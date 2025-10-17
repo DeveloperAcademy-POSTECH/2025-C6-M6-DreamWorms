@@ -1,0 +1,7 @@
+# 특정 폴더(예: Pods, Carthage 등)을 포맷팅에서 제외
+--exclude Pods, Carthage, DerivedData, .build
+
+--indent 4 # 들여쓰기 4칸
+--self init-only # 불필요한 self 제거
+--trimwhitespace nonblank-lines # 불필요한 공백 제거
+--disable preferForLoop # 고차 함수 유지
