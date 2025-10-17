@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3DC8BA2A2EA2758D006CC467 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3DC8BA292EA2758D006CC467 /* Alamofire */; };
 		3DC8BB162EA28369006CC467 /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = 3DC8BB152EA28369006CC467 /* Documentation.docc */; };
 		F55BB7412E9FE667009F1B82 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = F55BB7402E9FE667009F1B82 /* NMapsMap */; };
 /* End PBXBuildFile section */
@@ -39,7 +40,7 @@
 		3DC8BA272EA2709E006CC467 /* Exceptions for "DreamWorms-iOS" folder in "DreamWorms-iOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				"Core/Supporting Files/Info.plist",
 			);
 			target = F57F0B202E9FE32F00664A84 /* DreamWorms-iOS */;
 		};
@@ -72,6 +73,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F55BB7412E9FE667009F1B82 /* NMapsMap in Frameworks */,
+				3DC8BA2A2EA2758D006CC467 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,6 +137,7 @@
 			name = "DreamWorms-iOS";
 			packageProductDependencies = (
 				F55BB7402E9FE667009F1B82 /* NMapsMap */,
+				3DC8BA292EA2758D006CC467 /* Alamofire */,
 			);
 			productName = "DreamWorms-iOS";
 			productReference = F57F0B212E9FE32F00664A84 /* DreamWorms-iOS.app */;
@@ -220,6 +223,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				F55BB73F2E9FE667009F1B82 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
+				3DC8BA282EA2758D006CC467 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F57F0B222E9FE32F00664A84 /* Products */;
@@ -320,6 +324,8 @@
 /* Begin XCBuildConfiguration section */
 		F57F0B402E9FE33100664A84 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = F57F0B232E9FE32F00664A84 /* DreamWorms-iOS */;
+			baseConfigurationReferenceRelativePath = Core/Resources/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -385,6 +391,8 @@
 		};
 		F57F0B412E9FE33100664A84 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = F57F0B232E9FE32F00664A84 /* DreamWorms-iOS */;
+			baseConfigurationReferenceRelativePath = Core/Resources/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -443,6 +451,8 @@
 		};
 		F57F0B432E9FE33100664A84 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = F57F0B232E9FE32F00664A84 /* DreamWorms-iOS */;
+			baseConfigurationReferenceRelativePath = Core/Resources/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -455,7 +465,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "DreamWorms-iOS/Info.plist";
+				INFOPLIST_FILE = "DreamWorms-iOS/Core/Supporting Files/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -483,6 +493,8 @@
 		};
 		F57F0B442E9FE33100664A84 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = F57F0B232E9FE32F00664A84 /* DreamWorms-iOS */;
+			baseConfigurationReferenceRelativePath = Core/Resources/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -495,7 +507,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "DreamWorms-iOS/Info.plist";
+				INFOPLIST_FILE = "DreamWorms-iOS/Core/Supporting Files/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -647,6 +659,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3DC8BA282EA2758D006CC467 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
 		F55BB73F2E9FE667009F1B82 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap.git";
@@ -658,6 +678,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3DC8BA292EA2758D006CC467 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3DC8BA282EA2758D006CC467 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
 		F55BB7402E9FE667009F1B82 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F55BB73F2E9FE667009F1B82 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
