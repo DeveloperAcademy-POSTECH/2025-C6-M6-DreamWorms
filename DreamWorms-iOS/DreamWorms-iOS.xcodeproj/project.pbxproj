@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3DC8BB162EA28369006CC467 /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = 3DC8BB152EA28369006CC467 /* Documentation.docc */; };
 		F55BB7412E9FE667009F1B82 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = F55BB7402E9FE667009F1B82 /* NMapsMap */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3DC8BB152EA28369006CC467 /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
 		F57F0B212E9FE32F00664A84 /* DreamWorms-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DreamWorms-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F57F0B2E2E9FE33100664A84 /* DreamWorms-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DreamWorms-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F57F0B382E9FE33100664A84 /* DreamWorms-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DreamWorms-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -93,6 +95,7 @@
 		F57F0B182E9FE32F00664A84 = {
 			isa = PBXGroup;
 			children = (
+				3DC8BB152EA28369006CC467 /* Documentation.docc */,
 				F57F0B232E9FE32F00664A84 /* DreamWorms-iOS */,
 				F57F0B312E9FE33100664A84 /* DreamWorms-iOSTests */,
 				F57F0B3B2E9FE33100664A84 /* DreamWorms-iOSUITests */,
@@ -281,6 +284,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DC8BB162EA28369006CC467 /* Documentation.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
