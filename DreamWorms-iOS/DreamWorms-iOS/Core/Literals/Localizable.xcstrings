@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "ko",
+  "strings" : {
+    "test" : {
+      "comment" : "테스트용 문자입니다.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hello, world!"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
