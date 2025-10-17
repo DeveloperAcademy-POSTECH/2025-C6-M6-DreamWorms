@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct DreamWorms_iOSApp: App {
+    @StateObject private var coordinator = AppCoordinator()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppRootView(moduleFactory: ModuleFactory.shared)
+                .environmentObject(coordinator)
         }
     }
 }
