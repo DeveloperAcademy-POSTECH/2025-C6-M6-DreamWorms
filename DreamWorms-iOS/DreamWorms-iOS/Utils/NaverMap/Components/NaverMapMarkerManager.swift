@@ -46,7 +46,7 @@ public struct NaverMapMarkerManager {
         let iconType: MarkerIconType
         
         switch data.markerType {
-        case .frequencyBased:
+        case .frequency:
             iconType = .number(
                 data.frequency,
                 textColor: .white,
@@ -56,7 +56,7 @@ public struct NaverMapMarkerManager {
             
             // TODO: SF Symbol 변수 타입 처리 필요
             // 위치 정보의 타입에 따라 값을 가져오게 추후 변경
-        case .normal, .clustered, .timeSequenced:
+        case .uniqueLocations, .timeSequence, .flow:
             iconType = .symbol(
                 name: "dot.radiowaves.left.and.right",
                 color: .white,
