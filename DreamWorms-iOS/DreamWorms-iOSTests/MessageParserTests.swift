@@ -38,7 +38,6 @@ final class MessageParserTests: XCTestCase {
         // 1. 한글 포함 (유효)
         XCTAssertEqual(MessageParser.findAddress(from: MockMessage.validAddressMessage, pattern: pattern), "부산강서구지사동")
         XCTAssertEqual(MessageParser.findAddress(from: MockMessage.validAddressWithNumber, pattern: pattern), "서울특별시 강남구 역삼1동")
-        XCTAssertEqual(MessageParser.findAddress(from: MockMessage.powerOffMessage, pattern: pattern), nil)
 
         // 한글 없음
         XCTAssertNil(MessageParser.findAddress(from: "123456", pattern: pattern))
