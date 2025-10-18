@@ -27,7 +27,10 @@ struct DWButton: View {
     }
     
     var body: some View {
-        Button(action: action) {
+        Button {
+            triggerMediumHapticFeedback()
+            action()
+        } label: {
             HStack(spacing: 6) {
                 if let iconImage {
                     iconImage
@@ -47,10 +50,6 @@ struct DWButton: View {
         .disabled(!isEnabled)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .onTapGesture {
-            guard isEnabled else { return }
-            triggerMediumHapticFeedback()
-        }
     }
 }
 
