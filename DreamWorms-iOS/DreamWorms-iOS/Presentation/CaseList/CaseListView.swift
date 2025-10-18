@@ -15,8 +15,7 @@ struct CaseListView: View {
     @Environment(\.modelContext)
     private var context
     
-    @Query
-    private var cases: [Case]
+    @Query private var cases: [Case]
 
     // TODO: - 모델 구조가 완성되면 그때 이부분 수정 필요
     private var completedCount: Int { cases.count }

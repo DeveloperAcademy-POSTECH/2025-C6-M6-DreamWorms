@@ -5,6 +5,7 @@
 //  Created by Moo on 10/15/25.
 //
 
+import SwiftData
 import SwiftUI
 
 @main
@@ -16,5 +17,6 @@ struct DreamWorms_iOSApp: App {
             AppRootView(moduleFactory: ModuleFactory.shared)
                 .environmentObject(coordinator)
         }
+        .modelContainer(for: [Case.self])
     }
 }
