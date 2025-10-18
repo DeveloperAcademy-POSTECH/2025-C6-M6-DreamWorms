@@ -62,7 +62,7 @@ struct CaseCard: View {
 
 #Preview {
     CaseCard(
-        item: Case(name: "대구 청테이프", number: 1, suspectName: "피의자명"),
+        item: Case(name: "대구 청테이프", number: "1", suspectName: "피의자명"),
         onEdit: {},
         onDelete: {}
     )

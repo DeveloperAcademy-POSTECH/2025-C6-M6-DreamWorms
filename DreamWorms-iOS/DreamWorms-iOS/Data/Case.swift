@@ -12,13 +12,13 @@ import SwiftData
 final class Case {
     @Attribute(.unique) var id: UUID
     var name: String
-    var number: Int
+    var number: String
     var suspectName: String
     
     init(
         id: UUID = UUID(),
         name: String,
-        number: Int,
+        number: String,
         suspectName: String
     ) {
         self.id = id

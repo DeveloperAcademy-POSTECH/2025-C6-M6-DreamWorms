@@ -4,6 +4,17 @@
     "%lld" : {
 
     },
+    "btn_add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추가하기"
+          }
+        }
+      }
+    },
     "btn_addCase" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -37,13 +48,68 @@
         }
       }
     },
+    "caseAdd_caseName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건명"
+          }
+        }
+      }
+    },
+    "caseAdd_caseNumber" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건번호"
+          }
+        }
+      }
+    },
+    "caseAdd_scanReport" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보고서 스캔하기"
+          }
+        }
+      }
+    },
+    "caseAdd_suspectName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "피의자명"
+          }
+        }
+      }
+    },
+    "caseAdd_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건을 입력하세요."
+          }
+        }
+      }
+    },
     "caseCard_caseNumber" : {
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "no. %1$(number)lld"
+            "value" : "no. %1$(number)@"
           }
         }
       }
