@@ -15,7 +15,7 @@ nonisolated struct GeocodeResponseDTO: Decodable, Sendable {
 
 nonisolated struct Address: Decodable, Sendable {
     let roadAddress: String
-    let lotAddress: String
+    let jibunAddress: String
     let x: String
     let y: String
     
@@ -23,6 +23,6 @@ nonisolated struct Address: Decodable, Sendable {
     var longitude: Double? { Double(x) }
     
     var fullAddress: String {
-        roadAddress.isEmpty ? lotAddress : roadAddress
+        roadAddress.isEmpty ? jibunAddress : roadAddress
     }
 }
