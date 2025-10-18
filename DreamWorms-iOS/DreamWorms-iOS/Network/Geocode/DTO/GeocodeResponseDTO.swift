@@ -6,3 +6,23 @@
 //
 
 import Foundation
+
+nonisolated struct GeocodeResponseDTO: Decodable, Sendable {
+    let status: String
+    let addresses: [Address]
+    let errorMessage: String
+}
+
+nonisolated struct Address: Decodable, Sendable {
+    let roadAddress: String
+    let lotAddress: String
+    let x: String
+    let y: String
+    
+    var latitude: Double? { Double(y) }
+    var longitude: Double? { Double(x) }
+    
+    var fullAddress: String {
+        roadAddress.isEmpty ? lotAddress : roadAddress
+    }
+}
