@@ -15,6 +15,9 @@ final class Case {
     var number: String
     var suspectName: String
     
+    @Relationship(deleteRule: .cascade, inverse: \CaseLocation.parentCase)
+    var locations: [CaseLocation] = []
+    
     init(
         id: UUID = UUID(),
         name: String,
@@ -25,5 +28,12 @@ final class Case {
         self.name = name
         self.number = number
         self.suspectName = suspectName
+    }
+}
+
+// NOTE: 삭제 예정
+extension Case {
+    func setAsCurrentCase() {
+        UserDefaults.standard.set(id.uuidString, forKey: "activeCase")
     }
 }
