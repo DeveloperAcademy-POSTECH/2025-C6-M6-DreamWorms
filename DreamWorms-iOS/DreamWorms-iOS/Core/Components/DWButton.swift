@@ -41,7 +41,7 @@ struct DWButton: View {
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: 56)
             .foregroundStyle(.white)
-            .background(isEnabled ? .mainBlue : .disabledGray)
+            .background(isEnabled ? .mainBlue : .gray8B)
             .cornerRadius(8)
         }
         .disabled(!isEnabled)
