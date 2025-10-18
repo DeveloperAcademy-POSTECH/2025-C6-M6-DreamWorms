@@ -12,17 +12,17 @@ struct DWButton: View {
     private let iconImage: Image?
     private let action: () -> Void
     
-    private(set) var isEnabled: Bool
+    @Binding var isEnabled: Bool
     
     init(
         title: String,
         iconImage: Image? = nil,
-        isEnabled: Bool = false,
+        isEnabled: Binding<Bool> = .constant(false),
         action: @escaping () -> Void
     ) {
         self.title = title
         self.iconImage = iconImage
-        self.isEnabled = isEnabled
+        self._isEnabled = isEnabled
         self.action = action
     }
     
@@ -56,6 +56,6 @@ struct DWButton: View {
 
 #Preview {
     DWButton(title: "추가하기", iconImage: Image(.icnPlus20), action: {})
-    DWButton(title: "추가하기", isEnabled: true, action: {})
-    DWButton(title: "추가하기", iconImage: Image(.icnPin18), isEnabled: true, action: {})
+    DWButton(title: "추가하기", isEnabled: .constant(true), action: {})
+    DWButton(title: "추가하기", iconImage: Image(.icnPin18), isEnabled: .constant(true), action: {})
 }
