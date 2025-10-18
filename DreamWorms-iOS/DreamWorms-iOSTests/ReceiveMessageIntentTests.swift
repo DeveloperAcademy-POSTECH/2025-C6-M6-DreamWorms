@@ -9,12 +9,21 @@
 import XCTest
 
 final class ReceiveMessageIntentTests: XCTestCase {
-    func testReceiveMessage() async throws {
+    func testReceiveMessageWithValidAddress() async throws {
         let intent = ReceiveMessageIntent()
         intent.bodyText = MockMessage.validAddressMessage
         
         let result = try await intent.perform()
         
-        print("결과:", result)
+        XCTAssertNotNil(result)
+    }
+    
+    func testReceiveMessageWithPowerOff() async throws {
+        let intent = ReceiveMessageIntent()
+        intent.bodyText = MockMessage.powerOffMessage
+        
+        let result = try await intent.perform()
+
+        XCTAssertNotNil(result)
     }
 }
