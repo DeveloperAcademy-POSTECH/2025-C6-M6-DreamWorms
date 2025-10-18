@@ -129,6 +129,7 @@ struct CaseAddView: View {
     private func saveAndClose() {
         let newCase = Case(name: name, number: number, suspectName: suspectName)
         context.insert(newCase)
+        newCase.setAsCurrentCase() // NOTE: 삭제 예정
         try? context.save()
         coordinator.pop()
     }
