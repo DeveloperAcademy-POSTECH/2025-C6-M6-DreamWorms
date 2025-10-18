@@ -8,12 +8,9 @@
 import Foundation
 import CoreLocation
 
-// MARK: - CLLocationCoordinate2D Extensions
-
 public extension CLLocationCoordinate2D {
     
     // MARK: - Validation
-    
     /// 유효한 좌표인지 확인
     var isValid: Bool {
         latitude != 0.0 && longitude != 0.0 &&
@@ -22,7 +19,7 @@ public extension CLLocationCoordinate2D {
     }
     
     // MARK: - Formatting
-    
+
     /// 좌표를 문자열로 변환
     var coordinateString: String {
         String(format: "%.6f, %.6f", latitude, longitude)
@@ -164,19 +161,3 @@ public extension CLLocationCoordinate2D {
     }
 }
 
-// MARK: - Equatable
-
-extension CLLocationCoordinate2D: Equatable {
-    public static func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
-        lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
-    }
-}
-
-// MARK: - Hashable
-
-extension CLLocationCoordinate2D: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(latitude)
-        hasher.combine(longitude)
-    }
-}
