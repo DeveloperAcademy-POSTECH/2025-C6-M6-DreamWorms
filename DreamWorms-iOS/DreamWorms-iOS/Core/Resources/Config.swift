@@ -26,14 +26,14 @@ enum Config {
 extension Config {
     static let naverMapClientID: String = {
         guard let key = Config.infoDictionary[Keys.Plist.naverMapClientID] as? String else {
-            fatalError("🍞⛔️KAKAO_NATIVE_APP_KEY is not set in plist for this configuration⛔️🍞")
+            fatalError("❌NAVER_CLOUD_MAP_API_CLIENT_ID is not set in plist for this configuration❌")
         }
         return key
     }()
 
     static let naverMapClientSecret: String = {
         guard let key = Config.infoDictionary[Keys.Plist.naverMapClientSecret] as? String else {
-            fatalError("🍞⛔️KAKAO_REST_API_KEY is not set in plist for this configuration⛔️🍞")
+            fatalError("❌NAVER_CLOUD_MAP_API_CLIENT_SECRET is not set in plist for this configuration❌")
         }
         return key
     }()
