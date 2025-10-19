@@ -35,6 +35,21 @@ struct MapView: View {
             )
             .ignoresSafeArea()
             
+            VStack(spacing: 0) {
+                // 검색 헤더
+                MapHeader(
+                    onBack: {
+                        coordinator.pop()
+                    },
+                    onSearch: {
+                        // SearchView로 네비게이션
+                        coordinator.push(.search)
+                    }
+                )
+                
+                Spacer()
+            }
+            
             MapControlPanel(
                 showFrequency: $showFrequency,
                 showCircle: $showCircle,
@@ -56,6 +71,7 @@ struct MapView: View {
             .padding(.bottom, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
         }
+        .navigationBarBackButtonHidden()
         .onAppear {
             viewModel.setModelContext(modelContext)
 //            viewModel.loadLocations()
