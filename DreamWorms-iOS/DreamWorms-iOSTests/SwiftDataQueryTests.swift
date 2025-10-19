@@ -29,7 +29,7 @@ final class SwiftDataQueryTests: XCTestCase {
         var output = ""
         
         for (index, location) in locations.enumerated() {
-            output = """
+            output += """
             
             [\(index + 1)] Location
               ID: \(location.id.uuidString)
