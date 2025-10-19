@@ -78,7 +78,7 @@ public struct NaverMapMarkerManager {
     private static func configureCaptions(_ marker: NMFMarker, data: NaverMapMarkerData) {
         marker.captionText = data.title
         marker.captionTextSize = 12
-        marker.captionColor = UIColor.label
+        marker.captionColor = UIColor.systemGray
         marker.captionHaloColor = UIColor.systemBackground
         
         if let sequenceText = data.sequenceText {
