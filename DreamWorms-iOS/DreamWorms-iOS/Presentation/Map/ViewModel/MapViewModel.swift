@@ -21,6 +21,10 @@ final class MapViewModel: ObservableObject {
     
     @Published var positionMode: NMFMyPositionMode = .normal
     
+    // 검색 결과 바텀시트 관련
+    @Published var selectedSearchResult: LocalSearchResult?
+    @Published var showSearchResultSheet = false
+    
     private var modelContext: ModelContext?
     // TODO: protocol 리팩토링 예정
     private let locationService = LocationService()
@@ -150,5 +154,30 @@ final class MapViewModel: ObservableObject {
             ),
             zoom: 15.0
         )
+    }
+    
+    init() {
+        // 검색 결과 선택 시 지도 이동 + 바텀시트 표시 알림 받기
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("ShowSearchResult"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            if let result = notification.object as? LocalSearchResult {
+                // 1. 바텀시트 표시
+                self?.selectedSearchResult = result
+                self?.showSearchResultSheet = true
+                
+                // 2. 지도 이동
+                self?.cameraPosition = NMFCameraPosition(
+                    NMGLatLng(lat: result.coordinate.latitude, lng: result.coordinate.longitude),
+                    zoom: 16.0
+                )
+            }
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

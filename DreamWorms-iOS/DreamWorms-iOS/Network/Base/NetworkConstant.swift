@@ -12,4 +12,9 @@ enum NetworkConstant {
         static let clientID = "X-NCP-APIGW-API-KEY-ID"
         static let clientSecret = "X-NCP-APIGW-API-KEY"
     }
+    
+    enum NaverSearchAPIHeaderKey {
+        static let clientID = "X-Naver-Client-Id"
+        static let clientSecret = "X-Naver-Client-Secret"
+    }
 }

@@ -12,6 +12,8 @@ enum Config {
         enum Plist {
             static let naverMapClientID = "NAVER_CLOUD_MAP_API_CLIENT_ID"
             static let naverMapClientSecret = "NAVER_CLOUD_MAP_API_CLIENT_SECRET"
+            static let naverSearchClientID = "NAVER_SEARCH_API_CLIENT_ID"
+            static let naverSearchClientSecret = "NAVER_SEARCH_API_CLIENT_SECRET"
         }
     }
     
@@ -34,6 +36,20 @@ extension Config {
     static let naverMapClientSecret: String = {
         guard let key = Config.infoDictionary[Keys.Plist.naverMapClientSecret] as? String else {
             fatalError("❌NAVER_CLOUD_MAP_API_CLIENT_SECRET is not set in plist for this configuration❌")
+        }
+        return key
+    }()
+    
+    static let naverSearchClientID: String = {
+        guard let key = Config.infoDictionary[Keys.Plist.naverSearchClientID] as? String else {
+            fatalError("❌NAVER_SEARCH_API_CLIENT_ID is not set in plist for this configuration❌")
+        }
+        return key
+    }()
+    
+    static let naverSearchClientSecret: String = {
+        guard let key = Config.infoDictionary[Keys.Plist.naverSearchClientSecret] as? String else {
+            fatalError("❌NAVER_SEARCH_API_CLIENT_SECRET is not set in plist for this configuration❌")
         }
         return key
     }()
