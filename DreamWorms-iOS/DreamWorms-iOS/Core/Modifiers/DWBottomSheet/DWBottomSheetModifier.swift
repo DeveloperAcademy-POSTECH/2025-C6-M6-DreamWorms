@@ -1,5 +1,5 @@
 //
-//  DWBottomSheetAdaptive.swift
+//  DWBottomSheetModifier.swift
 //  DreamWorms-iOS
 //
 //  Created by Demian Yoo on 10/19/25.
@@ -18,21 +18,12 @@ import SwiftUI
 /// - Reference:
 ///   - [Apple HIG - Sheets](https://developer.apple.com/design/human-interface-guidelines/sheets)
 ///   - [SK Devocean](https://devocean.sk.com/blog/techBoardDetail.do?ID=166992)
+
 struct DWBottomSheetModifier<SheetContent: View>: ViewModifier {
     // MARK: - Properties
     
     @Binding var isPresented: Bool
     @Binding var detent: PresentationDetent
-    
-    // MARK: - Computed Properties
-    
-    /// 드래그로 닫기를 막을지 여부
-    ///
-    /// - Small: 닫기 막기
-    /// - Medium/ Large: detent만 허용
-    private var shouldDisableDismiss: Bool {
-        detent == .small
-    }
     
     let content: SheetContent
     
@@ -43,17 +34,24 @@ struct DWBottomSheetModifier<SheetContent: View>: ViewModifier {
             .sheet(isPresented: $isPresented) {
                 self.content
                     .presentationDetents(
-                        [.small, .medium, .large],
+                        DWBottomSheetConfiguration.supportedDetents,
                         selection: $detent
                     )
                     .presentationBackgroundInteraction(
-                        .enabled(upThrough: .medium)
+                        DWBottomSheetConfiguration.backgroundInteraction
                     )
                     .presentationDragIndicator(
-                        detent == .large ? .hidden : .visible
+                        
+                        DWBottomSheetConfiguration.shouldShowDragIndicator(for: detent)
+                            ? .visible
+                            : .hidden
                     )
-                    .presentationCornerRadius(16)
-                    .interactiveDismissDisabled(shouldDisableDismiss)
+                    .presentationCornerRadius(
+                        DWBottomSheetConfiguration.defaultCornerRadius
+                    )
+                    .interactiveDismissDisabled(
+                        DWBottomSheetConfiguration.shouldDisableInteractiveDismiss(for: detent)
+                    )
             }
     }
 }
@@ -69,10 +67,11 @@ extension View {
     ///   - content: 바텀시트에 표시할 SubView
     ///
     /// - Note:
-    ///   - Small/Medium: 배경(지도) 터치 가능
+    ///   - Small: 배경 터치 가능, 드래그로 닫기 불가
+    ///   - Medium: 배경 터치 가능, 드래그로 Small 전환
     ///   - Large: 배경 터치 불가, 드래그 핸들 숨김
-    
-    func dwBottomSheet<Content: View>(
+    ///
+    func dreamwormsBottomSheet<Content: View>(
         isPresented: Binding<Bool>,
         detent: Binding<PresentationDetent>,
         content: Content
