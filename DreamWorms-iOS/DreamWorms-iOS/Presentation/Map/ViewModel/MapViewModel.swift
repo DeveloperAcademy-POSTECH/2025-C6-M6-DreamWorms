@@ -12,7 +12,7 @@ import Combine
 import CoreLocation
 
 @MainActor
-class MapViewModel: ObservableObject {
+final class MapViewModel: ObservableObject {
     @Published var cameraPosition: NMFCameraPosition?
     @Published var locations: [NaverMapLocationData] = []
     @Published var displayMode: NaverMapDisplayMode = .uniqueLocations
