@@ -59,7 +59,7 @@ struct CaseListView: View {
             DWButton(
                 title: String(localized: .btnAddCase),
                 iconImage: Image(.icnPlus20),
-                isEnabled: true
+                isEnabled: .constant(true)
             ) {
                 coordinator.push(.caseAdd)
             }

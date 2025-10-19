@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CountBadge: View {
-    var count: Int
+    let count: Int
     var body: some View {
         Text("\(count)")
             .font(.pretendardSemiBold(size: 24))

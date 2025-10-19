@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct CaseCard: View {
-    var item: Case
+    let item: Case
     
-    var onEdit: () -> Void
-    var onDelete: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
