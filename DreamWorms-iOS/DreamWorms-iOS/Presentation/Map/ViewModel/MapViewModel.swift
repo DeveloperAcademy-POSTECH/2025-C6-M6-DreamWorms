@@ -21,6 +21,9 @@ final class MapViewModel: ObservableObject {
     
     @Published var positionMode: NMFMyPositionMode = .normal
     
+    @Published var currentCase: Case?
+    @Published var caseLocation: [CaseLocation] = []
+    
     private var modelContext: ModelContext?
     // TODO: protocol 리팩토링 예정
     private let locationService = LocationService()
