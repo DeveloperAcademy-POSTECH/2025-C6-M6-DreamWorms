@@ -12,6 +12,7 @@ import CoreLocation
 
 struct MockMapView: View {
     @StateObject private var viewModel = MapViewModel()
+    @EnvironmentObject private var coordinator: AppCoordinator
     
     @State private var showFrequency = false
     @State private var showCircle = false
@@ -32,32 +33,15 @@ struct MockMapView: View {
             )
             .ignoresSafeArea()
             
-            // TODO: Mock View 라서 컨벤션을 못지켰습니다. 추후 MapView 완성 되면 같이 맞추겠습니다. (또는 삭제될 수도)
-            VStack(spacing: 12) {
-                DWCircleToggleButton(
-                    title: "빈도",
-                    isOn: $showFrequency
-                ) {
-                    viewModel.toggleFrequencyMode()
-                }
-                
-                DWCircleToggleButton(
-                    title: "반경",
-                    isOn: $showCircle
-                ) {
-                    viewModel.toggleCircleOverlay()
-                }
-                
-                DWCircleToggleButton(
-                    title: "갱신",
-                    isOn: .constant(false)
-                ) {
-                    viewModel.loadMockLocations()
-                }
-            }
-            .padding(.top, 124)
-            .padding(.trailing, 16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            
+            MapControlPanel(
+                showFrequency: $showFrequency,
+                showCircle: $showCircle,
+                isClusteringEnabled: viewModel.clusteringEnabled,
+                onToggleFrequency: { viewModel.toggleFrequencyMode() },
+                onToggleCircle: { viewModel.toggleCircleOverlay() },
+                onRefresh: { viewModel.refreshData() }
+            )
             
             // 토글 기능이 없는 버튼임
             // TODO: 추후 컴포넌트 수정
@@ -73,11 +57,6 @@ struct MockMapView: View {
         }
         .onAppear {
             viewModel.loadMockLocations()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    print("🗺️ Locations: \(viewModel.locations.count)")
-                    print("🗺️ First location: \(viewModel.locations.first?.address ?? "none")")
-                }
         }
     }
 }

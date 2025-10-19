@@ -22,61 +22,56 @@ final class MapViewModel: ObservableObject {
     @Published var positionMode: NMFMyPositionMode = .normal
     
     private var modelContext: ModelContext?
-    private weak var coordinator: AppCoordinator?
     private let locationService = LocationService()
     
     func setModelContext(_ context: ModelContext) {
         self.modelContext = context
     }
     
-    func setCoordinator(_ coordinator: AppCoordinator) {
-        self.coordinator = coordinator
-    }
     // TODO: 실 데이터 연동
-//    func loadLocations() {
-//        guard let modelContext = modelContext else {
-//            print("ModelContext not set")
-//            return
-//        }
-//        
-//        let descriptor = FetchDescriptor<CaseLocation>(
-//            predicate: #Predicate { location in
-//                location.pinType == .telecom &&
-//                location.latitude != nil &&
-//                location.longitude != nil
-//            },
-//            sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
-//        )
-//        
-//        do {
-//            let caseLocations = try modelContext.fetch(descriptor)
-//            print("Loaded \(caseLocations.count) telecom locations")
-//            
-//            locations = caseLocations.compactMap { location in
-//                guard let lat = location.latitude,
-//                      let lng = location.longitude else {
-//                    return nil
-//                }
-//                
-//                return NaverMapLocationData(
-//                    id: location.id,
-//                    coordinate: CLLocationCoordinate2D(
-//                        latitude: lat,
-//                        longitude: lng
-//                    ),
-//                    timestamp: location.receivedAt,
-//                    address: location.address ?? "위치",
-//                    additionalInfo: [:]
-//                )
-//            }
-//            
-//            moveCameraToLatestMarker()
-//            
-//        } catch {
-//            print("Failed to fetch locations: \(error)")
-//        }
-//    }
-    
+    //    func loadLocations() {
+    //        guard let modelContext = modelContext else {
+    //            print("ModelContext not set")
+    //            return
+    //        }
+    //
+    //        let descriptor = FetchDescriptor<CaseLocation>(
+    //            predicate: #Predicate { location in
+    //                location.pinType == .telecom &&
+    //                location.latitude != nil &&
+    //                location.longitude != nil
+    //            },
+    //            sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
+    //        )
+    //
+    //        do {
+    //            let caseLocations = try modelContext.fetch(descriptor)
+    //            print("Loaded \(caseLocations.count) telecom locations")
+    //
+    //            locations = caseLocations.compactMap { location in
+    //                guard let lat = location.latitude,
+    //                      let lng = location.longitude else {
+    //                    return nil
+    //                }
+    //
+    //                return NaverMapLocationData(
+    //                    id: location.id,
+    //                    coordinate: CLLocationCoordinate2D(
+    //                        latitude: lat,
+    //                        longitude: lng
+    //                    ),
+    //                    timestamp: location.receivedAt,
+    //                    address: location.address ?? "위치",
+    //                    additionalInfo: [:]
+    //                )
+    //            }
+    //
+    //            moveCameraToLatestMarker()
+    //
+    //        } catch {
+    //            print("Failed to fetch locations: \(error)")
+    //        }
+    //    }
     
     // Mock json 파일 데이터
     func loadMockLocations() {
@@ -97,7 +92,7 @@ final class MapViewModel: ObservableObject {
     }
     
     func toggleFrequencyMode() {
-        displayMode = displayMode == .frequency ? .uniqueLocations : .frequency
+        displayMode = displayMode == .countFrequency ? .uniqueLocations : .countFrequency
         print("Display mode: \(displayMode.rawValue)")
     }
     
@@ -107,7 +102,8 @@ final class MapViewModel: ObservableObject {
     }
     
     func refreshData() {
-//        loadLocations()
+        //        loadLocations()
+        moveCameraToLatestMarker()
         print("Data refreshed")
     }
     
@@ -120,7 +116,7 @@ final class MapViewModel: ObservableObject {
             }
             
             guard locationService.authorizationStatus == .authorizedWhenInUse ||
-                  locationService.authorizationStatus == .authorizedAlways else {
+                    locationService.authorizationStatus == .authorizedAlways else {
                 print("위치 권한이 없습니다")
                 return
             }
@@ -152,7 +148,5 @@ final class MapViewModel: ObservableObject {
             ),
             zoom: 15.0
         )
-        
-        print("Camera moved to latest marker: \(latest.address)")
     }
 }
