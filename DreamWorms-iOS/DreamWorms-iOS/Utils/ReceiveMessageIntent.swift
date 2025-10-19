@@ -29,7 +29,10 @@ struct ReceiveMessageIntent: AppIntent {
         let activeCase = try fetchActiveCase(from: modelContext)
         
         guard let address = MessageParser.extractAddress(from: bodyText) else {
-            let location = CaseLocation(pinType: .telecom)
+            let location = CaseLocation(
+                pinType: .telecom,
+                receivedAt: Date().toKoreanTime
+            )
             location.parentCase = activeCase
             modelContext.insert(location)
             try modelContext.save()
@@ -42,7 +45,10 @@ struct ReceiveMessageIntent: AppIntent {
             guard let latitude = geocodeResult.latitude,
                   let longitude = geocodeResult.longitude
             else {
-                let location = CaseLocation(pinType: .telecom)
+                let location = CaseLocation(
+                    pinType: .telecom,
+                    receivedAt: Date().toKoreanTime
+                )
                 location.parentCase = activeCase
                 modelContext.insert(location)
                 try modelContext.save()
@@ -53,14 +59,18 @@ struct ReceiveMessageIntent: AppIntent {
                 pinType: .telecom,
                 address: geocodeResult.fullAddress,
                 latitude: latitude,
-                longitude: longitude
+                longitude: longitude,
+                receivedAt: Date().toKoreanTime
             )
             location.parentCase = activeCase
             modelContext.insert(location)
             try modelContext.save()
             
         } catch {
-            let location = CaseLocation(pinType: .telecom)
+            let location = CaseLocation(
+                pinType: .telecom,
+                receivedAt: Date().toKoreanTime
+            )
             location.parentCase = activeCase
             modelContext.insert(location)
             try modelContext.save()
