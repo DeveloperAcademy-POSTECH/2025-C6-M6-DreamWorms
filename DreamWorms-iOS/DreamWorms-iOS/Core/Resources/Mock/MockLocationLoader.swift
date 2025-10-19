@@ -5,11 +5,10 @@
 //  Created by taeni on 10/19/25.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 
 struct MockLocation: Codable, Identifiable {
-    
     var id: String { "\(location),\(receivedAt)" }
     
     let location: String

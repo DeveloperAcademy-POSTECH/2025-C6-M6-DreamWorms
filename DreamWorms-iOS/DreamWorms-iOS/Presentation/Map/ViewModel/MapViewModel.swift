@@ -5,11 +5,11 @@
 //  Created by taeni on 10/19/25.
 //
 
-import SwiftUI
-import SwiftData
-import NMapsMap
 import Combine
 import CoreLocation
+import NMapsMap
+import SwiftData
+import SwiftUI
 
 @MainActor
 final class MapViewModel: ObservableObject {
@@ -26,7 +26,7 @@ final class MapViewModel: ObservableObject {
     private let locationService = LocationService()
     
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
     
     // TODO: 실 데이터 연동
@@ -117,7 +117,8 @@ final class MapViewModel: ObservableObject {
             }
             
             guard locationService.authorizationStatus == .authorizedWhenInUse ||
-                    locationService.authorizationStatus == .authorizedAlways else {
+                locationService.authorizationStatus == .authorizedAlways
+            else {
                 print("위치 권한이 없습니다")
                 return
             }

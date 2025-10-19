@@ -1,21 +1,21 @@
 //
-//  CLLocationCoordinate2D.swift
+//  CLLocationCoordinate2D+.swift
 //  DreamWorms-iOS
 //
 //  Created by taeni on 10/18/25.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 
 public extension CLLocationCoordinate2D {
-    
     // MARK: - Validation
+
     /// 유효한 좌표인지 확인
     var isValid: Bool {
         latitude != 0.0 && longitude != 0.0 &&
-        latitude >= -90.0 && latitude <= 90.0 &&
-        longitude >= -180.0 && longitude <= 180.0
+            latitude >= -90.0 && latitude <= 90.0 &&
+            longitude >= -180.0 && longitude <= 180.0
     }
     
     // MARK: - Formatting
@@ -35,8 +35,8 @@ public extension CLLocationCoordinate2D {
     /// 좌표 해시 키 (중복 제거용)
     /// 소수점 5자리까지만 비교 (약 1m 정확도)
     var coordinateKey: String {
-        let lat = Int(latitude * 100000)
-        let lng = Int(longitude * 100000)
+        let lat = Int(latitude * 100_000)
+        let lng = Int(longitude * 100_000)
         return "\(lat),\(lng)"
     }
     
@@ -93,24 +93,24 @@ public extension CLLocationCoordinate2D {
     
     /// 방위각을 나침반 방향으로 변환
     func compassDirection(to coordinate: CLLocationCoordinate2D) -> String {
-        let bearing = self.bearing(to: coordinate)
+        let bearing = bearing(to: coordinate)
         
         switch bearing {
-        case 0..<22.5, 337.5...360:
+        case 0 ..< 22.5, 337.5 ... 360:
             return "북"
-        case 22.5..<67.5:
+        case 22.5 ..< 67.5:
             return "북동"
-        case 67.5..<112.5:
+        case 67.5 ..< 112.5:
             return "동"
-        case 112.5..<157.5:
+        case 112.5 ..< 157.5:
             return "남동"
-        case 157.5..<202.5:
+        case 157.5 ..< 202.5:
             return "남"
-        case 202.5..<247.5:
+        case 202.5 ..< 247.5:
             return "남서"
-        case 247.5..<292.5:
+        case 247.5 ..< 292.5:
             return "서"
-        case 292.5..<337.5:
+        case 292.5 ..< 337.5:
             return "북서"
         default:
             return "알 수 없음"
@@ -121,7 +121,7 @@ public extension CLLocationCoordinate2D {
     
     /// 오프셋을 적용한 새 좌표
     func offsetBy(meters: Double, bearing: Double) -> CLLocationCoordinate2D {
-        let earthRadius = 6371000.0 // 미터
+        let earthRadius = 6_371_000.0 // 미터
         
         let angularDistance = meters / earthRadius
         let bearingRadians = bearing * .pi / 180
@@ -130,7 +130,7 @@ public extension CLLocationCoordinate2D {
         let lon1 = longitude * .pi / 180
         
         let lat2 = asin(sin(lat1) * cos(angularDistance) +
-                       cos(lat1) * sin(angularDistance) * cos(bearingRadians))
+            cos(lat1) * sin(angularDistance) * cos(bearingRadians))
         
         let lon2 = lon1 + atan2(sin(bearingRadians) * sin(angularDistance) * cos(lat1),
                                 cos(angularDistance) - sin(lat1) * sin(lat2))
@@ -150,14 +150,12 @@ public extension CLLocationCoordinate2D {
         let minutes = Int(minutesNotTruncated)
         let seconds = (minutesNotTruncated - Double(minutes)) * 60
         
-        let direction: String
-        if isLatitude {
-            direction = coordinate >= 0 ? "N" : "S"
+        let direction: String = if isLatitude {
+            coordinate >= 0 ? "N" : "S"
         } else {
-            direction = coordinate >= 0 ? "E" : "W"
+            coordinate >= 0 ? "E" : "W"
         }
         
         return String(format: "%d°%d'%.1f\"%@", degrees, minutes, seconds, direction)
     }
 }
-

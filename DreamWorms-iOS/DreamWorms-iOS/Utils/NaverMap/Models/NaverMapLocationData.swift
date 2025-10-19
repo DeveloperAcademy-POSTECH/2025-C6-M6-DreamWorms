@@ -5,8 +5,8 @@
 //  Created by taeni on 10/18/25.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 
 // MARK: - Location Data Model
 

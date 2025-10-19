@@ -5,12 +5,11 @@
 //  Created by taeni on 10/18/25.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 import NMapsMap
 
 public struct NaverMapConfiguration: Sendable {
-    
     // 카메라
     public var initialPosition: CLLocationCoordinate2D
     public var initialZoom: Double
@@ -41,10 +40,10 @@ public struct NaverMapConfiguration: Sendable {
         
         public var nmfMapType: NMFMapType {
             switch self {
-            case .normal: return .basic
-            case .satellite: return .satellite
-            case .hybrid: return .hybrid
-            case .terrain: return .terrain
+            case .normal: .basic
+            case .satellite: .satellite
+            case .hybrid: .hybrid
+            case .terrain: .terrain
             }
         }
     }
