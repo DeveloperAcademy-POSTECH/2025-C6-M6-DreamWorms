@@ -37,17 +37,17 @@ struct DWCircleToggleButton: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 20, height: 20)
-                    .foregroundColor(isOn ? .mainBlue : .mainBlack)
+                    .foregroundColor(isOn ? .mainBlue : .gray44)
             } else if let title {
                 Text(title)
                     .font(.pretendardSemiBold(size: 12))
-                    .foregroundColor(isOn ? .mainBlue : .mainBlack)
+                    .foregroundColor(isOn ? .mainBlue : .gray44)
             }
         }
         .frame(width: 40, height: 40)
         .background(.white)
         .clipShape(Circle())
-        .shadow(color: .mainBlack.opacity(0.15), radius: 6, x: 0, y: 2)
+        .shadow(color: .gray44.opacity(0.15), radius: 6, x: 0, y: 2)
     }
 }
 
