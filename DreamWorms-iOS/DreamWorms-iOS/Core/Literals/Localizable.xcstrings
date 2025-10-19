@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
+    "—" : {
+
+    },
     "%lld" : {
 
     },
@@ -110,6 +113,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$(caseTitleHeader)@"
+          }
+        }
+      }
+    },
+    "caseBottomSheet_separator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~"
           }
         }
       }

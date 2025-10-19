@@ -30,14 +30,10 @@ private struct TabBarContainer: View {
     
     var body: some View {
         VStack(spacing: 10) {
-            Divider()
-            
             TabContent(
                 tabs: tabs,
                 selectedTab: $selectedTab
             )
-            
-            Divider()
         }
     }
 }
