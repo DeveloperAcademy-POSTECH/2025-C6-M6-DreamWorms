@@ -47,7 +47,7 @@ struct DWCircleToggleButton: View {
         .frame(width: 40, height: 40)
         .background(.white)
         .clipShape(Circle())
-        .shadow(color: .gray44.opacity(0.15), radius: 12, x: 0, y: 2)
+        .shadow(color: .gray44.opacity(0.15), radius: 6, x: 0, y: 2)
     }
 }
 

@@ -10,7 +10,7 @@ import SwiftUI
 
 // TODO: 추후 따로 분리해서 고도화 할 예정
 enum MarkerIconType {
-    case symbol(name: String, color: UIColor = .systemBlue, background: UIColor = .white, stroke: UIColor = UIColor(Color.white), width: CGFloat = 10, height: CGFloat = 7)
+    case symbol(name: String, color: UIColor = .systemBlue, background: UIColor = .white, stroke: UIColor = UIColor(Color.white), width: CGFloat = 16, height: CGFloat = 16)
     case number(Int, textColor: UIColor = .white, background: UIColor = .systemBlue, stroke: UIColor = .white)
     case text(String, textColor: UIColor = .white, background: UIColor = .systemGreen, stroke: UIColor = .white)
     case customImage(UIImage)
@@ -18,7 +18,7 @@ enum MarkerIconType {
 
 struct NaverMapMarkerIconFactory {
     // TODO: 마커 상수 처리 수정 요망
-    private static let markerSize: CGFloat = 20
+    private static let markerSize: CGFloat = 24
     private static let strokeWidth: CGFloat = 1.0
     
     static func create(_ type: MarkerIconType) -> NMFOverlayImage? {
