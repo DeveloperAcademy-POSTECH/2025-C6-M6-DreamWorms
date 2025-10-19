@@ -8,5 +8,5 @@
 import Foundation
 
 enum URLConstant {
-    static let naverGeocodeBase = ""
+    static let geocodeURL = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
 }
