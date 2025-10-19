@@ -37,9 +37,10 @@ private struct FilterContainer: View {
                 startDate: $startDate,
                 endDate: $endDate
             )
-         }
+        }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+        .background(Color(.grayFB))
         .background(Color(.systemBackground))
     }
 }

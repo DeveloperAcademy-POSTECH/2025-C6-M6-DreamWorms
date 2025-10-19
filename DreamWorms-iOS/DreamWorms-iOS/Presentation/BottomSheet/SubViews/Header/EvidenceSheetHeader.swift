@@ -16,6 +16,7 @@ struct EvidenceSheetHeader: View {
     let caseName: String
     let suspectName: String
     let locationAmount: Int
+    let showDropdown: Bool
     
     // MARK: - Body
     
@@ -23,7 +24,8 @@ struct EvidenceSheetHeader: View {
         HeaderContainer(
             caseName: caseName,
             suspectName: suspectName,
-            locationAmount: locationAmount
+            locationAmount: locationAmount,
+            showDropdown: showDropdown
         )
     }
 }
@@ -34,11 +36,15 @@ private struct HeaderContainer: View {
     let caseName: String
     let suspectName: String
     let locationAmount: Int
+    let showDropdown: Bool
     
     var body: some View {
         VStack(spacing: 4) {
             // 사건명 + 드롭다운
-            CaseNameRow(caseName: caseName)
+            CaseNameRow(
+                caseName: caseName,
+                showDropdown: showDropdown
+            )
             
             // 피의자명 + 위치 개수
             CaseInfoRow(
@@ -54,15 +60,17 @@ private struct HeaderContainer: View {
 
 private struct CaseNameRow: View {
     let caseName: String
+    let showDropdown: Bool
     
     var body: some View {
         ZStack {
             CaseTitleHeader(caseName: caseName)
-            
-            HStack {
-                Spacer()
-                HeaderDropdownButton()
-                    .padding(.trailing, 16)
+            if showDropdown {
+                HStack {
+                    Spacer()
+                    HeaderDropdownButton()
+                        .padding(.trailing, 16)
+                }
             }
         }
     }
@@ -91,6 +99,7 @@ private struct CaseInfoRow: View {
     EvidenceSheetHeader(
         caseName: "베트콩 소탕",
         suspectName: "왕꿈틀",
-        locationAmount: 27
+        locationAmount: 27,
+        showDropdown: true
     )
 }
