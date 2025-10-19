@@ -40,6 +40,7 @@ struct NaverMapMarkerIconFactory {
 
 private extension NaverMapMarkerIconFactory {
     
+    // TODO: 렌더 ComputedProperties 처리방안
     static func createSymbolIcon(name: String, color: UIColor, background: UIColor, stroke: UIColor, width: CGFloat, height: CGFloat) -> NMFOverlayImage? {
         let containerSize = markerSize
         

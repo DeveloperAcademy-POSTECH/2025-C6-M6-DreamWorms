@@ -22,6 +22,7 @@ final class MapViewModel: ObservableObject {
     @Published var positionMode: NMFMyPositionMode = .normal
     
     private var modelContext: ModelContext?
+    // TODO: protocol 리팩토링 예정
     private let locationService = LocationService()
     
     func setModelContext(_ context: ModelContext) {

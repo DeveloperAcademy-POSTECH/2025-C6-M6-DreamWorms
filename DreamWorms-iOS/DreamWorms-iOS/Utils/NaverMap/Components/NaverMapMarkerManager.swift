@@ -75,6 +75,7 @@ public struct NaverMapMarkerManager {
         marker.alpha = 1.0
     }
     
+    // TODO: 상수 처리 할 것
     private static func configureCaptions(_ marker: NMFMarker, data: NaverMapMarkerData) {
         marker.captionText = data.title
         marker.captionTextSize = 12

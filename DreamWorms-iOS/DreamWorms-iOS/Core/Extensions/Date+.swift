@@ -7,13 +7,12 @@
 
 import Foundation
 
-// MARK: - Date Extensions
-
 public extension Date {
     
     // MARK: - Formatted Strings
     
     /// 포맷된 타임스탬프 (중간 날짜, 짧은 시간)
+    // TODO: Date.now.formatted 방식 적용
     var formattedTimestamp: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
