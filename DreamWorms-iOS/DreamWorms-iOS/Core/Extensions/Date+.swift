@@ -115,6 +115,13 @@ public extension Date {
     
     // MARK: - Date Calculations
     
+    /// 한국 시간으로 변환
+    var toKoreanTime: Date {
+        let koreanTimeZone = TimeZone(identifier: "Asia/Seoul")!
+        let offset = koreanTimeZone.secondsFromGMT(for: self)
+        return addingTimeInterval(TimeInterval(offset))
+    }
+    
     /// 다른 날짜까지의 일수 차이
     func daysBetween(_ otherDate: Date) -> Int {
         let calendar = Calendar.current
