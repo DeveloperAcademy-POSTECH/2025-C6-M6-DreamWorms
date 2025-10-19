@@ -62,8 +62,8 @@ public struct NaverMapMarkerManager {
                 color: .white,
                 background: .mainBlue,
                 stroke: .white,
-                width: 10,
-                height: 7
+                width: 12,
+                height: 10
             )
         }
         
