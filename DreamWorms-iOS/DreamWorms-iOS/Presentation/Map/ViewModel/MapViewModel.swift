@@ -92,7 +92,7 @@ final class MapViewModel: ObservableObject {
     }
     
     func toggleFrequencyMode() {
-        displayMode = displayMode == .countFrequency ? .uniqueLocations : .countFrequency
+        displayMode = displayMode == .frequency ? .uniqueLocations : .frequency
         print("Display mode: \(displayMode.rawValue)")
     }
     
