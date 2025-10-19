@@ -55,7 +55,7 @@ struct MockMapView: View {
                     viewModel.loadMockLocations()
                 }
             }
-            .padding(.top, 50)
+            .padding(.top, 124)
             .padding(.trailing, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             
@@ -68,7 +68,7 @@ struct MockMapView: View {
                 viewModel.moveToMyLocation()
             }
             .padding(.leading, 16)
-            .padding(.bottom, 50)
+            .padding(.bottom, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
         }
         .onAppear {
