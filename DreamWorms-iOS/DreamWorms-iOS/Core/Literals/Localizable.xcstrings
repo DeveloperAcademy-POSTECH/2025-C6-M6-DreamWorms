@@ -4,6 +4,21 @@
     "%lld" : {
 
     },
+    "1.5km" : {
+
+    },
+    "1km" : {
+
+    },
+    "200m" : {
+
+    },
+    "500m" : {
+
+    },
+    "750m" : {
+
+    },
     "btn_add" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -150,6 +165,39 @@
     "Hello, World!" : {
 
     },
+    "map_frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빈도"
+          }
+        }
+      }
+    },
+    "map_radiusOverlay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "반경"
+          }
+        }
+      }
+    },
+    "map_recent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최신"
+          }
+        }
+      }
+    },
     "test" : {
       "comment" : "테스트용 문자입니다.",
       "extractionState" : "manual",
@@ -162,19 +210,16 @@
         }
       }
     },
-    "기지국 위치정보 저장하기" : {
+    "거리" : {
 
     },
-    "메시지 본문" : {
+    "그라데이션" : {
 
-    },
-    "본문: ${bodyText}" : {
-
-    },
-    "전달된 문자 메시지에 포함된 주소를 저장합니다." : {
-        
     },
     "기지국" : {
+
+    },
+    "기지국 위치정보 저장하기" : {
 
     },
     "날짜: 2025-10-19 ~ 2025-10-20" : {
@@ -183,10 +228,28 @@
     "닫기" : {
 
     },
+    "메시지 본문" : {
+
+    },
+    "반경 끄기" : {
+
+    },
+    "본문: ${bodyText}" : {
+
+    },
+    "선" : {
+
+    },
     "셀 %lld" : {
 
     },
+    "스타일" : {
+
+    },
     "장소" : {
+
+    },
+    "전달된 문자 메시지에 포함된 주소를 저장합니다." : {
 
     },
     "증거 정보" : {
