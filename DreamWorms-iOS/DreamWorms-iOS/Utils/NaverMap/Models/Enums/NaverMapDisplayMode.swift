@@ -8,21 +8,21 @@
 import Foundation
 
 public enum NaverMapDisplayMode: String, CaseIterable, Sendable {
-    case uniqueLocations = "unique"       // 기본
-    case frequency = "frequency"          // 빈도 표시
-    case timeSequence = "sequence"        // 시간순 그룹화
-    case flow = "flow"                    // 화살표 흐름 표시
+    case uniqueLocations = "unique" // 기본
+    case frequency // 빈도 표시
+    case timeSequence = "sequence" // 시간순 그룹화
+    case flow // 화살표 흐름 표시
     
     public var title: String {
         switch self {
         case .uniqueLocations:
-            return "기본 위치"
+            "기본 위치"
         case .frequency:
-            return "빈도 표시"
+            "빈도 표시"
         case .timeSequence:
-            return "시간순 그룹"
+            "시간순 그룹"
         case .flow:
-            return "이동 경로"
+            "이동 경로"
         }
     }
 }

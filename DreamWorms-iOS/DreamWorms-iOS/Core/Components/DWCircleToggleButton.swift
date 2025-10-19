@@ -53,13 +53,10 @@ struct DWCircleToggleButton: View {
 
 #Preview {
     VStack {
-        DWCircleToggleButton(systemImage: "scope", isOn: .constant(true)) {
-        }
+        DWCircleToggleButton(systemImage: "scope", isOn: .constant(true)) {}
         
-        DWCircleToggleButton(title: "반경", isOn: .constant(false)) {
-        }
+        DWCircleToggleButton(title: "반경", isOn: .constant(false)) {}
         
-        DWCircleToggleButton(title: "빈도", isOn: .constant(true)) {
-        }
+        DWCircleToggleButton(title: "빈도", isOn: .constant(true)) {}
     }
 }

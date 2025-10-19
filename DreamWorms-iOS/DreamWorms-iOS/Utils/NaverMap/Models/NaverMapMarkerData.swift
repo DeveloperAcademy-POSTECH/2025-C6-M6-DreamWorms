@@ -5,8 +5,8 @@
 //  Created by taeni on 10/18/25.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 
 public struct NaverMapMarkerData: Identifiable, Sendable {
     public let id: UUID
@@ -53,7 +53,7 @@ public extension NaverMapMarkerData {
     
     /// 마커 표시 제목 (빈도)
     var displayTitle: String {
-        if let frequencyText = frequencyText {
+        if let frequencyText {
             return "\(title) \(frequencyText)"
         }
         return title
@@ -63,11 +63,11 @@ public extension NaverMapMarkerData {
     var displayDescription: String? {
         var components: [String] = []
         
-        if let subtitle = subtitle {
+        if let subtitle {
             components.append(subtitle)
         }
         
-        if let sequenceText = sequenceText {
+        if let sequenceText {
             components.append("순서: \(sequenceText)")
         }
         

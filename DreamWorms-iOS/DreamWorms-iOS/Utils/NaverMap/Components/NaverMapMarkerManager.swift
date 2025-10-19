@@ -7,12 +7,11 @@
 
 import Foundation
 import NMapsMap
-import UIKit
 import SwiftUI
+import UIKit
 
 @MainActor
 public struct NaverMapMarkerManager {
-    
     public static func createMarker(
         from data: NaverMapMarkerData,
         onTap: @escaping (NaverMapMarkerData) -> Void
@@ -43,21 +42,19 @@ public struct NaverMapMarkerManager {
     }
     
     private static func configureMarkerIcon(_ marker: NMFMarker, data: NaverMapMarkerData) {
-        let iconType: MarkerIconType
-        
-        switch data.markerType {
+        let iconType: MarkerIconType = switch data.markerType {
         case .frequency:
-            iconType = .number(
+            .number(
                 data.frequency,
                 textColor: .white,
                 background: .mainBlue,
                 stroke: .white
             )
             
-            // TODO: SF Symbol 변수 타입 처리 필요
-            // 위치 정보의 타입에 따라 값을 가져오게 추후 변경
+        // TODO: SF Symbol 변수 타입 처리 필요
+        // 위치 정보의 타입에 따라 값을 가져오게 추후 변경
         case .uniqueLocations, .timeSequence, .flow:
-            iconType = .symbol(
+            .symbol(
                 name: "dot.radiowaves.left.and.right",
                 color: .white,
                 background: .mainBlue,

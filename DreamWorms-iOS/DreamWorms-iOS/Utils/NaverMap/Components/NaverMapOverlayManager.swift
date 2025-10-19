@@ -7,12 +7,11 @@
 
 import Foundation
 import NMapsMap
-import UIKit
 import SwiftUI
+import UIKit
 
 @MainActor
 public struct NaverMapOverlayManager {
-    
     // circle
     public static func createCircleOverlay(
         center: CLLocationCoordinate2D,
@@ -103,7 +102,7 @@ public struct NaverMapOverlayManager {
         
         // 시간순 정렬
         let sortedLocations = locations.sorted { $0.timestamp < $1.timestamp }
-        let points = sortedLocations.map { $0.coordinate }
+        let points = sortedLocations.map(\.coordinate)
         
         if showArrows {
             // 화살표 경로

@@ -4,9 +4,9 @@
 //
 //  Created by taeni on 10/19/25.
 //
-import UIKit
 import NMapsMap
 import SwiftUI
+import UIKit
 
 // TODO: 추후 따로 분리해서 고도화 할 예정
 enum MarkerIconType {
@@ -16,7 +16,7 @@ enum MarkerIconType {
     case customImage(UIImage)
 }
 
-struct NaverMapMarkerIconFactory {
+enum NaverMapMarkerIconFactory {
     // TODO: 마커 상수 처리 수정 요망
     private static let markerSize: CGFloat = 24
     private static let strokeWidth: CGFloat = 1.0
@@ -24,28 +24,27 @@ struct NaverMapMarkerIconFactory {
     static func create(_ type: MarkerIconType) -> NMFOverlayImage? {
         switch type {
         case let .symbol(name, color, background, stroke, width, height):
-            return createSymbolIcon(name: name, color: color, background: background, stroke: stroke, width: width, height: height)
+            createSymbolIcon(name: name, color: color, background: background, stroke: stroke, width: width, height: height)
             
         case let .number(value, textColor, background, stroke):
-            return createNumberIcon(value: value, textColor: textColor, background: background, stroke: stroke)
+            createNumberIcon(value: value, textColor: textColor, background: background, stroke: stroke)
             
         case let .text(text, textColor, background, stroke):
-            return createTextIcon(text: text, textColor: textColor, background: background, stroke: stroke)
+            createTextIcon(text: text, textColor: textColor, background: background, stroke: stroke)
             
         case let .customImage(image):
-            return NMFOverlayImage(image: image)
+            NMFOverlayImage(image: image)
         }
     }
 }
 
 private extension NaverMapMarkerIconFactory {
-    
     // TODO: 렌더 ComputedProperties 처리방안
     static func createSymbolIcon(name: String, color: UIColor, background: UIColor, stroke: UIColor, width: CGFloat, height: CGFloat) -> NMFOverlayImage? {
         let containerSize = markerSize
         
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: containerSize, height: containerSize))
-        let image = renderer.image { context in
+        let image = renderer.image { _ in
             let rect = CGRect(x: 0, y: 0, width: containerSize, height: containerSize)
             let insetRect = rect.insetBy(dx: strokeWidth / 2, dy: strokeWidth / 2)
             
@@ -82,7 +81,7 @@ private extension NaverMapMarkerIconFactory {
         let containerSize = CGFloat(26)
         
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: containerSize, height: containerSize))
-        let image = renderer.image { context in
+        let image = renderer.image { _ in
             let rect = CGRect(x: 0, y: 0, width: containerSize, height: containerSize)
             let insetRect = rect.insetBy(dx: strokeWidth / 2, dy: strokeWidth / 2)
             
@@ -100,7 +99,7 @@ private extension NaverMapMarkerIconFactory {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.boldSystemFont(ofSize: 10),
                 .foregroundColor: textColor,
-                .paragraphStyle: paragraphStyle
+                .paragraphStyle: paragraphStyle,
             ]
             
             let text = "\(value)" as NSString
@@ -122,7 +121,7 @@ private extension NaverMapMarkerIconFactory {
         let containerSize = markerSize
         
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: containerSize, height: containerSize))
-        let image = renderer.image { context in
+        let image = renderer.image { _ in
             let rect = CGRect(x: 0, y: 0, width: containerSize, height: containerSize)
             let insetRect = rect.insetBy(dx: strokeWidth / 2, dy: strokeWidth / 2)
             
@@ -140,7 +139,7 @@ private extension NaverMapMarkerIconFactory {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 12, weight: .medium),
                 .foregroundColor: textColor,
-                .paragraphStyle: paragraphStyle
+                .paragraphStyle: paragraphStyle,
             ]
             
             let nsText = text as NSString

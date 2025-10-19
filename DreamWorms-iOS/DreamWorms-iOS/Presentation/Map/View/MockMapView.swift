@@ -5,10 +5,9 @@
 //  Created by taeni on 10/19/25.
 //
 
-
-import SwiftUI
-import NMapsMap
 import CoreLocation
+import NMapsMap
+import SwiftUI
 
 struct MockMapView: View {
     @StateObject private var viewModel = MapViewModel()
@@ -32,7 +31,6 @@ struct MockMapView: View {
                 }
             )
             .ignoresSafeArea()
-            
             
             MapControlPanel(
                 showFrequency: $showFrequency,

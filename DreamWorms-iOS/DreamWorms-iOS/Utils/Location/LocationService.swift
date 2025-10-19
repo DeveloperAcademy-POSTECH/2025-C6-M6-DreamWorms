@@ -5,9 +5,9 @@
 //  Created by taeni on 10/19/25.
 //
 
-import Foundation
-import CoreLocation
 import Combine
+import CoreLocation
+import Foundation
 
 @MainActor
 final class LocationService: NSObject, ObservableObject {
@@ -25,7 +25,7 @@ final class LocationService: NSObject, ObservableObject {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 10
-        authorizationStatus = locationManager.authorizationStatus
+        self.authorizationStatus = locationManager.authorizationStatus
     }
     
     func requestAuthorization() {
@@ -38,7 +38,8 @@ final class LocationService: NSObject, ObservableObject {
     
     func startUpdatingLocation() {
         guard authorizationStatus == .authorizedWhenInUse ||
-              authorizationStatus == .authorizedAlways else {
+            authorizationStatus == .authorizedAlways
+        else {
             print("Location authorization not granted")
             return
         }
@@ -62,7 +63,7 @@ final class LocationService: NSObject, ObservableObject {
             try await Task.sleep(nanoseconds: 100_000_000) // 0.1초 대기
             
             // 현재 위치가 있으면 반환
-            if let currentLocation = currentLocation {
+            if let currentLocation {
                 return currentLocation
             }
             
@@ -70,7 +71,8 @@ final class LocationService: NSObject, ObservableObject {
         }
         
         guard authorizationStatus == .authorizedWhenInUse ||
-              authorizationStatus == .authorizedAlways else {
+            authorizationStatus == .authorizedAlways
+        else {
             throw LocationError.authorizationDenied
         }
         
@@ -119,12 +121,13 @@ final class LocationService: NSObject, ObservableObject {
     // 현재 위치를 즉시 가져오는 대체 메서드
     func getCurrentLocationImmediately() async throws -> CLLocationCoordinate2D {
         guard authorizationStatus == .authorizedWhenInUse ||
-              authorizationStatus == .authorizedAlways else {
+            authorizationStatus == .authorizedAlways
+        else {
             throw LocationError.authorizationDenied
         }
         
         // 이미 저장된 현재 위치가 있으면 바로 반환
-        if let currentLocation = currentLocation {
+        if let currentLocation {
             print("Returning cached location")
             return currentLocation
         }
@@ -133,7 +136,7 @@ final class LocationService: NSObject, ObservableObject {
         startUpdatingLocation()
         
         // 최대 3초 동안 위치 업데이트 대기
-        for _ in 0..<30 {
+        for _ in 0 ..< 30 {
             if let location = currentLocation {
                 stopUpdatingLocation()
                 return location
@@ -167,7 +170,7 @@ extension LocationService: CLLocationManagerDelegate {
         }
     }
     
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         let coordinate = location.coordinate
         
@@ -185,7 +188,7 @@ extension LocationService: CLLocationManagerDelegate {
         }
     }
     
-    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    nonisolated func locationManager(_: CLLocationManager, didFailWithError error: Error) {
         let errorDescription = error.localizedDescription
         
         Task { @MainActor in
@@ -217,13 +220,13 @@ enum LocationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .authorizationDenied:
-            return "위치 권한이 거부되었습니다"
+            "위치 권한이 거부되었습니다"
         case .locationUnavailable:
-            return "현재 위치를 가져올 수 없습니다"
+            "현재 위치를 가져올 수 없습니다"
         case .timeout:
-            return "위치 요청 시간이 초과되었습니다"
+            "위치 요청 시간이 초과되었습니다"
         case .requestCancelled:
-            return "이전 위치 요청이 취소되었습니다"
+            "이전 위치 요청이 취소되었습니다"
         }
     }
 }

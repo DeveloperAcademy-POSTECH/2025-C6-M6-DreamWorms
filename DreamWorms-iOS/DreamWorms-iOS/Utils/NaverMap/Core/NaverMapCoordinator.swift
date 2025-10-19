@@ -3,10 +3,10 @@
 //  DreamWorms-iOS
 //
 
-import Foundation
-import SwiftUI
-import NMapsMap
 import CoreLocation
+import Foundation
+import NMapsMap
+import SwiftUI
 
 @MainActor
 public final class NaverMapCoordinator: NSObject {
@@ -17,7 +17,6 @@ public final class NaverMapCoordinator: NSObject {
     var circleOverlays: [UUID: NMFCircleOverlay] = [:]
     var pathOverlay: NMFPath?
     var arrowPathOverlay: NMFArrowheadPath?
-    
     
     var lastCameraPosition: NMFCameraPosition?
     
@@ -48,7 +47,7 @@ public final class NaverMapCoordinator: NSObject {
     }
     
     func applyConfiguration(_ config: NaverMapConfiguration) {
-        guard let mapView = mapView else { return }
+        guard let mapView else { return }
         
         mapView.mapType = config.mapType.nmfMapType
         mapView.minZoomLevel = config.minZoom
@@ -65,7 +64,7 @@ public final class NaverMapCoordinator: NSObject {
     }
     
     func moveCamera(to position: CLLocationCoordinate2D, zoom: Double? = nil, animated: Bool = true) {
-        guard let mapView = mapView else { return }
+        guard let mapView else { return }
         
         let targetZoom = zoom ?? mapView.cameraPosition.zoom
         let cameraPosition = NMFCameraPosition(
@@ -100,8 +99,8 @@ public final class NaverMapCoordinator: NSObject {
 }
 
 extension NaverMapCoordinator: NMFMapViewCameraDelegate {
-    public func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {}
-    public func mapView(_ mapView: NMFMapView, cameraIsChangingByReason reason: Int) {}
+    public func mapView(_: NMFMapView, cameraWillChangeByReason _: Int, animated _: Bool) {}
+    public func mapView(_: NMFMapView, cameraIsChangingByReason _: Int) {}
     
     @MainActor
     public func mapViewCameraIdle(_ mapView: NMFMapView) {
@@ -112,11 +111,10 @@ extension NaverMapCoordinator: NMFMapViewCameraDelegate {
             parent.onCameraChange?(mapView.cameraPosition)
         }
     }
-
 }
 
 extension NaverMapCoordinator: NMFMapViewTouchDelegate {
-    public func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
+    public func mapView(_: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
         let coordinate = CLLocationCoordinate2D(latitude: latlng.lat, longitude: latlng.lng)
         parent.onMapTap?(coordinate)
     }

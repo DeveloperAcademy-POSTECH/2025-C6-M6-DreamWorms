@@ -20,7 +20,7 @@ enum DWBottomSheetConfiguration {
     static let supportedDetents: Set<PresentationDetent> = [
         .small,
         .medium,
-        .large
+        .large,
     ]
     
     // MARK: - Interaction

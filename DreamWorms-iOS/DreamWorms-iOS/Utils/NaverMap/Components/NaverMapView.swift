@@ -5,12 +5,11 @@
 //  Created by taeni on 10/18/25.
 //
 
-import SwiftUI
-import NMapsMap
 import CoreLocation
+import NMapsMap
+import SwiftUI
 
 public struct NaverMapView: UIViewRepresentable {
-    
     // 실시간성
     @Binding var cameraPosition: NMFCameraPosition?
     @Binding var positionMode: NMFMyPositionMode
@@ -70,7 +69,8 @@ public struct NaverMapView: UIViewRepresentable {
         updateMapContent(mapView, coordinator: coordinator)
         
         if let position = cameraPosition,
-           position != coordinator.lastCameraPosition {
+           position != coordinator.lastCameraPosition
+        {
             let update = NMFCameraUpdate(position: position)
             update.animation = .easeIn
             update.animationDuration = 0.3
@@ -83,11 +83,11 @@ public struct NaverMapView: UIViewRepresentable {
         NaverMapCoordinator(self)
     }
     
-    public static func dismantleUIView(_ uiView: NMFNaverMapView, coordinator: NaverMapCoordinator) {
+    public static func dismantleUIView(_: NMFNaverMapView, coordinator: NaverMapCoordinator) {
         coordinator.cleanup()
     }
     
-    private func updateMapContent(_ mapView: NMFMapView, coordinator: NaverMapCoordinator) {
+    private func updateMapContent(_: NMFMapView, coordinator: NaverMapCoordinator) {
         let processedMarkers = processMarkers()
         
         // 자동 클러스터링 여부 확인
@@ -110,7 +110,7 @@ public struct NaverMapView: UIViewRepresentable {
             show: shouldShowCircle
         )
         
-        if overlayOptions.showFlowPath && displayMode == .flow {
+        if overlayOptions.showFlowPath, displayMode == .flow {
             NaverMapOverlayManager.updateFlowPath(
                 coordinator: coordinator,
                 locations: locations,
@@ -125,13 +125,13 @@ public struct NaverMapView: UIViewRepresentable {
     private func processMarkers() -> [NaverMapMarkerData] {
         switch displayMode {
         case .uniqueLocations:
-            return processUniqueLocations()
+            processUniqueLocations()
         case .frequency:
-            return processFrequencyMarkers()
+            processFrequencyMarkers()
         case .timeSequence:
-            return processTimeSequenceMarkers()
+            processTimeSequenceMarkers()
         case .flow:
-            return processFlowMarkers()
+            processFlowMarkers()
         }
     }
     

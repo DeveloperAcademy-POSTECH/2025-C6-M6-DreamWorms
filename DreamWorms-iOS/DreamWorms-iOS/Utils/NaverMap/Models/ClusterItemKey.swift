@@ -1,5 +1,5 @@
 //
-//  ClusterKey.swift
+//  ClusterItemKey.swift
 //  DreamWorms-iOS
 //
 //  Created by taeni on 10/18/25.
@@ -18,19 +18,19 @@ public class ClusterItemKey: NSObject, NMCClusteringKey, NSCopying {
     }
 
     public var clusteringPosition: NMGLatLng {
-        return position
+        position
     }
 
-    public nonisolated override func isEqual(_ object: Any?) -> Bool {
+    override public nonisolated func isEqual(_ object: Any?) -> Bool {
         guard let other = object as? ClusterItemKey else { return false }
-        return self.identifier == other.identifier
+        return identifier == other.identifier
     }
 
-    public nonisolated override var hash: Int {
-        return identifier
+    override public nonisolated var hash: Int {
+        identifier
     }
 
-    public func copy(with zone: NSZone? = nil) -> Any {
-        return ClusterItemKey(identifier: self.identifier, position: self.position)
+    public func copy(with _: NSZone? = nil) -> Any {
+        ClusterItemKey(identifier: identifier, position: position)
     }
 }

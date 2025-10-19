@@ -118,6 +118,17 @@
         }
       }
     },
+    "caseBottomSheet_caseTitleHeader" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(caseTitleHeader)@"
+          }
+        }
+      }
+    },
     "caseCard_caseNumber" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -194,6 +205,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최신"
+          }
+        }
+      }
+    },
+    "pin_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(dataLocationCount)lld개"
           }
         }
       }
