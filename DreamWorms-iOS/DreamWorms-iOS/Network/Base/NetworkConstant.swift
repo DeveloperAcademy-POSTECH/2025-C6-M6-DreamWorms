@@ -7,4 +7,9 @@
 
 import Alamofire
 
-enum NetworkConstant {}
+enum NetworkConstant {
+    enum NaverAPIHeaderKey {
+        static let clientID = "X-NCP-APIGW-API-KEY-ID"
+        static let clientSecret = "X-NCP-APIGW-API-KEY"
+    }
+}
