@@ -25,14 +25,14 @@ struct DWBottomSheetModifier<SheetContent: View>: ViewModifier {
     @Binding var isPresented: Bool
     @Binding var detent: PresentationDetent
     
-    let content: SheetContent
+    let content: () -> SheetContent
     
     // MARK: - Body
     
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $isPresented) {
-                self.content
+                self.content()
                     .presentationDetents(
                         DWBottomSheetConfiguration.supportedDetents,
                         selection: $detent
@@ -41,7 +41,6 @@ struct DWBottomSheetModifier<SheetContent: View>: ViewModifier {
                         DWBottomSheetConfiguration.backgroundInteraction
                     )
                     .presentationDragIndicator(
-                        
                         DWBottomSheetConfiguration.shouldShowDragIndicator(for: detent)
                             ? .visible
                             : .hidden
@@ -49,9 +48,7 @@ struct DWBottomSheetModifier<SheetContent: View>: ViewModifier {
                     .presentationCornerRadius(
                         DWBottomSheetConfiguration.defaultCornerRadius
                     )
-                    .interactiveDismissDisabled(
-                        DWBottomSheetConfiguration.shouldDisableInteractiveDismiss(for: detent)
-                    )
+                    .interactiveDismissDisabled(true)
             }
     }
 }
@@ -71,12 +68,12 @@ extension View {
     ///   - Medium: 배경 터치 가능, 드래그로 Small 전환
     ///   - Large: 배경 터치 불가, 드래그 핸들 숨김
     ///
-    func dreamwormsBottomSheet<Content: View>(
+    func dreamwormsBottomSheet(
         isPresented: Binding<Bool>,
         detent: Binding<PresentationDetent>,
-        content: Content
+        @ViewBuilder content: @escaping () -> some View
     ) -> some View {
-        self.modifier(
+        modifier(
             DWBottomSheetModifier(
                 isPresented: isPresented,
                 detent: detent,

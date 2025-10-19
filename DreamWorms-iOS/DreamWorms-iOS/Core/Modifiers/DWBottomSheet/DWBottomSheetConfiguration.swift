@@ -14,7 +14,6 @@ import SwiftUI
 /// 역할: 바텀시트 동작 규칙만 정의
 
 enum DWBottomSheetConfiguration {
-    
     // MARK: - Detents
     
     /// 지원하는 Detent 목록
@@ -37,23 +36,12 @@ enum DWBottomSheetConfiguration {
     /// 모서리 둥글기 반경
     static let defaultCornerRadius: CGFloat = 16
     
-    // MARK: - Dismiss Rules
-    
-    /// 드래그로 닫기를 막을지 여부
-    ///
-    ///  - Parameters:
-    ///         - detent: 현재 Detent 상태
-    ///         - return: Bool형식 true면 닫기 막기, false면 닫기 허용
-    static func shouldDisableInteractiveDismiss(for detent: PresentationDetent) -> Bool {
-        detent == .small
-    }
-    
     /// 드래그 인디케이터 표시 여부
     ///
     /// - Parameters
     ///         - detent: 현재 Detent 상태
     ///         - return: true면 표시, false면 숨김
     static func shouldShowDragIndicator(for detent: PresentationDetent) -> Bool {
-          detent != .large
-      }
+        detent != .large
+    }
 }
