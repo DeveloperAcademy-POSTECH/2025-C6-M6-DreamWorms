@@ -7,22 +7,54 @@
 
 import SwiftUI
 
+enum SearchState {
+    case loading
+    case error(String)
+    case emptyResults
+    case empty
+    case results([LocalSearchResult])
+}
+
 struct SearchView: View {
     @EnvironmentObject private var coordinator: AppCoordinator
-    @State private var searchText = ""
+    @StateObject private var viewModel = SearchViewModel()
+    
+    private var searchState: SearchState {
+        if viewModel.isLoading {
+            return .loading
+        }
+        
+        if let errorMessage = viewModel.errorMessage {
+            return .error(errorMessage)
+        }
+        
+        let hasResults = !viewModel.searchResults.isEmpty
+        let hasSearchText = !viewModel.searchText.isEmpty
+        
+        switch (hasResults, hasSearchText) {
+        case (false, false):
+            return .empty
+        case (false, true):
+            return .emptyResults
+        case (true, _):
+            return .results(viewModel.searchResults)
+        }
+    }
     
     var body: some View {
         VStack(spacing: 0) {
             SearchHeader(
-                text: $searchText,
+                text: $viewModel.searchText,
                 onBack: {
                     coordinator.pop()
                 },
                 onSubmit: {
-                    // NOTE: 검색 API 호출 들어 갈 자리
+                    Task {
+                        await viewModel.performSearch(query: viewModel.searchText)
+                    }
                 },
                 onClear: {
-                    searchText = ""
+                    viewModel.clearSearch()
                 }
             )
             
@@ -30,80 +62,124 @@ struct SearchView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 12)
             
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(MockSearchData.results.enumerated()), id: \.offset) { index, result in
-                        SearchResultRow(
-                            placeName: result.placeName,
-                            address: result.address,
-                            category: result.category,
-                            distance: result.distance,
-                            reviewCount: result.reviewCount,
-                            onTap: {
-                                // NOTE: 누르면 그 위치로 이동하게 해야 함.
-                                print("선택됨: \(result.placeName)")
-                            }
-                        )
-                        
-                        if index < MockSearchData.results.count - 1 {
-                            Divider()
-                                .padding(.horizontal, 12)
-                        }
-                    }
+            SearchContentView(
+                state: searchState,
+                onResultTap: { result in
+                    viewModel.selectSearchResult(result)
+                    coordinator.pop()
                 }
-            }
+            )
         }
         .navigationBarBackButtonHidden()
     }
 }
 
-// 임시 목데이터
-struct SearchResultData {
-    let placeName: String
-    let address: String
-    let category: String
-    let distance: String
-    let reviewCount: Int
+// MARK: - SearchContentView
+
+struct SearchContentView: View {
+    let state: SearchState
+    let onResultTap: (LocalSearchResult) -> Void
+    
+    var body: some View {
+        switch state {
+        case .loading:
+            SearchLoadingView()
+        case let .error(message):
+            SearchErrorView(errorMessage: message)
+        case .emptyResults:
+            SearchEmptyView()
+        case .empty:
+            SearchPlaceholderView()
+        case let .results(results):
+            SearchResultView(searchResults: results, onResultTap: onResultTap)
+        }
+    }
 }
 
-enum MockSearchData {
-    static let results = [
-        SearchResultData(
-            placeName: "GS25 포항효성로점",
-            address: "경북 포항시 남구 효성로 54 (효자동 597)",
-            category: "편의점",
-            distance: "1.5km",
-            reviewCount: 497
-        ),
-        SearchResultData(
-            placeName: "CU 포항효자센터점",
-            address: "경북 포항시 남구 효자동 123-45",
-            category: "편의점",
-            distance: "1.8km",
-            reviewCount: 234
-        ),
-        SearchResultData(
-            placeName: "세븐일레븐 포항남부점",
-            address: "경북 포항시 남구 남부동 67-89",
-            category: "편의점",
-            distance: "2.1km",
-            reviewCount: 156
-        ),
-        SearchResultData(
-            placeName: "스타벅스 포항점",
-            address: "경북 포항시 남구 중앙로 123",
-            category: "카페",
-            distance: "0.8km",
-            reviewCount: 892
-        ),
-        SearchResultData(
-            placeName: "맥도날드 포항점",
-            address: "경북 포항시 남구 대잠동 456-78",
-            category: "패스트푸드",
-            distance: "2.5km",
-            reviewCount: 445
-        ),
-    ]
+// MARK: - SubViews
+
+struct SearchLoadingView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            ProgressView("검색 중...")
+                .font(.pretendardRegular(size: 14))
+                .foregroundStyle(Color.gray8B)
+            Spacer()
+        }
+    }
+}
+
+struct SearchErrorView: View {
+    let errorMessage: String
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("검색 중 오류가 발생했습니다")
+                .font(.pretendardRegular(size: 16))
+                .foregroundStyle(Color.gray8B)
+            Text(errorMessage)
+                .font(.pretendardRegular(size: 14))
+                .foregroundStyle(Color.gray8B)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+            Spacer()
+        }
+    }
+}
+
+struct SearchEmptyView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("검색 결과가 없습니다")
+                .font(.pretendardRegular(size: 16))
+                .foregroundStyle(Color.gray8B)
+            Spacer()
+        }
+    }
+}
+
+struct SearchPlaceholderView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("장소를 검색해보세요")
+                .font(.pretendardRegular(size: 16))
+                .foregroundStyle(Color.gray8B)
+            Spacer()
+        }
+    }
+}
+
+struct SearchResultView: View {
+    let searchResults: [LocalSearchResult]
+    let onResultTap: (LocalSearchResult) -> Void
+    
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(Array(searchResults.enumerated()), id: \.offset) { index, result in
+                    SearchResultRow(
+                        placeName: result.title,
+                        address: result.roadAddress.isEmpty ? result.address : result.roadAddress,
+                        category: result.category,
+                        distance: "거리 정보 없음",
+                        reviewCount: 0,
+                        onTap: {
+                            onResultTap(result)
+                        }
+                    )
+                    
+                    if index < searchResults.count - 1 {
+                        Divider()
+                            .padding(.horizontal, 12)
+                    }
+                }
+            }
+        }
+    }
 }
 
 #Preview {
