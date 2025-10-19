@@ -9,27 +9,52 @@ import SwiftUI
 
 struct DWButton: View {
     private let title: String
+    private let iconImage: Image?
     private let action: () -> Void
+    
+    @Binding var isEnabled: Bool
     
     init(
         title: String,
+        iconImage: Image? = nil,
+        isEnabled: Binding<Bool> = .constant(false),
         action: @escaping () -> Void
     ) {
         self.title = title
+        self.iconImage = iconImage
+        self._isEnabled = isEnabled
         self.action = action
     }
     
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.pretendardSemiBold(size: 16))
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity, maxHeight: 56)
-                .foregroundStyle(.white)
-                .background(.mainBlue)
-                .cornerRadius(8)
+        Button {
+            triggerMediumHapticFeedback()
+            action()
+        } label: {
+            HStack(spacing: 6) {
+                if let iconImage {
+                    iconImage
+                        .renderingMode(.template)
+                        .foregroundColor(.white)
+                }
+                
+                Text(title)
+                    .font(.pretendardSemiBold(size: 16))
+            }
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, maxHeight: 56)
+            .foregroundStyle(.white)
+            .background(isEnabled ? .mainBlue : .gray8B)
+            .cornerRadius(8)
         }
+        .disabled(!isEnabled)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
     }
+}
+
+#Preview {
+    DWButton(title: "추가하기", iconImage: Image(.icnPlus20), action: {})
+    DWButton(title: "추가하기", isEnabled: .constant(true), action: {})
+    DWButton(title: "추가하기", iconImage: Image(.icnPin18), isEnabled: .constant(true), action: {})
 }
