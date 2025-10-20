@@ -87,7 +87,7 @@ struct MapView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             viewModel.setModelContext(modelContext)
-//            viewModel.loadLocations()
+            viewModel.loadAllLocations()
             showEvidenceBottomSheet = true
         }
         .dreamwormsBottomSheet(isPresented: $showEvidenceBottomSheet, detent: $evidenceDetent) {
