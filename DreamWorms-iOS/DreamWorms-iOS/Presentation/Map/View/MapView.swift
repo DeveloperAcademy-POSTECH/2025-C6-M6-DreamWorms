@@ -74,7 +74,7 @@ struct MapView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             viewModel.setModelContext(modelContext)
-//            viewModel.loadLocations()
+            viewModel.loadAllLocations()
         }
     }
 }

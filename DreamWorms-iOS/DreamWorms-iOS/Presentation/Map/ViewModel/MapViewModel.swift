@@ -17,7 +17,8 @@ final class MapViewModel: ObservableObject {
     @Published var locations: [NaverMapLocationData] = []
     @Published var displayMode: NaverMapDisplayMode = .uniqueLocations
     @Published var overlayOptions = NaverMapOverlayOptions()
-    @Published var clusteringEnabled = true
+    // TODO: 임시로 클러스터 모드 제거
+    @Published var clusteringEnabled = false
     
     @Published var positionMode: NMFMyPositionMode = .normal
     
@@ -33,50 +34,50 @@ final class MapViewModel: ObservableObject {
         modelContext = context
     }
     
-    // TODO: 실 데이터 연동
-    //    func loadLocations() {
-    //        guard let modelContext = modelContext else {
-    //            print("ModelContext not set")
-    //            return
-    //        }
-    //
-    //        let descriptor = FetchDescriptor<CaseLocation>(
-    //            predicate: #Predicate { location in
-    //                location.pinType == .telecom &&
-    //                location.latitude != nil &&
-    //                location.longitude != nil
-    //            },
-    //            sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
-    //        )
-    //
-    //        do {
-    //            let caseLocations = try modelContext.fetch(descriptor)
-    //            print("Loaded \(caseLocations.count) telecom locations")
-    //
-    //            locations = caseLocations.compactMap { location in
-    //                guard let lat = location.latitude,
-    //                      let lng = location.longitude else {
-    //                    return nil
-    //                }
-    //
-    //                return NaverMapLocationData(
-    //                    id: location.id,
-    //                    coordinate: CLLocationCoordinate2D(
-    //                        latitude: lat,
-    //                        longitude: lng
-    //                    ),
-    //                    timestamp: location.receivedAt,
-    //                    address: location.address ?? "위치",
-    //                    additionalInfo: [:]
-    //                )
-    //            }
-    //
-    //            moveCameraToLatestMarker()
-    //
-    //        } catch {
-    //            print("Failed to fetch locations: \(error)")
-    //        }
-    //    }
+    //     TODO: 실 데이터 연동
+    func loadLocations() {
+        guard let modelContext = modelContext else {
+            print("ModelContext not set")
+            return
+        }
+        
+        let descriptor = FetchDescriptor<CaseLocation>(
+            predicate: #Predicate { location in
+                //                    location.pinType == .telecom &&
+                location.latitude != nil &&
+                location.longitude != nil
+            },
+            sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
+        )
+        
+        do {
+            let caseLocations = try modelContext.fetch(descriptor)
+            print("Loaded \(caseLocations.count) telecom locations")
+            
+            locations = caseLocations.compactMap { location in
+                guard let lat = location.latitude,
+                      let lng = location.longitude else {
+                    return nil
+                }
+                
+                return NaverMapLocationData(
+                    id: location.id,
+                    coordinate: CLLocationCoordinate2D(
+                        latitude: lat,
+                        longitude: lng
+                    ),
+                    timestamp: location.receivedAt,
+                    address: location.address ?? "위치",
+                    additionalInfo: [:]
+                )
+            }
+            
+            moveCameraToLatestMarker()
+            
+        } catch {
+            print("Failed to fetch locations: \(error)")
+        }
+    }
     
     // Mock json 파일 데이터
     func loadMockLocations() {
@@ -94,6 +95,69 @@ final class MapViewModel: ObservableObject {
         
         moveCameraToLatestMarker()
         print("Loaded \(locations.count) mock locations")
+    }
+    
+    // mvp 용
+    func loadAllLocations() {
+        var allLocations: [NaverMapLocationData] = []
+        
+        // 1. 실제 데이터 로드
+        if let modelContext = modelContext {
+            let descriptor = FetchDescriptor<CaseLocation>(
+                predicate: #Predicate { location in
+                    location.latitude != nil &&
+                    location.longitude != nil
+                },
+                sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
+            )
+            
+            do {
+                let caseLocations = try modelContext.fetch(descriptor)
+                print("Loaded \(caseLocations.count) real locations")
+                
+                let realLocations = caseLocations.compactMap { location -> NaverMapLocationData? in
+                    guard let lat = location.latitude,
+                          let lng = location.longitude else {
+                        return nil
+                    }
+                    
+                    return NaverMapLocationData(
+                        id: location.id,
+                        coordinate: CLLocationCoordinate2D(
+                            latitude: lat,
+                            longitude: lng
+                        ),
+                        timestamp: location.receivedAt,
+                        address: location.address ?? "위치",
+                        additionalInfo: [:]
+                    )
+                }
+                
+                allLocations.append(contentsOf: realLocations)
+            } catch {
+                print("Failed to fetch real locations: \(error)")
+            }
+        }
+        
+        // 2. Mock 데이터 로드
+        let mockLocations = MockLocationLoader.loadFromJSON()
+        let mockNaverLocations = mockLocations.map { mock in
+            NaverMapLocationData(
+                id: UUID(),
+                coordinate: mock.coordinate,
+                timestamp: mock.timestamp,
+                address: mock.location,
+                additionalInfo: [:]
+            )
+        }
+        
+        allLocations.append(contentsOf: mockNaverLocations)
+        
+        // 3. 시간순 정렬 (최신순)
+        locations = allLocations.sorted { $0.timestamp > $1.timestamp }
+        
+        moveCameraToLatestMarker()
+        print("Loaded total \(locations.count) locations (real: \(allLocations.count - mockNaverLocations.count), mock: \(mockNaverLocations.count))")
     }
     
     func toggleFrequencyMode() {
@@ -121,7 +185,7 @@ final class MapViewModel: ObservableObject {
             }
             
             guard locationService.authorizationStatus == .authorizedWhenInUse ||
-                locationService.authorizationStatus == .authorizedAlways
+                    locationService.authorizationStatus == .authorizedAlways
             else {
                 print("위치 권한이 없습니다")
                 return
