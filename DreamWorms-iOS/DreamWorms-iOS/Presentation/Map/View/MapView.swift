@@ -19,6 +19,15 @@ struct MapView: View {
     @State private var showFrequency = false
     @State private var showCircle = false
     
+    // 바텀시트 관련 상태
+    @State private var showEvidenceBottomSheet: Bool = true
+    @State private var evidenceDetent: PresentationDetent = .small
+    // 데모용(실제로는 선택된 사건 전달)
+    @State private var selectedCaseForSheet: Case = .init(
+        name: "베트콩 소탕", number: "2024-001", suspectName: "왕꿈틀"
+    )
+    private let locationAmount: Int = 39
+
     var body: some View {
         ZStack {
             NaverMapView(
@@ -31,6 +40,10 @@ struct MapView: View {
                 locations: viewModel.locations,
                 onMarkerTap: { markerData in
                     print("Marker tapped: \(markerData.title)")
+                    evidenceDetent = .medium
+                },
+                onMapTap: { _ in
+                    evidenceDetent = .medium
                 }
             )
             .ignoresSafeArea()
@@ -74,7 +87,16 @@ struct MapView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             viewModel.setModelContext(modelContext)
-            viewModel.loadAllLocations()
+//            viewModel.loadLocations()
+            showEvidenceBottomSheet = true
+        }
+        .dreamwormsBottomSheet(isPresented: $showEvidenceBottomSheet, detent: $evidenceDetent) {
+            EvidenceBottomSheet(
+                currentDetent: $evidenceDetent,
+                selectedCase: selectedCaseForSheet,
+                totalLocationCount: locationAmount,
+                evidences: Evidence.mockData
+            )
         }
     }
 }

@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
+    "%@ - %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -103,6 +113,28 @@
         }
       }
     },
+    "caseBottomSheet_caseTitleHeader" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(caseTitleHeader)@"
+          }
+        }
+      }
+    },
+    "caseBottomSheet_separator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~"
+          }
+        }
+      }
+    },
     "caseCard_caseNumber" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -183,6 +215,17 @@
         }
       }
     },
+    "pin_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(dataLocationCount)lld개"
+          }
+        }
+      }
+    },
     "test" : {
       "comment" : "테스트용 문자입니다.",
       "extractionState" : "manual",
@@ -204,16 +247,7 @@
     "검색 중..." : {
 
     },
-    "기지국" : {
-
-    },
     "기지국 위치정보 저장하기" : {
-
-    },
-    "날짜: 2025-10-19 ~ 2025-10-20" : {
-
-    },
-    "닫기" : {
 
     },
     "리뷰 %lld" : {
@@ -225,12 +259,6 @@
     "본문: ${bodyText}" : {
 
     },
-    "셀 %lld" : {
-
-    },
-    "장소" : {
-
-    },
     "장소, 주소 검색" : {
 
     },
@@ -238,18 +266,6 @@
 
     },
     "전달된 문자 메시지에 포함된 주소를 저장합니다." : {
-
-    },
-    "증거 정보" : {
-
-    },
-    "증거 종류 탭" : {
-
-    },
-    "차량" : {
-
-    },
-    "카드내역" : {
 
     }
   },

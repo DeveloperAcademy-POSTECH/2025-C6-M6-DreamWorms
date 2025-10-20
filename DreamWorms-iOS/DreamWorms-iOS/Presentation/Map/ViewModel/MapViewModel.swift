@@ -22,6 +22,8 @@ final class MapViewModel: ObservableObject {
     
     @Published var positionMode: NMFMyPositionMode = .normal
     
+    @Published var currentCase: Case?
+    @Published var caseLocation: [CaseLocation] = []
     // 검색 결과 바텀시트 관련
     @Published var selectedSearchResult: LocalSearchResult?
     @Published var showSearchResultSheet = false
