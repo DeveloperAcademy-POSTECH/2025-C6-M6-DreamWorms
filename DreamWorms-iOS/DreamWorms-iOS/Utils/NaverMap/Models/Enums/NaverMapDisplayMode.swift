@@ -26,27 +26,3 @@ public enum NaverMapDisplayMode: String, CaseIterable, Sendable {
         }
     }
 }
-
-public struct NaverMapOverlayOptions: Sendable {
-    public var showCircleOverlay: Bool
-    public var circleRadius: Double
-    public var radiusStyle: RadiusStyle
-    public var showFlowPath: Bool
-    
-    public init(
-        showCircleOverlay: Bool = false,
-        circleRadius: Double = 750.0,
-        radiusStyle: RadiusStyle = .gradient,
-        showFlowPath: Bool = false
-    ) {
-        self.showCircleOverlay = showCircleOverlay
-        self.circleRadius = circleRadius
-        self.radiusStyle = radiusStyle
-        self.showFlowPath = showFlowPath
-    }
-}
-
-public enum RadiusStyle: String, Codable, Sendable {
-    case gradient
-    case stroke
-}

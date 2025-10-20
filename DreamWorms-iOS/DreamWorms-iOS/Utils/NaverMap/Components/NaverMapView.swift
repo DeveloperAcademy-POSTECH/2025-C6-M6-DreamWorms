@@ -103,10 +103,17 @@ public struct NaverMapView: UIViewRepresentable {
         // 클러스터링이 활성화되면 Circle Overlay 비활성화
         let shouldShowCircle = overlayOptions.showCircleOverlay && !isClusteringActive
         
+        NaverMapOverlayManager.updateGradientCircleOverlays(
+            coordinator: coordinator,
+            markers: processedMarkers,
+            radiusPresets: overlayOptions.radiusPresets,
+            show: shouldShowCircle
+        )
+        
         NaverMapOverlayManager.updateCircleOverlays(
             coordinator: coordinator,
             markers: processedMarkers,
-            radius: overlayOptions.circleRadius,
+            radiusPresets: overlayOptions.radiusPresets,
             show: shouldShowCircle
         )
         
