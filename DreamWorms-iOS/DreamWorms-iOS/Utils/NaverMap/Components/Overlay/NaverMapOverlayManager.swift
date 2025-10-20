@@ -5,13 +5,12 @@
 //  Created by taeni on 10/18/25.
 //
 
+import CoreLocation
 import Foundation
 import NMapsMap
-import CoreLocation
 import UIKit
 
 enum NaverMapOverlayManager {
-    
     static func updateGradientCircleOverlays(
         coordinator: NaverMapCoordinator,
         markers: [NaverMapMarkerData],
@@ -62,7 +61,7 @@ enum NaverMapOverlayManager {
             GradientImageGenerator.GradientStop(
                 color: color.withAlphaComponent(0.0),
                 location: 1.0
-            )
+            ),
         ]
         
         return GradientImageGenerator.createRadialGradientImage(
@@ -157,8 +156,8 @@ enum NaverMapOverlayManager {
         center: CLLocationCoordinate2D,
         radiusMeters: Double
     ) -> NMGLatLngBounds {
-        let latitudeDelta = radiusMeters / 111000.0
-        let longitudeDelta = radiusMeters / (111000.0 * cos(center.latitude * .pi / 180.0))
+        let latitudeDelta = radiusMeters / 111_000.0
+        let longitudeDelta = radiusMeters / (111_000.0 * cos(center.latitude * .pi / 180.0))
         
         let southWest = NMGLatLng(
             lat: center.latitude - latitudeDelta,
@@ -174,8 +173,7 @@ enum NaverMapOverlayManager {
     }
 }
 
-final class GradientImageGenerator {
-    
+enum GradientImageGenerator {
     struct GradientStop {
         let color: UIColor
         let location: CGFloat
@@ -236,8 +234,8 @@ final class GradientImageGenerator {
         
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         
-        let colors = stops.map { $0.color.cgColor } as CFArray
-        let locations = stops.map { $0.location }
+        let colors = stops.map(\.color.cgColor) as CFArray
+        let locations = stops.map(\.location)
         
         return CGGradient(
             colorsSpace: colorSpace,

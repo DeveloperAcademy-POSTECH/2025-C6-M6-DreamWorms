@@ -24,7 +24,6 @@ enum LocalSearchService {
     /// - Returns: 검색 결과 배열
     /// - Throws: LocalSearchError 또는 네트워크 에러
     static func search(query: String) async throws -> [LocalSearchResult] {
-        
         let parameters: [String: String] = [
             "query": query,
             "display": "10",
@@ -34,7 +33,6 @@ enum LocalSearchService {
             NetworkConstant.NaverSearchAPIHeaderKey.clientID: Config.naverSearchClientID,
             NetworkConstant.NaverSearchAPIHeaderKey.clientSecret: Config.naverSearchClientSecret,
         ]
-        
         
         do {
             let response = try await AF.request(
@@ -46,18 +44,15 @@ enum LocalSearchService {
             .serializingDecodable(SearchResponse.self)
             .value
             
-            
             let results = response.items.map { item in
                 let mapx = Double(item.mapx) ?? 0
                 let mapy = Double(item.mapy) ?? 0
-                
                 
                 // 네이버 API는 1000만분의 1 단위로 좌표 제공
                 let coordinate = CLLocationCoordinate2D(
                     latitude: mapy / 10_000_000.0, // mapy가 위도
                     longitude: mapx / 10_000_000.0 // mapx가 경도
                 )
-                
                 
                 return LocalSearchResult(
                     title: item.title.replacingOccurrences(of: "<[^>]+>", with: "", options: String.CompareOptions.regularExpression),

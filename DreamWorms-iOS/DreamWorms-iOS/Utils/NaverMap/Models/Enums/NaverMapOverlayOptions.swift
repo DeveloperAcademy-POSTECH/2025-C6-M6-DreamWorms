@@ -39,48 +39,47 @@ public enum RadiusPreset: Double, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .small:
-            return "500m"
+            "500m"
         case .medium:
-            return "1km"
+            "1km"
         case .large:
-            return "1.5km"
+            "1.5km"
         }
     }
     
     var color: UIColor {
         switch self {
         case .small:
-            return .mainBlue
+            .mainBlue
         case .medium:
-            return .mainBlue
+            .mainBlue
         case .large:
-            return .mainBlue
+            .mainBlue
         }
     }
     
     var fillAlpha: Double {
         switch self {
         case .small:
-            return 0.25
+            0.25
         case .medium:
-            return 0.15
+            0.15
         case .large:
-            return 0.10
+            0.10
         }
     }
     
     var strokeAlpha: Double {
         switch self {
         case .small:
-            return 0.6
+            0.6
         case .medium:
-            return 0.5
+            0.5
         case .large:
-            return 0.4
+            0.4
         }
     }
 }
-
 
 public enum RadiusStyle: String, Codable, Sendable {
     case gradient

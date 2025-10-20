@@ -1,5 +1,5 @@
 //
-//  AssociatedKeys.swift
+//  NaverMapCoordinator+.swift
 //  DreamWorms-iOS
 //
 //  Created by taeni on 10/20/25.
@@ -9,7 +9,6 @@ import Foundation
 import NMapsMap
 
 extension NaverMapCoordinator {
-    
     var groundOverlays: [NMFGroundOverlay] {
         get {
             if let overlays = objc_getAssociatedObject(self, &AssociatedKeys.groundOverlays) as? [NMFGroundOverlay] {
@@ -40,7 +39,7 @@ extension NaverMapCoordinator {
     
     var pathOverlay: NMFPath? {
         get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.pathOverlay) as? NMFPath
+            objc_getAssociatedObject(self, &AssociatedKeys.pathOverlay) as? NMFPath
         }
         set {
             objc_setAssociatedObject(self, &AssociatedKeys.pathOverlay, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -49,7 +48,7 @@ extension NaverMapCoordinator {
     
     var arrowPathOverlay: NMFArrowheadPath? {
         get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.arrowPathOverlay) as? NMFArrowheadPath
+            objc_getAssociatedObject(self, &AssociatedKeys.arrowPathOverlay) as? NMFArrowheadPath
         }
         set {
             objc_setAssociatedObject(self, &AssociatedKeys.arrowPathOverlay, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -80,7 +79,7 @@ extension NaverMapCoordinator {
     }
 }
 
-private struct AssociatedKeys {
+private enum AssociatedKeys {
     static var groundOverlays: UInt8 = 0
     static var circleOverlays: UInt8 = 1
     static var pathOverlay: UInt8 = 2

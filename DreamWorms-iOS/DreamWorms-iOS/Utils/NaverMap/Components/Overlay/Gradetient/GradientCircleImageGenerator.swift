@@ -5,11 +5,10 @@
 //  Created by taeni on 10/20/25.
 //
 
-import UIKit
 import CoreGraphics
+import UIKit
 
-final class GradientCircleImageGenerator {
-    
+enum GradientCircleImageGenerator {
     struct GradientStyle {
         let centerColor: UIColor
         let edgeColor: UIColor
@@ -82,7 +81,8 @@ final class GradientCircleImageGenerator {
         let edgeColorWithAlpha = style.edgeColor.withAlphaComponent(style.edgeAlpha)
         
         guard let centerCGColor = centerColorWithAlpha.cgColor as CGColor?,
-              let edgeCGColor = edgeColorWithAlpha.cgColor as CGColor? else {
+              let edgeCGColor = edgeColorWithAlpha.cgColor as CGColor?
+        else {
             return nil
         }
         

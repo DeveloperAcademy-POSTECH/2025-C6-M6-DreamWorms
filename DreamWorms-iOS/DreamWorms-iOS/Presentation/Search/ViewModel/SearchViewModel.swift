@@ -35,7 +35,6 @@ final class SearchViewModel: ObservableObject {
     }
     
     func performSearch(query: String) async {
-        
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
             errorMessage = nil

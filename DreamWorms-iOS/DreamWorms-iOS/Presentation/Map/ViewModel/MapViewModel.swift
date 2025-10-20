@@ -36,7 +36,7 @@ final class MapViewModel: ObservableObject {
     
     //     TODO: 실 데이터 연동
     func loadLocations() {
-        guard let modelContext = modelContext else {
+        guard let modelContext else {
             print("ModelContext not set")
             return
         }
@@ -45,7 +45,7 @@ final class MapViewModel: ObservableObject {
             predicate: #Predicate { location in
                 //                    location.pinType == .telecom &&
                 location.latitude != nil &&
-                location.longitude != nil
+                    location.longitude != nil
             },
             sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
         )
@@ -56,7 +56,8 @@ final class MapViewModel: ObservableObject {
             
             locations = caseLocations.compactMap { location in
                 guard let lat = location.latitude,
-                      let lng = location.longitude else {
+                      let lng = location.longitude
+                else {
                     return nil
                 }
                 
@@ -102,11 +103,11 @@ final class MapViewModel: ObservableObject {
         var allLocations: [NaverMapLocationData] = []
         
         // 1. 실제 데이터 로드
-        if let modelContext = modelContext {
+        if let modelContext {
             let descriptor = FetchDescriptor<CaseLocation>(
                 predicate: #Predicate { location in
                     location.latitude != nil &&
-                    location.longitude != nil
+                        location.longitude != nil
                 },
                 sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
             )
@@ -117,7 +118,8 @@ final class MapViewModel: ObservableObject {
                 
                 let realLocations = caseLocations.compactMap { location -> NaverMapLocationData? in
                     guard let lat = location.latitude,
-                          let lng = location.longitude else {
+                          let lng = location.longitude
+                    else {
                         return nil
                     }
                     
@@ -185,7 +187,7 @@ final class MapViewModel: ObservableObject {
             }
             
             guard locationService.authorizationStatus == .authorizedWhenInUse ||
-                    locationService.authorizationStatus == .authorizedAlways
+                locationService.authorizationStatus == .authorizedAlways
             else {
                 print("위치 권한이 없습니다")
                 return
