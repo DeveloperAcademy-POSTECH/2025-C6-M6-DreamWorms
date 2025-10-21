@@ -37,6 +37,12 @@ struct AppRootView: View {
                         moduleFactory.makeMapView(selectedCase: selectedCase)
                     case .search:
                         moduleFactory.makeSearchView()
+                    case .reportRecognition:
+                        if #available(iOS 18.0, *) {
+                            moduleFactory.makeReportRecognitionView()
+                        } else {
+                            ContentView()
+                        }
                     }
                 }
         }

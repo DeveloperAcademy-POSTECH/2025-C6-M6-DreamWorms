@@ -13,7 +13,7 @@ struct MapView: View {
     
     @StateObject private var viewModel = MapViewModel()
     
-    // ✅ 전체 데이터 감지용 (변경 감지만 사용)
+    // 전체 데이터 감지용 (변경 감지만 사용)
     @Query(sort: \CaseLocation.receivedAt, order: .reverse)
     private var allCaseLocations: [CaseLocation]
     
@@ -22,14 +22,14 @@ struct MapView: View {
     @State private var showEvidenceBottomSheet: Bool = true
     @State private var evidenceDetent: PresentationDetent = .small
     
-    // ✅ Case의 locations를 직접 사용
+    // Case의 locations를 직접 사용
     private var filteredLocations: [CaseLocation] {
         selectedCase.locations
             .filter { $0.latitude != nil && $0.longitude != nil }
             .sorted { $0.receivedAt > $1.receivedAt }
     }
     
-    // ✅ 실시간 체류 정보
+    // 실시간 체류 정보
     private var locationStays: [LocationStay] {
         LocationStay.groupByConsecutiveLocation(from: filteredLocations)
     }
@@ -73,7 +73,11 @@ struct MapView: View {
                 isClusteringEnabled: viewModel.clusteringEnabled,
                 onToggleFrequency: { viewModel.toggleFrequencyMode() },
                 onToggleCircle: { viewModel.toggleCircleOverlay() },
-                onRefresh: { viewModel.refreshData() }
+                onRefresh: { viewModel.refreshData() },
+                onCamera: {
+                    showEvidenceBottomSheet = false
+                    coordinator.push(.reportRecognition)
+                }
             )
 
             DWCircleToggleButton(
@@ -91,7 +95,7 @@ struct MapView: View {
             viewModel.setModelContext(modelContext)
             showEvidenceBottomSheet = true
             
-            // ✅ 디버깅
+            // 디버깅
             print("\n📋 MapView onAppear")
             print("   - Selected Case: \(selectedCase.name) (ID: \(selectedCase.id))")
             print("   - Direct locations: \(selectedCase.locations.count)")
@@ -101,9 +105,12 @@ struct MapView: View {
             // 초기 로드
             viewModel.updateLocations(with: filteredLocations)
         }
-        // ✅ 전체 데이터 변경 감지 → Case의 locations 다시 로드
+        .onDisappear {
+            showEvidenceBottomSheet = false
+        }
+        // 전체 데이터 변경 감지 → Case의 locations 다시 로드
         .onChange(of: allCaseLocations.count) { oldCount, newCount in
-            print("\n🔄 Data changed: \(oldCount) → \(newCount)")
+            print("\nData changed: \(oldCount) → \(newCount)")
             print("   - Filtered count: \(filteredLocations.count)")
             
             // ViewModel 업데이트

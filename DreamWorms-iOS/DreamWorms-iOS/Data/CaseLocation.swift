@@ -36,7 +36,8 @@ final class CaseLocation {
     }
 }
 
-enum PinType: String, Codable {
+public enum PinType: String, Codable {
     case telecom
     case custom
+    case report
 }

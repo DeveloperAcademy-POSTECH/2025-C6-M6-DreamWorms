@@ -42,23 +42,27 @@ public struct NaverMapMarkerManager {
     }
     
     private static func configureMarkerIcon(_ marker: NMFMarker, data: NaverMapMarkerData) {
+        let style: (symbol: String, bg: UIColor, stroke: UIColor) = switch data.pinType {
+        case .telecom, .custom:
+            ("dot.radiowaves.left.and.right", UIColor.mainBlue, UIColor.white)
+        case .report:
+            ("pin", UIColor.mainRed, UIColor.white)
+        }
+        
         let iconType: MarkerIconType = switch data.markerType {
         case .frequency:
             .number(
                 data.frequency,
                 textColor: .white,
-                background: .mainBlue,
-                stroke: .white
+                background: style.bg,
+                stroke: style.stroke
             )
-            
-        // TODO: SF Symbol 변수 타입 처리 필요
-        // 위치 정보의 타입에 따라 값을 가져오게 추후 변경
         case .uniqueLocations, .timeSequence, .flow:
             .symbol(
-                name: "dot.radiowaves.left.and.right",
+                name: style.symbol,
                 color: .white,
-                background: .mainBlue,
-                stroke: .white,
+                background: style.bg,
+                stroke: style.stroke,
                 width: 16,
                 height: 13
             )

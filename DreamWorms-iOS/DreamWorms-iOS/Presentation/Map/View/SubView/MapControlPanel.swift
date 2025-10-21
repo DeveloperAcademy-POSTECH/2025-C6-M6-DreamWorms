@@ -15,6 +15,7 @@ struct MapControlPanel: View {
     var onToggleFrequency: () -> Void
     var onToggleCircle: () -> Void
     var onRefresh: () -> Void
+    var onCamera: () -> Void
 
     var body: some View {
         VStack {
@@ -35,6 +36,15 @@ struct MapControlPanel: View {
                 isOn: .constant(false),
                 action: onRefresh
             )
+            
+            Spacer()
+            
+            DWCircleToggleButton(
+                title: "카메라",
+                isOn: .constant(true),
+                action: onCamera
+            )
+            .padding(.bottom, 200)
         }
         .padding(.top, 124)
         .padding(.trailing, 16)

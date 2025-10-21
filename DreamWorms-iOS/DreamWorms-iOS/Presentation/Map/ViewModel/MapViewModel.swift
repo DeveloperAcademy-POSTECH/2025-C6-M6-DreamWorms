@@ -73,6 +73,7 @@ final class MapViewModel: ObservableObject {
                     longitude: lng
                 ),
                 timestamp: location.receivedAt,
+                pinType: location.pinType,
                 address: location.address ?? "위치",
                 additionalInfo: [:]
             )
@@ -94,6 +95,7 @@ final class MapViewModel: ObservableObject {
                 id: UUID(),
                 coordinate: mock.coordinate,
                 timestamp: mock.timestamp,
+                pinType: .custom,
                 address: mock.location,
                 additionalInfo: [:]
             )
@@ -135,6 +137,7 @@ final class MapViewModel: ObservableObject {
                             longitude: lng
                         ),
                         timestamp: location.receivedAt,
+                        pinType: location.pinType,
                         address: location.address ?? "위치",
                         additionalInfo: [:]
                     )
@@ -153,6 +156,7 @@ final class MapViewModel: ObservableObject {
                 id: UUID(),
                 coordinate: mock.coordinate,
                 timestamp: mock.timestamp,
+                pinType: .custom,
                 address: mock.location,
                 additionalInfo: [:]
             )
@@ -237,6 +241,7 @@ final class MapViewModel: ObservableObject {
                     longitude: lng
                 ),
                 timestamp: location.receivedAt,
+                pinType: location.pinType,
                 address: location.address ?? "위치",
                 additionalInfo: [:]
             )

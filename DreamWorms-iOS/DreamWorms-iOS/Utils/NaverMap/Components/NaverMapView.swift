@@ -157,7 +157,8 @@ public struct NaverMapView: UIViewRepresentable {
                 coordinate: location.coordinate,
                 title: location.address.isEmpty ? "위치" : location.address,
                 subtitle: location.formattedTimestamp,
-                markerType: .uniqueLocations
+                markerType: .uniqueLocations,
+                pinType: location.pinType
             )
         }
     }
@@ -179,7 +180,8 @@ public struct NaverMapView: UIViewRepresentable {
                 coordinate: item.location.coordinate,
                 title: item.location.address.isEmpty ? "위치" : item.location.address,
                 frequency: item.count,
-                markerType: .frequency
+                markerType: .frequency,
+                pinType: item.location.pinType
             )
         }
     }

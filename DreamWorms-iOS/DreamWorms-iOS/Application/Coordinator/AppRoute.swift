@@ -12,6 +12,7 @@ enum AppRoute: Hashable {
     case caseAdd
     case map(selectedCase: Case)
     case search
+    case reportRecognition
 }
 
 // TODO: - 만약 Case 타이틀이랑 겹치는것이 있다는 가정하에 id로 구분지을려면 TODO해야함

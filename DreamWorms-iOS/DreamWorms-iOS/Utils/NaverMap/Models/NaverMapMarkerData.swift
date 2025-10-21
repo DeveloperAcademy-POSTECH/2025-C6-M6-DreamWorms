@@ -17,6 +17,7 @@ public struct NaverMapMarkerData: Identifiable, Sendable {
     public let groupIndex: Int?
     public let markerType: NaverMapDisplayMode
     public let timestamp: Date
+    public let pinType: PinType
     
     public init(
         id: UUID = UUID(),
@@ -26,7 +27,8 @@ public struct NaverMapMarkerData: Identifiable, Sendable {
         frequency: Int = 1,
         groupIndex: Int? = nil,
         markerType: NaverMapDisplayMode = .uniqueLocations,
-        timestamp: Date = Date()
+        timestamp: Date = Date(),
+        pinType: PinType = .custom
     ) {
         self.id = id
         self.coordinate = coordinate
@@ -36,6 +38,7 @@ public struct NaverMapMarkerData: Identifiable, Sendable {
         self.groupIndex = groupIndex
         self.markerType = markerType
         self.timestamp = timestamp
+        self.pinType = pinType
     }
 }
 

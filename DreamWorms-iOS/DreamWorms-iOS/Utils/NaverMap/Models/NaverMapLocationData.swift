@@ -14,6 +14,7 @@ public struct NaverMapLocationData: Identifiable, Sendable {
     public let id: UUID
     public let coordinate: CLLocationCoordinate2D
     public let timestamp: Date
+    public let pinType: PinType
     public let address: String
     public let additionalInfo: [String: String]
     
@@ -21,12 +22,14 @@ public struct NaverMapLocationData: Identifiable, Sendable {
         id: UUID = UUID(),
         coordinate: CLLocationCoordinate2D,
         timestamp: Date = Date(),
+        pinType: PinType,
         address: String = "",
         additionalInfo: [String: String] = [:]
     ) {
         self.id = id
         self.coordinate = coordinate
         self.timestamp = timestamp
+        self.pinType = pinType
         self.address = address
         self.additionalInfo = additionalInfo
     }

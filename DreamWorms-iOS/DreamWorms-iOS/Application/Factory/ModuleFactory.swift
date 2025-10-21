@@ -12,6 +12,9 @@ protocol ModuleFactoryProtocol {
     func makeCaseAddView() -> CaseAddView
     func makeMapView(selectedCase: Case) -> MapView
     func makeSearchView() -> SearchView
+    
+    @available(iOS 18.0, *)
+    func makeReportRecognitionView() -> ReportRecognitionView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
@@ -35,6 +38,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
     
     func makeSearchView() -> SearchView {
         let view = SearchView()
+        return view
+    }
+    
+    @available(iOS 18.0, *)
+    func makeReportRecognitionView() -> ReportRecognitionView {
+        let view = ReportRecognitionView()
         return view
     }
 }

@@ -38,7 +38,8 @@ struct MockMapView: View {
                 isClusteringEnabled: viewModel.clusteringEnabled,
                 onToggleFrequency: { viewModel.toggleFrequencyMode() },
                 onToggleCircle: { viewModel.toggleCircleOverlay() },
-                onRefresh: { viewModel.refreshData() }
+                onRefresh: { viewModel.refreshData() },
+                onCamera: {}
             )
             
             // 토글 기능이 없는 버튼임
