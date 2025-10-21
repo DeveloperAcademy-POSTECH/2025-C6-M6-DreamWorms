@@ -39,13 +39,13 @@ struct CaseListView: View {
             
             ScrollView {
                 VStack(spacing: 12) {
-                    ForEach(cases) { item in
+                    ForEach(cases) { selectedCase in
                         Button {
-                            coordinator.push(.map)
+                            coordinator.push(.map(selectedCase: selectedCase))
                         } label: {
                             // TODO: - 모델 연결이후, 수정하기 삭제하기 작업 추가
                             CaseCard(
-                                item: item,
+                                item: selectedCase,
                                 onEdit: {},
                                 onDelete: {}
                             )

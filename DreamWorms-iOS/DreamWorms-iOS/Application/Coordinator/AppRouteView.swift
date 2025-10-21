@@ -33,8 +33,8 @@ struct AppRootView: View {
                         moduleFactory.makeCaseListView()
                     case .caseAdd:
                         moduleFactory.makeCaseAddView()
-                    case .map:
-                        moduleFactory.makeMapView()
+                    case let .map(selectedCase):
+                        moduleFactory.makeMapView(selectedCase: selectedCase)
                     case .search:
                         moduleFactory.makeSearchView()
                     }

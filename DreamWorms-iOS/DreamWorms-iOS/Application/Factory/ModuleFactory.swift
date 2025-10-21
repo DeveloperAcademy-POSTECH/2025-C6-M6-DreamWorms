@@ -10,7 +10,7 @@ import SwiftUI
 protocol ModuleFactoryProtocol {
     func makeCaseListView() -> CaseListView
     func makeCaseAddView() -> CaseAddView
-    func makeMapView() -> MapView
+    func makeMapView(selectedCase: Case) -> MapView
     func makeSearchView() -> SearchView
 }
 
@@ -28,8 +28,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeMapView() -> MapView {
-        let view = MapView()
+    func makeMapView(selectedCase: Case) -> MapView {
+        let view = MapView(selectedCase: selectedCase)
         return view
     }
     

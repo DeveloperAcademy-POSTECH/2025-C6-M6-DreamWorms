@@ -23,7 +23,11 @@ final class MapViewModel: ObservableObject {
     @Published var positionMode: NMFMyPositionMode = .normal
     
     @Published var currentCase: Case?
-    @Published var caseLocation: [CaseLocation] = []
+    @Published var caseLocations: [CaseLocation] = []
+    
+    // 위치별 체류 정보
+    @Published var locationStays: [LocationStay] = []
+    
     // 검색 결과 바텀시트 관련
     @Published var selectedSearchResult: LocalSearchResult?
     @Published var showSearchResultSheet = false
@@ -36,50 +40,49 @@ final class MapViewModel: ObservableObject {
         modelContext = context
     }
     
-    //     TODO: 실 데이터 연동
-    func loadLocations() {
+    // ✅ 수정된 메서드
+    func loadLocations(for selectedCase: Case) {
         guard let modelContext else {
-            print("ModelContext not set")
+            print("❌ ModelContext not set")
             return
         }
-        
-        let descriptor = FetchDescriptor<CaseLocation>(
-            predicate: #Predicate { location in
-                //                    location.pinType == .telecom &&
-                location.latitude != nil &&
-                    location.longitude != nil
-            },
-            sortBy: [SortDescriptor(\.receivedAt, order: .reverse)]
-        )
-        
-        do {
-            let caseLocations = try modelContext.fetch(descriptor)
-            print("Loaded \(caseLocations.count) telecom locations")
-            
-            locations = caseLocations.compactMap { location in
-                guard let lat = location.latitude,
-                      let lng = location.longitude
-                else {
-                    return nil
-                }
-                
-                return NaverMapLocationData(
-                    id: location.id,
-                    coordinate: CLLocationCoordinate2D(
-                        latitude: lat,
-                        longitude: lng
-                    ),
-                    timestamp: location.receivedAt,
-                    address: location.address ?? "위치",
-                    additionalInfo: [:]
-                )
+          
+        currentCase = selectedCase
+          
+        // ✅ Case의 locations 관계를 직접 사용
+        let fetchedLocations = selectedCase.locations
+            .filter { $0.latitude != nil && $0.longitude != nil }
+            .sorted { $0.receivedAt > $1.receivedAt }
+          
+        print("✅ Loaded \(fetchedLocations.count) locations for case: \(selectedCase.name)")
+          
+        caseLocations = fetchedLocations
+          
+        // 지도 마커 데이터
+        locations = fetchedLocations.compactMap { location in
+            guard let lat = location.latitude,
+                  let lng = location.longitude
+            else {
+                return nil
             }
-            
-            moveCameraToLatestMarker()
-            
-        } catch {
-            print("Failed to fetch locations: \(error)")
+              
+            return NaverMapLocationData(
+                id: location.id,
+                coordinate: CLLocationCoordinate2D(
+                    latitude: lat,
+                    longitude: lng
+                ),
+                timestamp: location.receivedAt,
+                address: location.address ?? "위치",
+                additionalInfo: [:]
+            )
         }
+          
+        // 체류 정보 생성
+        locationStays = LocationStay.groupByConsecutiveLocation(from: fetchedLocations)
+        print("✅ 생성된 체류 정보: \(locationStays.count)개")
+          
+        moveCameraToLatestMarker()
     }
     
     // Mock json 파일 데이터
@@ -176,6 +179,12 @@ final class MapViewModel: ObservableObject {
     
     func refreshData() {
         //        loadLocations()
+        
+        // 실시간 업데이트
+        
+        if let currentCase {
+            loadLocations(for: currentCase)
+        }
         moveCameraToLatestMarker()
         print("Data refreshed")
     }
@@ -206,6 +215,43 @@ final class MapViewModel: ObservableObject {
                 // TODO: 에러처리 필요
                 print("위치 가져오기 실패: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    // ✅ 새로 추가: 외부에서 locations 업데이트
+    func updateLocations(with caseLocations: [CaseLocation]) {
+        self.caseLocations = caseLocations
+           
+        // 지도 마커 데이터
+        locations = caseLocations.compactMap { location in
+            guard let lat = location.latitude,
+                  let lng = location.longitude
+            else {
+                return nil
+            }
+               
+            return NaverMapLocationData(
+                id: location.id,
+                coordinate: CLLocationCoordinate2D(
+                    latitude: lat,
+                    longitude: lng
+                ),
+                timestamp: location.receivedAt,
+                address: location.address ?? "위치",
+                additionalInfo: [:]
+            )
+        }
+           
+        // 체류 정보 생성
+        locationStays = LocationStay.groupByConsecutiveLocation(from: caseLocations)
+           
+        print("✅ Updated locations:")
+        print("   - Map markers: \(locations.count)")
+        print("   - Location stays: \(locationStays.count)")
+           
+        // 카메라 이동 (새 데이터가 있을 때만)
+        if !locations.isEmpty {
+            moveCameraToLatestMarker()
         }
     }
     

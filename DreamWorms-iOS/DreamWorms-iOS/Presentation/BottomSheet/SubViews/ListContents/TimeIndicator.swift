@@ -71,6 +71,7 @@ private struct TimeRangeText: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a"
         formatter.locale = Locale(identifier: "en_US")
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         return formatter.string(from: date).uppercased()
     }
 }

@@ -8,7 +8,8 @@ struct EvidenceBottomSheet: View {
     // 화면에 표시할 데이터
     let selectedCase: Case
     let totalLocationCount: Int
-    let evidences: [Evidence]
+    let locationStays: [LocationStay]
+//    let evidences: [Evidence]
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -36,7 +37,7 @@ struct EvidenceBottomSheet: View {
                     DateFilterBar()
                     Divider()
 
-                    EvidenceList(evidences: evidences)
+                    LocationStayList(locationStays: locationStays)
                 }
             }
         }
@@ -49,8 +50,8 @@ struct EvidenceBottomSheet: View {
     EvidenceBottomSheet(
         currentDetent: .constant(.small),
         selectedCase: Case(name: "베트콩 소탕", number: "2024-001", suspectName: "왕꿈틀"),
-        totalLocationCount: 27,
-        evidences: Evidence.mockData
+        totalLocationCount: 5,
+        locationStays: []
     )
 }
 
@@ -58,16 +59,7 @@ struct EvidenceBottomSheet: View {
     EvidenceBottomSheet(
         currentDetent: .constant(.medium),
         selectedCase: Case(name: "베트콩 소탕", number: "2024-001", suspectName: "왕꿈틀"),
-        totalLocationCount: 39, // ✅ 실제 개수
-        evidences: Evidence.mockData // ✅ Mock 데이터 전달
-    )
-}
-
-#Preview("Large") {
-    EvidenceBottomSheet(
-        currentDetent: .constant(.large),
-        selectedCase: Case(name: "베트콩 소탕", number: "2024-001", suspectName: "왕꿈틀"),
-        totalLocationCount: 39, // ✅ 실제 개수
-        evidences: Evidence.mockData // ✅ Mock 데이터 전달
+        totalLocationCount: 5,
+        locationStays: [] // Mock 데이터는 실제 데이터로 대체
     )
 }
