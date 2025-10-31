@@ -73,5 +73,5 @@ extension DWCircleButton {
 }
 
 //#Preview {
-//    DWCircleButton(image: Image(systemName: SymbolLiterals.setting.rawValue), action: {})
+//    DWCircleButton(image: Image(.setting), action: {})
 //}

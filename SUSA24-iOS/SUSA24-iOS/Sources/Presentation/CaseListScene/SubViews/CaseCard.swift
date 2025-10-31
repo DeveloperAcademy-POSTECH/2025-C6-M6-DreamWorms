@@ -42,7 +42,7 @@ struct CaseCard: View {
 
             HStack {
                 HStack(spacing: 4) {
-                    Image(systemName: SymbolLiterals.person.rawValue)
+                    Image(.person)
                     Text(item.suspect)
                 }
                 .font(.bodyMedium12)
