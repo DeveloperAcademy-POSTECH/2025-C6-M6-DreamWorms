@@ -13,6 +13,18 @@
         }
       }
     },
+    "caseCard_number" : {
+      "comment" : "케이스 리스트_케이스 카드에 들어가는 숫자 표시",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "no. %1$(number)@"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
