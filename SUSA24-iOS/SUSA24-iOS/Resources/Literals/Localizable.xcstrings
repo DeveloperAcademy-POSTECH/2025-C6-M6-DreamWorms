@@ -1,0 +1,150 @@
+{
+  "sourceLanguage" : "ko",
+  "strings" : {
+    "analyze" : {
+      "comment" : "탭바_대시보드 뷰 이름",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "분석"
+          }
+        }
+      }
+    },
+    "map" : {
+      "comment" : "탭바_지도 뷰 이름",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도"
+          }
+        }
+      }
+    },
+    "summary" : {
+      "comment" : "탭바_원 페이지 뷰 이름",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "요약"
+          }
+        }
+      }
+    },
+    "test_Camera" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera View!"
+          }
+        }
+      }
+    },
+    "test_CaseAdd" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CaseAdd View!"
+          }
+        }
+      }
+    },
+    "test_CaseList" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CaseList View!"
+          }
+        }
+      }
+    },
+    "test_Dashboard" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dashboard View!"
+          }
+        }
+      }
+    },
+    "test_OnePage" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One Page View!"
+          }
+        }
+      }
+    },
+    "test_Search" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search View!"
+          }
+        }
+      }
+    },
+    "test_SelectLocation" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SelectLocation View!"
+          }
+        }
+      }
+    },
+    "test_Setting" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setting View!"
+          }
+        }
+      }
+    },
+    "test_Timeline" : {
+      "comment" : "⚠️지울내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Line View!"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
