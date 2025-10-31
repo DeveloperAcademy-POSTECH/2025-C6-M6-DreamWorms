@@ -11,4 +11,5 @@ enum SymbolLiterals: String {
     case map = "map"
     case analytics = "chart.pie"
     case people = "person.text.rectangle.fill"
+    case setting = "gearshape"
 }
