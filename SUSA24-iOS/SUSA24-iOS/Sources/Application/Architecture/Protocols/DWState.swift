@@ -7,4 +7,4 @@
 
 import Foundation
 
-public protocol DWState {} 
+public protocol DWState: Sendable {} 

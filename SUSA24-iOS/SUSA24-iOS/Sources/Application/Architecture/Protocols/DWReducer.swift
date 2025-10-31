@@ -8,6 +8,7 @@
 import Foundation
 
 /// 상태를 동기적으로 수정하고, 필요 시 비동기 사이드 이펙트를 반환하는 프로토콜입니다.
+@MainActor
 public protocol DWReducer {
     associatedtype State: DWState
     associatedtype Action: DWAction
