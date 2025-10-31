@@ -14,9 +14,10 @@ struct CaseListHeader: View {
         VStack(spacing: 20) {
             HStack {
                 Spacer()
-                DWCircleButton(image: Image(.setting)) {
-                    onSettingTapped()
-                }
+                DWCircleButton(
+                    image: Image(.setting),
+                    action: onSettingTapped
+                )
             }
             
             Text(.caseListNavigationTitle)

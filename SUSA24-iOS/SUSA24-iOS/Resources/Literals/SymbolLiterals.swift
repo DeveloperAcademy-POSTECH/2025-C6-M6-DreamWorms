@@ -13,6 +13,7 @@ enum SymbolLiterals: String {
     case people = "person.text.rectangle.fill"
     case setting = "gearshape"
     case person = "person.fill"
+    case plus = "plus"
 }
 
 extension Image {
