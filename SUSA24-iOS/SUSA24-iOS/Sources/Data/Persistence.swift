@@ -9,19 +9,33 @@ import CoreData
 
 struct PersistenceController {
     static let shared = PersistenceController()
+    static let preview = PersistenceController(inMemory: true)
     
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "SUSA24_iOS")
-        if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+        
+        let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+        if inMemory || isPreview {
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         }
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+
+        // 자동 마이그레이션 옵션
+        let desc = container.persistentStoreDescriptions.first
+        desc?.shouldMigrateStoreAutomatically = true
+        desc?.shouldInferMappingModelAutomatically = true
+
+        container.loadPersistentStores { _, error in
+            if let error {
+                #if DEBUG
+                assertionFailure("CoreData load error: \(error)")
+                #else
+                print("CoreData load error: \(error)")
+                #endif
             }
-        })
+        }
+
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
 }
