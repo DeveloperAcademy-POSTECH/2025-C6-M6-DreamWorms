@@ -12,15 +12,9 @@ struct CaseListView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
     
-    @Environment(\.managedObjectContext)
-    private var context
-    
     // MARK: - Dependencies
     
-    @State private var store = DWStore(
-        initialState: CaseListFeature.State(),
-        reducer: CaseListFeature()
-    )
+    @State var store: DWStore<CaseListFeature>
 
     // MARK: - Properties
 
@@ -40,7 +34,7 @@ struct CaseListView: View {
                             item: item,
                             onEdit: {},
                             onShare: {},
-                            onDelete: {}
+                            onDelete: { store.send(.deleteTapped(item: item)) }
                         )
                         .padding(.horizontal, 16)
                         .onTapGesture { coordinator.push(.mainTabScene) }
@@ -53,6 +47,9 @@ struct CaseListView: View {
             CaseListBottomFade(
                 onAddCaseTapped: { coordinator.push(.caseAddScene) }
             )
+        }
+        .onAppear {
+            store.send(.onAppear)
         }
         .ignoresSafeArea(edges: .bottom)
     }
@@ -68,7 +65,7 @@ private extension CaseListView {}
 
 // MARK: - Preview
 
-#Preview {
-    CaseListView()
-        .environment(AppCoordinator())
-}
+//#Preview {
+//    CaseListView()
+//        .environment(AppCoordinator())
+//}

@@ -5,12 +5,13 @@
 //  Created by mini on 10/29/25.
 //
 
+import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
     func makeCameraView() -> CameraView
     func makeCaseAddView() -> CaseAddView
-    func makeCaseListView() -> CaseListView
+    func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView() -> DashboardView
     func makeMainTabView() -> MainTabView
     func makeMapView() -> MapView
@@ -35,8 +36,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeCaseListView() -> CaseListView {
-        let view = CaseListView()
+    func makeCaseListView(context: NSManagedObjectContext) -> CaseListView {
+        let repository = CaseRepository(context: context)
+        let store = DWStore(
+            initialState: CaseListFeature.State(),
+            reducer: CaseListFeature(repository: repository))
+        let view = CaseListView(store: store)
         return view
     }
     

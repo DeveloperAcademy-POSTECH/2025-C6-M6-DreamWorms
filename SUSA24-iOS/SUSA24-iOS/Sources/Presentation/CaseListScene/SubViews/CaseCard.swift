@@ -25,7 +25,7 @@ struct CaseCard: View {
                         .foregroundStyle(.gray)
 
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(item.title)
+                        Text(item.name)
                             .font(.titleSemiBold18)
                             .foregroundStyle(.labelNormal)
                         Text(item.crime)

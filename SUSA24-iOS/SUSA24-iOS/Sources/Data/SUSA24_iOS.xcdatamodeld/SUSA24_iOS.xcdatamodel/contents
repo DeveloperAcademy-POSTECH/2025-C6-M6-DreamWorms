@@ -4,7 +4,7 @@
         <attribute name="crime" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="number" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="number" attributeType="String"/>
         <relationship name="suspects" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SuspectEntity" inverseName="relateCase" inverseEntity="SuspectEntity"/>
     </entity>
     <entity name="LocationEntity" representedClassName="LocationEntity" syncable="YES" codeGenerationType="class">

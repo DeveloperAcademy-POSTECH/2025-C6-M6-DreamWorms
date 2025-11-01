@@ -30,4 +30,10 @@ public struct DWEffect<Action: DWAction>: Sendable {
             downstream(action)
         }
     }
+    
+    public static func task(_ work: @escaping @Sendable () async -> Action?) -> Self {
+        .init { downstream in
+            if let a = await work() { downstream(a) }
+        }
+    }
 }
