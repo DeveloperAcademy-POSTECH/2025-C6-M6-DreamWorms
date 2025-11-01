@@ -14,6 +14,9 @@ enum SymbolLiterals: String {
     case setting = "gearshape"
     case person = "person.fill"
     case plus = "plus"
+    case edit = "pencil"
+    case share = "square.and.arrow.up"
+    case delete = "trash"
 }
 
 extension Image {

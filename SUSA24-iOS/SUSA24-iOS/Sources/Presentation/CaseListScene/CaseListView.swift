@@ -12,6 +12,9 @@ struct CaseListView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
     
+    @Environment(\.managedObjectContext)
+    private var context
+    
     // MARK: - Dependencies
     
     @State private var store = DWStore(
@@ -24,10 +27,34 @@ struct CaseListView: View {
     // MARK: - View
 
     var body: some View {
-        Text(.testCaseList)
-            .onTapGesture {
-                coordinator.push(.mainTabScene)
+        VStack {
+            CaseListHeader(
+                onSettingTapped: { coordinator.push(.settingScene) }
+            )
+            .padding(.bottom, 24)
+            
+            ScrollView {
+                VStack(spacing: 12) {
+                    ForEach(store.state.cases) { item in
+                        CaseCard(
+                            item: item,
+                            onEdit: {},
+                            onShare: {},
+                            onDelete: {}
+                        )
+                        .padding(.horizontal, 16)
+                        .onTapGesture { coordinator.push(.mainTabScene) }
+                    }
+                }
+                .padding(.bottom, 90)
             }
+        }
+        .overlay(alignment: .bottom) {
+            CaseListBottomFade(
+                onAddCaseTapped: { coordinator.push(.caseAddScene) }
+            )
+        }
+        .ignoresSafeArea(edges: .bottom)
     }
 }
 

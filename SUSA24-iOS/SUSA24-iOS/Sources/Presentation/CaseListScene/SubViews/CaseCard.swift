@@ -9,6 +9,12 @@ import SwiftUI
 
 struct CaseCard: View {
     let item: Case
+    
+    let onEdit: () -> Void
+    let onShare: () -> Void
+    let onDelete: () -> Void
+    
+    @State private var showMenu = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -53,10 +59,41 @@ struct CaseCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 4))
 
                 Spacer()
-
-                Image(.icnMore)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
+                
+                Menu {
+                    Button {
+                        onEdit()
+                    } label: {
+                        Label(
+                            String(localized: .buttonEdit),
+                            systemImage: SymbolLiterals.edit.rawValue
+                        )
+                    }
+                    
+                    Button {
+                        onShare()
+                    } label: {
+                        Label(
+                            String(localized: .buttonShare),
+                            systemImage: SymbolLiterals.share.rawValue
+                        )
+                    }
+                    
+                    Button(role: .destructive) {
+                        onDelete()
+                    } label: {
+                        Label(
+                            String(localized: .buttonDelete),
+                            systemImage: SymbolLiterals.delete.rawValue
+                        )
+                    }
+                } label: {
+                    Image(.icnMore)
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                        .contentShape(Rectangle())
+                }
+                .menuActionDismissBehavior(.automatic)
             }
         }
         .padding(.vertical, 12)
@@ -80,6 +117,8 @@ struct CaseCard: View {
 //            title: "사건명",
 //            crime: "범죄유형",
 //            suspect: "피의자명"
-//        ))
+//        ),
+//        onEdit: {}, onShare: {}, onDelete: {}
+//    )
 //    .padding(.horizontal, 16)
 //}
