@@ -24,6 +24,7 @@
     <entity name="SuspectEntity" representedClassName="SuspectEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
+        <attribute name="phoneNumber" optional="YES" attributeType="String"/>
         <attribute name="profileImage" optional="YES" attributeType="String"/>
         <relationship name="locations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LocationEntity" inverseName="suspect" inverseEntity="LocationEntity"/>
         <relationship name="relateCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CaseEntity" inverseName="suspects" inverseEntity="CaseEntity"/>
