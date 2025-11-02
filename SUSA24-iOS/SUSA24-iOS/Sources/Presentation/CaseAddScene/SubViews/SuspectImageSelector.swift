@@ -23,7 +23,10 @@ struct SuspectImageSelector: View {
             } else {
                 Circle()
                     .frame(width: 100, height: 100)
-                    .overlay(Image(.imgProfile))
+                    .overlay(
+                        Image(.imgProfile)
+                            .overlay(Circle().stroke(.gray.opacity(0.3), lineWidth: 1))
+                    )
             }
 
             Button(action: onTap) {
@@ -34,7 +37,7 @@ struct SuspectImageSelector: View {
                     .background(Circle().fill(.white))
                     .overlay(Circle().stroke(Color.mainAlternative, lineWidth: 1))
             }
-            .offset(x: 12, y: 12)
+            .offset(x: 16, y: 16)
         }
     }
 }
