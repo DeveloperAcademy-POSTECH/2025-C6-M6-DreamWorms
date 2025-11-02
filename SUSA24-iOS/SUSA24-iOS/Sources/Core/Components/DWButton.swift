@@ -50,7 +50,7 @@ struct DWButton: View {
             .foregroundStyle(.white)
         }
         .disabled(!isEnabled)
-        .glassEffect(.regular.tint(backgroundColor))
+        .glassEffect(.regular.tint(isEnabled ? backgroundColor : .labelAlternative))
         .glassEffect(isInteractiveEffect ? .regular.interactive() : .regular)
     }
 }

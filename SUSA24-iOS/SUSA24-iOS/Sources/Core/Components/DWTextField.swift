@@ -19,22 +19,45 @@ enum DWTextFieldState: Equatable {
         case .error: .pointRed3
         }
     }
+    
+    var isError: Bool {
+        if case .error = self { return true }
+        return false
+    }
 }
 
 // MARK: - View
 
-struct DWTextField: View {
+struct DWTextField<Field: Hashable>: View {
     @Binding var text: String
-    @FocusState private var isFocused: Bool
     
-    var state: DWTextFieldState = .normal
+    let field: Field
+    let externalFocus: FocusState<Field?>.Binding?
+    @FocusState private var internalFocus: Field?
+    
     var title: String?
     var placeholder: String?
+    var errorMessage: String? = nil
     
     var contentPadding: EdgeInsets = .init(top: 18, leading: 20, bottom: 18, trailing: 12)
     var keyboard: UIKeyboardType = .default
     var submitLabel: SubmitLabel = .done
     var onSubmit: (() -> Void)? = nil
+    
+    private var focus: FocusState<Field?>.Binding {
+        externalFocus ?? $internalFocus
+    }
+    
+    private var isFocused: Bool {
+        focus.wrappedValue == field
+    }
+    
+    private var currentState: DWTextFieldState {
+        if let errorMessage, isFocused, text.isEmpty {
+            return .error(errorMessage)
+        }
+        return .normal
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -45,11 +68,10 @@ struct DWTextField: View {
             }
             
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .fill(.mainAlternative)
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(state.borderColor, lineWidth: 1)
-                    .animation(.default, value: state)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(currentState.borderColor, lineWidth: 1)
                 
                 HStack {
                     TextField(
@@ -59,7 +81,7 @@ struct DWTextField: View {
                             .foregroundColor(.labelAssistive)
                             .font(.bodyMedium14)
                     )
-                    .focused($isFocused)
+                    .focused(focus, equals: field)
                     .font(.bodyMedium14)
                     .foregroundStyle(.labelNormal)
                     .textInputAutocapitalization(.never)
@@ -87,7 +109,7 @@ struct DWTextField: View {
             .padding(.bottom, 2)
             
             Group {
-                switch state {
+                switch currentState {
                 case .error(let message):
                     HStack(alignment: .center, spacing: 6) {
                         Image(.warningCircle)
@@ -99,18 +121,18 @@ struct DWTextField: View {
                 }
             }
             .font(.captionRegular12)
-            .transition(.opacity)
         }
-        .animation(.default, value: text)
+        .frame(height: currentState.isError ? 104 : 82)
     }
 }
 
 extension DWTextField {
+    
     @discardableResult
-    func setupState(_ state: DWTextFieldState) -> Self {
-        var v = self; v.state = state; return v
+    func setupErrorMessage(_ message: String) -> Self {
+        var v = self; v.errorMessage = message; return v
     }
-
+    
     @discardableResult
     func setupPadding(_ insets: EdgeInsets) -> Self {
         var v = self; v.contentPadding = insets; return v
@@ -135,14 +157,14 @@ extension DWTextField {
 //            placeholder: "사건번호를 입력해 주세요."
 //        )
 //        .frame(height: 56)
-//        
+//
 //        DWTextField(
 //            text: .constant(""),
 //            title: "사건번호",
 //            placeholder: "사건번호를 입력해 주세요."
 //        )
 //        .frame(height: 82)
-//        
+//
 //        DWTextField(
 //            text: .constant("dsd"),
 //            state: .error("텍스트를 입력해 주세요."),
