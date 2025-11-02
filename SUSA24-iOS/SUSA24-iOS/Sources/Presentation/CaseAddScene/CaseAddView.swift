@@ -26,59 +26,67 @@ struct CaseAddView: View {
     // MARK: - View
     
     var body: some View {
-        VStack(spacing: 32) {
-            SuspectImageSelector(
-                image: .constant(nil),
-                onTap: { showPhotoDialog = true }
-            )
-            .confirmationDialog("", isPresented: $showPhotoDialog) {
-                Button(
-                    String(localized: .caseAddDeleteImage),
-                    role: .destructive
-                ) {
-                    // 사진 삭제
-                }
-                
-                Button(String(localized: .caseAddSelectImage)) {
-                    // 앨범으로 넘어가기
-                }
-            }
-            .padding(.top, 6)
-            .padding(.bottom, 33)
+        ZStack {
+            Color.clear
+                .contentShape(Rectangle())
+                .ignoresSafeArea()
+                .onTapGesture { focus = nil }
             
-            CaseAddScrollForm<Field>(
-                caseName: Binding(
-                    get: { store.state.caseName },
-                    set: { store.send(.updateCaseName($0)) }
-                ),
-                caseNumber: Binding(
-                    get: { store.state.caseNumber },
-                    set: { store.send(.updateCaseNumber($0)) }
-                ),
-                suspectName: Binding(
-                    get: { store.state.suspectName },
-                    set: { store.send(.updateSuspectName($0)) }
-                ),
-                crime: Binding(
-                    get: { store.state.crime },
-                    set: { store.send(.updateCrimeType($0)) }
-                ),
-                focus: $focus,
-                nameField: .name,
-                numberField: .number,
-                suspectField: .suspect,
-                crimeField: .crime
-            )
-            .scrollIndicators(.hidden)
-                                    
-            DWButton(
-                isEnabled: .constant(store.state.isFormComplete),
-                title: String(localized: .buttonAddCase)
-            ) {
-                store.send(.addCaseButtonTapped)
-                coordinator.pop()
+            VStack(spacing: 32) {
+                SuspectImageSelector(
+                    image: .constant(nil),
+                    onTap: { showPhotoDialog = true }
+                )
+                .confirmationDialog("", isPresented: $showPhotoDialog) {
+                    Button(
+                        String(localized: .caseAddDeleteImage),
+                        role: .destructive
+                    ) {
+                        // 사진 삭제
+                    }
+                    
+                    Button(String(localized: .caseAddSelectImage)) {
+                        // 앨범으로 넘어가기
+                    }
+                }
+                .padding(.top, 6)
+                .padding(.bottom, 33)
+                
+                CaseAddScrollForm<Field>(
+                    caseName: Binding(
+                        get: { store.state.caseName },
+                        set: { store.send(.updateCaseName($0)) }
+                    ),
+                    caseNumber: Binding(
+                        get: { store.state.caseNumber },
+                        set: { store.send(.updateCaseNumber($0)) }
+                    ),
+                    suspectName: Binding(
+                        get: { store.state.suspectName },
+                        set: { store.send(.updateSuspectName($0)) }
+                    ),
+                    crime: Binding(
+                        get: { store.state.crime },
+                        set: { store.send(.updateCrimeType($0)) }
+                    ),
+                    focus: $focus,
+                    nameField: .name,
+                    numberField: .number,
+                    suspectField: .suspect,
+                    crimeField: .crime
+                )
+                .scrollIndicators(.hidden)
+                                        
+                DWButton(
+                    isEnabled: .constant(store.state.isFormComplete),
+                    title: String(localized: .buttonAddCase)
+                ) {
+                    store.send(.addCaseButtonTapped)
+                    coordinator.pop()
+                }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
+
         }
     }
 }

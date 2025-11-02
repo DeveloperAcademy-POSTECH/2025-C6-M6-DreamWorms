@@ -80,11 +80,18 @@ struct CaseAddScrollForm<Field: Hashable>: View {
                 .id(crimeField)
             }
             .padding(.horizontal, 20)
+            .safeAreaPadding(.bottom, 20)
         }
         .scrollPosition(id: $scrollID)
         .scrollDisabled(true)
         .onChange(of: focus.wrappedValue) { _, newFocus in
-            scrollID = newFocus
+            guard let newFocus else { return }
+            Task {
+                try? await Task.sleep(for: .milliseconds(80))
+                withAnimation(.snappy(duration: 0.25)) {
+                    scrollID = newFocus
+                }
+            }
         }
     }
 }
