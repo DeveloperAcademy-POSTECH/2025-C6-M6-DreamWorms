@@ -14,20 +14,44 @@ struct CaseListView: View {
     
     // MARK: - Dependencies
     
-    @State private var store = DWStore(
-        initialState: CaseListFeature.State(),
-        reducer: CaseListFeature()
-    )
+    @State var store: DWStore<CaseListFeature>
 
     // MARK: - Properties
 
     // MARK: - View
 
     var body: some View {
-        Text(.testCaseList)
-            .onTapGesture {
-                coordinator.push(.mainTabScene)
+        VStack {
+            CaseListHeader(
+                onSettingTapped: { coordinator.push(.settingScene) }
+            )
+            .padding(.bottom, 24)
+            
+            ScrollView {
+                VStack(spacing: 12) {
+                    ForEach(store.state.cases) { item in
+                        CaseCard(
+                            item: item,
+                            onEdit: {},
+                            onShare: {},
+                            onDelete: { store.send(.deleteTapped(item: item)) }
+                        )
+                        .padding(.horizontal, 16)
+                        .onTapGesture { coordinator.push(.mainTabScene) }
+                    }
+                }
+                .padding(.bottom, 90)
             }
+        }
+        .overlay(alignment: .bottom) {
+            CaseListBottomFade(
+                onAddCaseTapped: { coordinator.push(.caseAddScene) }
+            )
+        }
+        .onAppear {
+            store.send(.onAppear)
+        }
+        .ignoresSafeArea(edges: .bottom)
     }
 }
 
@@ -41,7 +65,7 @@ private extension CaseListView {}
 
 // MARK: - Preview
 
-#Preview {
-    CaseListView()
-        .environment(AppCoordinator())
-}
+//#Preview {
+//    CaseListView()
+//        .environment(AppCoordinator())
+//}

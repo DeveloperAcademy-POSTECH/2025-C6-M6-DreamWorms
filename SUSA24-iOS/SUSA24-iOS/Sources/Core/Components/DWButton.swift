@@ -18,7 +18,7 @@ import SwiftUI
 struct DWButton: View {
     @Binding var isEnabled: Bool
 
-    let title: String = "추가"
+    let title: String
     let action: () -> Void
     
     var iconImage: Image? = nil

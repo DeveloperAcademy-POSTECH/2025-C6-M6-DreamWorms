@@ -4,7 +4,7 @@
         <attribute name="crime" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="number" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="number" attributeType="String"/>
         <relationship name="suspects" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SuspectEntity" inverseName="relateCase" inverseEntity="SuspectEntity"/>
     </entity>
     <entity name="LocationEntity" representedClassName="LocationEntity" syncable="YES" codeGenerationType="class">
@@ -19,6 +19,7 @@
         <attribute name="pointLatitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="pointLongitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="receivedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="suspect" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SuspectEntity" inverseName="locations" inverseEntity="SuspectEntity"/>
     </entity>
     <entity name="SuspectEntity" representedClassName="SuspectEntity" syncable="YES" codeGenerationType="class">

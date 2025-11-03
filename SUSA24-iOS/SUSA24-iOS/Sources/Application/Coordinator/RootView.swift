@@ -10,6 +10,10 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
+    
+    @Environment(\.managedObjectContext)
+    private var context
+
     private let moduleFactory: ModuleFactoryProtocol
     
     public init(
@@ -25,7 +29,7 @@ struct RootView: View {
                 set: { coordinator.path = $0 }
             )
         ) {
-            moduleFactory.makeCaseListView()
+            moduleFactory.makeCaseListView(context: context)
                 .navigationBarBackButtonHidden(true)
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
@@ -34,7 +38,7 @@ struct RootView: View {
                     case .caseAddScene:
                         moduleFactory.makeCaseAddView()
                     case .caseListScene:
-                        moduleFactory.makeCaseListView()
+                        moduleFactory.makeCaseListView(context: context)
                     case .dashboardScene:
                         moduleFactory.makeDashboardView()
                     case .mainTabScene:
@@ -56,6 +60,3 @@ struct RootView: View {
         }
     }
 }
-
-
-
