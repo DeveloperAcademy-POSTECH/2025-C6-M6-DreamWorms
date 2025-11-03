@@ -13,4 +13,5 @@ struct Case: Identifiable, Equatable, Sendable {
     var name: String
     var crime: String
     var suspect: String
+    var suspectProfileImage: String?
 }

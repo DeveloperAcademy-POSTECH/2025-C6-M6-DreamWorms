@@ -31,6 +31,7 @@ struct CaseRepository: CaseRepositoryProtocol {
                     number: $0.number ?? "",
                     name: $0.name ?? "",
                     crime: $0.crime ?? "",
+                    // TODO: - 범죄자 정보 가져오도록 추후 코드에서 수정하기
                     suspect: ""
                 )
             }
@@ -60,9 +61,20 @@ struct CaseRepository: CaseRepositoryProtocol {
             let suspectEntity = SuspectEntity(context: context)
             suspectEntity.id = UUID()
             suspectEntity.name = model.suspect
+            suspectEntity.profileImage = model.suspectProfileImage
+            
             suspectEntity.relateCase = caseEntity
+            caseEntity.addToSuspects(suspectEntity)
+            
+            try context.save()
         }
-        
-        try context.save()
     }
+}
+
+// TODO: - Preview용 Mock Repository
+
+struct MockCaseRepository: CaseRepositoryProtocol {
+    func fetchCases() async throws -> [Case] { [] }
+    func deleteCase(id: UUID) async throws {}
+    func createCase(model: Case) async throws {}
 }

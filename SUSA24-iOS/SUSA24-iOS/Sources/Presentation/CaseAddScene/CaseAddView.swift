@@ -20,8 +20,10 @@ struct CaseAddView: View {
     
     enum Field: Hashable { case name, number, suspect, crime }
     
-    @State private var showPhotoDialog: Bool = false
     @FocusState private var focus: Field?
+    @State private var showPhotoDialog: Bool = false
+    @State private var showPhotoPicker = false
+    @State private var selectedImage: Image? = nil
 
     // MARK: - View
     
@@ -34,19 +36,23 @@ struct CaseAddView: View {
             
             VStack(spacing: 32) {
                 SuspectImageSelector(
-                    image: .constant(nil),
+                    image: $selectedImage,
                     onTap: { showPhotoDialog = true }
                 )
                 .confirmationDialog("", isPresented: $showPhotoDialog) {
-                    Button(
-                        String(localized: .caseAddDeleteImage),
-                        role: .destructive
-                    ) {
-                        // 사진 삭제
+                    if selectedImage != nil {
+                        Button(
+                            String(localized: .caseAddDeleteImage),
+                            role: .destructive
+                        ) {
+                            selectedImage = nil
+                            store.send(.setProfileImage(nil))
+                        }
                     }
                     
                     Button(String(localized: .caseAddSelectImage)) {
-                        // 앨범으로 넘어가기
+                        focus = nil
+                        showPhotoPicker = true
                     }
                 }
                 .padding(.top, 6)
@@ -86,7 +92,13 @@ struct CaseAddView: View {
                 }
                 .padding(.horizontal, 16)
             }
-
+        }
+        .fullScreenCover(isPresented: $showPhotoPicker) {
+            FullScreenPhotoPicker(isPresented: $showPhotoPicker) { image, data in
+                selectedImage = Image(uiImage: image)
+                store.send(.setProfileImage(data.base64EncodedString()))
+            }
+            .ignoresSafeArea()
         }
     }
 }
@@ -101,18 +113,12 @@ private extension CaseAddView {}
 
 // MARK: - Preview
 
-#Preview {
-    CaseAddView(
-        store: DWStore(
-            initialState: CaseAddFeature.State(),
-            reducer: CaseAddFeature(repository: MockCaseRepository())
-        )
-    )
-    .environment(AppCoordinator())
-}
-
-private struct MockCaseRepository: CaseRepositoryProtocol {
-    func fetchCases() async throws -> [Case] { [] }
-    func deleteCase(id: UUID) async throws {}
-    func createCase(model: Case) async throws {}
-}
+//#Preview {
+//    CaseAddView(
+//        store: DWStore(
+//            initialState: CaseAddFeature.State(),
+//            reducer: CaseAddFeature(repository: MockCaseRepository())
+//        )
+//    )
+//    .environment(AppCoordinator())
+//}

@@ -19,6 +19,7 @@ struct CaseAddFeature: DWReducer {
         var caseNumber: String = ""
         var suspectName: String = ""
         var crime: String = ""
+        var suspectProfileImage: String? = nil
         var isFormComplete: Bool {
             [caseName, caseNumber, suspectName, crime]
                 .allSatisfy { !$0.isEmpty }
@@ -32,6 +33,7 @@ struct CaseAddFeature: DWReducer {
         case updateCaseNumber(String)
         case updateSuspectName(String)
         case updateCrimeType(String)
+        case setProfileImage(String?)
         case addCaseButtonTapped
     }
     
@@ -47,13 +49,16 @@ struct CaseAddFeature: DWReducer {
             state.suspectName = name; return .none
         case .updateCrimeType(let name):
             state.crime = name; return .none
+        case .setProfileImage(let image):
+            state.suspectProfileImage = image; return .none
         case .addCaseButtonTapped:
             let model = Case(
                 id: UUID(),
                 number: state.caseNumber,
                 name: state.caseName,
                 crime: state.crime,
-                suspect: state.suspectName
+                suspect: state.suspectName,
+                suspectProfileImage: state.suspectProfileImage
             )
             
             return .task {
