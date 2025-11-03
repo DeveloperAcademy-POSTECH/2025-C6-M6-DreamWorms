@@ -15,10 +15,7 @@ struct MapView: View {
     
     // MARK: - Dependencies
     
-    @State private var store = DWStore(
-        initialState: MapFeature.State(),
-        reducer: MapFeature()
-    )
+    @State var store: DWStore<MapFeature>
 
     // MARK: - Properties
     
@@ -28,6 +25,9 @@ struct MapView: View {
         ZStack {
             NaverMapView()
                 .ignoresSafeArea()
+        }
+        .onAppear {
+            store.send(.onAppear)
         }
     }
 }
@@ -42,7 +42,12 @@ private extension MapView {}
 
 // MARK: - Preview
 
-#Preview {
-    MapView()
-        .environment(AppCoordinator())
-}
+//#Preview {
+//    let repository = MockLocationRepository()
+//    let store = DWStore(
+//        initialState: MapFeature.State(),
+//        reducer: MapFeature(repository: repository)
+//    )
+//    return MapView(store: store)
+//        .environment(AppCoordinator())
+//}
