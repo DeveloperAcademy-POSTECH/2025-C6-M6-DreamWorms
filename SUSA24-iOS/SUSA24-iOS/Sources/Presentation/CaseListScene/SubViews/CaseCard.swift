@@ -109,16 +109,16 @@ struct CaseCard: View {
     }
 }
 
-//#Preview {
-//    CaseCard(
-//        item: Case(
-//            id: UUID(),
-//            number: "12-2025",
-//            title: "사건명",
-//            crime: "범죄유형",
-//            suspect: "피의자명"
-//        ),
-//        onEdit: {}, onShare: {}, onDelete: {}
-//    )
-//    .padding(.horizontal, 16)
-//}
+#Preview {
+    CaseCard(
+        item: Case(
+            id: UUID(),
+            number: "12-2025",
+            name: "사건명",
+            crime: "범죄유형",
+            suspect: "피의자명"
+        ),
+        onEdit: {}, onShare: {}, onDelete: {}
+    )
+    .padding(.horizontal, 16)
+}

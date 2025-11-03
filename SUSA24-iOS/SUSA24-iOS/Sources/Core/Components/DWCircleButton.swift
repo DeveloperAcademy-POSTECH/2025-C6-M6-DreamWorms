@@ -39,7 +39,7 @@ struct DWCircleButton: View {
 extension DWCircleButton {
     
     /// 버튼의 크기를 설정합니다
-    /// - Parameter size: 버튼의 widgth, height 공통 크기
+    /// - Parameter size: 버튼의 width, height 공통 크기
     @discardableResult
     func setupSize(_ size: CGFloat) -> Self {
         var view = self

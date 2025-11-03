@@ -19,6 +19,7 @@
         <attribute name="pointLatitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="pointLongitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="receivedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="suspect" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SuspectEntity" inverseName="locations" inverseEntity="SuspectEntity"/>
     </entity>
     <entity name="SuspectEntity" representedClassName="SuspectEntity" syncable="YES" codeGenerationType="class">
