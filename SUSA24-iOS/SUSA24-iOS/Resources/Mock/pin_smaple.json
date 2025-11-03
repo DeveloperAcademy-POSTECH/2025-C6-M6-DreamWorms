@@ -1,0 +1,149 @@
+[
+  {
+    "locationType": 2,
+    "address": "경북 포항시 남구 이동로 18",
+    "pointLatitude": 35.990521,
+    "pointLongitude": 129.450371,
+    "title": "오리명가"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 남구 대이로 189번길 15 준영빌딩 1층",
+    "pointLatitude": 36.002015,
+    "pointLongitude": 129.439062,
+    "title": "비콜로커피"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 중앙로 222-8",
+    "pointLatitude": 36.035722,
+    "pointLongitude": 129.362035,
+    "title": "오거리곰탕"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 남구 중흥로100번길 10",
+    "pointLatitude": 35.989253,
+    "pointLongitude": 129.418043,
+    "title": "영양닭불백"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 남구 구룡포읍 장길리 259",
+    "pointLatitude": 35.925439,
+    "pointLongitude": 129.569431,
+    "title": "빌스4339"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 중흥로 219 1층",
+    "pointLatitude": 36.034346,
+    "pointLongitude": 129.367011,
+    "title": "부산24시순대돼지국밥밀면"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 죽도동 2-356",
+    "pointLatitude": 36.045763,
+    "pointLongitude": 129.375681,
+    "title": "장기식당"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 두호동 190-7",
+    "pointLatitude": 36.065715,
+    "pointLongitude": 129.387994,
+    "title": "오브레멘"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 삼호로 228",
+    "pointLatitude": 36.035441,
+    "pointLongitude": 129.364402,
+    "title": "깍뚝갈비 본점"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 천마로71번길 21",
+    "pointLatitude": 36.046337,
+    "pointLongitude": 129.368369,
+    "title": "강릉장칼 포항북구점"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 남구 연일읍 중명길 111",
+    "pointLatitude": 35.968725,
+    "pointLongitude": 129.400545,
+    "title": "반다이크 브라운"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 두호동 1039-7",
+    "pointLatitude": 36.066497,
+    "pointLongitude": 129.389772,
+    "title": "토리고야 영일대점"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 우창동로 70 108호",
+    "pointLatitude": 36.046808,
+    "pointLongitude": 129.351225,
+    "title": "국수나무 포항우현점"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 두호동 193-2",
+    "pointLatitude": 36.066063,
+    "pointLongitude": 129.38782,
+    "title": "메리툴린카투"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 죽도동 568-23",
+    "pointLatitude": 36.045558,
+    "pointLongitude": 129.375685,
+    "title": "삼형제횟집"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 두호동 410",
+    "pointLatitude": 36.071852,
+    "pointLongitude": 129.385559,
+    "title": "윳쿠리"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 남구 호미곶면 해맞이로46번길 164",
+    "pointLatitude": 36.002821,
+    "pointLongitude": 129.563825,
+    "title": "네스트카페"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 두호동 611 1층",
+    "pointLatitude": 36.069151,
+    "pointLongitude": 129.384661,
+    "title": "묵돌이"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 용흥동 244-5 1층",
+    "pointLatitude": 36.042781,
+    "pointLongitude": 129.365319,
+    "title": "우고집"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 흥해읍 오도리 217 2동",
+    "pointLatitude": 36.115831,
+    "pointLongitude": 129.407469,
+    "title": "카페포토피아"
+  },
+  {
+    "locationType": 2,
+    "address": "경북 포항시 북구 남빈동 526",
+    "pointLatitude": 36.044158,
+    "pointLongitude": 129.363658,
+    "title": "해구식당"
+  }
+]
