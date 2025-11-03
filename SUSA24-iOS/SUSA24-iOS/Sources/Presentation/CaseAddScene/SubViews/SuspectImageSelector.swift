@@ -19,14 +19,19 @@ struct SuspectImageSelector: View {
                     .scaledToFill()
                     .frame(width: 100, height: 100)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(.gray.opacity(0.3), lineWidth: 1))
+                    .overlay(Circle().stroke(.labelAssistive, lineWidth: 1))
             } else {
                 Circle()
-                    .frame(width: 100, height: 100)
-                    .overlay(
-                        Image(.imgProfile)
-                            .overlay(Circle().stroke(.gray.opacity(0.3), lineWidth: 1))
-                    )
+                     .fill(.clear)
+                     .frame(width: 100, height: 100)
+                     .overlay(
+                         Image(.imgProfile)
+                             .resizable()
+                             .scaledToFill()
+                             .frame(width: 100, height: 100)
+                             .clipShape(Circle())
+                             .overlay(Circle().stroke(.labelAssistive, lineWidth: 1))
+                     )
             }
 
             Button(action: onTap) {
@@ -37,7 +42,7 @@ struct SuspectImageSelector: View {
                     .background(Circle().fill(.white))
                     .overlay(Circle().stroke(Color.mainAlternative, lineWidth: 1))
             }
-            .offset(x: 16, y: 16)
+            .offset(x: 8, y: 8)
         }
     }
 }

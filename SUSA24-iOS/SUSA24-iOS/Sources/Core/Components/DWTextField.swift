@@ -72,6 +72,7 @@ struct DWTextField<Field: Hashable>: View {
                     .fill(.mainAlternative)
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(currentState.borderColor, lineWidth: 1)
+                    .animation(.easeInOut(duration: 0.2), value: currentState.isError)
                 
                 HStack {
                     TextField(
@@ -102,6 +103,7 @@ struct DWTextField<Field: Hashable>: View {
                                 .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
+                        .transition(.opacity)
                     }
                 }
                 .padding(contentPadding)
@@ -123,6 +125,8 @@ struct DWTextField<Field: Hashable>: View {
             .font(.captionRegular12)
         }
         .frame(height: currentState.isError ? 104 : 82)
+        .animation(.snappy(duration: 0.2), value: currentState.isError)
+        .animation(.snappy(duration: 0.2), value: text)
     }
 }
 
