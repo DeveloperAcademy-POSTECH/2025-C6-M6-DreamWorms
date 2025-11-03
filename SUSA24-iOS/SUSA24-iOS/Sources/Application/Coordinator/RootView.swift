@@ -41,10 +41,10 @@ struct RootView: View {
                         moduleFactory.makeCaseListView(context: context)
                     case .dashboardScene:
                         moduleFactory.makeDashboardView()
-                    case .mainTabScene:
-                        moduleFactory.makeMainTabView()
+                    case .mainTabScene(let caseId):
+                        moduleFactory.makeMainTabView(caseId: caseId, context: context)
                     case .mapScene:
-                        moduleFactory.makeMapView()
+                        moduleFactory.makeMapView(context: context)
                     case .onePageScene:
                         moduleFactory.makeOnePageView()
                     case .searchScene:
