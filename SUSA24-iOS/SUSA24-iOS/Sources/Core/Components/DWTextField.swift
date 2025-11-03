@@ -9,8 +9,14 @@ import SwiftUI
 
 // MARK: - TextField State
 
+/// `DWTextField`의 상태를 정의하는 열거형입니다.
+///
+/// 이 타입은 텍스트 필드의 **테두리 색상**, **에러 메시지 표시 여부** 등을 제어합니다.
+/// - Note: `.error` 상태일 때는 필드의 높이가 늘어나며 에러 메시지가 자연스럽게 표시됩니다.
 enum DWTextFieldState: Equatable {
+    /// 기본(normal) 상태입니다.
     case normal
+    /// 에러가 발생했을 때의 상태입니다. 에러 메시지를 함께 가집니다.
     case error(String)
     
     var borderColor: Color {
@@ -28,30 +34,43 @@ enum DWTextFieldState: Equatable {
 
 // MARK: - View
 
+/// 폼 입력을 위한 **커스텀 텍스트 필드 컴포넌트**입니다.
 struct DWTextField<Field: Hashable>: View {
+    /// 바인딩된 텍스트 값입니다.
     @Binding var text: String
     
+    /// 필드 식별자입니다. `FocusState`를 구분하는 데 사용됩니다.
     let field: Field
+    /// 외부에서 전달된 포커스 상태입니다. 없으면 내부 포커스를 사용합니다.
     let externalFocus: FocusState<Field?>.Binding?
     @FocusState private var internalFocus: Field?
     
+    /// 제목 (필드 위에 표시됩니다)
     var title: String?
+    /// 플레이스홀더 (필드 안에 표시됩니다)
     var placeholder: String?
+    /// 에러 메시지 (포커스 중이며 비어 있을 때 표시됩니다)
     var errorMessage: String? = nil
     
+    /// 텍스트 입력 영역의 패딩
     var contentPadding: EdgeInsets = .init(top: 18, leading: 20, bottom: 18, trailing: 12)
+    /// 키보드 타입
     var keyboard: UIKeyboardType = .default
+    /// 키보드 하단 리턴 버튼 타입
     var submitLabel: SubmitLabel = .done
+    /// 리턴 버튼 탭 시 실행되는 액션
     var onSubmit: (() -> Void)? = nil
     
     private var focus: FocusState<Field?>.Binding {
         externalFocus ?? $internalFocus
     }
     
+    /// 현재 포커스 여부를 반환합니다.
     private var isFocused: Bool {
         focus.wrappedValue == field
     }
     
+    /// 현재 상태(`normal` 또는 `error`)를 계산합니다.
     private var currentState: DWTextFieldState {
         if let errorMessage, isFocused, text.isEmpty {
             return .error(errorMessage)
@@ -132,16 +151,29 @@ struct DWTextField<Field: Hashable>: View {
 
 extension DWTextField {
     
+    /// 텍스트 필드가 비어 있고 포커스 중일 때 표시할 에러 메시지를 설정합니다.
+    ///
+    /// - Parameter message: 사용자에게 보여질 에러 메시지
+    /// - Note: 포커스가 해제되면 에러 메시지는 자동으로 사라집니다.
     @discardableResult
     func setupErrorMessage(_ message: String) -> Self {
         var v = self; v.errorMessage = message; return v
     }
     
+    /// 텍스트 필드 내부의 패딩을 설정합니다.
+    ///
+    /// - Parameter insets: 내부 패딩 값
     @discardableResult
     func setupPadding(_ insets: EdgeInsets) -> Self {
         var v = self; v.contentPadding = insets; return v
     }
     
+    /// 키보드 타입과 리턴 버튼 동작을 설정합니다.
+    ///
+    /// - Parameters:
+    ///   - type: 키보드 타입 (`.default`, `.numberPad` 등)
+    ///   - submit: 리턴 키 타입 (`.next`, `.done` 등)
+    ///   - onSubmit: 리턴 키를 눌렀을 때 실행할 액션
     @discardableResult
     func setupKeyboard(
         _ type: UIKeyboardType,
