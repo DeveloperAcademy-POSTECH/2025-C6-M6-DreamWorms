@@ -36,6 +36,7 @@ extension Font {
     static let bodyMedium14: Font = .custom(FontName.notoSansMedium.rawValue, size: 14)
     static let bodyRegular14: Font = .custom(FontName.notoSansRegular.rawValue, size: 14)
     static let bodyMedium12: Font = .custom(FontName.notoSansMedium.rawValue, size: 12)
+    static let bodyMedium10: Font = .custom(FontName.notoSansMedium.rawValue, size: 10)
 
     // MARK: - Caption
     

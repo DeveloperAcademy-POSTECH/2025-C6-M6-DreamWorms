@@ -24,29 +24,28 @@ struct MainTabView: View {
     // MARK: - View
     
     var body: some View {
-        TabView(
-            selection: Binding(
-                get: { store.state.selectedTab },
-                set: { store.send(.selectTab($0)) }
+        ZStack {
+            switch store.state.selectedTab {
+            case .map: MapView()
+            case .dashboard: DashboardView()
+            case .onePage: OnePageView()
+            }
+        }
+        .sheet(isPresented: .constant(true)) {
+            DWTabBar(
+                activeTab: Binding(
+                    get: { store.state.selectedTab },
+                    set: { store.send(.selectTab($0)) }
+                )
             )
-        ) {
-            Tab(value: MainTabIdentifier.map) {
-                MapView()
-            } label: {
-                MainTabIdentifier.map.tabLabel
-            }
-            
-            Tab(value: MainTabIdentifier.dashboard) {
-                DashboardView()
-            } label: {
-                MainTabIdentifier.dashboard.tabLabel
-            }
-            
-            Tab(value: MainTabIdentifier.onePage) {
-                OnePageView()
-            } label: {
-                MainTabIdentifier.onePage.tabLabel
-            }
+            .presentationDetents(
+                store.state.selectedTab == .map
+                ? [.height(71), .fraction(0.4), .large]
+                : [.height(63)]
+            )
+            .presentationBackgroundInteraction(.enabled)
+            .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
+            .interactiveDismissDisabled(true)
         }
     }
 }
