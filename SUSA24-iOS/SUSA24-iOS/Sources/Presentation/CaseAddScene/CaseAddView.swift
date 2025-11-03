@@ -35,6 +35,7 @@ struct CaseAddView: View {
                 .onTapGesture { focus = nil }
             
             VStack(spacing: 32) {
+                // 상단 프로필 이미지
                 SuspectImageSelector(
                     image: $selectedImage,
                     onTap: { showPhotoDialog = true }
@@ -58,6 +59,7 @@ struct CaseAddView: View {
                 .padding(.top, 6)
                 .padding(.bottom, 33)
                 
+                // 텍스트필드 모음
                 CaseAddScrollForm<Field>(
                     caseName: Binding(
                         get: { store.state.caseName },
@@ -82,7 +84,8 @@ struct CaseAddView: View {
                     crimeField: .crime
                 )
                 .scrollIndicators(.hidden)
-                                        
+                            
+                // 추가하기 버튼
                 DWButton(
                     isEnabled: .constant(store.state.isFormComplete),
                     title: String(localized: .buttonAddCase)
