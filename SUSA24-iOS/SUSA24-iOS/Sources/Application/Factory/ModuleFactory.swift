@@ -64,7 +64,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
             initialState: MapFeature.State(caseId: caseId),
             reducer: MapFeature(repository: repository))
         return MainTabView(
-            mainTabStore: mainTabStore,
+            store: mainTabStore,
             mapStore: mapStore
         )
     }

@@ -14,7 +14,7 @@ struct MainTabView: View {
     
     // MARK: - Dependencies
     
-    @State var mainTabStore: DWStore<MainTabFeature>
+    @State var store: DWStore<MainTabFeature>
     @State var mapStore: DWStore<MapFeature>
     
     // MARK: - Properties
@@ -24,8 +24,8 @@ struct MainTabView: View {
     var body: some View {
         TabView(
             selection: Binding(
-                get: { mainTabStore.state.selectedTab },
-                set: { mainTabStore.send(.selectTab($0)) }
+                get: { store.state.selectedTab },
+                set: { store.send(.selectTab($0)) }
             )
         ) {
             Tab(value: MainTabIdentifier.map) {
