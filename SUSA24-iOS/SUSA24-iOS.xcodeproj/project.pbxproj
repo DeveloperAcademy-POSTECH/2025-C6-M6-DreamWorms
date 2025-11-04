@@ -48,19 +48,9 @@
 		3DBE1B6D2EB2117A002F2EA0 /* Exceptions for "SUSA24-iOS" folder in "SUSA24-iOSTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Resources/Config.xcconfig,
-				Resources/Mock/weekly_cell_sample_iso8601.json,
 				Tests/SUSA24Tests.swift,
 			);
 			target = 3DBE1A4B2EB206F9002F2EA0 /* SUSA24-iOSTests */;
-		};
-		F5BF31B02EB947DC003EC670 /* Exceptions for "SUSA24-iOS" folder in "SUSA24-iOSUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Resources/Config.xcconfig,
-				Resources/Mock/weekly_cell_sample_iso8601.json,
-			);
-			target = 3DBE1A552EB206F9002F2EA0 /* SUSA24-iOSUITests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -70,7 +60,6 @@
 			exceptions = (
 				3DBE1B6C2EB2117A002F2EA0 /* Exceptions for "SUSA24-iOS" folder in "SUSA24-iOS" target */,
 				3DBE1B6D2EB2117A002F2EA0 /* Exceptions for "SUSA24-iOS" folder in "SUSA24-iOSTests" target */,
-				F5BF31B02EB947DC003EC670 /* Exceptions for "SUSA24-iOS" folder in "SUSA24-iOSUITests" target */,
 			);
 			path = "SUSA24-iOS";
 			sourceTree = "<group>";
@@ -210,7 +199,6 @@
 					};
 					3DBE1A552EB206F9002F2EA0 = {
 						CreatedOnToolsVersion = 26.0;
-						LastSwiftMigration = 2600;
 						TestTargetID = 3DBE1A392EB206F7002F2EA0;
 					};
 				};
@@ -574,7 +562,6 @@
 		3DBE1A672EB206F9002F2EA0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JF6B89ULG6;
@@ -585,8 +572,6 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "SUSA24-iOS/Tests/SUSA24-iOSUITests-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -597,7 +582,6 @@
 		3DBE1A682EB206F9002F2EA0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JF6B89ULG6;
@@ -608,7 +592,6 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "SUSA24-iOS/Tests/SUSA24-iOSUITests-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

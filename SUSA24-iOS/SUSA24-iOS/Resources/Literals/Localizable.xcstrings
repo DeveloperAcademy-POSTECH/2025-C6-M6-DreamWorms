@@ -16,6 +16,30 @@
         }
       }
     },
+    "bottomSheet_caseLocation_pinCount" : {
+      "comment" : "바텀시트_케이스_위치_핀_갯수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(countNumber)lld개"
+          }
+        }
+      }
+    },
+    "bottomSheet_cellLocation_searchText" : {
+      "comment" : "기지국_주소_검색",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 주소 검색"
+          }
+        }
+      }
+    },
     "button_addCase" : {
       "comment" : "버튼_사건추가",
       "extractionState" : "manual",
