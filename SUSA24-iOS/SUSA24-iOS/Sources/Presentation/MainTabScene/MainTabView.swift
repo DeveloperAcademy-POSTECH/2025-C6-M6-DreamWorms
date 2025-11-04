@@ -14,10 +14,8 @@ struct MainTabView: View {
     
     // MARK: - Dependencies
     
-    @State private var store = DWStore(
-        initialState: MainTabFeature.State(),
-        reducer: MainTabFeature()
-    )
+    @State var mainTabStore: DWStore<MainTabFeature>
+    @State var mapStore: DWStore<MapFeature>
     
     // MARK: - Properties
         
@@ -26,12 +24,12 @@ struct MainTabView: View {
     var body: some View {
         TabView(
             selection: Binding(
-                get: { store.state.selectedTab },
-                set: { store.send(.selectTab($0)) }
+                get: { mainTabStore.state.selectedTab },
+                set: { mainTabStore.send(.selectTab($0)) }
             )
         ) {
             Tab(value: MainTabIdentifier.map) {
-                MapView()
+                MapView(store: mapStore)
             } label: {
                 MainTabIdentifier.map.tabLabel
             }
@@ -61,7 +59,15 @@ private extension MainTabView {}
 
 // MARK: - Preview
 
-#Preview {
-    MainTabView()
-        .environment(AppCoordinator())
-}
+//#Preview {
+//    let mainTabStore = DWStore(
+//        initialState: MainTabFeature.State(),
+//        reducer: MainTabFeature()
+//    )
+//    let mapStore = DWStore(
+//        initialState: MapFeature.State(caseId: UUID()),
+//        reducer: MapFeature(repository: MockLocationRepository())
+//    )
+//    return MainTabView(mainTabStore: mainTabStore, mapStore: mapStore)
+//        .environment(AppCoordinator())
+//}

@@ -5,6 +5,7 @@
 //  Created by mini on 10/29/25.
 //
 
+import CoreData
 import XCTest
 @testable import SUSA24_iOS
 
@@ -77,5 +78,121 @@ final class SUSA24Tests: XCTestCase {
         print("동시 로딩 성공")
         print("핀: \(pinsData.count)개")
         print("기지국: \(stationsData.count)개")
+    }
+}
+
+// MARK: Location Repository Tests
+
+@MainActor
+final class LocationRepositoryTests: XCTestCase {
+    
+    var context: NSManagedObjectContext!
+    var repository: LocationRepository!
+    var caseId: UUID!
+    var suspect: SuspectEntity!
+    
+    override func setUpWithError() throws {
+        // In-memory CoreData 설정
+        let container = NSPersistentContainer(name: "SUSA24_iOS")
+        container.persistentStoreDescriptions.first?.type = NSInMemoryStoreType
+        container.loadPersistentStores { _, error in
+            if let error = error { fatalError("Store load failed: \(error)") }
+        }
+        context = container.viewContext
+        
+        repository = LocationRepository(context: context)
+        
+        // 테스트 데이터: Case, Suspect 생성 (필수 필드 포함)
+        caseId = UUID()
+        let caseEntity = CaseEntity(context: context)
+        caseEntity.id = caseId
+        caseEntity.name = "테스트"
+        caseEntity.number = "TEST-001"  // 필수 필드
+        caseEntity.crime = "테스트 범죄"  // 필수 필드
+        
+        suspect = SuspectEntity(context: context)
+        suspect.id = UUID()
+        suspect.name = ""  // 빈 문자열
+        suspect.relateCase = caseEntity
+        caseEntity.addToSuspects(suspect)
+        
+        try context.save()
+    }
+    
+    func testFetchLocations() async throws {
+        // Given: Location 생성
+        let location = Location(
+            id: UUID(),
+            address: "테스트 주소",
+            title: nil,
+            note: nil,
+            pointLatitude: 36.0,
+            pointLongitude: 129.0,
+            boxMinLatitude: nil,
+            boxMinLongitude: nil,
+            boxMaxLatitude: nil,
+            boxMaxLongitude: nil,
+            locationType: 2,
+            receivedAt: nil
+        )
+        try await repository.createLocations(data: [location], caseId: caseId)
+        
+        // When: 조회
+        let locations = try await repository.fetchLocations(caseId: caseId)
+        
+        // Then
+        XCTAssertEqual(locations.count, 1)
+        XCTAssertEqual(locations.first?.id, location.id)
+    }
+    
+    func testCreateLocation() async throws {
+        // Given
+        let location = Location(
+            id: UUID(),
+            address: "생성 테스트",
+            title: nil,
+            note: nil,
+            pointLatitude: 37.0,
+            pointLongitude: 130.0,
+            boxMinLatitude: nil,
+            boxMinLongitude: nil,
+            boxMaxLatitude: nil,
+            boxMaxLongitude: nil,
+            locationType: 1,
+            receivedAt: nil
+        )
+        
+        // When
+        try await repository.createLocations(data: [location], caseId: caseId)
+        
+        // Then
+        let locations = try await repository.fetchLocations(caseId: caseId)
+        XCTAssertEqual(locations.count, 1)
+    }
+    
+    func testDeleteLocation() async throws {
+        // Given
+        let location = Location(
+            id: UUID(),
+            address: "삭제 테스트",
+            title: nil,
+            note: nil,
+            pointLatitude: 38.0,
+            pointLongitude: 131.0,
+            boxMinLatitude: nil,
+            boxMinLongitude: nil,
+            boxMaxLatitude: nil,
+            boxMaxLongitude: nil,
+            locationType: 0,
+            receivedAt: nil
+        )
+        try await repository.createLocations(data: [location], caseId: caseId)
+        
+        // When
+        try await repository.deleteLocation(id: location.id)
+        
+        // Then
+        let locations = try await repository.fetchLocations(caseId: caseId)
+        XCTAssertEqual(locations.count, 0)
     }
 }
