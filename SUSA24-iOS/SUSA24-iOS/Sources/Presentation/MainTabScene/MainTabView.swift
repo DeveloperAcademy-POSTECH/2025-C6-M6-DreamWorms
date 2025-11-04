@@ -18,33 +18,48 @@ struct MainTabView: View {
     @State var mapStore: DWStore<MapFeature>
     
     // MARK: - Properties
+    
+    @State private var selectedDetent: PresentationDetent = PresentationDetent.height(66)
+    
+    private let mapShortDetent = PresentationDetent.height(73)
+    private let mapMidDetnet   = PresentationDetent.fraction(0.4)
+    private let mapLargeDetent = PresentationDetent.large
+    private let otherDetent    = PresentationDetent.height(66)
+    
+    private var showDividerByDetent: Bool {
+        let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetnet, mapLargeDetent]
+        return detentsShowingDivider.contains(selectedDetent)
+    }
         
     // MARK: - View
     
     var body: some View {
-        TabView(
-            selection: Binding(
-                get: { store.state.selectedTab },
-                set: { store.send(.selectTab($0)) }
+        ZStack {
+            switch store.state.selectedTab {
+            case .map: MapView(store: mapStore)
+            case .dashboard: DashboardView()
+            case .onePage: OnePageView()
+            }
+        }
+        .sheet(isPresented: .constant(true)) {
+            DWTabBar<TimeLineView>(
+                activeTab: Binding(
+                    get: { store.state.selectedTab },
+                    set: { store.send(.selectTab($0)) }
+                ),
+                showDivider: showDividerByDetent
+            ) {
+                TimeLineView()
+            }
+            .presentationDetents(
+                store.state.selectedTab == .map
+                ? [mapShortDetent, mapMidDetnet, mapLargeDetent]
+                : [otherDetent],
+                selection: $selectedDetent
             )
-        ) {
-            Tab(value: MainTabIdentifier.map) {
-                MapView(store: mapStore)
-            } label: {
-                MainTabIdentifier.map.tabLabel
-            }
-            
-            Tab(value: MainTabIdentifier.dashboard) {
-                DashboardView()
-            } label: {
-                MainTabIdentifier.dashboard.tabLabel
-            }
-            
-            Tab(value: MainTabIdentifier.onePage) {
-                OnePageView()
-            } label: {
-                MainTabIdentifier.onePage.tabLabel
-            }
+            .presentationBackgroundInteraction(.enabled)
+            .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
+            .interactiveDismissDisabled(true)
         }
     }
 }

@@ -24,7 +24,10 @@ struct TimeLineView: View {
     // MARK: - View
 
     var body: some View {
-        Text(.testTimeline)
+        ScrollView {
+            Text(.testTimeline)
+        }
+        .padding(.top, 12)
     }
 }
 
