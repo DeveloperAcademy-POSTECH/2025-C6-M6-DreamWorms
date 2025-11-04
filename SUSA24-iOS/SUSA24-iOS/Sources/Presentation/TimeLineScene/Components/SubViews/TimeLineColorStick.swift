@@ -38,15 +38,22 @@ enum TimeLineColorStickState: Equatable {
 /// 방문 빈도( top1~3 / normal)에 따라 spotColor가 다릅니다.
 /// - 드랍 섀도우: 모든 상태에서 동일하게 적용 ( blur = 4 )
 /// - 도트(Circle)과 수직막대(Rectangle)로 구성
+/// - 마지막 셀일때는 막대가 표시되지 않음
 ///
 /// # 사용예시
 /// ```swift
-/// TimeLineColorStick(state: .top1)
+/// // 일반셀
+/// TimeLineColorStick(state: .top1, isLast: false)
+///
+/// // 마지막 셀 (막대 숨김)
+/// TimeLineColorStick(state: .top1, isLast: true)
 /// ```
 ///
 struct TimeLineColorStick: View {
     
     let state: TimeLineColorStickState
+    let isLast: Bool
+    
     var contentPadding: EdgeInsets = .init(top: 10, leading: 10, bottom: 7, trailing: 10)
     var stickHeight: CGFloat = 41
     
@@ -66,7 +73,7 @@ struct TimeLineColorStick: View {
                 .padding(contentPadding)
             
             Rectangle()
-                .fill(.blue80)
+                .fill(isLast ? .clear : .blue80)
                 .frame(width: 1, height: stickHeight)
         }
         .animation(.snappy(duration: 0.2), value: state)

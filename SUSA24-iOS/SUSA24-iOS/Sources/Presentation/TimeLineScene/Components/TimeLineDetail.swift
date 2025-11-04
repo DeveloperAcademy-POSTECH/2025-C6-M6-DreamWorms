@@ -23,6 +23,7 @@ import SwiftUI
 ///     title: location.title,
 ///     startTime: location.startTime,
 ///     endTime: location.endTime,
+///     isLast: index == location.count - 1,
 ///     onTap: {print("Tapped")
 /// )
 /// ```
@@ -31,13 +32,17 @@ struct TimeLineDetail: View {
     let caseTitle: String
     let startTime: Date
     let endTime: Date
+    let isLast: Bool
     let onTap: () -> Void
     
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 6) {
                 // 왼쪽: 색상 막대
-                TimeLineColorStick(state: state)
+                TimeLineColorStick(
+                    state: state,
+                    isLast: isLast
+                )
                 
                 // 오른쪽: 위치 정보
                 TimeLineCellLocationDetail(
@@ -45,6 +50,7 @@ struct TimeLineDetail: View {
                     startTime: startTime,
                     endTime: endTime
                 )
+
                 Spacer()
             }
         }
@@ -52,6 +58,8 @@ struct TimeLineDetail: View {
     }
 }
 
+//// MARK: - Preview
+//
 //#Preview("Timeline Detail - States") {
 //    ScrollView {
 //        VStack(spacing: 0) {
@@ -68,6 +76,7 @@ struct TimeLineDetail: View {
 //                caseTitle: "대구 청테이프",
 //                startTime: Date().addingTimeInterval(-7200),
 //                endTime: Date().addingTimeInterval(-5400),
+//                isLast: false,  // ⭐️ 추가
 //                onTap: { print("Tapped Top1") }
 //            )
 //            .padding(.vertical, 8)
@@ -89,6 +98,7 @@ struct TimeLineDetail: View {
 //                caseTitle: "대구 수성구 범어동",
 //                startTime: Date().addingTimeInterval(-5400),
 //                endTime: Date().addingTimeInterval(-3600),
+//                isLast: false,
 //                onTap: { print("Tapped Top2") }
 //            )
 //            .padding(.vertical, 8)
@@ -110,6 +120,7 @@ struct TimeLineDetail: View {
 //                caseTitle: "대구 중구 동성로",
 //                startTime: Date().addingTimeInterval(-3600),
 //                endTime: Date().addingTimeInterval(-1800),
+//                isLast: false,
 //                onTap: { print("Tapped Top3") }
 //            )
 //            .padding(.vertical, 8)
@@ -119,7 +130,7 @@ struct TimeLineDetail: View {
 //            Divider()
 //                .padding(.vertical, 8)
 //            
-//            Text("Normal (일반 방문)")
+//            Text("Normal (마지막 셀 - 스틱 없음)")
 //                .font(.caption)
 //                .foregroundStyle(.secondary)
 //                .frame(maxWidth: .infinity, alignment: .leading)
@@ -131,6 +142,7 @@ struct TimeLineDetail: View {
 //                caseTitle: "대구 달서구 죽전동",
 //                startTime: Date().addingTimeInterval(-1800),
 //                endTime: Date(),
+//                isLast: true,  // ⭐️ 마지막 셀!
 //                onTap: { print("Tapped Normal") }
 //            )
 //            .padding(.vertical, 8)
@@ -140,14 +152,14 @@ struct TimeLineDetail: View {
 //    }
 //    .background(.mainAlternative)
 //}
-
-//#Preview("Timeline Detail - List") {
-//    TimeLineDetailListPreview()
+//
+//#Preview("Timeline Detail - List with Lazy") {
+//    TimeLineDetailLazyListPreview()
 //}
 //
 //// MARK: - Preview Helpers
 //
-//private struct TimeLineDetailListPreview: View {
+//private struct TimeLineDetailLazyListPreview: View {
 //    let mockData: [(TimeLineColorStickState, String, Date, Date)] = [
 //        (.top1, "대구 청테이프", Date().addingTimeInterval(-10800), Date().addingTimeInterval(-9000)),
 //        (.top1, "대구 청테이프", Date().addingTimeInterval(-7200), Date().addingTimeInterval(-5400)),
@@ -160,7 +172,7 @@ struct TimeLineDetail: View {
 //    
 //    var body: some View {
 //        ScrollView {
-//            LazyVStack(spacing: 0) {
+//            LazyVStack(spacing: 0) {  // ⭐️ LazyVStack 사용
 //                ForEach(mockData.indices, id: \.self) { index in
 //                    let data = mockData[index]
 //                    
@@ -169,17 +181,16 @@ struct TimeLineDetail: View {
 //                        caseTitle: data.1,
 //                        startTime: data.2,
 //                        endTime: data.3,
+//                        isLast: index == mockData.count - 1,  // ⭐️ 마지막 체크
 //                        onTap: {
 //                            print("Tapped: \(data.1)")
 //                        }
 //                    )
-//                    .padding(.vertical, 8)
-//                    .padding(.horizontal, 16)
-//                    .background(.mainBackground)
+//                    
+//                    
+//                    
 //                    
 //                    if index < mockData.count - 1 {
-//                        Divider()
-//                            .padding(.horizontal, 16)
 //                    }
 //                }
 //            }
