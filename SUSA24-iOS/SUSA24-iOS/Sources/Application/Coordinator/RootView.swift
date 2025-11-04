@@ -36,7 +36,7 @@ struct RootView: View {
                     case .cameraScene:
                         moduleFactory.makeCameraView()
                     case .caseAddScene:
-                        moduleFactory.makeCaseAddView()
+                        moduleFactory.makeCaseAddView(context: context)
                     case .caseListScene:
                         moduleFactory.makeCaseListView(context: context)
                     case .dashboardScene:

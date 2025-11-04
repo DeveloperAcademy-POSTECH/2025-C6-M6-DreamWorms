@@ -12,6 +12,7 @@ import CoreData
 protocol CaseRepositoryProtocol: Sendable {
     func fetchCases() async throws -> [Case]
     func deleteCase(id: UUID) async throws
+    func createCase(model: Case) async throws
 }
 
 // MARK: - Repository Implementation
@@ -30,6 +31,7 @@ struct CaseRepository: CaseRepositoryProtocol {
                     number: $0.number ?? "",
                     name: $0.name ?? "",
                     crime: $0.crime ?? "",
+                    // TODO: - 범죄자 정보 가져오도록 추후 코드에서 수정하기
                     suspect: ""
                 )
             }
@@ -46,4 +48,33 @@ struct CaseRepository: CaseRepositoryProtocol {
             }
         }
     }
+    
+    func createCase(model: Case) async throws {
+        try await context.perform {
+            let caseEntity = CaseEntity(context: context)
+            caseEntity.id = UUID()
+            caseEntity.name = model.name
+            caseEntity.number = model.number
+            caseEntity.suspects
+            caseEntity.crime = model.crime
+            
+            let suspectEntity = SuspectEntity(context: context)
+            suspectEntity.id = UUID()
+            suspectEntity.name = model.suspect
+            suspectEntity.profileImage = model.suspectProfileImage
+            
+            suspectEntity.relateCase = caseEntity
+            caseEntity.addToSuspects(suspectEntity)
+            
+            try context.save()
+        }
+    }
+}
+
+// TODO: - Preview용 Mock Repository
+
+struct MockCaseRepository: CaseRepositoryProtocol {
+    func fetchCases() async throws -> [Case] { [] }
+    func deleteCase(id: UUID) async throws {}
+    func createCase(model: Case) async throws {}
 }
