@@ -363,6 +363,30 @@
           }
         }
       }
+    },
+    "timeRange_Format" : {
+      "comment" : "바텀시트_빈도수_체류시간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(start)@ - %2$(end)@"
+          }
+        }
+      }
+    },
+    "us_ver" : {
+      "comment" : "미국_버전",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en_US"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
