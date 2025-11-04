@@ -20,6 +20,10 @@ enum SymbolLiterals: String {
     case xmark = "xmark"
     case warningCircle = "exclamationmark.circle.fill"
     case camera = "camera.fill"
+    case back = "chevron.left"
+    case search = "magnifyingglass"
+    case scan = "document.viewfinder"
+    case myPosition = "paperplane"
 }
 
 extension Image {
