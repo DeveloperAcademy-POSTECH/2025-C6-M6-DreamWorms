@@ -37,7 +37,7 @@ struct CaseListView: View {
                             onDelete: { store.send(.deleteTapped(item: item)) }
                         )
                         .padding(.horizontal, 16)
-                        .onTapGesture { coordinator.push(.mainTabScene) }
+                        .onTapGesture { coordinator.push(.mainTabScene(caseId: item.id)) }
                     }
                 }
                 .padding(.bottom, 90)
