@@ -20,12 +20,15 @@ struct LocationCard: View {
     let type: LocationCardType
     let title: String
     let description: String
+    let onTap: (() -> Void)? = nil
     
     var isButton: Bool = true
     var iconBackgroundColor: Color = .primaryNormal
         
     var body: some View {
-        Button(action: {}, label: {
+        Button(
+            action: { onTap?() },
+            label: {
              HStack(spacing: 12) {
                  leadingIcon
                  

@@ -24,7 +24,38 @@ struct DashboardView: View {
     // MARK: - View
 
     var body: some View {
-        Text(.testDashboard)
+        ScrollView {
+            VStack {
+                Text(.testAnalyze)
+                    .font(.titleSemiBold22)
+                    .kerning(-0.44)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 30)
+                
+                Picker(
+                    "",
+                    selection: Binding(
+                        get: { store.state.tab },
+                        set: { store.send(.setTab($0)) }
+                    )
+                ) {
+                    ForEach(DashboardPickerTab.allCases, id: \.title) { tab in
+                        Text(tab.title).tag(tab)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 295)
+                .padding(.top, 38)
+                
+                DashboardSectionHeader(title: store.state.tab.sectionTitle)
+                    .setupDescription(store.state.tab.sectionDescription)
+                    .padding(.top, 24)
+                
+                DashboardSectionHeader(title: String(localized: .dashboardVisitDurationCellTowerTitle))
+                    .padding(.top, 24)
+            }
+            .padding(.horizontal, 16)
+        }
     }
 }
 
