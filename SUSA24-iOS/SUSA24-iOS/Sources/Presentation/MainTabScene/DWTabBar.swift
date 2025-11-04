@@ -7,21 +7,28 @@
 
 import SwiftUI
 
-struct DWTabBar: View {
+struct DWTabBar<Content: View>: View {
     @Binding var activeTab: MainTabIdentifier
-
+    let showDivider: Bool
+    @ViewBuilder var content: () -> Content
+    
     var body: some View {
         GeometryReader {
             let safeArea = $0.safeAreaInsets
             let bottomPadding = safeArea.bottom / 5
 
             VStack(spacing: 0) {
-                // TODO: - 해당 Spacer 부분에 이제 타임라인 뷰를 얹으면 됩니다!!
-                Spacer(minLength: 0)
+                if activeTab == .map {
+                    content()
+                    if showDivider { Divider() }
+                } else {
+                    Spacer(minLength: 0)
+                }
+
                 dwTabBar()
                     .padding(.bottom, bottomPadding)
             }
-            .ignoresSafeArea(edges: .bottom)
+            .ignoresSafeArea(.all, edges: .bottom)
         }
     }
     
@@ -31,7 +38,7 @@ struct DWTabBar: View {
             ForEach(MainTabIdentifier.allCases, id: \.title) { tab in
                 VStack(spacing: 4) {
                     tab.icon
-                        .font(.title3)
+                        .font(.system(size: 20))
                     
                     Text(tab.title)
                         .font(.bodyMedium10)
@@ -39,16 +46,10 @@ struct DWTabBar: View {
                 .foregroundStyle(activeTab == tab ? .primaryNormal : .labelNeutral)
                 .frame(maxWidth: .infinity)
                 .contentShape(.rect)
-                .onTapGesture {
-                    activeTab = tab
-                }
+                .onTapGesture { activeTab = tab }
             }
         }
-        .padding(.horizontal, 30)
+        .padding(.horizontal, 32)
         .padding(.vertical, 10)
     }
 }
-
-//#Preview {
-//    DWTabBar(activeTab: .constant(.map))
-//}

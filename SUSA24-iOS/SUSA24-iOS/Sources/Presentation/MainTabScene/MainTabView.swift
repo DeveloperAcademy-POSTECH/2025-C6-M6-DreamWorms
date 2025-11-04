@@ -20,6 +20,18 @@ struct MainTabView: View {
     )
     
     // MARK: - Properties
+    
+    @State private var selectedDetent: PresentationDetent = PresentationDetent.height(66)
+    
+    private let mapShortDetent = PresentationDetent.height(73)
+    private let mapMidDetnet   = PresentationDetent.fraction(0.4)
+    private let mapLargeDetent = PresentationDetent.large
+    private let otherDetent    = PresentationDetent.height(66)
+    
+    private var showDividerByDetent: Bool {
+        let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetnet, mapLargeDetent]
+        return detentsShowingDivider.contains(selectedDetent)
+    }
         
     // MARK: - View
     
@@ -32,16 +44,20 @@ struct MainTabView: View {
             }
         }
         .sheet(isPresented: .constant(true)) {
-            DWTabBar(
+            DWTabBar<TimeLineView>(
                 activeTab: Binding(
                     get: { store.state.selectedTab },
                     set: { store.send(.selectTab($0)) }
-                )
-            )
+                ),
+                showDivider: showDividerByDetent
+            ) {
+                TimeLineView()
+            }
             .presentationDetents(
                 store.state.selectedTab == .map
-                ? [.height(71), .fraction(0.4), .large]
-                : [.height(63)]
+                ? [mapShortDetent, mapMidDetnet, mapLargeDetent]
+                : [otherDetent],
+                selection: $selectedDetent
             )
             .presentationBackgroundInteraction(.enabled)
             .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
