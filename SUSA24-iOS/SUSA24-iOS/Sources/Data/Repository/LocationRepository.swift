@@ -27,6 +27,30 @@ protocol LocationRepositoryProtocol: Sendable {
     ///   - caseId: 연결할 Case의 UUID (케이스당 suspect가 한 명이라는 가정)
     /// - Throws: CoreData 저장 에러 (Case 또는 Suspect를 찾을 수 없는 경우 포함)
     func createLocations(data: [Location], caseId: UUID) async throws
+    
+    //
+    func fetchTopLocations(
+        caseId: UUID,
+        limit: Int,
+        in range: ClosedRange<Date>?
+    ) async throws -> [LocationRank]
+
+    // ✅ 추가: 특정 주소·요일·주차의 0~23시 시리즈
+    func fetchHourlySeries(
+        caseId: UUID,
+        address: String,
+        weekday: Int,          // Foundation 요일(일=1 … 토=7). Weekday enum 쓰면 매핑해서 넘겨줘.
+        slice: WeekSlice,
+        calendar: Calendar
+    ) async throws -> [HourValue]
+
+    // ✅ 추가: 지난주/이번주 한 번에 가져오기(편의)
+    func fetchWeeklySeries(
+        caseId: UUID,
+        address: String,
+        weekday: Int,
+        calendar: Calendar
+    ) async throws -> (lastWeek: [HourValue], thisWeek: [HourValue])
 }
 
 // MARK: - Repository Implementation
@@ -136,6 +160,117 @@ struct LocationRepository: LocationRepositoryProtocol {
         }
     }
     
+    func fetchTopLocations(
+        caseId: UUID,
+        limit: Int = 3,
+        in range: ClosedRange<Date>? = nil
+    ) async throws -> [LocationRank] {
+        try await context.perform {
+            let req = NSFetchRequest<NSDictionary>(entityName: "LocationEntity")
+            req.resultType = .dictionaryResultType
+
+            // suspect.case.id == caseId 로 바로 필터
+            var predicates: [NSPredicate] = [
+                NSPredicate(format: "suspect.case.id == %@", caseId as CVarArg)
+            ]
+            if let range {
+                predicates.append(NSPredicate(format: "receivedAt >= %@ AND receivedAt < %@",
+                                              range.lowerBound as NSDate, range.upperBound as NSDate))
+            }
+            req.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+
+            // GROUP BY address
+            req.propertiesToGroupBy = ["address"]
+
+            // COUNT(id)
+            let countDesc = NSExpressionDescription()
+            countDesc.name = "cnt"
+            countDesc.expression = NSExpression(forFunction: "count:",
+                                                arguments: [NSExpression(forKeyPath: "id")])
+            countDesc.expressionResultType = .integer64AttributeType
+
+            req.propertiesToFetch = ["address", countDesc]
+            req.sortDescriptors = [NSSortDescriptor(key: "cnt", ascending: false)]
+            req.fetchLimit = max(0, limit)
+
+            let rows = try context.fetch(req)
+            return rows.compactMap { dict in
+                guard let address = dict["address"] as? String,
+                      let cnt = dict["cnt"] as? Int else { return nil }
+                return LocationRank(address: address, count: cnt)
+            }
+        }
+    }
+
+    // MARK: - Hourly series (0~23)
+
+    func fetchHourlySeries(
+        caseId: UUID,
+        address: String,
+        weekday: Int,
+        slice: WeekSlice,
+        calendar: Calendar = .current
+    ) async throws -> [HourValue] {
+        try await context.perform {
+            // 주(week) 구간 계산
+            var cal = calendar
+            if cal.firstWeekday != 2 { cal.firstWeekday = 2 } // 월요일 시작(원하면 바꿔도 됨)
+
+            let now = Date()
+            let startOfThisWeek = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
+
+            let start: Date
+            switch slice {
+            case .thisWeek:
+                start = startOfThisWeek
+            case .lastWeek:
+                start = cal.date(byAdding: .day, value: -7, to: startOfThisWeek)!
+            }
+
+            let end = cal.date(byAdding: .day, value: 7, to: start)!
+
+            // 해당 주 + 케이스 + 주소
+            let req = NSFetchRequest<LocationEntity>(entityName: "LocationEntity")
+            req.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                NSPredicate(format: "suspect.case.id == %@", caseId as CVarArg),
+                NSPredicate(format: "address == %@", address),
+                NSPredicate(format: "receivedAt >= %@ AND receivedAt < %@", start as NSDate, end as NSDate)
+            ])
+            // 메모리 절약: 필요한 컬럼만 fault로 가져오게 힌트
+            req.returnsObjectsAsFaults = true
+
+            let rows = try context.fetch(req)
+
+            // 0~23 카운트
+            var buckets = Array(repeating: 0, count: 24)
+
+            for r in rows {
+                guard let date = r.receivedAt else { continue }
+                // 선택 요일만
+                let w = cal.component(.weekday, from: date) // 일=1 … 토=7
+                guard w == weekday else { continue }
+
+                let h = cal.component(.hour, from: date)
+                if (0..<24).contains(h) { buckets[h] &+= 1 }
+            }
+
+            return (0..<24).map { HourValue(hour: $0, value: Double(buckets[$0])) }
+        }
+    }
+
+    // MARK: - Convenience: 지난주/이번주 동시
+
+    func fetchWeeklySeries(
+        caseId: UUID,
+        address: String,
+        weekday: Int,
+        calendar: Calendar = .current
+    ) async throws -> (lastWeek: [HourValue], thisWeek: [HourValue]) {
+        async let last = fetchHourlySeries(caseId: caseId, address: address, weekday: weekday, slice: .lastWeek, calendar: calendar)
+        async let this = fetchHourlySeries(caseId: caseId, address: address, weekday: weekday, slice: .thisWeek, calendar: calendar)
+        return try await (last, this)
+    }
+    
     /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
     /// - Parameter caseId: 저장할 Case의 UUID
     /// - Throws: JSONLoaderError, CoreData 저장 에러
@@ -151,6 +286,8 @@ struct MockLocationRepository: LocationRepositoryProtocol {
     func fetchLocations(caseId: UUID) async throws -> [Location] { [] }
     func deleteLocation(id: UUID) async throws {}
     func createLocations(data: [Location], caseId: UUID) async throws {}
+    func fetchTopLocations(caseId: UUID, limit: Int, in range: ClosedRange<Date>?) async throws -> [LocationRank] { [] }
+    func fetchHourlySeries(caseId: UUID, address: String, weekday: Int, slice: WeekSlice, calendar: Calendar) async throws -> [HourValue] { [] }
+    func fetchWeeklySeries(caseId: UUID, address: String, weekday: Int, calendar: Calendar) async throws -> (lastWeek: [HourValue], thisWeek: [HourValue]) { ([], []) }
 }
-
 
