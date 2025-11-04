@@ -24,7 +24,7 @@ struct CaseAddView: View {
     @State private var showPhotoDialog: Bool = false
     @State private var showPhotoPicker = false
     @State private var selectedImage: Image? = nil
-
+    
     // MARK: - View
     
     var body: some View {
@@ -35,19 +35,25 @@ struct CaseAddView: View {
                 .onTapGesture { focus = nil }
             
             VStack(spacing: 32) {
+                // 상단 프로필 이미지
                 SuspectImageSelector(
                     image: $selectedImage,
-                    onTap: { showPhotoDialog = true }
+                    onTap: {
+                        if selectedImage == nil {
+                            focus = nil
+                            showPhotoPicker = true
+                        } else {
+                            showPhotoDialog = true
+                        }
+                    }
                 )
                 .confirmationDialog("", isPresented: $showPhotoDialog) {
-                    if selectedImage != nil {
-                        Button(
-                            String(localized: .caseAddDeleteImage),
-                            role: .destructive
-                        ) {
-                            selectedImage = nil
-                            store.send(.setProfileImage(nil))
-                        }
+                    Button(
+                        String(localized: .caseAddDeleteImage),
+                        role: .destructive
+                    ) {
+                        selectedImage = nil
+                        store.send(.setProfileImage(nil))
                     }
                     
                     Button(String(localized: .caseAddSelectImage)) {
@@ -58,6 +64,7 @@ struct CaseAddView: View {
                 .padding(.top, 6)
                 .padding(.bottom, 33)
                 
+                // 텍스트필드 모음
                 CaseAddScrollForm<Field>(
                     caseName: Binding(
                         get: { store.state.caseName },
@@ -82,7 +89,8 @@ struct CaseAddView: View {
                     crimeField: .crime
                 )
                 .scrollIndicators(.hidden)
-                                        
+                
+                // 추가하기 버튼
                 DWButton(
                     isEnabled: .constant(store.state.isFormComplete),
                     title: String(localized: .buttonAddCase)
