@@ -36,7 +36,7 @@ struct MainTabView: View {
     var body: some View {
         ZStack {
             switch store.state.selectedTab {
-            case .map: MapView()
+            case .map: MapView(store: mapStore)
             case .dashboard: DashboardView()
             case .onePage: OnePageView()
             }

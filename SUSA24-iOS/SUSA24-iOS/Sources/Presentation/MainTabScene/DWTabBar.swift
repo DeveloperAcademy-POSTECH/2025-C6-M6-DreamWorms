@@ -15,7 +15,7 @@ struct DWTabBar<Content: View>: View {
     var body: some View {
         GeometryReader {
             let safeArea = $0.safeAreaInsets
-            let bottomPadding = safeArea.bottom / 5
+            let bottomPadding = safeArea.bottom / 4
 
             VStack(spacing: 0) {
                 if activeTab == .map {
