@@ -17,6 +17,9 @@ enum SymbolLiterals: String {
     case edit = "pencil"
     case share = "square.and.arrow.up"
     case delete = "trash"
+    case xmark = "xmark"
+    case warningCircle = "exclamationmark.circle.fill"
+    case camera = "camera.fill"
 }
 
 extension Image {

@@ -14,10 +14,8 @@ struct MainTabView: View {
     
     // MARK: - Dependencies
     
-    @State private var store = DWStore(
-        initialState: MainTabFeature.State(),
-        reducer: MainTabFeature()
-    )
+    @State var store: DWStore<MainTabFeature>
+    @State var mapStore: DWStore<MapFeature>
     
     // MARK: - Properties
     
@@ -76,7 +74,15 @@ private extension MainTabView {}
 
 // MARK: - Preview
 
-#Preview {
-    MainTabView()
-        .environment(AppCoordinator())
-}
+//#Preview {
+//    let mainTabStore = DWStore(
+//        initialState: MainTabFeature.State(),
+//        reducer: MainTabFeature()
+//    )
+//    let mapStore = DWStore(
+//        initialState: MapFeature.State(caseId: UUID()),
+//        reducer: MapFeature(repository: MockLocationRepository())
+//    )
+//    return MainTabView(mainTabStore: mainTabStore, mapStore: mapStore)
+//        .environment(AppCoordinator())
+//}

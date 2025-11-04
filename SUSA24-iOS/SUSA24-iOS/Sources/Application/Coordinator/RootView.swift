@@ -36,15 +36,15 @@ struct RootView: View {
                     case .cameraScene:
                         moduleFactory.makeCameraView()
                     case .caseAddScene:
-                        moduleFactory.makeCaseAddView()
+                        moduleFactory.makeCaseAddView(context: context)
                     case .caseListScene:
                         moduleFactory.makeCaseListView(context: context)
                     case .dashboardScene:
                         moduleFactory.makeDashboardView()
-                    case .mainTabScene:
-                        moduleFactory.makeMainTabView()
+                    case .mainTabScene(let caseId):
+                        moduleFactory.makeMainTabView(caseId: caseId, context: context)
                     case .mapScene:
-                        moduleFactory.makeMapView()
+                        moduleFactory.makeMapView(context: context)
                     case .onePageScene:
                         moduleFactory.makeOnePageView()
                     case .searchScene:

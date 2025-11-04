@@ -10,11 +10,11 @@ import SwiftUI
 
 protocol ModuleFactoryProtocol {
     func makeCameraView() -> CameraView
-    func makeCaseAddView() -> CaseAddView
+    func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView() -> DashboardView
-    func makeMainTabView() -> MainTabView
-    func makeMapView() -> MapView
+    func makeMainTabView(caseId: UUID, context: NSManagedObjectContext) -> MainTabView
+    func makeMapView(context: NSManagedObjectContext) -> MapView
     func makeOnePageView() -> OnePageView
     func makeSearchView() -> SearchView
     func makeSelectLocationView() -> SelectLocationView
@@ -31,8 +31,13 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeCaseAddView() -> CaseAddView {
-        let view = CaseAddView()
+    func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView {
+        let repository = CaseRepository(context: context)
+        let store = DWStore(
+            initialState: CaseAddFeature.State(),
+            reducer: CaseAddFeature(repository: repository)
+        )
+        let view = CaseAddView(store: store)
         return view
     }
     
@@ -50,13 +55,26 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeMainTabView() -> MainTabView {
-        let view = MainTabView()
-        return view
+    func makeMainTabView(caseId: UUID, context: NSManagedObjectContext) -> MainTabView {
+        let mainTabStore = DWStore(
+            initialState: MainTabFeature.State(),
+            reducer: MainTabFeature())
+        let repository = LocationRepository(context: context)
+        let mapStore = DWStore(
+            initialState: MapFeature.State(caseId: caseId),
+            reducer: MapFeature(repository: repository))
+        return MainTabView(
+            store: mainTabStore,
+            mapStore: mapStore
+        )
     }
     
-    func makeMapView() -> MapView {
-        let view = MapView()
+    func makeMapView(context: NSManagedObjectContext) -> MapView {
+        let repository = LocationRepository(context: context)
+        let store = DWStore(
+            initialState: MapFeature.State(),
+            reducer: MapFeature(repository: repository))
+        let view = MapView(store: store)
         return view
     }
     
