@@ -46,6 +46,7 @@ struct MainTabView: View {
                 MainTabIdentifier.onePage.tabLabel
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
