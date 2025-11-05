@@ -13,10 +13,12 @@ import SwiftUI
 ///
 /// 지도 레이어 전환과 현재 위치 재설정 버튼을 세로로 묶은 컨테이너입니다.
 struct MapLayerContainer: View {
+    /// 지도 레이어 버튼의 활성화 상태입니다.
+    let isLayerActive: Bool
     /// 지도 레이어 버튼을 탭했을 때 실행되는 액션입니다.
-    var onLayerTapped: (() -> Void)? = nil
+    let onLayerTapped: (() -> Void)?
     /// 현재 위치 재설정 버튼을 탭했을 때 실행되는 액션입니다.
-    var onRecenterTapped: (() -> Void)? = nil
+    let onRecenterTapped: (() -> Void)?
     
     var buttonSpacing: CGFloat = 27
     var iconWidth: CGFloat = 23
@@ -29,7 +31,7 @@ struct MapLayerContainer: View {
     var body: some View {
         VStack(spacing: buttonSpacing) {
             Button(action: { onLayerTapped?() }) {
-                Image("icn_map_global_layer")
+                Image(isLayerActive ? .mapLayerFill : .mapLayerDefault)
                     .foregroundStyle(.labelNeutral)
                     .frame(width: iconWidth, height: iconHeight)
             }

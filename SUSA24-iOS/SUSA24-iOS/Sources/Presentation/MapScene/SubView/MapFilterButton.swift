@@ -23,7 +23,7 @@ struct MapFilterButton: View {
     let action: () -> Void
     
     /// 버튼에 표시할 아이콘 이미지입니다.
-    var iconImage: Image = Image("icn_cell_range_filter")
+    let iconImage: Image
     /// 좌우 패딩 값입니다.
     var horizontalPadding: CGFloat = 10
     /// 상하 패딩 값입니다.
@@ -56,16 +56,6 @@ struct MapFilterButton: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension MapFilterButton {
-    
-    /// 기본 아이콘을 설정합니다.
-    /// - Parameter icon: inactive 상태에서 사용할 아이콘
-    @discardableResult
-    func setupDefaultIcon(_ icon: Image) -> Self {
-        var view = self
-        view.iconImage = icon
-        return view
-    }
-    
     /// 좌우 패딩을 설정합니다.
     /// - Parameter padding: 좌우 패딩 값
     @discardableResult

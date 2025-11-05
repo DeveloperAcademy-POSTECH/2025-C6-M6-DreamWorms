@@ -18,7 +18,7 @@ struct DWGlassEffectCircleButton: View {
     let action: () -> Void
     
     /// 아이콘 이미지입니다.
-    var icon: Image
+    let icon: Image
     /// 버튼의 크기입니다 (width, height 동일).
     var size: CGFloat = 44
     /// 아이콘의 크기입니다.
@@ -51,15 +51,6 @@ struct DWGlassEffectCircleButton: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension DWGlassEffectCircleButton {
-    
-    /// 아이콘 이미지를 설정합니다.
-    /// - Parameter image: 사용할 아이콘 이미지
-    @discardableResult
-    func setupIcon(_ image: Image) -> Self {
-        var view = self
-        view.icon = image
-        return view
-    }
     
     /// 버튼의 크기를 설정합니다.
     /// - Parameter size: 버튼의 width, height 값

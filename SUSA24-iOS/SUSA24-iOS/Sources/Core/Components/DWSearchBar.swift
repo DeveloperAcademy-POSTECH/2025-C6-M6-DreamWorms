@@ -9,9 +9,9 @@ import SwiftUI
 
 /// 지도 화면에서 사용하는 검색 바 컴포넌트
 struct DWSearchBar: View {
-    var placeholder: String = String(localized: .placeholderSearch)
-    var isTapped: () -> Void
+    let isTapped: () -> Void
 
+    var placeholder: String = String(localized: .placeholderSearch)
     var leadingPadding: CGFloat = 16
     var trailingPadding: CGFloat = 12
     var height: CGFloat = 46
