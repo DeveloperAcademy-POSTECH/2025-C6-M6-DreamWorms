@@ -31,6 +31,8 @@ struct DWGlassEffectCircleButton: View {
     var iconColor: Color = .labelNeutral
     /// 인터랙션(떠오르는) 효과 사용 여부입니다.
     var isInteractiveEffect: Bool = true
+    /// 버튼 배경 색상입니다.
+    var buttonBackgroundColor: Color = .clear
     
     var body: some View {
         Button(action: action) {
@@ -44,7 +46,11 @@ struct DWGlassEffectCircleButton: View {
                 )
                 .frame(width: size, height: size)
         }
-        .glassEffect(isInteractiveEffect ? .regular.interactive() : .regular)
+        .background(
+            Circle()
+                .foregroundColor(buttonBackgroundColor)
+        )
+        .glassEffect(isInteractiveEffect ? .regular.interactive() : .regular.tint(.primaryLight1))
     }
 }
 
@@ -97,6 +103,15 @@ extension DWGlassEffectCircleButton {
     func setupInteractiveEffect(_ isInteractive: Bool) -> Self {
         var view = self
         view.isInteractiveEffect = isInteractive
+        return view
+    }
+    
+    /// 버튼 컬러를 설정합니다.
+    /// - Parameter color: 배경 색상
+    @discardableResult
+    func setupbuttonBackgroundColor(_ color: Color) -> Self {
+        var view = self
+        view.buttonBackgroundColor = color
         return view
     }
 }
