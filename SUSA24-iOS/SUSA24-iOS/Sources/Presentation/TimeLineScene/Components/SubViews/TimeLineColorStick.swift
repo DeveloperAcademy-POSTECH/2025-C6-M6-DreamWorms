@@ -56,6 +56,7 @@ struct TimeLineColorStick: View {
     
     var contentPadding: EdgeInsets = .init(top: 10, leading: 10, bottom: 7, trailing: 10)
     var stickHeight: CGFloat = 41
+    var spotColor: TimeLineColorStickState = .normal
     
     private let shadowOpacity: Double = 1.0
     private let shadowRadius: CGFloat = 4
@@ -90,6 +91,16 @@ extension TimeLineColorStick {
     func setupHeight(_ value: CGFloat) -> Self {
         var v = self
         v.stickHeight = value
+        return v
+    }
+    
+    /// 스팟 색상을 커스텀합니다.
+    ///
+    /// - Parameter value: 막대의 세로 길이 (기본값: 80)
+    @discardableResult
+    func setupSpotColor(_ value: TimeLineColorStickState) -> Self {
+        var v = self
+        v.spotColor = value
         return v
     }
 }
