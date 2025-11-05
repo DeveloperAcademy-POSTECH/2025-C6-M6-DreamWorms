@@ -7,7 +7,9 @@
 
 import SwiftUI
 
-struct MainTabView: View {
+struct MainTabView<MapView: View,
+                    DashboardView: View,
+                    OnePageView: View>: View {
     
     @Environment(AppCoordinator.self)
     private var coordinator
@@ -15,7 +17,6 @@ struct MainTabView: View {
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
-    @State var mapStore: DWStore<MapFeature>
     
     // MARK: - Properties
     
@@ -30,15 +31,33 @@ struct MainTabView: View {
         let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetnet, mapLargeDetent]
         return detentsShowingDivider.contains(selectedDetent)
     }
+    
+    private let mapView: () -> MapView
+    private let dashboardView: () -> DashboardView
+    private let onePageView: () -> OnePageView
+    
+    // MARK: - Init
+    
+    init(
+        store: DWStore<MainTabFeature>,
+        @ViewBuilder mapView: @escaping () -> MapView,
+        @ViewBuilder dashboardView: @escaping () -> DashboardView,
+        @ViewBuilder onePageView: @escaping () -> OnePageView
+    ) {
+        self._store = State(initialValue: store)
+        self.mapView = mapView
+        self.dashboardView = dashboardView
+        self.onePageView = onePageView
+    }
         
     // MARK: - View
     
     var body: some View {
         ZStack {
             switch store.state.selectedTab {
-            case .map: MapView(store: mapStore)
-            case .dashboard: DashboardView()
-            case .onePage: OnePageView()
+            case .map: mapView()
+            case .dashboard: dashboardView()
+            case .onePage: onePageView()
             }
         }
         .sheet(isPresented: .constant(true)) {
