@@ -7,6 +7,19 @@
 
 import SwiftUI
 
+/// 메인 탭 화면의 상태와 액션을 관리하는 Reducer입니다.
+///
+/// MainTabFeature는 Map, Dashboard, OnePage 탭 간의 전환을 관리하고,
+/// 현재 선택된 케이스의 정보와 위치 데이터를 가져와 하위 Feature들에게 제공합니다.
+///
+/// ## Topics
+///
+/// ### State
+/// - ``State``
+///
+/// ### Actions
+/// - ``Action``
+
 struct MainTabFeature: DWReducer {
     
     private let caseRepository: CaseRepositoryProtocol
@@ -23,12 +36,15 @@ struct MainTabFeature: DWReducer {
     /// 메인 탭 화면의 상태를 나타냅니다./
     struct State: DWState {
         /// 현재 표시 중인 케이스의 UUID
-        var caseID: UUID
+        var selectedCurrentCaseId: UUID
         
         /// 현재 케이스의 상세정보
         ///
         /// 'nil'인 경우 아직 로드 되지않았거나 로드에 실패 한 상태
         var caseInfo: Case?
+        
+        /// 현재 선택된 케이스의 로케이션 정보
+        var locations: [Location] = []
         
         /// 현재 선택된 탭
         var selectedTab: MainTabIdentifier = .map
@@ -45,7 +61,7 @@ struct MainTabFeature: DWReducer {
         
         /// 케이스 정보를 로드하는 액션
         /// - Parameter Case?: 로드된 케이스 정보. 로드 실패 시 'nil'
-        case loadCaseInfo(Case?)
+        case loadCaseInfoDetail(case: Case?, locations: [Location])
         
         /// 탭을 선택하는 액션
         ///  - Parameter MainTabIndentifier: 선택할 탭의 식별자
@@ -64,17 +80,19 @@ struct MainTabFeature: DWReducer {
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
         case .onAppear:
-            let caseId = state.caseID
-            return .task {[caseRepository] in
+            let caseId = state.selectedCurrentCaseId
+            let reposiotry = caseRepository
+            return .task {
                 do {
-                    let caseInfo = try await caseRepository.fetchCases(id: caseId)
-                    return .loadCaseInfo(caseInfo)
+                    let (caseInfo, locations) = try await reposiotry.fetchAllDataOfSpecificCase(for: caseId)
+                    return .loadCaseInfoDetail(case: caseInfo, locations: locations)
                 } catch {
-                    return .loadCaseInfo(nil)
+                    return .loadCaseInfoDetail(case: nil, locations: [])
                 }
             }
-        case .loadCaseInfo(let caseInfo):
+        case .loadCaseInfoDetail(let caseInfo, let locations):
             state.caseInfo = caseInfo
+            state.locations = locations
             return .none
             
         case .selectTab(let tab):

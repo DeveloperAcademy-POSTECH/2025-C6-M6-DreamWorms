@@ -56,16 +56,26 @@ final class ModuleFactory: ModuleFactoryProtocol {
     }
     
     func makeMainTabView(caseId: UUID, context: NSManagedObjectContext) -> MainTabView {
+        
+        let locationRepository = LocationRepository(context: context)
+        let caseRepository = CaseRepository(context: context)
+        
         let mainTabStore = DWStore(
-            initialState: MainTabFeature.State(),
-            reducer: MainTabFeature())
-        let repository = LocationRepository(context: context)
+            initialState: MainTabFeature.State(selectedCurrentCaseId: caseId),
+            reducer: MainTabFeature(caseRepository: caseRepository))
+        
         let mapStore = DWStore(
             initialState: MapFeature.State(caseId: caseId),
-            reducer: MapFeature(repository: repository))
+            reducer: MapFeature(repository: locationRepository))
+        
+//        let timelineStore = DWStore(
+//            initialState: <#T##_#>,
+//            reducer: DWReducer)
+        
         return MainTabView(
             store: mainTabStore,
-            mapStore: mapStore
+            mapStore: mapStore,
+//            timelineStore: timelineStore
         )
     }
     
