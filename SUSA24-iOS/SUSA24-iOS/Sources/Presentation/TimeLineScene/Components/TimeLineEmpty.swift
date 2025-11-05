@@ -20,7 +20,7 @@ import SwiftUI
 /// )
 /// ```
 struct TimeLineEmptyState: View {
-    let message: String
+    let message: LocalizedStringResource
     
     var textFont: Font = .bodyMedium14
     var textColor: Color = .labelAlternative

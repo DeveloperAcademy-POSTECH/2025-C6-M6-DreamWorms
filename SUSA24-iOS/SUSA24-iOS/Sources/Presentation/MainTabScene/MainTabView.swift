@@ -70,7 +70,7 @@ struct MainTabView<MapView: View,
                 ),
                 showDivider: showDividerByDetent
             ) {
-                TimeLineView()
+                timeLineView()
             }
             .presentationDetents(
                 store.state.selectedTab == .map
@@ -83,6 +83,9 @@ struct MainTabView<MapView: View,
             .interactiveDismissDisabled(true)
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 }
 

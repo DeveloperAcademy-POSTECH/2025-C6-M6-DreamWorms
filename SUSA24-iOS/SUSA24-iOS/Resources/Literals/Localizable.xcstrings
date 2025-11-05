@@ -47,7 +47,7 @@
       }
     },
     "bottomSheet_no_cellData" : {
-      "comment" : "기지국_정보_없음",
+      "comment" : "기지국_정보가_없음",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {

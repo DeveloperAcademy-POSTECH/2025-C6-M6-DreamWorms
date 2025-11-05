@@ -11,23 +11,75 @@ struct TimeLineView: View {
     
     // MARK: - Dependencies
     
-    @State private var store = DWStore(
-        initialState: TimeLineFeature.State(),
-        reducer: TimeLineFeature()
-    )
-
+    @State var store: DWStore<TimeLineFeature>
+    
     // MARK: - Properties
     
-    private let caseTitle: String = "택시 상습추행"
-    private let suspectName: String = "왕꾹"
-
     // MARK: - View
-
+    
     var body: some View {
-        ScrollView {
-            Text(.testTimeline)
+        VStack(spacing: 0) {
+            // 헤더
+            TimeLineBottomSheetHeader(
+                title: store.state.caseName,
+                suspectName: store.state.suspectName,
+                locationCount: store.state.totalLocationCount
+            )
+            .padding(.top, 12)
+            .padding(.bottom, 16)
+            
+            // 컨텐츠 유무 체크
+            if store.state.isEmpty {
+                TimeLineEmptyState(
+                    message: .bottomSheetNoCellData
+                )
+                .setupRadius(18)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            else {
+                ScrollView {
+                    LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        ForEach(store.state.groupedLocations) { group in
+                            Section {
+                                ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, location in
+                                    TimeLineDetail(
+                                        state: determineColorState(for: location, in: store.state.groupedLocations),
+                                        caseTitle: location.address,
+                                        startTime: location.receivedAt ?? Date(),
+                                        endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
+                                        isLast: index == group.locations.count - 1,
+                                        onTap: {
+                                            store.send(.locationTapped(location))
+                                        }
+                                    )
+                                }
+                            } header: {
+                                TimeLineDateSectionHeader(text: group.headerText)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(.mainBackground)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
         }
-        .padding(.top, 12)
+        .onAppear {
+            store.send(.onAppear)
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// 방문 빈도에 따라 색상 상태를 결정합니다.
+    private func determineColorState(
+        for location: Location,
+        in groups: [LocationGroupedByDate]
+    ) -> TimeLineColorStickState {
+        // TODO: 실제 방문 빈도 로직 구현
+        // 현재는 임시로 normal 반환
+        return .normal
     }
 }
 
@@ -42,6 +94,21 @@ private extension TimeLineView {}
 // MARK: - Preview
 
 #Preview {
-    TimeLineView()
-        .environment(AppCoordinator())
+    let mockCase = Case(
+        id: UUID(),
+        number: "12-2025",
+        name: "택시 상습추행",
+        crime: "추행",
+        suspect: "왕꾹"
+    )
+    
+    let store = DWStore(
+        initialState: TimeLineFeature.State(
+            caseInfo: mockCase,
+            locations: []
+        ),
+        reducer: TimeLineFeature()
+    )
+    
+    return TimeLineView(store: store)
 }
