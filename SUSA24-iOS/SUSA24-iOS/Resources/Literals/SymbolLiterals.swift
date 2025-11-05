@@ -8,8 +8,8 @@
 import SwiftUI
 
 enum SymbolLiterals: String {
-    case map = "map"
-    case analytics = "chart.pie"
+    case map = "map.fill"
+    case analytics = "chart.pie.fill"
     case people = "person.text.rectangle.fill"
     case setting = "gearshape"
     case person = "person.fill"
@@ -20,6 +20,12 @@ enum SymbolLiterals: String {
     case xmark = "xmark"
     case warningCircle = "exclamationmark.circle.fill"
     case camera = "camera.fill"
+    case back = "chevron.left"
+    case search = "magnifyingglass"
+    case scan = "document.viewfinder"
+    case myPosition = "paperplane"
+    case mapLayerDefault = "square.2.layers.3d"
+    case mapLayerFill = "square.2.layers.3d.fill"
     case rightArrow = "chevron.right"
 }
 

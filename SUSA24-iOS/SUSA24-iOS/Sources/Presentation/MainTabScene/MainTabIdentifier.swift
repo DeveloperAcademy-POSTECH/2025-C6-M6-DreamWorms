@@ -10,23 +10,19 @@ import SwiftUI
 enum MainTabIdentifier: Hashable, CaseIterable {
     case map, dashboard, onePage
     
-    var tabLabel: Label<Text, Image> {
+    var title: String {
         switch self {
-        case .map:
-            Label(
-                String(localized: .map),
-                systemImage: SymbolLiterals.map.rawValue
-            )
-        case .dashboard:
-            Label(
-                String(localized: .analyze),
-                systemImage: SymbolLiterals.analytics.rawValue
-            )
-        case .onePage:
-            Label(
-                String(localized: .summary),
-                systemImage: SymbolLiterals.people.rawValue
-            )
+        case .map: String(localized: .map)
+        case .dashboard: String(localized: .analyze)
+        case .onePage: String(localized: .summary)
+        }
+    }
+    
+    var icon: Image {
+        switch self {
+        case .map: Image(.map)
+        case .dashboard: Image(.analytics)
+        case .onePage: Image(.people)
         }
     }
 }

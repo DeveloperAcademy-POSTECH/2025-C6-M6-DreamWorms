@@ -20,6 +20,18 @@ struct MainTabView<MapView: View,
     
     // MARK: - Properties
     
+    @State private var selectedDetent: PresentationDetent = PresentationDetent.height(66)
+    
+    private let mapShortDetent = PresentationDetent.height(73)
+    private let mapMidDetnet   = PresentationDetent.fraction(0.4)
+    private let mapLargeDetent = PresentationDetent.large
+    private let otherDetent    = PresentationDetent.height(66)
+    
+    private var showDividerByDetent: Bool {
+        let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetnet, mapLargeDetent]
+        return detentsShowingDivider.contains(selectedDetent)
+    }
+    
     private let mapView: () -> MapView
     private let dashboardView: () -> DashboardView
     private let onePageView: () -> OnePageView
@@ -41,30 +53,34 @@ struct MainTabView<MapView: View,
     // MARK: - View
     
     var body: some View {
-        TabView(
-            selection: Binding(
-                get: { store.state.selectedTab },
-                set: { store.send(.selectTab($0)) }
-            )
-        ) {
-            Tab(value: MainTabIdentifier.map) {
-                mapView()
-            } label: {
-                MainTabIdentifier.map.tabLabel
-            }
-            
-            Tab(value: MainTabIdentifier.dashboard) {
-                dashboardView()
-            } label: {
-                MainTabIdentifier.dashboard.tabLabel
-            }
-            
-            Tab(value: MainTabIdentifier.onePage) {
-                onePageView()
-            } label: {
-                MainTabIdentifier.onePage.tabLabel
+        ZStack {
+            switch store.state.selectedTab {
+            case .map: mapView()
+            case .dashboard: dashboardView()
+            case .onePage: onePageView()
             }
         }
+        .sheet(isPresented: .constant(true)) {
+            DWTabBar<TimeLineView>(
+                activeTab: Binding(
+                    get: { store.state.selectedTab },
+                    set: { store.send(.selectTab($0)) }
+                ),
+                showDivider: showDividerByDetent
+            ) {
+                TimeLineView()
+            }
+            .presentationDetents(
+                store.state.selectedTab == .map
+                ? [mapShortDetent, mapMidDetnet, mapLargeDetent]
+                : [otherDetent],
+                selection: $selectedDetent
+            )
+            .presentationBackgroundInteraction(.enabled)
+            .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
+            .interactiveDismissDisabled(true)
+        }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
