@@ -81,7 +81,7 @@ struct LocationCard: View {
                 Circle()
                     .fill(iconBackgroundColor)
                     .frame(width: 32, height: 32)
-                Text("\(num)")
+                Text("\(num+1)")
                     .font(.numberSemiBold14)
                     .foregroundColor(.white)
             }
