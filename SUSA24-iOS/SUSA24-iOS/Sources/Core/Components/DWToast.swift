@@ -16,7 +16,7 @@ struct DWToast: View {
         HStack(alignment: .center, spacing: 0) {
             Text(message)
                 .font(.captionRegular13)
-                .foregroundColor(.labelColorNormal)
+                .foregroundColor(.labelCoolNormal)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
