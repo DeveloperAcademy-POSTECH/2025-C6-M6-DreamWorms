@@ -7,41 +7,60 @@
 
 import SwiftUI
 
-struct MainTabView: View {
+struct MainTabView<MapView: View,
+                    DashboardView: View,
+                    OnePageView: View>: View {
     
     @Environment(AppCoordinator.self)
     private var coordinator
     
     // MARK: - Dependencies
     
-    @State var mainTabStore: DWStore<MainTabFeature>
-    @State var mapStore: DWStore<MapFeature>
+    @State var store: DWStore<MainTabFeature>
     
     // MARK: - Properties
+    
+    private let mapView: () -> MapView
+    private let dashboardView: () -> DashboardView
+    private let onePageView: () -> OnePageView
+    
+    // MARK: - Init
+    
+    init(
+        store: DWStore<MainTabFeature>,
+        @ViewBuilder mapView: @escaping () -> MapView,
+        @ViewBuilder dashboardView: @escaping () -> DashboardView,
+        @ViewBuilder onePageView: @escaping () -> OnePageView
+    ) {
+        self._store = State(initialValue: store)
+        self.mapView = mapView
+        self.dashboardView = dashboardView
+        self.onePageView = onePageView
+    }
         
     // MARK: - View
     
     var body: some View {
         TabView(
             selection: Binding(
-                get: { mainTabStore.state.selectedTab },
-                set: { mainTabStore.send(.selectTab($0)) }
+                get: { store.state.selectedTab },
+                set: { store.send(.selectTab($0)) }
             )
         ) {
             Tab(value: MainTabIdentifier.map) {
-                MapView(store: mapStore)
+                mapView()
             } label: {
                 MainTabIdentifier.map.tabLabel
             }
             
             Tab(value: MainTabIdentifier.dashboard) {
-                DashboardView()
+                dashboardView()
             } label: {
                 MainTabIdentifier.dashboard.tabLabel
             }
             
             Tab(value: MainTabIdentifier.onePage) {
-                OnePageView()
+                onePageView()
             } label: {
                 MainTabIdentifier.onePage.tabLabel
             }
