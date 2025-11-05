@@ -22,6 +22,7 @@ struct CaseListHeader: View {
             
             Text(.caseListNavigationTitle)
                 .font(.titleSemiBold22)
+                .kerning(-0.44)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.leading, 24)
