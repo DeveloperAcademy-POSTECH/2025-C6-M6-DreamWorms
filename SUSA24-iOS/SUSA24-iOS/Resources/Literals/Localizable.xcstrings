@@ -211,9 +211,6 @@
         }
       }
     },
-    "en_US" : {
-
-    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",

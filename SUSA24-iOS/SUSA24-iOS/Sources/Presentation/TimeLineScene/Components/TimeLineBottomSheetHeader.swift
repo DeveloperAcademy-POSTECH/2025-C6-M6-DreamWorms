@@ -41,22 +41,23 @@ struct TimeLineBottomSheetHeader: View {
                         .font(.bodyRegular14)
                         .foregroundStyle(.gray60)
                 }
-                
-                // 구분선
-                Circle()
-                    .fill(.labelAssistive)
-                    .frame(width: 3, height: 3)
-                    .padding(.horizontal,6)
-                
-                // 오른쪽: 위치 개수
-                HStack(spacing: 2) {
-                    Image(.icnFillPlace)
-                        .font(.system(size: 16))
-                        .foregroundStyle(.labelAlternative)
+                if locationCount > 0 {
+                    // 구분선
+                    Circle()
+                        .fill(.labelAssistive)
+                        .frame(width: 3, height: 3)
+                        .padding(.horizontal,6)
                     
-                    Text("\(locationCount)개")
-                        .font(.bodyRegular14)
-                        .foregroundStyle(.gray60)
+                    // 오른쪽: 위치 개수
+                    HStack(spacing: 2) {
+                        Image(.icnFillPlace)
+                            .font(.system(size: 16))
+                            .foregroundStyle(.labelAlternative)
+                        
+                        Text("\(locationCount)개")
+                            .font(.bodyRegular14)
+                            .foregroundStyle(.gray60)
+                    }
                 }
             }
         }
@@ -72,9 +73,9 @@ struct TimeLineBottomSheetHeader: View {
 //            suspectName: "왕꿈틀",
 //            locationCount: 27
 //        )
-//        
+//
 //        Divider()
-//        
+//
 //        ScrollView {
 //            VStack(spacing: 12) {
 //                ForEach(0..<5) { _ in
@@ -82,7 +83,7 @@ struct TimeLineBottomSheetHeader: View {
 //                        Circle()
 //                            .fill(.primaryNormal)
 //                            .frame(width: 8, height: 8)
-//                        
+//
 //                        VStack(alignment: .leading, spacing: 4) {
 //                            Text("기지국 위치 정보")
 //                                .font(.bodyMedium14)
@@ -90,7 +91,7 @@ struct TimeLineBottomSheetHeader: View {
 //                                .font(.captionRegular12)
 //                                .foregroundStyle(.labelAlternative)
 //                        }
-//                        
+//
 //                        Spacer()
 //                    }
 //                    .padding(.horizontal, 16)
