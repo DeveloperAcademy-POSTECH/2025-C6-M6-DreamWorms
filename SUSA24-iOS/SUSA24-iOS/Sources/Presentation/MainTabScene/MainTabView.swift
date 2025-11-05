@@ -10,10 +10,7 @@ import SwiftUI
 struct MainTabView<MapView: View,
                     DashboardView: View,
                     OnePageView: View>: View {
-    
-    @Environment(AppCoordinator.self)
-    private var coordinator
-    
+
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
