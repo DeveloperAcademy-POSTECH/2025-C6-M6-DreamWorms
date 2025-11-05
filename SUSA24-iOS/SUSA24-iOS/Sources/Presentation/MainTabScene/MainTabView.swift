@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct MainTabView<MapView: View,
-                    DashboardView: View,
-                    OnePageView: View>: View {
-
+                   DashboardView: View,
+                   OnePageView: View,
+                   TimeLineView: View
+>: View {
+    
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
@@ -32,6 +34,7 @@ struct MainTabView<MapView: View,
     private let mapView: () -> MapView
     private let dashboardView: () -> DashboardView
     private let onePageView: () -> OnePageView
+    private let timeLineView: () -> TimeLineView
     
     // MARK: - Init
     
@@ -39,14 +42,16 @@ struct MainTabView<MapView: View,
         store: DWStore<MainTabFeature>,
         @ViewBuilder mapView: @escaping () -> MapView,
         @ViewBuilder dashboardView: @escaping () -> DashboardView,
-        @ViewBuilder onePageView: @escaping () -> OnePageView
+        @ViewBuilder onePageView: @escaping () -> OnePageView,
+        @ViewBuilder timeLineView: @escaping () -> TimeLineView
     ) {
         self._store = State(initialValue: store)
         self.mapView = mapView
         self.dashboardView = dashboardView
         self.onePageView = onePageView
+        self.timeLineView = timeLineView
     }
-        
+    
     // MARK: - View
     
     var body: some View {

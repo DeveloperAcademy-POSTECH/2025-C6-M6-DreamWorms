@@ -13,7 +13,12 @@ protocol ModuleFactoryProtocol {
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
-    func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<MapView, DashboardView, OnePageView>
+    func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<
+        MapView,
+        DashboardView,
+        OnePageView,
+        TimeLineView
+    >
     func makeMapView(caseID: UUID, context: NSManagedObjectContext) -> MapView
     func makeOnePageView(caseID: UUID, context: NSManagedObjectContext) -> OnePageView
     func makeSearchView() -> SearchView
@@ -66,8 +71,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeMainTabView(
         caseID: UUID,
         context: NSManagedObjectContext
-    ) -> MainTabView<MapView, DashboardView, OnePageView> {
-        
+    ) -> MainTabView<MapView, DashboardView, OnePageView, TimeLineView> {
+    
         let caseRepository = CaseRepository(context: context)
         
         let store = DWStore(
@@ -78,12 +83,14 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let mapView = makeMapView(caseID: caseID, context: context)
         let dashboardView = makeDashboardView(caseID: caseID, context: context)
         let onePageView = makeOnePageView(caseID: caseID, context: context)
+        let timeLineView = makeTimeLineView(caseID: caseID, context: context)
         
         let view = MainTabView(
             store: store,
             mapView: { mapView },
             dashboardView: { dashboardView },
-            onePageView: { onePageView }
+            onePageView: { onePageView },
+            timeLineView: { timeLineView }
         )
         return view
     }
@@ -123,7 +130,10 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeTimeLineView() -> TimeLineView {
+    func makeTimeLineView(
+        caseID: UUID,
+        context: NSManagedObjectContext
+    ) -> TimeLineView {
         let view = TimeLineView()
         return view
     }
