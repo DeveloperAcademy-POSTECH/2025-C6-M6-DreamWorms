@@ -21,7 +21,7 @@ struct MapHeader: View {
     var body: some View {
         HStack(spacing: 12) {
             DWGlassEffectCircleButton(
-                icon: Image(.back),
+                image: Image(.back),
                 action: onBackTapped
             )
             .setupSize(44)
