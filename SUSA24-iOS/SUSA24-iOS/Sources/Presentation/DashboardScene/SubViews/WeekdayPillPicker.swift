@@ -39,7 +39,7 @@ struct WeekdayPillPicker: View {
                 Circle()
                     .fill(isSelected ? .primaryLight2 : .mainBackground)
                     .overlay(
-                        Circle().stroke(isSelected ? .clear : .labelColorNormal, lineWidth: 1)
+                        Circle().stroke(isSelected ? .clear : .labelCoolNormal, lineWidth: 1)
                     )
                     .frame(width: size, height: size)
 

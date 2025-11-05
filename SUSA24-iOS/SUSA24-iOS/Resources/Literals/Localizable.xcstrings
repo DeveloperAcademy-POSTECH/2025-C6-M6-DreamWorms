@@ -7,6 +7,9 @@
     "%lld" : {
 
     },
+    "%lld개" : {
+
+    },
     "analyze" : {
       "comment" : "탭바_대시보드 뷰 이름",
       "extractionState" : "manual",
@@ -15,6 +18,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "분석"
+          }
+        }
+      }
+    },
+    "bottomSheet_caseLocation_pinCount" : {
+      "comment" : "바텀시트_케이스_위치_핀_갯수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(countNumber)lld개"
+          }
+        }
+      }
+    },
+    "bottomSheet_cellLocation_searchText" : {
+      "comment" : "기지국_주소_검색",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 주소 검색"
+          }
+        }
+      }
+    },
+    "bottomSheet_no_cellData" : {
+      "comment" : "기지국_정보_없음",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 확인된 기지국 정보가 없어요."
           }
         }
       }
@@ -439,6 +478,30 @@
         }
       }
     },
+    "timeRange_Format" : {
+      "comment" : "바텀시트_빈도수_체류시간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(start)@ - %2$(end)@"
+          }
+        }
+      }
+    },
+    "us_ver" : {
+      "comment" : "미국_버전",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en_US"
+          }
+        }
+      }
+    },
     "visitDuration" : {
       "comment" : "체류 시간",
       "extractionState" : "manual",
@@ -452,7 +515,7 @@
       }
     },
     "visitFrequency" : {
-      "comment" : "방문 빈도",
+      "comment" : "맵뷰_필터_누적빈도",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {

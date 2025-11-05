@@ -14,11 +14,11 @@ import SwiftUI
 /// `DWCircleButton`은 `buttonStyle(.glass)`를 사용하지만, 이 컴포넌트는 레이아웃 제어를 위해
 /// `glassEffect()` 모디파이어를 직접 사용합니다. 헤더의 백 버튼, 스캔 버튼 등에 사용됩니다.
 struct DWGlassEffectCircleButton: View {
+    /// 아이콘 이미지입니다.
+    let image: Image
     /// 버튼을 탭했을 때 실행되는 액션입니다.
     let action: () -> Void
     
-    /// 아이콘 이미지입니다.
-    let icon: Image
     /// 버튼의 크기입니다 (width, height 동일).
     var size: CGFloat = 44
     /// 아이콘의 크기입니다.
@@ -31,10 +31,12 @@ struct DWGlassEffectCircleButton: View {
     var iconColor: Color = .labelNeutral
     /// 인터랙션(떠오르는) 효과 사용 여부입니다.
     var isInteractiveEffect: Bool = true
+    /// 버튼 배경 색상입니다.
+    var buttonBackgroundColor: Color = .clear
     
     var body: some View {
         Button(action: action) {
-            icon
+            image
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(iconColor)
@@ -44,7 +46,11 @@ struct DWGlassEffectCircleButton: View {
                 )
                 .frame(width: size, height: size)
         }
-        .glassEffect(isInteractiveEffect ? .regular.interactive() : .regular)
+        .background(
+            Circle()
+                .foregroundColor(buttonBackgroundColor)
+        )
+        .glassEffect(isInteractiveEffect ? .regular.interactive() : .regular.tint(.primaryLight1))
     }
 }
 
@@ -97,6 +103,15 @@ extension DWGlassEffectCircleButton {
     func setupInteractiveEffect(_ isInteractive: Bool) -> Self {
         var view = self
         view.isInteractiveEffect = isInteractive
+        return view
+    }
+    
+    /// 버튼 컬러를 설정합니다.
+    /// - Parameter color: 배경 색상
+    @discardableResult
+    func setupbuttonBackgroundColor(_ color: Color) -> Self {
+        var view = self
+        view.buttonBackgroundColor = color
         return view
     }
 }
