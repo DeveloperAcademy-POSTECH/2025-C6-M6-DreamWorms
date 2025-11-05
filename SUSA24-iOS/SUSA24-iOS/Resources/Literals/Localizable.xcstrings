@@ -160,6 +160,18 @@
         }
       }
     },
+    "cellStationRange" : {
+      "comment" : "맵뷰_필터_기지국범위",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 범위"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
@@ -208,6 +220,18 @@
         }
       }
     },
+    "placeholder_search" : {
+      "comment" : "플레이스홀더_검색",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "장소, 주소 검색"
+          }
+        }
+      }
+    },
     "placeholder_suspectName" : {
       "comment" : "플레이스홀더_피의자명을 입력해 주세요.",
       "extractionState" : "manual",
@@ -216,6 +240,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "피의자명을 입력해 주세요."
+          }
+        }
+      }
+    },
+    "recentBaseStation" : {
+      "comment" : "맵뷰_필터_최근기지국",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최근 기지국"
           }
         }
       }
@@ -336,6 +372,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "텍스트를 입력해 주세요."
+          }
+        }
+      }
+    },
+    "visitFrequency" : {
+      "comment" : "맵뷰_필터_누적빈도",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "누적 빈도"
           }
         }
       }

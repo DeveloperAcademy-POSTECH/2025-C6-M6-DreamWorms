@@ -61,6 +61,7 @@ struct MainTabView: View {
             .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
             .interactiveDismissDisabled(true)
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
