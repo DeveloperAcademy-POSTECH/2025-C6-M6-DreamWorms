@@ -9,9 +9,6 @@ import SwiftUI
 
 struct TimeLineView: View {
     
-    @Environment(AppCoordinator.self)
-    private var coordinator
-    
     // MARK: - Dependencies
     
     @State private var store = DWStore(
@@ -20,6 +17,9 @@ struct TimeLineView: View {
     )
 
     // MARK: - Properties
+    
+    private let caseTitle: String = "택시 상습추행"
+    private let suspectName: String = "왕꾹"
 
     // MARK: - View
 

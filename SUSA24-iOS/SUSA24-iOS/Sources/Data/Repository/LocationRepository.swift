@@ -71,7 +71,8 @@ struct LocationRepository: LocationRepositoryProtocol {
                     boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
                     boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
                     locationType: locationEntity.locationType,
-                    receivedAt: locationEntity.receivedAt
+                    receivedAt: locationEntity.receivedAt,
+                    colorType: locationEntity.colorType
                 )
             }
         }
