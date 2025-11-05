@@ -46,7 +46,7 @@ struct CaseRepository: CaseRepositoryProtocol {
         }
     }
     
-    func fetchAllDataOfSpecificCase(for caseId: UUID) async throws -> (case: Case?, locations: [Location]) {
+    func fetchAllDataOfSpecificCase(for caseId: UUID) async throws -> (case: Case?, location: [Location]) {
          try await context.perform {
              let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
              request.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
