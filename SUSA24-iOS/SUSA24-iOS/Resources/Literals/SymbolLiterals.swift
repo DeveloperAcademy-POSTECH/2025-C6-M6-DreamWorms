@@ -24,6 +24,8 @@ enum SymbolLiterals: String {
     case search = "magnifyingglass"
     case scan = "document.viewfinder"
     case myPosition = "paperplane"
+    case mapLayerDefault = "square.2.layers.3d"
+    case mapLayerFill = "square.2.layers.3d.fill"
 }
 
 extension Image {
