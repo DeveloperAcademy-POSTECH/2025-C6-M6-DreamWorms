@@ -39,14 +39,14 @@ struct RootView: View {
                         moduleFactory.makeCaseAddView(context: context)
                     case .caseListScene:
                         moduleFactory.makeCaseListView(context: context)
-                    case .dashboardScene:
-                        moduleFactory.makeDashboardView()
-                    case .mainTabScene(let caseId):
-                        moduleFactory.makeMainTabView(caseId: caseId, context: context)
-                    case .mapScene:
-                        moduleFactory.makeMapView(context: context)
-                    case .onePageScene:
-                        moduleFactory.makeOnePageView()
+                    case .dashboardScene(let caseID):
+                        moduleFactory.makeDashboardView(caseID: caseID, context: context)
+                    case .mainTabScene(let caseID):
+                        moduleFactory.makeMainTabView(caseID: caseID, context: context)
+                    case .mapScene(let caseID):
+                        moduleFactory.makeMapView(caseID: caseID, context: context)
+                    case .onePageScene(let caseID):
+                        moduleFactory.makeOnePageView(caseID: caseID, context: context)
                     case .searchScene:
                         moduleFactory.makeSearchView()
                     case .selectLocationScene:
