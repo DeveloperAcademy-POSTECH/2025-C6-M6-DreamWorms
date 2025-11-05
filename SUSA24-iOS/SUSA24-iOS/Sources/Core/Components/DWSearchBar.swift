@@ -2,189 +2,93 @@
 //  DWSearchBar.swift
 //  SUSA24-iOS
 //
-//  Created by Demian Yoo on 11/4/25.
+//  Created by Moo on 11/5/25.
 //
 
 import SwiftUI
 
-// MARK: - View
-
-/// 검색 전용 텍스트 필드 컴포넌트
-///
-/// 시트(Sheet)에서 사용하기 위한 검색 입력 필드를 제공합니다.
-/// - 오른쪽에 검색 아이콘 또는 작은 X 버튼이 표시됩니다.
-/// - 활성 상태일 때는 외부에 큰 X 버튼을 조합하여 사용합니다.
-/// - Liquid Glass 효과 없이 일반 배경을 사용합니다.
-///
-/// # 상태별 동작
-/// - 내부 작은 X: 텍스트만 지움 (포커스 유지)
-/// - 외부 큰 X: 검색 모드 종료 (포커스 해제 + 텍스트 초기화)
-///
-/// # 사용예시
-/// ```swift
-/// @State private var searchText = ""
-/// @FocusState private var isSearchActive: Bool
-///
-/// HStack(spacing: 12) {
-///     DWSearchBar(
-///         text: $searchText,
-///         isFocused: $isSearchActive
-///     )
-///     .setupPlaceholder("기지국 주소 검색")
-///
-///     if isSearchActive {
-///         Button {
-///             isSearchActive = false
-///             searchText = ""
-///         } label: {
-///             Image(systemName: "xmark")
-///                 .frame(width: 44, height: 44)
-///                 .background(.mainAlternative)
-///                 .clipShape(Circle())
-///         }
-///         .transition(.opacity)
-///     }
-/// }
-/// .animation(.snappy, value: isSearchActive)
-/// ```
+/// 지도 화면에서 사용하는 검색 바 컴포넌트
 struct DWSearchBar: View {
-    /// 바인딩된 텍스트 값입니다.
-    @Binding var text: String
-    /// 포커스 상태를 외부에서 제어하기 위한 바인딩입니다.
-    @FocusState.Binding var isFocused: Bool
-    
-    /// 플레이스홀더 (필드 안에 표시됩니다)
-    var placeholder: String?
-    /// 텍스트 입력 영역의 패딩
-    var contentPadding: EdgeInsets = .init(top: 11, leading: 16, bottom: 11, trailing: 12)
-    
-    /// 키보드 하단 리턴 버튼 타입
-    var submitLabel: SubmitLabel = .search
-    
-    /// 리턴 버튼 탭 시 실행되는 액션
-    var onSubmit: (() -> Void)? = nil
-    
+    let isTapped: () -> Void
+
+    var placeholder: String = String(localized: .placeholderSearch)
+    var leadingPadding: CGFloat = 16
+    var trailingPadding: CGFloat = 12
+    var height: CGFloat = 46
+    var isInteractiveEffect: Bool = true
+
+    var iconImage: Image = Image(.search)
+    var iconColor: Color = .labelNeutral
+
     var body: some View {
-        HStack {
-            TextField(
-                "",
-                text: $text,
-                prompt: Text(placeholder ?? "")
+        Button {
+            isTapped()
+        } label: {
+            HStack {
+                Text(placeholder)
                     .font(.bodyMedium16)
-                    .foregroundColor(.labelAssistive)
-            )
-            .focused($isFocused)
-            .font(.bodyMedium16)
-            .foregroundStyle(isFocused || !text.isEmpty ? .labelNormal : .labelAssistive)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .submitLabel(submitLabel)
-            .onSubmit { onSubmit?() }
-            
-            if isFocused, !text.isEmpty {
-                Button {
-                    text = ""
-                } label: {
-                    Image(.xmark)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 20, height: 20)
-                        .background(.labelAssistive)
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .transition(.opacity)
-            } else {
-                Image(.search)
-                    .font(.system(size: 20))
                     .foregroundStyle(.labelAssistive)
+                    .padding(.leading, leadingPadding)
+
+                Spacer()
+
+                iconImage
                     .frame(width: 24, height: 24)
+                    .foregroundStyle(iconColor)
+                    .padding(.trailing, trailingPadding)
             }
         }
-        .padding(contentPadding)
-        .background(.mainAlternative)
-        .clipShape(RoundedRectangle(cornerRadius: 100))
-        .animation(.snappy(duration: 0.2), value: text)
-        .animation(.snappy(duration: 0.2), value: isFocused)
+        .frame(maxWidth: .infinity, minHeight: height, maxHeight: height)
+        .glassEffect(isInteractiveEffect ? .regular.interactive() : .regular)
     }
 }
 
-// MARK: - Progressive Disclosure
+// MARK: - Extension Methods (Progressive Disclosure)
 
 extension DWSearchBar {
     
+    /// 검색 바의 높이를 설정합니다.
+    /// - Parameter height: 검색 바의 높이 값
+    @discardableResult
+    func setupHeight(_ height: CGFloat) -> Self {
+        var view = self
+        view.height = height
+        return view
+    }
+    
     /// 플레이스홀더 텍스트를 설정합니다.
-    ///
-    /// - Parameter text: 검색 바에 표시될 플레이스홀더
+    /// - Parameter placeholder: 검색 바에 표시할 플레이스홀더 텍스트
     @discardableResult
-    func setupPlaceholder(_ text: String) -> Self {
-        var v = self
-        v.placeholder = text
-        return v
+    func setupPlaceholder(_ placeholder: String) -> Self {
+        var view = self
+        view.placeholder = placeholder
+        return view
     }
     
-    /// 텍스트 필드 내부의 패딩을 설정합니다.
-    ///
-    /// - Parameter insets: 내부 패딩 값
+    /// 텍스트 왼쪽 패딩을 설정합니다.
+    /// - Parameter padding: 텍스트의 왼쪽 패딩 값
     @discardableResult
-    func setupPadding(_ insets: EdgeInsets) -> Self {
-        var v = self
-        v.contentPadding = insets
-        return v
+    func setupLeadingPadding(_ padding: CGFloat) -> Self {
+        var view = self
+        view.leadingPadding = padding
+        return view
     }
     
-    /// 키보드 리턴 버튼 동작을 설정합니다.
-    ///
-    /// - Parameters:
-    ///   - submit: 리턴 키 타입 (`.search`, `.done` 등)
-    ///   - onSubmit: 리턴 키를 눌렀을 때 실행할 액션
+    /// 돋보기 아이콘의 오른쪽 패딩을 설정합니다.
+    /// - Parameter padding: 돋보기 아이콘의 오른쪽 패딩 값
     @discardableResult
-    func setupSubmit(
-        _ submit: SubmitLabel = .search,
-        onSubmit: (() -> Void)? = nil
-    ) -> Self {
-        var v = self
-        v.submitLabel = submit
-        v.onSubmit = onSubmit
-        return v
+    func setupTrailingPadding(_ padding: CGFloat) -> Self {
+        var view = self
+        view.trailingPadding = padding
+        return view
+    }
+    
+    /// 아이콘 색상을 설정합니다.
+    /// - Parameter color: 아이콘 색상
+    @discardableResult
+    func setupIconColor(_ color: Color) -> Self {
+        var view = self
+        view.iconColor = color
+        return view
     }
 }
-
-// MARK: - Preview
-
-//#Preview("Search Bar - States") {
-//    SearchBarStatePreview()
-//}
-
-// 미리보기 Helper
-//private struct SearchBarStatePreview: View {
-//    @State private var text = ""
-//    @FocusState private var isFocused: Bool
-//    
-//    var body: some View {
-//        HStack {
-//            DWSearchBar(
-//                text: $text,
-//                isFocused: $isFocused,
-//            )
-//            .setupPlaceholder("기지국 검색")
-//            
-//            if isFocused {
-//                Button {
-//                    isFocused = false
-//                } label: {
-//                    Image(.xmark)
-//                        .font(.system(size: 20, weight: .medium))
-//                        .foregroundStyle(.labelNeutral)
-//                        .frame(width: 44, height: 44)
-//                        .background(.mainBackground)
-//                        .clipShape(Circle())
-//                }
-//                .transition(.opacity)
-//            }
-//        }
-//        .padding()
-//        .animation(.snappy, value: isFocused)
-//        .background(Color(.black))
-//    }
-//}
