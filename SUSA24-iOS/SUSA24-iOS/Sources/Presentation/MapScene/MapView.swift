@@ -41,27 +41,27 @@ struct MapView: View {
                         isActive: store.state.isBaseStationRangeSelected,
                         action: {
                             store.send(.selectFilter(.cellStationRange))
-                        }
+                        },
+                        iconImage: Image(MapFilterType.cellStationRange.iconName)
                     )
-                    .setupDefaultIcon(Image(MapFilterType.cellStationRange.iconName))
                     
                     MapFilterButton(
                         text: MapFilterType.visitFrequency.rawValue,
                         isActive: store.state.isVisitFrequencySelected,
                         action: {
                             store.send(.selectFilter(.visitFrequency))
-                        }
+                        },
+                        iconImage: Image(MapFilterType.visitFrequency.iconName)
                     )
-                    .setupDefaultIcon(Image(MapFilterType.visitFrequency.iconName))
                     
                     MapFilterButton(
                         text: MapFilterType.recentBaseStation.rawValue,
                         isActive: store.state.isRecentBaseStationSelected,
                         action: {
                             store.send(.selectFilter(.recentBaseStation))
-                        }
+                        },
+                        iconImage: Image(MapFilterType.recentBaseStation.iconName)
                     )
-                    .setupDefaultIcon(Image(MapFilterType.recentBaseStation.iconName))
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 18)
