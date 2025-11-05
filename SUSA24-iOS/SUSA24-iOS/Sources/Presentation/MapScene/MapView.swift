@@ -70,7 +70,13 @@ struct MapView: View {
                     Spacer()
                     
                     VStack(spacing: 6) {
-                        MapLayerContainer()
+                        MapLayerContainer(
+                            isLayerActive: store.state.isMapLayerSheetPresented,
+                            onLayerTapped: {
+                                store.send(.toggleMapLayerSheet)
+                            },
+                            onRecenterTapped: nil
+                        )
                         
                         DWGlassEffectCircleButton(
                             action: { coordinator.push(.cameraScene) },
@@ -86,6 +92,7 @@ struct MapView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        // TODO: 지도 레이어 시트 구현 (store.state.isMapLayerSheetPresented 사용)
         .onAppear {
             store.send(.onAppear)
         }

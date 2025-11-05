@@ -33,6 +33,9 @@ struct MapFeature: DWReducer {
         var isVisitFrequencySelected: Bool = false
         /// 최근 기지국 필터의 선택 상태입니다.
         var isRecentBaseStationSelected: Bool = false
+        
+        /// 지도 레이어 시트의 표시 상태입니다.
+        var isMapLayerSheetPresented: Bool = false
     }
     
     // MARK: - Action
@@ -47,6 +50,8 @@ struct MapFeature: DWReducer {
         /// 필터를 선택/해제하는 액션입니다.
         /// - Parameter filter: 선택할 필터 타입
         case selectFilter(MapFilterType)
+        /// 지도 레이어 시트를 토글하는 액션입니다.
+        case toggleMapLayerSheet
     }
     
     // MARK: - Reducer
@@ -85,6 +90,10 @@ struct MapFeature: DWReducer {
             case .recentBaseStation:
                 state.isRecentBaseStationSelected.toggle()
             }
+            return .none
+            
+        case .toggleMapLayerSheet:
+            state.isMapLayerSheetPresented.toggle()
             return .none
         }
     }
