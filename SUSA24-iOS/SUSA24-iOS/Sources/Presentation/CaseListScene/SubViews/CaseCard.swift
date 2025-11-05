@@ -43,7 +43,7 @@ struct CaseCard: View {
             .padding(.top, 8)
             
             Divider()
-                .background(.labelColorNormal)
+                .background(.labelCoolNormal)
                 .padding(.bottom, 2)
 
             HStack {
@@ -103,7 +103,7 @@ struct CaseCard: View {
                 .fill(.mainAlternative)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(.labelColorNormal, lineWidth: 0.5)
+                        .stroke(.labelCoolNormal, lineWidth: 0.5)
                 )
         )
     }
