@@ -43,6 +43,18 @@
         }
       }
     },
+    "bottomSheet_no_cellData" : {
+      "comment" : "기지국_정보_없음",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 확인된 기지국 정보가 없어요."
+          }
+        }
+      }
+    },
     "button_addCase" : {
       "comment" : "버튼_사건추가",
       "extractionState" : "manual",
