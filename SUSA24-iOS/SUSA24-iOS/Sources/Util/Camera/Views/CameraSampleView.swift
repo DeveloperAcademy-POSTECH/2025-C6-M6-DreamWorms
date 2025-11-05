@@ -20,16 +20,6 @@ struct CameraSampleView: View {
             VStack {
                 // MARK: - 상단: 상태 표시
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("상태")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        Text("\(camera.cameraStatus.description)")
-                            .font(.body)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                    }
                     
                     Spacer()
                     
@@ -48,32 +38,6 @@ struct CameraSampleView: View {
                 .background(Color.black.opacity(0.4))
                 .cornerRadius(8)
                 .padding(16)
-                
-                Spacer()
-                
-                // MARK: - 중간: 상태 메시지
-                VStack(spacing: 8) {
-                    if camera.isRunning {
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 8, height: 8)
-                            
-                            Text("카메라 실행 중")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                        }
-                    }
-                    
-                    Text(statusMessage)
-                        .font(.caption)
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(12)
-                .background(Color.black.opacity(0.4))
-                .cornerRadius(8)
-                .padding(.horizontal, 12)
                 
                 Spacer()
                 
@@ -125,7 +89,6 @@ struct CameraSampleView: View {
         .ignoresSafeArea()
         .task {
             await camera.start()
-            statusMessage = "카메라가 시작되었습니다"
         }
         .onDisappear {
             Task {

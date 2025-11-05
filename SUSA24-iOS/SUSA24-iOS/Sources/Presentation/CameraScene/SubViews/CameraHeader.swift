@@ -23,7 +23,7 @@ struct CameraHeader: View {
                     image: Image(.checkmark),
                     action: onScanTapped
                 )
-                .setupIconColor(.labelColorNormal)
+                .setupIconColor(.labelCoolNormal)
                 .setupInteractiveEffect(true)
                 .setupbuttonBackgroundColor(.primaryNormal)
             }

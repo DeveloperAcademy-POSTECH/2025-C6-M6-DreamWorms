@@ -4,6 +4,12 @@
     "" : {
 
     },
+    "%lld" : {
+
+    },
+    "%lld개" : {
+
+    },
     "analyze" : {
       "comment" : "탭바_대시보드 뷰 이름",
       "extractionState" : "manual",
@@ -12,6 +18,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "분석"
+          }
+        }
+      }
+    },
+    "bottomSheet_caseLocation_pinCount" : {
+      "comment" : "바텀시트_케이스_위치_핀_갯수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(countNumber)lld개"
+          }
+        }
+      }
+    },
+    "bottomSheet_cellLocation_searchText" : {
+      "comment" : "기지국_주소_검색",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 주소 검색"
+          }
+        }
+      }
+    },
+    "bottomSheet_no_cellData" : {
+      "comment" : "기지국_정보_없음",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 확인된 기지국 정보가 없어요."
           }
         }
       }
@@ -220,14 +262,62 @@
         }
       }
     },
-    "cellStationRange" : {
-      "comment" : "맵뷰_필터_기지국범위",
+    "dashboard_visitDurationCellTower_Title" : {
+      "comment" : "대시보드_기지국별 체류시간_타이틀",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "기지국 범위"
+            "value" : "기지국별 체류시간"
+          }
+        }
+      }
+    },
+    "dashboard_visitDurationRank_Description" : {
+      "comment" : "대시보드_체류시간 순위_설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "머문시간이 가장 긴 기지국 위치 순위입니다."
+          }
+        }
+      }
+    },
+    "dashboard_visitDurationRank_Title" : {
+      "comment" : "대시보드_체류시간 순위_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "체류시간 순위"
+          }
+        }
+      }
+    },
+    "dashboard_visitFreqRank_Description" : {
+      "comment" : "대시보드_방문빈도 순위_설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방문빈도가 가장 높은 기지국 위치 순위입니다."
+          }
+        }
+      }
+    },
+    "dashboard_visitFreqRank_Title" : {
+      "comment" : "대시보드_방문빈도 순위_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방문빈도 순위"
           }
         }
       }
@@ -388,6 +478,18 @@
         }
       }
     },
+    "test_analyze" : {
+      "comment" : "분석_타이틀 예시 문구",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "top 3 에서 7-8시에\n머무를 가능성이 높아요."
+          }
+        }
+      }
+    },
     "test_Camera" : {
       "comment" : "⚠️지울내용",
       "extractionState" : "manual",
@@ -496,6 +598,42 @@
         }
       }
     },
+    "timeRange_Format" : {
+      "comment" : "바텀시트_빈도수_체류시간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(start)@ - %2$(end)@"
+          }
+        }
+      }
+    },
+    "us_ver" : {
+      "comment" : "미국_버전",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en_US"
+          }
+        }
+      }
+    },
+    "visitDuration" : {
+      "comment" : "체류 시간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "체류 시간"
+          }
+        }
+      }
+    },
     "visitFrequency" : {
       "comment" : "맵뷰_필터_누적빈도",
       "extractionState" : "manual",
@@ -503,7 +641,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "누적 빈도"
+            "value" : "방문 빈도"
           }
         }
       }

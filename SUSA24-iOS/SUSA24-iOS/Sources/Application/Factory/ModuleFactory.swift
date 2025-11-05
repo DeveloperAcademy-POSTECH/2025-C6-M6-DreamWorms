@@ -9,13 +9,13 @@ import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
-    func makeCameraView() -> CameraView
+    func makeCameraView() -> CameraSampleView
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
-    func makeDashboardView() -> DashboardView
-    func makeMainTabView(caseId: UUID, context: NSManagedObjectContext) -> MainTabView
-    func makeMapView(context: NSManagedObjectContext) -> MapView
-    func makeOnePageView() -> OnePageView
+    func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
+    func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<MapView, DashboardView, OnePageView>
+    func makeMapView(caseID: UUID, context: NSManagedObjectContext) -> MapView
+    func makeOnePageView(caseID: UUID, context: NSManagedObjectContext) -> OnePageView
     func makeSearchView() -> SearchView
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
@@ -26,8 +26,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
     
-    func makeCameraView() -> CameraView {
-        let view = CameraView()
+    func makeCameraView() -> CameraSampleView {
+        let view = CameraSampleView()
         return view
     }
     
@@ -50,26 +50,45 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeDashboardView() -> DashboardView {
-        let view = DashboardView()
+    func makeDashboardView(
+        caseID: UUID,
+        context: NSManagedObjectContext
+    ) -> DashboardView {
+        let repository = LocationRepository(context: context)
+        let store = DWStore(
+            initialState: DashboardFeature.State(),
+            reducer: DashboardFeature(repository: repository)
+        )
+        let view = DashboardView(store: store, currentCaseID: caseID)
         return view
     }
     
-    func makeMainTabView(caseId: UUID, context: NSManagedObjectContext) -> MainTabView {
-        let mainTabStore = DWStore(
+    func makeMainTabView(
+        caseID: UUID,
+        context: NSManagedObjectContext
+    ) -> MainTabView<MapView, DashboardView, OnePageView> {
+        let store = DWStore(
             initialState: MainTabFeature.State(),
-            reducer: MainTabFeature())
-        let repository = LocationRepository(context: context)
-        let mapStore = DWStore(
-            initialState: MapFeature.State(caseId: caseId),
-            reducer: MapFeature(repository: repository))
-        return MainTabView(
-            store: mainTabStore,
-            mapStore: mapStore
+            reducer: MainTabFeature()
         )
+        
+        let mapView = makeMapView(caseID: caseID, context: context)
+        let dashboardView = makeDashboardView(caseID: caseID, context: context)
+        let onePageView = makeOnePageView(caseID: caseID, context: context)
+        
+        let view = MainTabView(
+            store: store,
+            mapView: { mapView },
+            dashboardView: { dashboardView },
+            onePageView: { onePageView }
+        )
+        return view
     }
     
-    func makeMapView(context: NSManagedObjectContext) -> MapView {
+    func makeMapView(
+        caseID: UUID,
+        context: NSManagedObjectContext
+    ) -> MapView {
         let repository = LocationRepository(context: context)
         let store = DWStore(
             initialState: MapFeature.State(),
@@ -78,7 +97,10 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeOnePageView() -> OnePageView {
+    func makeOnePageView(
+        caseID: UUID,
+        context: NSManagedObjectContext
+    ) -> OnePageView {
         let view = OnePageView()
         return view
     }
