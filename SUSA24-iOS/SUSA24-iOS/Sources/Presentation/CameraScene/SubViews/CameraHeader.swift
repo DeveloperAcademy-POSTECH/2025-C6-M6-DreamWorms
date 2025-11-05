@@ -20,8 +20,8 @@ struct CameraHeader: View {
                 )
                 Spacer()
                 DWGlassEffectCircleButton(
-                    action: onScanTapped,
-                    icon: Image(.checkmark)
+                    image: Image(.checkmark),
+                    action: onScanTapped
                 )
                 .setupIconColor(.labelColorNormal)
                 .setupInteractiveEffect(true)

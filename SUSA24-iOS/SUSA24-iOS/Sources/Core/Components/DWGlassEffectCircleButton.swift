@@ -14,11 +14,11 @@ import SwiftUI
 /// `DWCircleButton`은 `buttonStyle(.glass)`를 사용하지만, 이 컴포넌트는 레이아웃 제어를 위해
 /// `glassEffect()` 모디파이어를 직접 사용합니다. 헤더의 백 버튼, 스캔 버튼 등에 사용됩니다.
 struct DWGlassEffectCircleButton: View {
+    /// 아이콘 이미지입니다.
+    let image: Image
     /// 버튼을 탭했을 때 실행되는 액션입니다.
     let action: () -> Void
     
-    /// 아이콘 이미지입니다.
-    let icon: Image
     /// 버튼의 크기입니다 (width, height 동일).
     var size: CGFloat = 44
     /// 아이콘의 크기입니다.
@@ -36,7 +36,7 @@ struct DWGlassEffectCircleButton: View {
     
     var body: some View {
         Button(action: action) {
-            icon
+            image
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(iconColor)
