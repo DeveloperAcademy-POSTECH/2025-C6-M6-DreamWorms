@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "%lld" : {
+
+    },
     "analyze" : {
       "comment" : "탭바_대시보드 뷰 이름",
       "extractionState" : "manual",
@@ -60,6 +63,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "공유하기"
+          }
+        }
+      }
+    },
+    "camera_CountLimit" : {
+      "comment" : "카메라_토스트 메세지_이미지 10장 초과",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최대 10장까지 업로드할 수 있습니다."
           }
         }
       }
@@ -172,6 +187,18 @@
         }
       }
     },
+    "photoDetails_current" : {
+      "comment" : "이미지 상세_현재 이미지와 총 이미지 표시",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%@"
+          }
+        }
+      }
+    },
     "placeholder_caseName" : {
       "comment" : "플레이스홀더_사건명을 입력해 주세요",
       "extractionState" : "manual",
@@ -216,6 +243,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "피의자명을 입력해 주세요."
+          }
+        }
+      }
+    },
+    "scanList_title" : {
+      "comment" : "문서스캔 리스트_제목",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도에 표시할 주소를\\n모두 선택해주세요"
+          }
+        }
+      }
+    },
+    "scanLoading_subTitle" : {
+      "comment" : "문서스캔 로딩_부제목",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잠시만 기다려 주세요."
+          }
+        }
+      }
+    },
+    "scanLoading_title" : {
+      "comment" : "문서스캔 로딩_상태 제목",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문서를 정리하고 있어요"
           }
         }
       }
@@ -339,6 +402,15 @@
           }
         }
       }
+    },
+    "오류" : {
+
+    },
+    "카메라" : {
+
+    },
+    "확인" : {
+
     }
   },
   "version" : "1.1"
