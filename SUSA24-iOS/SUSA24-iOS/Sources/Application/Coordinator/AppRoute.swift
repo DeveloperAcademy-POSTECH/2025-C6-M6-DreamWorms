@@ -11,10 +11,10 @@ enum AppRoute: Hashable {
     case cameraScene
     case caseAddScene
     case caseListScene
-    case dashboardScene
-    case mainTabScene(caseId: UUID)
-    case mapScene
-    case onePageScene
+    case dashboardScene(caseID: UUID)
+    case mainTabScene(caseID: UUID)
+    case mapScene(caseID: UUID)
+    case onePageScene(caseID: UUID)
     case searchScene
     case selectLocationScene
     case settingScene
