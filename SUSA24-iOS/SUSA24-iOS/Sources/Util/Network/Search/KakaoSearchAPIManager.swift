@@ -30,31 +30,24 @@ final class KakaoSearchAPIManager {
     
     /// 공통 네트워크 요청 처리 메서드
     /// - Parameters:
-    ///   - url: 요청 URL
-    ///   - parameters: 요청 파라미터 (Encodable & Sendable)
+    ///   - url: 완전한 요청 URL (쿼리 파라미터 포함)
     ///   - responseType: 응답 타입
     /// - Returns: 디코딩된 응답 객체
     /// - Throws: `KakaoSearchError`
-    private func request<T: Decodable & Sendable>(
+    private func request<T: Decodable>(
         url: String,
-        parameters: some Encodable & Sendable,
         responseType: T.Type
     ) async throws -> T {
         do {
             let requestData = try await session
-                .request(url, method: .get, parameters: parameters, encoder: URLEncodedFormParameterEncoder.default, headers: NetworkHeader.kakaoHeaders)
+                .request(url, method: .get, headers: NetworkHeader.kakaoHeaders)
                 .serializingData()
                 .value
             
             let response = try decoder.decode(T.self, from: requestData)
-            
-            // 응답 검증: totalCount가 있는 응답인지 확인
             if let metaResponse = response as? any KakaoResponseMeta {
-                guard metaResponse.totalCount > 0 else {
-                    throw KakaoSearchError.noResults
-                }
+                guard metaResponse.totalCount > 0 else { throw KakaoSearchError.noResults }
             }
-            
             return response
         } catch let error as DecodingError {
             throw KakaoSearchError.decodingFailed(error)
@@ -79,12 +72,15 @@ extension KakaoSearchAPIManager {
     /// - Returns: 좌표에 해당하는 주소 정보 응답
     /// - Throws: `KakaoSearchError`
     func fetchLocationFromCoord(x: String, y: String, inputCoord: String? = nil) async throws -> KakaoCoordToLocationResponseDTO {
-        let parameters = KakaoCoordToLocationRequestDTO(x: x, y: y, inputCoord: inputCoord)
-        return try await request(
-            url: URLConstant.kakaoCoordToLocationURL,
-            parameters: parameters,
-            responseType: KakaoCoordToLocationResponseDTO.self
+        let fullURL = try URLBuilder.build(
+            baseURL: URLConstant.kakaoCoordToLocationURL,
+            parameters: [
+                "x": x,
+                "y": y,
+                "inputCoord": inputCoord
+            ]
         )
+        return try await request(url: fullURL, responseType: KakaoCoordToLocationResponseDTO.self)
     }
     
     /// 키워드로 장소를 검색합니다.
@@ -98,12 +94,18 @@ extension KakaoSearchAPIManager {
     /// - Returns: 키워드 검색 결과 응답
     /// - Throws: `KakaoSearchError`
     func fetchPlaceFromKeyword(query: String, x: String? = nil, y: String? = nil, radius: Int? = nil, page: Int? = nil, size: Int? = nil) async throws -> KakaoKeywordToPlaceResponseDTO {
-        let parameters = KakaoKeywordToPlaceRequestDTO(query: query, x: x, y: y, radius: radius, page: page, size: size)
-        return try await request(
-            url: URLConstant.kakaoKeywordToPlaceURL,
-            parameters: parameters,
-            responseType: KakaoKeywordToPlaceResponseDTO.self
+        let fullURL = try URLBuilder.build(
+            baseURL: URLConstant.kakaoKeywordToPlaceURL,
+            parameters: [
+                "query": query,
+                "x": x,
+                "y": y,
+                "radius": radius,
+                "page": page,
+                "size": size
+            ]
         )
+        return try await request(url: fullURL, responseType: KakaoKeywordToPlaceResponseDTO.self)
     }
 }
 
