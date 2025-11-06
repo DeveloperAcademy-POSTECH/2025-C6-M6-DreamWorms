@@ -9,7 +9,7 @@ import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
-    func makeCameraView() -> CameraView
+    func makeCameraView() -> CameraSampleView
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
@@ -31,8 +31,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
     
-    func makeCameraView() -> CameraView {
-        let view = CameraView()
+    func makeCameraView() -> CameraSampleView {
+        let view = CameraSampleView()
         return view
     }
     
