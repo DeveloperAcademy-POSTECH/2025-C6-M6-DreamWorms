@@ -68,7 +68,7 @@ private extension CameraView {
 
 // MARK: - Preview
 
-#Preview {
-    CameraView()
-        .environment(AppCoordinator())
-}
+//#Preview {
+//    CameraView()
+//        .environment(AppCoordinator())
+//}

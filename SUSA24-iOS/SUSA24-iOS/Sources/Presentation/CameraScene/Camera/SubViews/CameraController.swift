@@ -34,6 +34,6 @@ struct CameraController: View {
     }
 }
 
-#Preview {
-    CameraController(image: Image(.camera), onDetailsTapped: {}, onPhotoCaptureTapped: {})
-}
+//#Preview {
+//    CameraController(image: Image(.camera), onDetailsTapped: {}, onPhotoCaptureTapped: {})
+//}
