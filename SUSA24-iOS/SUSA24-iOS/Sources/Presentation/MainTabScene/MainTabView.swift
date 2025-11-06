@@ -38,8 +38,8 @@ struct MainTabView<MapView: View,
     private let dashboardView: () -> DashboardView
     private let onePageView: () -> OnePageView
     private var timeLineView: some View {
-           TimeLineView(store: timeLineStore)
-       }
+        TimeLineView(store: timeLineStore)
+    }
     
     
     // MARK: - Init
@@ -98,6 +98,11 @@ struct MainTabView<MapView: View,
                 caseInfo: caseInfo,
                 locations: store.state.locations
             ))
+        }
+        
+        .onChange(of: selectedDetent) { _, newDetent in
+            let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
+            timeLineStore.send(.setMinimized(isMinimized))
         }
     }
 }

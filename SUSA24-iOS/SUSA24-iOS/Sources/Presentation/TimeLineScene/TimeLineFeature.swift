@@ -34,6 +34,7 @@ struct TimeLineFeature: DWReducer {
         
         var scrollTarget: ScrollTarget? = nil
         
+        var isMinimized: Bool = false
         
         /// 케이스 이름
         var caseName: String {
@@ -78,6 +79,7 @@ struct TimeLineFeature: DWReducer {
         
         case updateData(caseInfo: Case?, locations: [Location])
         
+        case setMinimized(Bool)
     }
     
     // MARK: - Reducer
@@ -85,6 +87,9 @@ struct TimeLineFeature: DWReducer {
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
         case .onAppear:
+            // 탭바를 위한 조건
+            state.isMinimized = true
+            
             return .none
             
         case .locationTapped:
@@ -114,7 +119,12 @@ struct TimeLineFeature: DWReducer {
             state.locations = locations
             state.groupedLocations = LocationGroupedByDate.groupByDate(locations)
             return .none
+            
+        case .setMinimized(let isMinimized):
+            state.isMinimized = isMinimized
+            return .none
         }
+        
     }
     //MARK: - Helper
     /// Date를 String ID로 변환 ("2025-01-06" 형식)
