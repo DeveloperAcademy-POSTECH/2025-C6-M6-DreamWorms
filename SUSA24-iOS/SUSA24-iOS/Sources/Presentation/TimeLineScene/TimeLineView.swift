@@ -34,7 +34,10 @@ struct TimeLineView: View {
                     message: .bottomSheetNoCellData
                 )
                 .setupRadius(18)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .setupBackground(.mainBackground)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+                .opacity(0.5)
             }
             else {
                 ScrollView {
@@ -57,7 +60,6 @@ struct TimeLineView: View {
                                 TimeLineDateSectionHeader(text: group.headerText)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 12)
-                                    .background(.mainBackground)
                             }
                         }
                     }
@@ -98,8 +100,8 @@ private extension TimeLineView {}
         id: UUID(),
         number: "12-2025",
         name: "택시 상습추행",
-        crime: "추행",
-        suspect: "왕꾹"
+        crime: "성추행",
+        suspect: "김꿈틀"
     )
     
     let store = DWStore(
@@ -110,5 +112,5 @@ private extension TimeLineView {}
         reducer: TimeLineFeature()
     )
     
-    return TimeLineView(store: store)
+    TimeLineView(store: store)
 }

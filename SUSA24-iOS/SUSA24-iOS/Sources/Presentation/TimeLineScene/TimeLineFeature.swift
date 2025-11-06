@@ -18,6 +18,8 @@ struct TimeLineFeature: DWReducer {
         var locations: [Location]
         /// 날짜별로 그룹화된 Location
         var groupedLocations: [LocationGroupedByDate] = []
+        
+        
         /// 케이스 이름
         var caseName: String {
             caseInfo?.name ?? ""
@@ -26,7 +28,6 @@ struct TimeLineFeature: DWReducer {
         var suspectName: String {
             caseInfo?.suspect ?? ""
         }
-        
         /// 데이터가 비어있는지 여부
         var isEmpty: Bool {
             groupedLocations.isEmpty
@@ -36,15 +37,14 @@ struct TimeLineFeature: DWReducer {
         var totalLocationCount: Int {
             groupedLocations.reduce(0) { $0 + $1.locations.count}
         }
-    
-        /// 초기화
+        
+        /// 초기화 - MainTabFeature.State에서 데이터를 받음
         /// - Parameters:
         ///     - caseInfo: 케이스 정보
         ///     - locations: Location 배열
         init(caseInfo: Case?, locations: [Location]) {
             self.caseInfo = caseInfo
             self.locations = locations
-            self.groupedLocations = []
         }
     }
     

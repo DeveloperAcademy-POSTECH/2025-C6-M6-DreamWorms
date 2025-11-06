@@ -34,7 +34,7 @@ struct TimeLineEmptyState: View {
             .font(textFont)
             .foregroundStyle(textColor)
             .multilineTextAlignment(textAlignment)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(contentPadding)
             .background(backgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))

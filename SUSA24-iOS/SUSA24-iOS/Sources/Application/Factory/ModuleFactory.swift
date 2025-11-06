@@ -24,7 +24,7 @@ protocol ModuleFactoryProtocol {
     func makeSearchView() -> SearchView
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
-    func makeTimeLineView() -> TimeLineView
+    func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
@@ -72,7 +72,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         caseID: UUID,
         context: NSManagedObjectContext
     ) -> MainTabView<MapView, DashboardView, OnePageView, TimeLineView> {
-    
+        
         let caseRepository = CaseRepository(context: context)
         
         let store = DWStore(
@@ -83,14 +83,19 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let mapView = makeMapView(caseID: caseID, context: context)
         let dashboardView = makeDashboardView(caseID: caseID, context: context)
         let onePageView = makeOnePageView(caseID: caseID, context: context)
-        let timeLineView = makeTimeLineView(caseID: caseID, context: context)
         
         let view = MainTabView(
             store: store,
             mapView: { mapView },
             dashboardView: { dashboardView },
             onePageView: { onePageView },
-            timeLineView: { timeLineView }
+            timeLineView: { [weak store ] in
+                ModuleFactory.shared.makeTimeLineView(
+                    caseInfo: store?.state.caseInfo,
+                    locations: store?.state.locations ?? []
+                )
+                
+            }
         )
         return view
     }
@@ -131,10 +136,19 @@ final class ModuleFactory: ModuleFactoryProtocol {
     }
     
     func makeTimeLineView(
-        caseID: UUID,
-        context: NSManagedObjectContext
+        caseInfo: Case?,
+        locations: [Location]
     ) -> TimeLineView {
-        let view = TimeLineView()
+        
+        let store = DWStore(
+            initialState: TimeLineFeature.State(
+                caseInfo: caseInfo,
+                locations: locations
+            ),
+            reducer: TimeLineFeature()
+        )
+        
+        let view = TimeLineView(store: store)
         return view
     }
 }
