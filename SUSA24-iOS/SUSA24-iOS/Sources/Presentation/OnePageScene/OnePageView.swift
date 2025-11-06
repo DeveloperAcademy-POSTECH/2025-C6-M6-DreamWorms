@@ -24,49 +24,17 @@ enum Category: String, CaseIterable, Identifiable {
 
 struct OnePageView: View {
     
-    // MARK: - Dependencies
-    
     @Environment(AppCoordinator.self)
     private var coordinator
+    
+    // MARK: - Dependencies
+    
+    @State var store: DWStore<OnePageFeature>
     
     // MARK: - Properties
     
     @State private var suspectImage: Image? = nil
-    @State private var selection: Category = .residence
-    
-    // 샘플 카테고리별 개수
-    private let counts: [Category: Int] = [
-        .all: 16, .residence: 2, .workplace: 1, .others: 13
-    ]
-    
-    // 샘플 카드 데이터
-    private var items: [LocationItem] {
-        switch selection {
-        case .all, .residence:
-            return [
-                .init(icon: "house.fill", tint: .gray,     title: "주민등록주소", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .orange,   title: "실거주지",   subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .indigo,   title: "여자친구집", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .gray,     title: "주민등록주소", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .orange,   title: "실거주지",   subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .indigo,   title: "여자친구집", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .gray,     title: "주민등록주소", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .orange,   title: "실거주지",   subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .indigo,   title: "여자친구집", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .gray,     title: "주민등록주소", subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .orange,   title: "실거주지",   subtitle: "상세주소가 들어갑니다"),
-                .init(icon: "house.fill", tint: .indigo,   title: "여자친구집", subtitle: "상세주소가 들어갑니다")
-            ]
-        case .workplace:
-            return [
-                .init(icon: "briefcase.fill", tint: .blue, title: "직장", subtitle: "상세주소가 들어갑니다")
-            ]
-        case .others:
-            return [
-                .init(icon: "mappin.circle.fill", tint: .purple, title: "기타 장소", subtitle: "상세주소가 들어갑니다")
-            ]
-        }
-    }
+    var currentCaseID: UUID
     
     // MARK: - View
     
@@ -83,15 +51,18 @@ struct OnePageView: View {
                         header: OnePageStickyHeader(
                             suspectName: "피의자명",
                             crime: "범죄명",
-                            selection: $selection
+                            selection: Binding(
+                                get: { store.state.selection },
+                                set: { store.send(.selectionChanged($0)) }
+                            )
                         )
                     ) {
                         VStack(spacing: 12) {
-                            ForEach(items) { item in
+                            ForEach(store.state.items) { item in
                                 LocationCard(
                                     type: .icon(Image(.testHome)),
-                                    title: item.title,
-                                    description: item.subtitle
+                                    title: item.title ?? "타이틀",
+                                    description: item.address
                                 )
                                 .setupAsButton(false)
                             }
@@ -119,17 +90,10 @@ struct OnePageView: View {
             }
         }
         .navigationBarBackButtonHidden()
+        .task {
+            store.send(.onAppear(currentCaseID))
+        }
     }
-}
-
-// TODO: - 수정될 데이터 모델의 형태
-
-private struct LocationItem: Identifiable {
-    let id = UUID()
-    let icon: String
-    let tint: Color
-    let title: String
-    let subtitle: String
 }
 
 // MARK: - Extension Methods
@@ -143,6 +107,12 @@ private extension OnePageView {}
 // MARK: - Preview
 
 #Preview {
-    OnePageView()
-        .environment(AppCoordinator())
+    OnePageView(
+        store: DWStore(
+            initialState: OnePageFeature.State(),
+            reducer: OnePageFeature(repository: MockLocationRepository())
+        ),
+        currentCaseID: UUID()
+    )
+    .environment(AppCoordinator())
 }
