@@ -60,11 +60,12 @@ struct OnePageView: View {
                         VStack(spacing: 12) {
                             ForEach(store.state.items) { item in
                                 LocationCard(
-                                    type: .icon(Image(.testHome)),
+                                    type: .icon(Image(.icnPin)),
                                     title: item.title ?? "타이틀",
                                     description: item.address
                                 )
                                 .setupAsButton(false)
+                                .setupIconBackgroundColor(PinColorType(item.colorType).color)
                             }
                         }
                         .padding(.horizontal, 16)
@@ -106,13 +107,13 @@ private extension OnePageView {}
 
 // MARK: - Preview
 
-#Preview {
-    OnePageView(
-        store: DWStore(
-            initialState: OnePageFeature.State(),
-            reducer: OnePageFeature(repository: MockLocationRepository())
-        ),
-        currentCaseID: UUID()
-    )
-    .environment(AppCoordinator())
-}
+//#Preview {
+//    OnePageView(
+//        store: DWStore(
+//            initialState: OnePageFeature.State(),
+//            reducer: OnePageFeature(repository: MockLocationRepository())
+//        ),
+//        currentCaseID: UUID()
+//    )
+//    .environment(AppCoordinator())
+//}

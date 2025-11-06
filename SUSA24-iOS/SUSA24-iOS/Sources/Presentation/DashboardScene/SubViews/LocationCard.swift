@@ -16,15 +16,20 @@ enum LocationCardType: Equatable {
 
 // MARK: - Pin Color Type
 
-enum PinColorType: Int {
-    case black
-    case red
-    case orange
-    case yellow
-    case lightGreen
-    case darkGreen
-    case purple
+enum PinColorType: Int16, CaseIterable, Codable {
+    case black = 0
+    case red = 1
+    case orange = 2
+    case yellow = 3
+    case lightGreen = 4
+    case darkGreen = 5
+    case purple = 6
     
+    init(_ raw: Int16) {
+        self = PinColorType(rawValue: raw) ?? .black
+    }
+
+    var raw: Int16 { rawValue }
     var color: Color {
         switch self {
         case .black: Color.labelNeutral
@@ -47,7 +52,7 @@ struct LocationCard: View {
     let onTap: (() -> Void)? = nil
     
     var isButton: Bool = true
-    var iconBackgroundColor: PinColorType = .black
+    var iconBackgroundColor: Color = .labelNeutral
         
     var body: some View {
         Button(
@@ -96,7 +101,7 @@ struct LocationCard: View {
         switch type {
         case .icon(let image):
             Circle()
-                .fill(iconBackgroundColor.color)
+                .fill(iconBackgroundColor)
                 .frame(width: 32, height: 32)
                 .overlay {
                     image
@@ -132,8 +137,8 @@ extension LocationCard {
     /// 왼쪽 아이콘의 배경색을 지정합니다.
     /// - Parameter color: 아이콘의 배경색
     @discardableResult
-    func setupIconBackgroundColorType(_ colorType: PinColorType) -> Self {
-        var v = self; v.iconBackgroundColor = colorType; return v
+    func setupIconBackgroundColor(_ color: Color) -> Self {
+        var v = self; v.iconBackgroundColor = color; return v
     }
 }
 
@@ -163,7 +168,7 @@ extension LocationCard {
 //            isButton: true
 //        )
 //        .setupAsButton(false)
-//        .setupIconBackgroundColorType(.red)
+//        .setupIconBackgroundColor(PinColorType.red.color)
 //        
 //        LocationCard(
 //            type: .icon(Image(.icnPin)),
@@ -172,7 +177,7 @@ extension LocationCard {
 //            isButton: true
 //        )
 //        .setupAsButton(false)
-//        .setupIconBackgroundColorType(.orange)
+//        .setupIconBackgroundColor(PinColorType.orange.color)
 //        
 //        LocationCard(
 //            type: .icon(Image(.icnPin)),
@@ -181,7 +186,7 @@ extension LocationCard {
 //            isButton: true
 //        )
 //        .setupAsButton(false)
-//        .setupIconBackgroundColorType(.yellow)
+//        .setupIconBackgroundColor(PinColorType.yellow.color)
 //        
 //        LocationCard(
 //            type: .icon(Image(.icnPin)),
@@ -190,7 +195,7 @@ extension LocationCard {
 //            isButton: true
 //        )
 //        .setupAsButton(false)
-//        .setupIconBackgroundColorType(.lightGreen)
+//        .setupIconBackgroundColor(PinColorType.lightGreen.color)
 //        
 //        LocationCard(
 //            type: .icon(Image(.icnPin)),
@@ -199,7 +204,7 @@ extension LocationCard {
 //            isButton: true
 //        )
 //        .setupAsButton(false)
-//        .setupIconBackgroundColorType(.darkGreen)
+//        .setupIconBackgroundColor(PinColorType.darkGreen.color)
 //        
 //        LocationCard(
 //            type: .icon(Image(.icnPin)),
@@ -208,7 +213,7 @@ extension LocationCard {
 //            isButton: true
 //        )
 //        .setupAsButton(false)
-//        .setupIconBackgroundColorType(.purple)
+//        .setupIconBackgroundColor(PinColorType.purple.color)
 //    }
 //    .padding(.horizontal, 16)
 //}

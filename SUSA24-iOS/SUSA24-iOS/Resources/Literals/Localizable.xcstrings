@@ -515,13 +515,13 @@
       }
     },
     "visitFrequency" : {
-      "comment" : "맵뷰_필터_누적빈도",
+      "comment" : "대시보드_방문빈도",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "체류 시간"
+            "value" : "방문 빈도"
           }
         }
       }
