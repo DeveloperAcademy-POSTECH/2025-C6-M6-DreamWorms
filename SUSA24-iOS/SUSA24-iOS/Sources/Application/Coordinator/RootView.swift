@@ -33,8 +33,8 @@ struct RootView: View {
                 .navigationBarBackButtonHidden(true)
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
-                    case .cameraScene:
-                        moduleFactory.makeCameraView()
+                    case .cameraScene(let caseID):
+                        moduleFactory.makeCameraView(caseID: caseID)
                     case .caseAddScene:
                         moduleFactory.makeCaseAddView(context: context)
                     case .caseListScene:

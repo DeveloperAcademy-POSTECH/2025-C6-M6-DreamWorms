@@ -1,13 +1,13 @@
 //
-//  CameraFeature.swift
+//  PhotoDetailsFeature.swift
 //  SUSA24-iOS
 //
-//  Created by mini on 10/31/25.
+//  Created by taeni on 10/31/25.
 //
 
 import SwiftUI
 
-struct CameraFeature: DWReducer {
+struct PhotoDetailsFeature: DWReducer {
     
     // MARK: - State
     

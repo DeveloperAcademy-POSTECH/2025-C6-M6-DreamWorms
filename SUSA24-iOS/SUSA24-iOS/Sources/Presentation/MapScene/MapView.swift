@@ -80,7 +80,7 @@ struct MapView: View {
                         
                         DWGlassEffectCircleButton(
                             image: Image(.scan),
-                            action: { coordinator.push(.cameraScene) }
+                            action: { coordinator.push(.cameraScene(caseID: UUID())) }
                         )
                         .setupSize(48)
                         .setupIconSize(width: 25, height: 19)
