@@ -63,14 +63,19 @@ struct MainTabView<MapView: View,
             }
         }
         .sheet(isPresented: .constant(true)) {
-            DWTabBar<TimeLineView>(
+            DWTabBar(
                 activeTab: Binding(
                     get: { store.state.selectedTab },
                     set: { store.send(.selectTab($0)) }
                 ),
                 showDivider: showDividerByDetent
             ) {
-                timeLineView()
+                // 이 부분에서 처음에 데이터 붙이면 store(caseInfo = nil, locations = [])임
+//                timeLineView()
+                ModuleFactory.shared.makeTimeLineView(
+                    caseInfo: store.state.caseInfo,
+                    locations: store.state.locations
+                )
             }
             .presentationDetents(
                 store.state.selectedTab == .map
@@ -81,9 +86,10 @@ struct MainTabView<MapView: View,
             .presentationBackgroundInteraction(.enabled)
             .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
             .interactiveDismissDisabled(true)
+            .id(store.state.caseInfo?.id)
         }
         .navigationBarBackButtonHidden(true)
-        .onAppear {
+        .task { @MainActor in
             store.send(.onAppear)
         }
     }

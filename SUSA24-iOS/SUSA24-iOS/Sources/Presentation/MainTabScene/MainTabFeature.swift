@@ -84,6 +84,8 @@ struct MainTabFeature: DWReducer {
             let reposiotry = caseRepository
             return .task {
                 do {
+                    try await reposiotry.loadMockDataIfNeeded(caseId: caseId)
+                    
                     let (caseInfo, locations) = try await reposiotry.fetchAllDataOfSpecificCase(for: caseId)
                     return .loadCaseInfoDetail(case: caseInfo, locations: locations)
                 } catch {
