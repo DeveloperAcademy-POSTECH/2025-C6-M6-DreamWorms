@@ -34,7 +34,12 @@ struct TimeLineFeature: DWReducer {
         
         var scrollTarget: ScrollTarget? = nil
         
+        /// Tabar 관련 보일 컨텐츠 영역잡기용
         var isMinimized: Bool = false
+        
+        /// 검색 관련 State
+        var searchText: String = ""
+        var isSearchActive: Bool = false
         
         /// 케이스 이름
         var caseName: String {
@@ -80,6 +85,12 @@ struct TimeLineFeature: DWReducer {
         case updateData(caseInfo: Case?, locations: [Location])
         
         case setMinimized(Bool)
+        
+        /// 검색바 터치
+        case searchTextChanged(String)
+        
+        /// 검색 시에 기능
+        case setSearchActive(Bool)
     }
     
     // MARK: - Reducer
@@ -123,8 +134,15 @@ struct TimeLineFeature: DWReducer {
         case .setMinimized(let isMinimized):
             state.isMinimized = isMinimized
             return .none
+
+        case .searchTextChanged(let text):
+            state.searchText = text
+            
+            return .none
+            
+        case .setSearchActive(let isActive):
+            return .none
         }
-        
     }
     //MARK: - Helper
     /// Date를 String ID로 변환 ("2025-01-06" 형식)

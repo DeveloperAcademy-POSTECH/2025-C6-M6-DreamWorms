@@ -12,6 +12,7 @@ struct TimeLineView: View {
     // MARK: - Dependencies
     
     @State var store: DWStore<TimeLineFeature>
+    @FocusState private var isSearchFocused: Bool
     
     // MARK: - View
     
@@ -26,6 +27,10 @@ struct TimeLineView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 16)
                 if !store.state.isEmpty {
+                    TimeLineSearchBar(store: store,
+                                      isSearchFocused: $isSearchFocused)
+                    .padding(.bottom, 16)
+                    
                     TimeLineDateChipList (
                         dates: store.state.groupedLocations.map { $0.date },
                         onDateTapped: { date in
@@ -82,7 +87,7 @@ private extension TimeLineView {}
 
 // MARK: - Preview
 
-#Preview {
+//#Preview {
     //    let mockCase = Case(
     //        id: UUID(),
     //        number: "12-2025",
@@ -259,4 +264,4 @@ private extension TimeLineView {}
     //    )
     //
     //    return TimeLineView(store: store)
-}
+//}
