@@ -22,4 +22,5 @@ struct Location: Identifiable, Equatable, Sendable {
     var boxMaxLongitude: Double?
     var locationType: Int16
     var receivedAt: Date?
+    var colorType: Int16
 }
