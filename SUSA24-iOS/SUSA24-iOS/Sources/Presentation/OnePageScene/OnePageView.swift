@@ -77,8 +77,8 @@ struct OnePageView: View {
         .overlay(alignment: .topLeading) {
             HStack {
                 DWGlassEffectCircleButton(
+                    image: Image(.back),
                     action: { coordinator.pop() },
-                    icon: Image(.back)
                 )
                 .setupSize(44)
                 .setupIconSize(18)

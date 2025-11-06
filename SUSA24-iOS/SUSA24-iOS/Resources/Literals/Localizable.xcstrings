@@ -7,6 +7,9 @@
     "%lld" : {
 
     },
+    "%lld/10" : {
+
+    },
     "%lld개" : {
 
     },
@@ -102,6 +105,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "공유하기"
+          }
+        }
+      }
+    },
+    "camera_ExitAlertContent" : {
+      "comment" : "카메라 나가기_스캔 중단 안내 컨텐츠",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스캔이 저장되지 않고 삭제됩니다.  중단하시겠습니까?"
+          }
+        }
+      }
+    },
+    "camera_ExitAlertTitle" : {
+      "comment" : "카메라 나가기_스캔 중단 안내 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스캔 중단"
+          }
+        }
+      }
+    },
+    "camera_ExitCancel" : {
+      "comment" : "카메라 나가기_취소 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속 촬영"
+          }
+        }
+      }
+    },
+    "camera_ExitConfirm" : {
+      "comment" : "카메라 나가기_컨펌 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나가기"
+          }
+        }
+      }
+    },
+    "camera_PhotolimitMessage" : {
+      "comment" : "카메라 토스트_사진 장수 제한 메세지",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최대 10장까지 업로드할 수 있습니다."
           }
         }
       }
@@ -274,6 +337,18 @@
         }
       }
     },
+    "photoDetails_currentIndex" : {
+      "comment" : "이미지 상세_현재이미지/총 이미지 수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d/%d"
+          }
+        }
+      }
+    },
     "placeholder_caseName" : {
       "comment" : "플레이스홀더_사건명을 입력해 주세요",
       "extractionState" : "manual",
@@ -342,6 +417,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최근 기지국"
+          }
+        }
+      }
+    },
+    "scanList_addPin" : {
+      "comment" : "스캔 목록_핀 추가",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 추가하기"
+          }
+        }
+      }
+    },
+    "scanList_title" : {
+      "comment" : "스캔 목록_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도에 표시할 주소를\\n모두 선택해주세요"
+          }
+        }
+      }
+    },
+    "scanLoad_subTitle" : {
+      "comment" : "스캔 로딩_서브타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잠시만 기다려 주세요,"
+          }
+        }
+      }
+    },
+    "scanLoad_title" : {
+      "comment" : "스캔 로딩_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문서를 정리하고 있어요"
           }
         }
       }
@@ -525,6 +648,9 @@
           }
         }
       }
+    },
+    "사진" : {
+
     }
   },
   "version" : "1.1"
