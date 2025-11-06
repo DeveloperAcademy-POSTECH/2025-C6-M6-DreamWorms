@@ -14,6 +14,30 @@ enum LocationCardType: Equatable {
     case number(Int)
 }
 
+// MARK: - Pin Color Type
+
+enum PinColorType: Int {
+    case black
+    case red
+    case orange
+    case yellow
+    case lightGreen
+    case darkGreen
+    case purple
+    
+    var color: Color {
+        switch self {
+        case .black: Color.labelNeutral
+        case .red: Color.pointRed2
+        case .orange: Color.pinOrange
+        case .yellow: Color.pinYellow
+        case .lightGreen: Color.pinLightGreen
+        case .darkGreen: Color.pinDarkGreen
+        case .purple: Color.pointPurple
+        }
+    }
+}
+
 // MARK: - View
 
 struct LocationCard: View {
@@ -23,7 +47,7 @@ struct LocationCard: View {
     let onTap: (() -> Void)? = nil
     
     var isButton: Bool = true
-    var iconBackgroundColor: Color = .primaryNormal
+    var iconBackgroundColor: PinColorType = .black
         
     var body: some View {
         Button(
@@ -71,15 +95,20 @@ struct LocationCard: View {
     private var leadingIcon: some View {
         switch type {
         case .icon(let image):
-            image
-                .resizable()
-                .scaledToFit()
+            Circle()
+                .fill(iconBackgroundColor.color)
                 .frame(width: 32, height: 32)
-                .foregroundColor(.white)
+                .overlay {
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.white)
+                }
         case .number(let num):
             ZStack {
                 Circle()
-                    .fill(iconBackgroundColor)
+                    .fill(.primaryNormal)
                     .frame(width: 32, height: 32)
                 Text("\(num+1)")
                     .font(.numberSemiBold14)
@@ -103,10 +132,12 @@ extension LocationCard {
     /// 왼쪽 아이콘의 배경색을 지정합니다.
     /// - Parameter color: 아이콘의 배경색
     @discardableResult
-    func setupIconBackgroundColor(_ color: Color) -> Self {
-        var v = self; v.iconBackgroundColor = color; return v
+    func setupIconBackgroundColorType(_ colorType: PinColorType) -> Self {
+        var v = self; v.iconBackgroundColor = colorType; return v
     }
 }
+
+// MARK: - Preivew
 
 //#Preview {
 //    VStack {
@@ -118,12 +149,66 @@ extension LocationCard {
 //        )
 //        
 //        LocationCard(
-//            type: .icon(Image(.testHome)),
+//            type: .icon(Image(.icnPin)),
 //            title: "기지국 주소",
 //            description: "19시간 체류",
 //            isButton: true
 //        )
 //        .setupAsButton(false)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColorType(.red)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColorType(.orange)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColorType(.yellow)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColorType(.lightGreen)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColorType(.darkGreen)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColorType(.purple)
 //    }
 //    .padding(.horizontal, 16)
 //}
