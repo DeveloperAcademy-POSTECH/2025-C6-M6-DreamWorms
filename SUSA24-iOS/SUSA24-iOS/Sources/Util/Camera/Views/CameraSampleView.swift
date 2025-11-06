@@ -9,7 +9,7 @@ import SwiftUI
 
 /// 카메라 기능의 기본 동작을 보여주는 간단한 샘플 뷰
 struct CameraSampleView: View {
-    @State private var camera = Camera()
+    @State private var camera = CameraModel()
     @State private var statusMessage = "준비 중..."
     
     var body: some View {

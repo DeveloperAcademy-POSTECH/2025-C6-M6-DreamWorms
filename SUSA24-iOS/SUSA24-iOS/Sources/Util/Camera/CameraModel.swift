@@ -1,5 +1,5 @@
 //
-//  Camera.swift
+//  CameraModel.swift
 //  SUSA24-iOS
 //
 //  Created by taeni on 11/5/25.
@@ -11,7 +11,7 @@ import SwiftUI
 /// 카메라의 모든 기능을 통합 관리합니다.
 @MainActor
 @Observable
-final class Camera: NSObject {
+final class CameraModel: NSObject {
     private let permissionService: CameraPermissionService
     private let controlService: CameraControlService
     private let captureSession: CameraCaptureSession
@@ -225,4 +225,8 @@ final class Camera: NSObject {
         lastThumbnail = photoCaptureService.getLastThumbnail()
         photoCount = photoCaptureService.getAllPhotos().count
     }
+}
+
+extension CameraModel {
+    
 }
