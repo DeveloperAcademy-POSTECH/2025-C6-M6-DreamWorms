@@ -65,44 +65,35 @@ final class KakaoSearchAPIManager {
 
 extension KakaoSearchAPIManager {
     /// 좌표로 주소 정보를 조회합니다.
-    /// - Parameters:
-    ///   - x: 경도(Longitude)
-    ///   - y: 위도(Latitude)
-    ///   - inputCoord: 입력 좌표계 (기본값: WGS84)
+    /// - Parameter requestDTO: 좌표 조회 요청 DTO
     /// - Returns: 좌표에 해당하는 주소 정보 응답
     /// - Throws: `KakaoSearchError`
-    func fetchLocationFromCoord(x: String, y: String, inputCoord: String? = nil) async throws -> KakaoCoordToLocationResponseDTO {
+    func fetchLocationFromCoord(_ requestDTO: KakaoCoordToLocationRequestDTO) async throws -> KakaoCoordToLocationResponseDTO {
         let fullURL = try URLBuilder.build(
             baseURL: URLConstant.kakaoCoordToLocationURL,
             parameters: [
-                "x": x,
-                "y": y,
-                "inputCoord": inputCoord
+                "x": requestDTO.x,
+                "y": requestDTO.y,
+                "inputCoord": requestDTO.inputCoord
             ]
         )
         return try await request(url: fullURL, responseType: KakaoCoordToLocationResponseDTO.self)
     }
     
     /// 키워드로 장소를 검색합니다.
-    /// - Parameters:
-    ///   - query: 검색을 원하는 질의어
-    ///   - x: 중심 좌표의 경도(longitude)
-    ///   - y: 중심 좌표의 위도(latitude)
-    ///   - radius: 중심 좌표부터의 반경거리(단위: 미터). 최대 20000
-    ///   - page: 결과 페이지 번호. 1~45 사이 값 (기본값: 1)
-    ///   - size: 한 페이지에 보여질 문서의 개수. 1~15 사이 값 (기본값: 15)
+    /// - Parameter requestDTO: 키워드 검색 요청 DTO
     /// - Returns: 키워드 검색 결과 응답
     /// - Throws: `KakaoSearchError`
-    func fetchPlaceFromKeyword(query: String, x: String? = nil, y: String? = nil, radius: Int? = nil, page: Int? = nil, size: Int? = nil) async throws -> KakaoKeywordToPlaceResponseDTO {
+    func fetchPlaceFromKeyword(_ requestDTO: KakaoKeywordToPlaceRequestDTO) async throws -> KakaoKeywordToPlaceResponseDTO {
         let fullURL = try URLBuilder.build(
             baseURL: URLConstant.kakaoKeywordToPlaceURL,
             parameters: [
-                "query": query,
-                "x": x,
-                "y": y,
-                "radius": radius,
-                "page": page,
-                "size": size
+                "query": requestDTO.query,
+                "x": requestDTO.x,
+                "y": requestDTO.y,
+                "radius": requestDTO.radius,
+                "page": requestDTO.page,
+                "size": requestDTO.size
             ]
         )
         return try await request(url: fullURL, responseType: KakaoKeywordToPlaceResponseDTO.self)
