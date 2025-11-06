@@ -1,5 +1,5 @@
 //
-//  CameraController.swift
+//  CameraController.swift (수정 필요)
 //  SUSA24-iOS
 //
 //  Created by taeni on 11/5/25.
@@ -10,7 +10,7 @@ import SwiftUI
 struct CameraController: View {
     
     var count: Int = 2
-    var image: Image = Image(.icnThumbnail)
+    var uiImage: UIImage? = nil
     
     let onDetailsTapped: () -> Void
     let onPhotoCaptureTapped: () -> Void
@@ -19,7 +19,8 @@ struct CameraController: View {
         ZStack {
             HStack {
                 ThumbnailButton(
-                    image: image,
+                    count: count,
+                    uiImage: uiImage,        
                     action: onDetailsTapped
                 )
                 .dwBadge(count)
@@ -35,5 +36,5 @@ struct CameraController: View {
 }
 
 //#Preview {
-//    CameraController(image: Image(.camera), onDetailsTapped: {}, onPhotoCaptureTapped: {})
+//    CameraController(count: 3, uiImage: nil, onDetailsTapped: {}, onPhotoCaptureTapped: {})
 //}

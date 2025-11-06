@@ -7,22 +7,50 @@
 
 import SwiftUI
 
+// MARK: - Default Thumbnail View
+
+struct DefaultThumbnailView: View {
+    var body: some View {
+        Rectangle()
+            .foregroundColor(.cameraThumbnail)
+            .frame(width: 56, height: 56)
+            .cornerRadius(8)
+            .overlay(
+                Image(.icnThumbnail)
+                    .frame(width: 22, height: 22)
+                    .foregroundColor(.white)
+            )
+    }
+}
+
+// MARK: - Thumbnail Button
+
 struct ThumbnailButton: View {
     
-    let image: Image
+    /// 촬영된 사진의 개수
+    let count: Int
+    
+    /// 썸네일 이미지 (UIImage)
+    let uiImage: UIImage?
+    
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            Rectangle()
-                .foregroundColor(.cameraThumbnail)
-                .frame(width: 56, height: 56)
-                .cornerRadius(8)
-                .overlay(
-                    image
-                        .frame(width: 22, height: 22)
-                        .foregroundColor(.white)
-                )
+            if count == 0 {
+                DefaultThumbnailView()
+            } else {
+                if let uiImage = uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 56, height: 56)
+                        .cornerRadius(8)
+                        .clipped()
+                } else {
+                    DefaultThumbnailView()
+                }
+            }
         }
     }
 }

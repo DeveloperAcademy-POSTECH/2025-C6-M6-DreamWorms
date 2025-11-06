@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CameraHeader: View {
+    
     let onBackTapped: () -> Void
     let onScanTapped: () -> Void
     

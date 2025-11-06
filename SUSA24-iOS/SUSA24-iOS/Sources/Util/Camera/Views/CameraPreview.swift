@@ -60,11 +60,22 @@ struct CameraPreview: UIViewRepresentable {
         
         nonisolated func setSession(_ session: AVCaptureSession) {
             // 세션과 프리뷰 레이어를 연결하여
-            // 레이어가 캡처된 내용의 라이브 뷰를 제공하도록 합니다.
+            // 레이어가 캡처된 내용의 라이브 뷰를 제공받음.
             Task { @MainActor in
                 previewLayer.videoGravity = .resizeAspectFill
                 previewLayer.session = session
+                
+                previewLayer.frame = self.bounds
             }
+        }
+        
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            previewLayer.frame = bounds
+        }
+        
+        override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+            return nil
         }
     }
 }

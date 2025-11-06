@@ -95,8 +95,8 @@ extension CameraModel {
             isRunning = true
             
             Task {
-                    await self.processDisplayFrames()
-                }
+                await self.processDisplayFrames()
+            }
         } catch {
             print("카메라 시작 실패: \(error.localizedDescription)")
             cameraStatus = .failed
@@ -156,7 +156,7 @@ extension CameraModel {
     }
 }
 
-// MARK: - Device Zoom, Torch Control
+// MARK: - Device Zoom, Torch Control, Focus
 extension CameraModel {
     
     /// 줌을 설정합니다. (0.5 ~ 12.0배)
@@ -200,6 +200,12 @@ extension CameraModel {
         if success {
             isTorchOn = false
         }
+    }
+    
+    /// 선택한 위치 오토 포커싱
+    func focusOnPoint(_ point: CGPoint) async {
+        guard !isCameraPaused else { return }
+        await controlService.focusOnPoint(point)
     }
 }
 

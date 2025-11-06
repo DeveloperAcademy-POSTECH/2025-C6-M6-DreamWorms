@@ -27,7 +27,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
     private init() {}
     
     func makeCameraView(caseID: UUID) -> CameraView {
-        let view = CameraView()
+        // cameraModel 주입
+        let cameraManager = CameraModel()
+        let store = DWStore(
+            initialState: CameraFeature.State(previewSource: cameraManager.previewSource),
+            reducer: CameraFeature(cameraManager: cameraManager))
+        let view = CameraView(store: store, cameraManager: cameraManager)
         return view
     }
     
