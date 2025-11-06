@@ -17,87 +17,47 @@ struct TimeLineView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            headerSection
+            TimeLineBottomSheetHeader(
+                title: store.state.caseName,
+                suspectName: store.state.suspectName,
+                locationCount: store.state.totalLocationCount
+            )
+            .padding(.top, 12)
+            .padding(.bottom, 16)
             
             if !store.state.isEmpty {
-                dateChipSection
+                TimeLineDateChipList (
+                    dates: store.state.groupedLocations.map { $0.date },
+                    onDateTapped: { date in
+                        store.send(.scrollToDate(date))
+                    }
+                )
+                .padding(.bottom, 24)
             }
-            
-            contentSection
+            // MARK: - contentSection
+            if store.state.isEmpty {
+                TimeLineEmptyState(
+                    message:.bottomSheetNoCellData
+                )
+                .setupRadius(18)
+                .setupBackground(.mainBackground)
+                .padding(.horizontal, 16)
+                .padding(16)
+                .opacity(0.5)
+            }
+            else {
+                TimeLineScrollContentView(
+                        groupedLocations: store.state.groupedLocations,
+                        scrollTargetID: store.state.scrollTarget?.dateID,
+                        onLocationTapped: { location in
+                            store.send(.locationTapped(location))
+                        }
+                    )
+            }
         }
         .task {
             @MainActor in
             store.send(.onAppear)
-        }
-    }
-    
-    // MARK: - Header Section
-    
-    private var headerSection: some View {
-        TimeLineBottomSheetHeader(
-            title: store.state.caseName,
-            suspectName: store.state.suspectName,
-            locationCount: store.state.totalLocationCount
-        )
-        .padding(.top, 12)
-        .padding(.bottom, 16)
-    }
-    
-    // MARK: - Date Chip Section
-    
-    private var dateChipSection: some View {
-        TimeLineDateChipList(
-            dates: store.state.groupedLocations.map { $0.date },
-            onDateTapped: { date in
-                store.send(.scrollToDate(date))
-            }
-        )
-        .padding(.bottom, 24)
-    }
-    
-    // MARK: - Content Section
-    
-    @ViewBuilder
-    private var contentSection: some View {
-        if store.state.isEmpty {
-            emptyStateView
-        } else {
-            scrollContent
-        }
-    }
-    
-    private var emptyStateView: some View {
-        TimeLineEmptyState(
-            message: .bottomSheetNoCellData
-        )
-        .setupRadius(18)
-        .setupBackground(.mainBackground)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
-        .opacity(0.5)
-    }
-    
-    private var scrollContent: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(store.state.groupedLocations) { group in
-                        DateSectionView(
-                            group: group,
-                            onLocationTapped: { location in
-                                store.send(.locationTapped(location))
-                            }
-                        )
-                    }
-                    .padding(.bottom, 16)
-                }
-                .onChange(of: store.state.scrollTarget) { _, newTarget in
-                    guard let target = newTarget else { return }
-                    withAnimation(.snappy(duration: 0.3)) {
-                        proxy.scrollTo(target.dateID, anchor: .top)
-                    }
-                }
-            }
         }
     }
     
@@ -108,75 +68,6 @@ struct TimeLineView: View {
         in groups: [LocationGroupedByDate]
     ) -> TimeLineColorStickState {
         return .normal
-    }
-}
-
-// MARK: - Date Section Subview
-
-private struct DateSectionView: View {
-    let group: LocationGroupedByDate
-    let onLocationTapped: (Location) -> Void
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            scrollAnchor
-            dateHeader
-            locationList
-        }
-    }
-    
-    private var scrollAnchor: some View {
-        Color.clear
-            .frame(height: 0)
-            .id(group.dateID)
-    }
-    
-    private var dateHeader: some View {
-        HStack {
-            TimeLineDateSectionHeader(text: group.headerText)
-                .font(.bodyMedium16)
-                .foregroundStyle(.labelNormal)
-            Spacer()
-        }
-        .padding(16)
-    }
-    
-    private var locationList: some View {
-        Section {
-            LocationListContent(
-                locations: group.locations,
-                onLocationTapped: onLocationTapped
-            )
-        }
-        .background(.labelCoolNormal)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .padding(.horizontal, 16)
-    }
-}
-
-// MARK: - Location List Content Subview
-
-private struct LocationListContent: View {
-    let locations: [Location]
-    let onLocationTapped: (Location) -> Void
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(locations.enumerated()), id: \.element.id) { index, location in
-                TimeLineDetail(
-                    state: .normal,
-                    caseTitle: location.address,
-                    startTime: location.receivedAt ?? Date(),
-                    endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
-                    isLast: index == locations.count - 1,
-                    onTap: {
-                        onLocationTapped(location)
-                    }
-                )
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 16)
     }
 }
 // MARK: - Extension Methods
