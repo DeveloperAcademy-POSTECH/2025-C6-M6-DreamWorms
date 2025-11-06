@@ -9,13 +9,16 @@ import SwiftUI
 
 struct MainTabView<MapView: View,
                    DashboardView: View,
-                   OnePageView: View,
-                   TimeLineView: View
+                   OnePageView: View
 >: View {
     
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
+    
+    // MARK: - TimeLine Store (탭 전환 시에도 유지!)
+    
+    @State var timeLineStore: DWStore<TimeLineFeature>
     
     // MARK: - Properties
     
@@ -34,22 +37,25 @@ struct MainTabView<MapView: View,
     private let mapView: () -> MapView
     private let dashboardView: () -> DashboardView
     private let onePageView: () -> OnePageView
-    private let timeLineView: () -> TimeLineView
+    private var timeLineView: some View {
+           TimeLineView(store: timeLineStore)
+       }
+    
     
     // MARK: - Init
     
     init(
         store: DWStore<MainTabFeature>,
+        timeLineStore: DWStore<TimeLineFeature>,
         @ViewBuilder mapView: @escaping () -> MapView,
         @ViewBuilder dashboardView: @escaping () -> DashboardView,
-        @ViewBuilder onePageView: @escaping () -> OnePageView,
-        @ViewBuilder timeLineView: @escaping () -> TimeLineView
+        @ViewBuilder onePageView: @escaping () -> OnePageView
     ) {
         self._store = State(initialValue: store)
+        self._timeLineStore = State(initialValue: timeLineStore)
         self.mapView = mapView
         self.dashboardView = dashboardView
         self.onePageView = onePageView
-        self.timeLineView = timeLineView
     }
     
     // MARK: - View
@@ -70,12 +76,7 @@ struct MainTabView<MapView: View,
                 ),
                 showDivider: showDividerByDetent
             ) {
-                // 이 부분에서 처음에 데이터 붙이면 store(caseInfo = nil, locations = [])임
-//                timeLineView()
-                ModuleFactory.shared.makeTimeLineView(
-                    caseInfo: store.state.caseInfo,
-                    locations: store.state.locations
-                )
+                timeLineView
             }
             .presentationDetents(
                 store.state.selectedTab == .map
@@ -86,11 +87,17 @@ struct MainTabView<MapView: View,
             .presentationBackgroundInteraction(.enabled)
             .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
             .interactiveDismissDisabled(true)
-            .id(store.state.caseInfo?.id)
         }
         .navigationBarBackButtonHidden(true)
         .task { @MainActor in
             store.send(.onAppear)
+        }
+        .onChange(of: store.state.caseInfo) { _, newCaseInfo in
+            guard let caseInfo = newCaseInfo else { return }
+            timeLineStore.send(.updateData(
+                caseInfo: caseInfo,
+                locations: store.state.locations
+            ))
         }
     }
 }

@@ -16,8 +16,7 @@ protocol ModuleFactoryProtocol {
     func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<
         MapView,
         DashboardView,
-        OnePageView,
-        TimeLineView
+        OnePageView
     >
     func makeMapView(caseID: UUID, context: NSManagedObjectContext) -> MapView
     func makeOnePageView(caseID: UUID, context: NSManagedObjectContext) -> OnePageView
@@ -71,7 +70,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeMainTabView(
         caseID: UUID,
         context: NSManagedObjectContext
-    ) -> MainTabView<MapView, DashboardView, OnePageView, TimeLineView> {
+    ) -> MainTabView<MapView, DashboardView, OnePageView> {
         
         let caseRepository = CaseRepository(context: context)
         
@@ -84,18 +83,21 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let dashboardView = makeDashboardView(caseID: caseID, context: context)
         let onePageView = makeOnePageView(caseID: caseID, context: context)
         
+        // 여기서 미리 생성
+        let timeLineStore = DWStore(
+            initialState: TimeLineFeature.State(
+                caseInfo: nil,
+                locations: []
+            ),
+            reducer: TimeLineFeature()
+        )
+        
         let view = MainTabView(
             store: store,
+            timeLineStore: timeLineStore,
             mapView: { mapView },
             dashboardView: { dashboardView },
-            onePageView: { onePageView },
-            timeLineView: { [weak store ] in
-                ModuleFactory.shared.makeTimeLineView(
-                    caseInfo: store?.state.caseInfo,
-                    locations: store?.state.locations ?? []
-                )
-                
-            }
+            onePageView: { onePageView }
         )
         return view
     }

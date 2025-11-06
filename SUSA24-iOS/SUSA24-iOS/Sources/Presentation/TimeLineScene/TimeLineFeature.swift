@@ -30,7 +30,7 @@ struct TimeLineFeature: DWReducer {
         /// Location 배열
         var locations: [Location]
         /// 날짜별로 그룹화된 Location
-        var groupedLocations: [LocationGroupedByDate] = []
+        var groupedLocations: [LocationGroupedByDate]
         
         var scrollTarget: ScrollTarget? = nil
         
@@ -60,6 +60,7 @@ struct TimeLineFeature: DWReducer {
         init(caseInfo: Case?, locations: [Location]) {
             self.caseInfo = caseInfo
             self.locations = locations
+            self.groupedLocations = LocationGroupedByDate.groupByDate(locations)
         }
     }
     
@@ -74,6 +75,9 @@ struct TimeLineFeature: DWReducer {
         case scrollToDate(Date)
         
         case resetScrollTarget
+        
+        case updateData(caseInfo: Case?, locations: [Location])
+        
     }
     
     // MARK: - Reducer
@@ -81,8 +85,6 @@ struct TimeLineFeature: DWReducer {
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
         case .onAppear:
-            // Location을 날짜별로 그룹화
-            state.groupedLocations = LocationGroupedByDate.groupByDate(state.locations)
             return .none
             
         case .locationTapped:
@@ -104,6 +106,13 @@ struct TimeLineFeature: DWReducer {
             
         case .resetScrollTarget:
             state.scrollTarget = nil
+            return .none
+            
+            
+        case .updateData(let caseInfo, let locations):
+            state.caseInfo = caseInfo
+            state.locations = locations
+            state.groupedLocations = LocationGroupedByDate.groupByDate(locations)
             return .none
         }
     }
