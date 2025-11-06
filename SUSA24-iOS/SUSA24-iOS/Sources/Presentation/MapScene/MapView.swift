@@ -23,7 +23,9 @@ struct MapView: View {
 
     var body: some View {
         ZStack {
-            NaverMapView()
+            NaverMapView(onMapTapped: { latlng in
+                handleMapTap(latlng: latlng)
+            })
                 .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
@@ -96,17 +98,42 @@ struct MapView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .sheet(isPresented: Binding(
+            get: { store.state.isPlaceInfoSheetPresented },
+            set: { _ in store.send(.hidePlaceInfo) }
+        )) {
+            PlaceInfoSheet(
+                placeInfo: store.state.selectedPlaceInfo ?? PlaceInfo(
+                    title: "",
+                    jibunAddress: "",
+                    roadAddress: "",
+                    phoneNumber: ""
+                ),
+                isLoading: store.state.isPlaceInfoLoading,
+                onClose: { store.send(.hidePlaceInfo) }
+            )
+            .presentationDetents([.fraction(0.4)])
+            .presentationBackgroundInteraction(.enabled)
+            .presentationDragIndicator(.visible)
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    /// 맵 터치 시 좌표로 주소 정보를 조회합니다.
+    private func handleMapTap(latlng: NMGLatLng) {
+        store.send(.mapTapped(latlng))
     }
 }
 
 // MARK: - Preview
 
-//#Preview {
-//    let repository = MockLocationRepository()
-//    let store = DWStore(
-//        initialState: MapFeature.State(caseId: UUID()),
-//        reducer: MapFeature(repository: repository)
-//    )
-//    return MapView(store: store)
-//        .environment(AppCoordinator())
-//}
+#Preview {
+    let repository = MockLocationRepository()
+    let store = DWStore(
+        initialState: MapFeature.State(caseId: UUID()),
+        reducer: MapFeature(repository: repository)
+    )
+    return MapView(store: store)
+        .environment(AppCoordinator())
+}
