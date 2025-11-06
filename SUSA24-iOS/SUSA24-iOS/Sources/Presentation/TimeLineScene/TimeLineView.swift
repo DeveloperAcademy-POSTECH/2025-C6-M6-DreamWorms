@@ -42,46 +42,43 @@ struct TimeLineView: View {
             }
             else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {  // 카드 간격 12
+                    LazyVStack(spacing: 0) {
                         ForEach(store.state.groupedLocations) { group in
                             // 날짜별 카드
                             VStack(spacing: 0) {
                                 // 날짜 헤더
                                 HStack {
-                                    Text(group.headerText)
+                                    TimeLineDateSectionHeader(text: group.headerText)
                                         .font(.bodyMedium16)
                                         .foregroundStyle(.labelNormal)
                                     Spacer()
                                 }
-                                .padding(.horizontal, 16)
-                                .padding(.bottom, 16)
+                                .padding(16)
                                 
-                                // 위치 리스트
-                                ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, location in
-                                    TimeLineDetail(
-                                        state: determineColorState(for: location, in: store.state.groupedLocations),
-                                        caseTitle: location.address,
-                                        startTime: location.receivedAt ?? Date(),
-                                        endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
-                                        isLast: index == group.locations.count - 1,
-                                        onTap: {
-                                            store.send(.locationTapped(location))
+                                Section {
+                                    VStack(spacing: 0) {
+                                        ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, location in
+                                            TimeLineDetail(
+                                                state: determineColorState(for: location, in: store.state.groupedLocations),
+                                                caseTitle: location.address,
+                                                startTime: location.receivedAt ?? Date(),
+                                                endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
+                                                isLast: index == group.locations.count - 1,
+                                                onTap: {
+                                                    store.send(.locationTapped(location))
+                                                }
+                                            )
                                         }
-                                    )
-                                    
-                                    // 마지막 아이템이 아니면 간격 추가
-                                    if index < group.locations.count - 1 {
-                                        Spacer().frame(height: 0)  // TimeLineDetail이 자체 spacing 가짐
                                     }
+                                    .padding(.horizontal, 16)
+                                    .padding(.top, 16)
                                 }
+                                .background(.red)
+                                .clipShape(RoundedRectangle(cornerRadius: 24))
+                                .padding(.horizontal, 16)
                             }
-                            .background(.red)
-                            .clipShape(RoundedRectangle(cornerRadius: 24))
-                            .padding(.bottom, 16)
                         }
                     }
-                    .padding(.horizontal, 16)  // 전체 컨테이너 좌우 16
-                    .padding(.bottom, 16)  // 하단 여백
                 }
             }
         }
