@@ -15,6 +15,7 @@ struct TimeLineView: View {
     
     // MARK: - Properties
     
+    
     // MARK: - View
     
     var body: some View {
@@ -27,7 +28,6 @@ struct TimeLineView: View {
             )
             .padding(.top, 12)
             .padding(.bottom, 16)
-            .background(Color(.systemBackground))
             
             // 컨텐츠 유무 체크
             if store.state.isEmpty {
@@ -73,7 +73,7 @@ struct TimeLineView: View {
                                     .padding(.horizontal, 16)
                                     .padding(.top, 16)
                                 }
-                                .background(.red)
+                                .background(.labelCoolNormal)
                                 .clipShape(RoundedRectangle(cornerRadius: 24))
                                 .padding(.horizontal, 16)
                             }

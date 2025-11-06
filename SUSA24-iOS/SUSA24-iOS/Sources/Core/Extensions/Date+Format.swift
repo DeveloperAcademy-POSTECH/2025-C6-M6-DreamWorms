@@ -24,4 +24,15 @@ extension Date {
         )
         return formatter.string(from: self)
     }
+    
+    /// Date를 월과 일만 "M.d" 형식으로 Date() 타입으로 빼옵니다.
+    ///
+    /// - Parameter dataText: 날짜 포맷 문자열
+    /// - Returns: 포맷팅된 Date() 타입.
+    func formattedDateType(_ dataText: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = dataText
+        let dateString = formatter.string(from: self)
+        return formatter.date(from: dateString)
+    }
 }
