@@ -7,7 +7,7 @@
 
 import Foundation
 
-nonisolated struct KakaoCoordToLocationResponseDTO: Decodable, Sendable {
+struct KakaoCoordToLocationResponseDTO: Decodable, Sendable {
     let meta: KakaoMeta
     let documents: [KakaoDocument]
 }

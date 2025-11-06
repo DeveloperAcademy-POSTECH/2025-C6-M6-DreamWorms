@@ -7,7 +7,7 @@
 
 import Foundation
 
-nonisolated struct KakaoKeywordToPlaceResponseDTO: Decodable, Sendable {
+struct KakaoKeywordToPlaceResponseDTO: Decodable, Sendable {
     let meta: KakaoKeywordMeta
     let documents: [KakaoPlaceDocument]
 }
