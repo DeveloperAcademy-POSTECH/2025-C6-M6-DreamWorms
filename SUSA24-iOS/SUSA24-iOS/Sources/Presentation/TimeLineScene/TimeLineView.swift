@@ -27,23 +27,23 @@ struct TimeLineView: View {
                     )
                     .padding(.vertical, 16)
                     .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                
+                if !store.state.isEmpty {
+                    TimeLineSearchBar(store: store,
+                                      isSearchFocused: $isSearchFocused)
+                    .padding(.top, isSearchFocused ? 16 : 0)
+                    .padding(.bottom, 16)
                     
-                    if !store.state.isEmpty {
-                        TimeLineSearchBar(store: store,
-                                          isSearchFocused: $isSearchFocused)
-                        .padding(.top, isSearchFocused ? 16 : 0)
-                        .padding(.bottom, 16)
-                        
-                        if !isSearchFocused {
-                            TimeLineDateChipList (
-                                dates: store.state.groupedLocations.map { $0.date },
-                                onDateTapped: { date in
-                                    store.send(.scrollToDate(date))
-                                }
-                            )
-                            .padding(.bottom, 24)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                        }
+                    if !isSearchFocused {
+                        TimeLineDateChipList (
+                            dates: store.state.groupedLocations.map { $0.date },
+                            onDateTapped: { date in
+                                store.send(.scrollToDate(date))
+                            }
+                        )
+                        .padding(.bottom, 24)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
                 }
             }
