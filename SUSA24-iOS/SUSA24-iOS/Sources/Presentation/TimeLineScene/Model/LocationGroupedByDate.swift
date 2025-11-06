@@ -20,7 +20,26 @@ struct LocationGroupedByDate: Identifiable, Equatable, Sendable {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "M월 d일 (E)"
+        formatter.timeZone = TimeZone.current
         return formatter.string(from:date)
+    }
+    
+    /// 스크롤 ID로 사용할 String ID (예: "2025-01-06")
+    var dateID: String {
+        Self.dateToID(date)
+    }
+    
+    static func dateToID(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else {
+            return ""
+        }
+        
+        return String(format: "%04d-%02d-%02d", year, month, day)
     }
 }
 
@@ -36,10 +55,11 @@ extension LocationGroupedByDate {
         }
         
         // 2. 날짜별로 그룹화 (시작 시간으로 만들어서 key값을 동일하게 날짜데이터로 뽑는다.)
+        let calendar = Calendar.current
         let grouped = Dictionary(grouping: filtered) { location -> Date in
             guard let receivedAt = location.receivedAt else { return Date() }
             // 시간을 00:00:00으로 정규화 (같은 날짜끼리 묶기)
-            return Calendar.current.startOfDay(for: receivedAt)
+            return calendar.startOfDay(for: receivedAt)
         }
         
         // 3. LocationGroupedByDate로 변환 ( map을 활용해서 key, locations를 평탄화 )

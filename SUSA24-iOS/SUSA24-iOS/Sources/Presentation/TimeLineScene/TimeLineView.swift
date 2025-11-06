@@ -13,74 +13,17 @@ struct TimeLineView: View {
     
     @State var store: DWStore<TimeLineFeature>
     
-    // MARK: - Properties
-    
-    
     // MARK: - View
     
     var body: some View {
         VStack(spacing: 0) {
-            // 상단 헤더 - 고정
-            TimeLineBottomSheetHeader(
-                title: store.state.caseName,
-                suspectName: store.state.suspectName,
-                locationCount: store.state.totalLocationCount
-            )
-            .padding(.top, 12)
-            .padding(.bottom, 16)
+            headerSection
             
-            // 컨텐츠 유무 체크
-            if store.state.isEmpty {
-                TimeLineEmptyState(
-                    message: .bottomSheetNoCellData
-                )
-                .setupRadius(18)
-                .setupBackground(.mainBackground)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-                .opacity(0.5)
+            if !store.state.isEmpty {
+                dateChipSection
             }
-            else {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(store.state.groupedLocations) { group in
-                            // 날짜별 카드
-                            VStack(spacing: 0) {
-                                // 날짜 헤더
-                                HStack {
-                                    TimeLineDateSectionHeader(text: group.headerText)
-                                        .font(.bodyMedium16)
-                                        .foregroundStyle(.labelNormal)
-                                    Spacer()
-                                }
-                                .padding(16)
-                                
-                                Section {
-                                    VStack(spacing: 0) {
-                                        ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, location in
-                                            TimeLineDetail(
-                                                state: determineColorState(for: location, in: store.state.groupedLocations),
-                                                caseTitle: location.address,
-                                                startTime: location.receivedAt ?? Date(),
-                                                endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
-                                                isLast: index == group.locations.count - 1,
-                                                onTap: {
-                                                    store.send(.locationTapped(location))
-                                                }
-                                            )
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .padding(.top, 16)
-                                }
-                                .background(.labelCoolNormal)
-                                .clipShape(RoundedRectangle(cornerRadius: 24))
-                                .padding(.horizontal, 16)
-                            }
-                        }
-                    }
-                }
-            }
+            
+            contentSection
         }
         .task {
             @MainActor in
@@ -88,19 +31,154 @@ struct TimeLineView: View {
         }
     }
     
+    // MARK: - Header Section
+    
+    private var headerSection: some View {
+        TimeLineBottomSheetHeader(
+            title: store.state.caseName,
+            suspectName: store.state.suspectName,
+            locationCount: store.state.totalLocationCount
+        )
+        .padding(.top, 12)
+        .padding(.bottom, 16)
+    }
+    
+    // MARK: - Date Chip Section
+    
+    private var dateChipSection: some View {
+        TimeLineDateChipList(
+            dates: store.state.groupedLocations.map { $0.date },
+            onDateTapped: { date in
+                store.send(.scrollToDate(date))
+            }
+        )
+        .padding(.bottom, 24)
+    }
+    
+    // MARK: - Content Section
+    
+    @ViewBuilder
+    private var contentSection: some View {
+        if store.state.isEmpty {
+            emptyStateView
+        } else {
+            scrollContent
+        }
+    }
+    
+    private var emptyStateView: some View {
+        TimeLineEmptyState(
+            message: .bottomSheetNoCellData
+        )
+        .setupRadius(18)
+        .setupBackground(.mainBackground)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+        .opacity(0.5)
+    }
+    
+    private var scrollContent: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(store.state.groupedLocations) { group in
+                        DateSectionView(
+                            group: group,
+                            onLocationTapped: { location in
+                                store.send(.locationTapped(location))
+                            }
+                        )
+                    }
+                    .padding(.bottom, 16)
+                }
+                .onChange(of: store.state.scrollTarget) { _, newTarget in
+                    guard let target = newTarget else { return }
+                    withAnimation(.snappy(duration: 0.3)) {
+                        proxy.scrollTo(target.dateID, anchor: .top)
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - Helper Methods
     
-    /// 방문 빈도에 따라 색상 상태를 결정합니다.
     private func determineColorState(
         for location: Location,
         in groups: [LocationGroupedByDate]
     ) -> TimeLineColorStickState {
-        // TODO: 실제 방문 빈도 로직 구현
-        // 현재는 임시로 normal 반환
         return .normal
     }
 }
 
+// MARK: - Date Section Subview
+
+private struct DateSectionView: View {
+    let group: LocationGroupedByDate
+    let onLocationTapped: (Location) -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            scrollAnchor
+            dateHeader
+            locationList
+        }
+    }
+    
+    private var scrollAnchor: some View {
+        Color.clear
+            .frame(height: 0)
+            .id(group.dateID)
+    }
+    
+    private var dateHeader: some View {
+        HStack {
+            TimeLineDateSectionHeader(text: group.headerText)
+                .font(.bodyMedium16)
+                .foregroundStyle(.labelNormal)
+            Spacer()
+        }
+        .padding(16)
+    }
+    
+    private var locationList: some View {
+        Section {
+            LocationListContent(
+                locations: group.locations,
+                onLocationTapped: onLocationTapped
+            )
+        }
+        .background(.labelCoolNormal)
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .padding(.horizontal, 16)
+    }
+}
+
+// MARK: - Location List Content Subview
+
+private struct LocationListContent: View {
+    let locations: [Location]
+    let onLocationTapped: (Location) -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(locations.enumerated()), id: \.element.id) { index, location in
+                TimeLineDetail(
+                    state: .normal,
+                    caseTitle: location.address,
+                    startTime: location.receivedAt ?? Date(),
+                    endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
+                    isLast: index == locations.count - 1,
+                    onTap: {
+                        onLocationTapped(location)
+                    }
+                )
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+    }
+}
 // MARK: - Extension Methods
 
 extension TimeLineView {}
@@ -112,180 +190,180 @@ private extension TimeLineView {}
 // MARK: - Preview
 
 #Preview {
-    let mockCase = Case(
-        id: UUID(),
-        number: "12-2025",
-        name: "택시 상습추행",
-        crime: "성추행",
-        suspect: "김꿈틀"
-    )
-    
-    // 날짜별로 5개씩 Location 생성
-    let mockLocations: [Location] = [
-        // 10월 30일 - 5개
-        Location(
-            id: UUID(),
-            address: "대구광역시 중구 동성로2가",
-            title: nil, note: nil,
-            pointLatitude: 35.8714, pointLongitude: 128.5948,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 13, minute: 44)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 수성구 범어동",
-            title: nil, note: nil,
-            pointLatitude: 35.8581, pointLongitude: 128.6311,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 14, minute: 23)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 달서구 성당동",
-            title: nil, note: nil,
-            pointLatitude: 35.8284, pointLongitude: 128.5351,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 15, minute: 10)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 북구 칠성동",
-            title: nil, note: nil,
-            pointLatitude: 35.8861, pointLongitude: 128.5825,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 16, minute: 45)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 동구 신암동",
-            title: nil, note: nil,
-            pointLatitude: 35.8923, pointLongitude: 128.6345,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 18, minute: 20)),
-            colorType: 1
-        ),
-        
-        // 10월 29일 - 5개
-        Location(
-            id: UUID(),
-            address: "대구광역시 중구 삼덕동",
-            title: nil, note: nil,
-            pointLatitude: 35.8668, pointLongitude: 128.5975,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 10, minute: 30)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 수성구 만촌동",
-            title: nil, note: nil,
-            pointLatitude: 35.8534, pointLongitude: 128.6168,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 12, minute: 15)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 달서구 두류동",
-            title: nil, note: nil,
-            pointLatitude: 35.8420, pointLongitude: 128.5589,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 14, minute: 50)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 북구 침산동",
-            title: nil, note: nil,
-            pointLatitude: 35.8978, pointLongitude: 128.5642,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 16, minute: 35)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 달서구 월성동",
-            title: nil, note: nil,
-            pointLatitude: 35.8156, pointLongitude: 128.5234,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 18, minute: 10)),
-            colorType: 1
-        ),
-        
-        // 10월 28일 - 5개
-        Location(
-            id: UUID(),
-            address: "대구광역시 중구 대봉동",
-            title: nil, note: nil,
-            pointLatitude: 35.8589, pointLongitude: 128.6045,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 9, minute: 20)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 동구 신천동",
-            title: nil, note: nil,
-            pointLatitude: 35.8762, pointLongitude: 128.6358,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 11, minute: 40)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 수성구 범물동",
-            title: nil, note: nil,
-            pointLatitude: 35.8123, pointLongitude: 128.6789,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 13, minute: 25)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 북구 산격동",
-            title: nil, note: nil,
-            pointLatitude: 35.8945, pointLongitude: 128.6123,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 15, minute: 55)),
-            colorType: 1
-        ),
-        Location(
-            id: UUID(),
-            address: "대구광역시 달서구 이곡동",
-            title: nil, note: nil,
-            pointLatitude: 35.8234, pointLongitude: 128.5456,
-            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
-            locationType: 2,
-            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 17, minute: 30)),
-            colorType: 1
-        ),
-    ]
-    
-    let store = DWStore(
-        initialState: TimeLineFeature.State(
-            caseInfo: mockCase,
-            locations: mockLocations
-        ),
-        reducer: TimeLineFeature()
-    )
-    
-    return TimeLineView(store: store)
+//    let mockCase = Case(
+//        id: UUID(),
+//        number: "12-2025",
+//        name: "택시 상습추행",
+//        crime: "성추행",
+//        suspect: "김꿈틀"
+//    )
+//
+//    // 날짜별로 5개씩 Location 생성
+//    let mockLocations: [Location] = [
+//        // 10월 30일 - 5개
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 중구 동성로2가",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8714, pointLongitude: 128.5948,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 13, minute: 44)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 수성구 범어동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8581, pointLongitude: 128.6311,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 14, minute: 23)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 달서구 성당동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8284, pointLongitude: 128.5351,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 15, minute: 10)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 북구 칠성동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8861, pointLongitude: 128.5825,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 16, minute: 45)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 동구 신암동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8923, pointLongitude: 128.6345,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30, hour: 18, minute: 20)),
+//            colorType: 1
+//        ),
+//
+//        // 10월 29일 - 5개
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 중구 삼덕동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8668, pointLongitude: 128.5975,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 10, minute: 30)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 수성구 만촌동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8534, pointLongitude: 128.6168,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 12, minute: 15)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 달서구 두류동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8420, pointLongitude: 128.5589,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 14, minute: 50)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 북구 침산동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8978, pointLongitude: 128.5642,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 16, minute: 35)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 달서구 월성동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8156, pointLongitude: 128.5234,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29, hour: 18, minute: 10)),
+//            colorType: 1
+//        ),
+//
+//        // 10월 28일 - 5개
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 중구 대봉동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8589, pointLongitude: 128.6045,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 9, minute: 20)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 동구 신천동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8762, pointLongitude: 128.6358,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 11, minute: 40)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 수성구 범물동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8123, pointLongitude: 128.6789,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 13, minute: 25)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 북구 산격동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8945, pointLongitude: 128.6123,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 15, minute: 55)),
+//            colorType: 1
+//        ),
+//        Location(
+//            id: UUID(),
+//            address: "대구광역시 달서구 이곡동",
+//            title: nil, note: nil,
+//            pointLatitude: 35.8234, pointLongitude: 128.5456,
+//            boxMinLatitude: nil, boxMinLongitude: nil, boxMaxLatitude: nil, boxMaxLongitude: nil,
+//            locationType: 2,
+//            receivedAt: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 28, hour: 17, minute: 30)),
+//            colorType: 1
+//        ),
+//    ]
+//
+//    let store = DWStore(
+//        initialState: TimeLineFeature.State(
+//            caseInfo: mockCase,
+//            locations: mockLocations
+//        ),
+//        reducer: TimeLineFeature()
+//    )
+//
+//    return TimeLineView(store: store)
 }
