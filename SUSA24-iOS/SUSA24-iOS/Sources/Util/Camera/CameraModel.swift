@@ -52,8 +52,10 @@ final class CameraModel: NSObject {
         
         super.init()
     }
-    
-    // MARK: - Camera Lifecycle
+}
+
+// MARK: - Camera Lifecycle + Control
+extension CameraModel {
     
     /// 카메라를 시작합니다.
     func start() async {
@@ -92,12 +94,23 @@ final class CameraModel: NSObject {
             cameraStatus = .running
             isRunning = true
             
-            // 프레임 스트림 처리 시작
-            await processDisplayFrames()
+            Task {
+                    await self.processDisplayFrames()
+                }
         } catch {
             print("카메라 시작 실패: \(error.localizedDescription)")
             cameraStatus = .failed
         }
+    }
+    
+    /// 카메라를 일시정지합니다.
+    func pauseCamera() {
+        isCameraPaused = true
+    }
+    
+    /// 카메라를 재개합니다.
+    func resumeCamera() {
+        isCameraPaused = false
     }
     
     /// 카메라를 중지합니다.
@@ -108,8 +121,10 @@ final class CameraModel: NSObject {
         cameraStatus = .stopped
         currentFrame = nil
     }
-    
-    // MARK: - Photo Capture
+}
+
+// MARK: - Photo Capture
+extension CameraModel {
     
     /// 사진을 촬영합니다.
     func capturePhoto() async throws -> CapturedPhoto {
@@ -139,8 +154,10 @@ final class CameraModel: NSObject {
     func getLastThumbnail() -> UIImage? {
         photoCaptureService.getLastThumbnail()
     }
-    
-    // MARK: - Zoom Control
+}
+
+// MARK: - Device Zoom, Torch Control
+extension CameraModel {
     
     /// 줌을 설정합니다. (0.5 ~ 12.0배)
     func setZoom(to factor: CGFloat) async {
@@ -164,8 +181,6 @@ final class CameraModel: NSObject {
         await controlService.getZoomRange()
     }
     
-    // MARK: - Torch Control
-    
     /// 토치를 토글합니다.
     func toggleTorch() async {
         isTorchOn = await controlService.toggleTorch()
@@ -186,28 +201,18 @@ final class CameraModel: NSObject {
             isTorchOn = false
         }
     }
-    
-    // MARK: - Camera Control
-    
-    /// 카메라를 일시정지합니다.
-    func pauseCamera() {
-        isCameraPaused = true
-    }
-    
-    /// 카메라를 재개합니다.
-    func resumeCamera() {
-        isCameraPaused = false
-    }
-    
-    // MARK: - Frame Stream
-    
+}
+
+// MARK: - Frame Stream
+extension CameraModel {
     /// 프레임 스트림을 반환합니다.
     func getFrameStream() -> AsyncStream<CVImageBuffer>? {
         frameProvider.frameStream
     }
-    
-    // MARK: - Private Methods
-    
+}
+
+// MARK: - Private Methods
+extension CameraModel {
     private func addPhotoCaptureOutput() async throws {
         try await captureSession.addPhotoOutput(photoCaptureService.output)
     }
@@ -225,8 +230,4 @@ final class CameraModel: NSObject {
         lastThumbnail = photoCaptureService.getLastThumbnail()
         photoCount = photoCaptureService.getAllPhotos().count
     }
-}
-
-extension CameraModel {
-    
 }
