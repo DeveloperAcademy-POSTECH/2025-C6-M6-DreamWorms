@@ -26,7 +26,7 @@ struct TimeLineSearchBar: View {
             .setupPlaceholder(.bottomSheetCellLocationSearchText)
             
             // 포커스와 텍스트 있을때만 X 버튼
-            if isSearchFocused && !store.state.searchText.isEmpty {
+            if isSearchFocused {
                 Button {
                     triggerLightHapticFeedback()
                     isSearchFocused = false
@@ -44,8 +44,6 @@ struct TimeLineSearchBar: View {
         }
         .padding(.horizontal, 16)
         .animation(.snappy, value: isSearchFocused)
-        .animation(.snappy, value: store.state.searchText)
-
         
     }
 }
