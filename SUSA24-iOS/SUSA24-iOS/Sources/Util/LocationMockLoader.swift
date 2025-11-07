@@ -57,8 +57,8 @@ enum LocationMockLoader {
                 boxMinLongitude: nil,
                 boxMaxLatitude: nil,
                 boxMaxLongitude: nil,
-                locationType: Int16.random(in: 0...3),
-                colorType: Int16.random(in: 0...6),
+                locationType: Int16.random(in: 0 ... 3),
+                colorType: Int16.random(in: 0 ... 6),
                 receivedAt: dto.receivedAt
             )
         }

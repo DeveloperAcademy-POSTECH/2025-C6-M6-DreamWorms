@@ -30,7 +30,7 @@ struct DWTappedPinStyle: ButtonStyle {
                 width: fixedSize?.width,
                 height: fixedSize?.height,
                 alignment: .center
-                )
+            )
             .background(configuration.isPressed ? tappedBg : normalBg)
             .clipShape(Capsule())
             .overlay(

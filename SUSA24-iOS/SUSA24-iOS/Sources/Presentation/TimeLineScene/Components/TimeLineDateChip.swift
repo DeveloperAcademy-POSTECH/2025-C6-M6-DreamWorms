@@ -19,7 +19,7 @@ struct TimeLineDateChip: View {
     
     var body: some View {
         DWTappedPin(
-            text: date.formatted("M.d"),  // Date Extension 활용
+            text: date.formatted("M.d"), // Date Extension 활용
             action: { onTap(date) }
         )
         .colors(
@@ -53,7 +53,7 @@ struct TimeLineDateChipList: View {
 
 // MARK: - Preview
 
-//#Preview("Date Chip List") {
+// #Preview("Date Chip List") {
 //    let dates = [
 //        Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 30))!,
 //        Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 29))!,
@@ -61,7 +61,7 @@ struct TimeLineDateChipList: View {
 //        Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 27))!,
 //        Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 26))!,
 //    ]
-//    
+//
 //    TimeLineDateChipList(
 //        dates: dates,
 //        onDateTapped: { date in
@@ -70,4 +70,4 @@ struct TimeLineDateChipList: View {
 //    )
 //    .padding()
 //    .background(.mainBackground)
-//}
+// }

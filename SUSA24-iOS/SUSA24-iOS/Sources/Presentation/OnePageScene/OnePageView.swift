@@ -77,7 +77,7 @@ struct OnePageView: View {
             HStack {
                 DWGlassEffectCircleButton(
                     image: Image(.back),
-                    action: { coordinator.pop() },
+                    action: { coordinator.pop() }
                 )
                 .setupSize(44)
                 .setupIconSize(18)
@@ -106,7 +106,7 @@ private extension OnePageView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    OnePageView(
 //        store: DWStore(
 //            initialState: OnePageFeature.State(),
@@ -115,4 +115,4 @@ private extension OnePageView {}
 //        currentCaseID: UUID()
 //    )
 //    .environment(AppCoordinator())
-//}
+// }

@@ -31,12 +31,12 @@ struct TimeLineView: View {
                 if !store.state.isEmpty {
                     TimeLineSearchBar(store: store,
                                       isSearchFocused: $isSearchFocused)
-                    .padding(.top, isSearchFocused ? 16 : 0)
-                    .padding(.bottom, 16)
+                        .padding(.top, isSearchFocused ? 16 : 0)
+                        .padding(.bottom, 16)
                     
                     if !isSearchFocused {
-                        TimeLineDateChipList (
-                            dates: store.state.groupedLocations.map { $0.date },
+                        TimeLineDateChipList(
+                            dates: store.state.groupedLocations.map(\.date),
                             onDateTapped: { date in
                                 store.send(.scrollToDate(date))
                             }
@@ -48,17 +48,17 @@ struct TimeLineView: View {
             }
             
             // MARK: - contentSection
+
             if store.state.isEmpty {
                 TimeLineEmptyState(
-                    message:.bottomSheetNoCellData
+                    message: .bottomSheetNoCellData
                 )
                 .setupRadius(18)
                 .setupBackground(.mainBackground)
                 .padding(.horizontal, 16)
                 .padding(16)
                 .opacity(0.5)
-            }
-            else {
+            } else {
                 TimeLineScrollContentView(
                     groupedLocations: store.state.groupedLocations,
                     scrollTargetID: store.state.scrollTarget?.dateID,
@@ -74,12 +74,13 @@ struct TimeLineView: View {
     // MARK: - Helper Methods
     
     private func determineColorState(
-        for location: Location,
-        in groups: [LocationGroupedByDate]
+        for _: Location,
+        in _: [LocationGroupedByDate]
     ) -> TimeLineColorStickState {
-        return .normal
+        .normal
     }
 }
+
 // MARK: - Extension Methods
 
 extension TimeLineView {}
@@ -90,7 +91,7 @@ private extension TimeLineView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    let mockCase = Case(
 //        id: UUID(),
 //        number: "12-2025",
@@ -267,4 +268,4 @@ private extension TimeLineView {}
 //    )
 //
 //    return TimeLineView(store: store)
-//}
+// }

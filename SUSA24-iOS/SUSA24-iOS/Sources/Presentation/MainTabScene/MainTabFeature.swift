@@ -46,9 +46,7 @@ struct MainTabFeature: DWReducer {
         
         /// 현재 선택된 탭
         var selectedTab: MainTabIdentifier = .map
-        
-        
-    }
+      }
     
     // MARK: - Action
     
