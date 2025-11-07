@@ -10,6 +10,7 @@
 extension CVImageBuffer: @unchecked @retroactive Sendable {}
 
 // MARK: - Delegate Conformance
+
 extension CameraFrameProvider: AVCaptureVideoDataOutputSampleBufferDelegate {}
 
 /// 카메라 프레임을 스트림으로 제공하고 관리합니다.
@@ -42,9 +43,9 @@ extension CameraFrameProvider {
     ///   - sampleBuffer: 캡처된 프레임 데이터
     ///   - connection: 캡처 연결 정보
     nonisolated func captureOutput(
-        _ output: AVCaptureOutput,
+        _: AVCaptureOutput,
         didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
+        from _: AVCaptureConnection
     ) {
         guard sampleBuffer.isValid, let imageBuffer = sampleBuffer.imageBuffer else { return }
         

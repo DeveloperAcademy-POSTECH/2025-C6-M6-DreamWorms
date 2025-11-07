@@ -57,7 +57,6 @@ struct DWGlassEffectCircleButton: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension DWGlassEffectCircleButton {
-    
     /// 버튼의 크기를 설정합니다.
     /// - Parameter size: 버튼의 width, height 값
     @discardableResult
@@ -116,7 +115,7 @@ extension DWGlassEffectCircleButton {
     }
 }
 
-//#Preview {
+// #Preview {
 //    HStack(spacing: 16) {
 //        DWGlassEffectCircleButton(
 //            action: {},
@@ -124,7 +123,7 @@ extension DWGlassEffectCircleButton {
 //        )
 //        .setupSize(44)
 //        .setupIconSize(18)
-//        
+//
 //        DWGlassEffectCircleButton(
 //            action: {},
 //            icon: Image(.scan)
@@ -133,5 +132,4 @@ extension DWGlassEffectCircleButton {
 //        .setupIconSize(width: 25, height: 19)
 //    }
 //    .padding()
-//}
-
+// }

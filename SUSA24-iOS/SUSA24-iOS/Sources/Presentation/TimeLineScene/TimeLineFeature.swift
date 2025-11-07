@@ -12,8 +12,8 @@ import SwiftUI
 /// 스크롤 타겟을 나타내는 모델
 /// String ID를 사용하여 Date 객체 비교 문제를 해결합니다.
 struct ScrollTarget: Equatable {
-    let dateID: String  // "2025-01-06" 형식
-    let triggerID = UUID()  // 같은 날짜를 여러 번 탭해도 스크롤되도록
+    let dateID: String // "2025-01-06" 형식
+    let triggerID = UUID() // 같은 날짜를 여러 번 탭해도 스크롤되도록
     
     static func == (lhs: ScrollTarget, rhs: ScrollTarget) -> Bool {
         lhs.triggerID == rhs.triggerID
@@ -21,7 +21,6 @@ struct ScrollTarget: Equatable {
 }
 
 struct TimeLineFeature: DWReducer {
-    
     // MARK: - State
     
     struct State: DWState {
@@ -32,7 +31,7 @@ struct TimeLineFeature: DWReducer {
         /// 날짜별로 그룹화된 Location
         var groupedLocations: [LocationGroupedByDate]
         
-        var scrollTarget: ScrollTarget? = nil
+        var scrollTarget: ScrollTarget?
         
         /// Tabar 관련 보일 컨텐츠 영역잡기용
         var isMinimized: Bool = false
@@ -45,10 +44,12 @@ struct TimeLineFeature: DWReducer {
         var caseName: String {
             caseInfo?.name ?? ""
         }
+
         /// 용의자 이름
         var suspectName: String {
             caseInfo?.suspect ?? ""
         }
+
         /// 데이터가 비어있는지 여부
         var isEmpty: Bool {
             groupedLocations.isEmpty
@@ -56,7 +57,7 @@ struct TimeLineFeature: DWReducer {
         
         /// 총 Location 개수
         var totalLocationCount: Int {
-            groupedLocations.reduce(0) { $0 + $1.locations.count}
+            groupedLocations.reduce(0) { $0 + $1.locations.count }
         }
         
         /// 초기화 - MainTabFeature.State에서 데이터를 받음
@@ -107,7 +108,7 @@ struct TimeLineFeature: DWReducer {
             // TODO: Location 상세 화면으로 이동 또는 지도에서 선택된 위치 표시
             return .none
             
-        case .scrollToDate(let date):
+        case let .scrollToDate(date):
             // Date를 String ID로 변환
             let dateID = Self.dateToID(date)
             
@@ -124,27 +125,28 @@ struct TimeLineFeature: DWReducer {
             state.scrollTarget = nil
             return .none
             
-            
-        case .updateData(let caseInfo, let locations):
+        case let .updateData(caseInfo, locations):
             state.caseInfo = caseInfo
             state.locations = locations
             state.groupedLocations = LocationGroupedByDate.groupByDate(locations)
             return .none
             
-        case .setMinimized(let isMinimized):
+        case let .setMinimized(isMinimized):
             state.isMinimized = isMinimized
             return .none
 
-        case .searchTextChanged(let text):
+        case let .searchTextChanged(text):
             state.searchText = text
             
             return .none
             
-        case .setSearchActive(let isActive):
+        case let .setSearchActive(isActive):
             return .none
         }
     }
-    //MARK: - Helper
+
+    // MARK: - Helper
+
     /// Date를 String ID로 변환 ("2025-01-06" 형식)
     static func dateToID(_ date: Date) -> String {
         let calendar = Calendar.current
@@ -152,7 +154,8 @@ struct TimeLineFeature: DWReducer {
         
         guard let year = components.year,
               let month = components.month,
-              let day = components.day else {
+              let day = components.day
+        else {
             return ""
         }
         

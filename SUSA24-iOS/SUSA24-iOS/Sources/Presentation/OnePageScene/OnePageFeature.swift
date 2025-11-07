@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OnePageFeature: DWReducer {
     private let categoryTypeMap: [Category: [Int]] = [
-        .residence: [0], .workplace: [1], .others: [3], .all: [0, 1, 3]
+        .residence: [0], .workplace: [1], .others: [3], .all: [0, 1, 3],
     ]
     
     private let repository: LocationRepositoryProtocol
@@ -19,7 +19,7 @@ struct OnePageFeature: DWReducer {
     
     struct State: DWState {
         var selection: Category = .all
-        var caseID: UUID? = nil
+        var caseID: UUID?
         var items: [Location] = []
     }
     
@@ -36,7 +36,7 @@ struct OnePageFeature: DWReducer {
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
-        case .selectionChanged(let category):
+        case let .selectionChanged(category):
             state.selection = category
             guard let caseId = state.caseID else { return .none }
             return .task { [] in
@@ -47,14 +47,14 @@ struct OnePageFeature: DWReducer {
                 }
             }
 
-        case .onAppear(let caseID):
+        case let .onAppear(caseID):
             state.caseID = caseID
             let selection = state.selection
             return .task {
-                return .loadLocations(caseID, selection)
+                .loadLocations(caseID, selection)
             }
 
-        case .loadLocations(let caseID, let selection):
+        case let .loadLocations(caseID, selection):
             return .task { [repository, categoryTypeMap] in
                 do {
                     let types = categoryTypeMap[selection] ?? [0, 1, 3]
@@ -68,7 +68,7 @@ struct OnePageFeature: DWReducer {
                 }
             }
             
-        case .setLocationItems(let locations):
+        case let .setLocationItems(locations):
             state.items = locations
             return .none
         }

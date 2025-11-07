@@ -1,5 +1,5 @@
 //
-//  WeekdayPillButton.swift
+//  WeekdayPillPicker.swift
 //  SUSA24-iOS
 //
 //  Created by mini on 11/4/25.

@@ -53,56 +53,57 @@ struct CaseRepository: CaseRepositoryProtocol {
     }
     
     func fetchAllDataOfSpecificCase(for caseId: UUID) async throws -> (case: Case?, location: [Location]) {
-         try await context.perform {
-             let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-             request.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
+        try await context.perform {
+            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+            request.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
              
-             guard let caseEntity = try context.fetch(request).first else {
-                 return (nil, [])
-             }
+            guard let caseEntity = try context.fetch(request).first else {
+                return (nil, [])
+            }
              
-             // Suspect 정보 가져오기 (한 명만 가정)
-             guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity>,
-                   let suspect = suspectsSet.first else {
-                 return (nil, [])
-             }
+            // Suspect 정보 가져오기 (한 명만 가정)
+            guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity>,
+                  let suspect = suspectsSet.first
+            else {
+                return (nil, [])
+            }
              
-             // Case 정보 생성
-             let caseInfo = Case(
-                 id: caseEntity.id ?? UUID(),
-                 number: caseEntity.number ?? "",
-                 name: caseEntity.name ?? "",
-                 crime: caseEntity.crime ?? "",
-                 suspect: suspect.name ?? ""
-             )
+            // Case 정보 생성
+            let caseInfo = Case(
+                id: caseEntity.id ?? UUID(),
+                number: caseEntity.number ?? "",
+                name: caseEntity.name ?? "",
+                crime: caseEntity.crime ?? "",
+                suspect: suspect.name ?? ""
+            )
              
-             // 해당 Suspect의 모든 Location 가져오기
-             guard let locationsSet = suspect.locations as? Set<LocationEntity> else {
-                 return (caseInfo, [])
-             }
+            // 해당 Suspect의 모든 Location 가져오기
+            guard let locationsSet = suspect.locations as? Set<LocationEntity> else {
+                return (caseInfo, [])
+            }
              
-             let locations = locationsSet.compactMap { locationEntity -> Location? in
-                 guard let locationId = locationEntity.id else { return nil }
-                 return Location(
-                     id: locationId,
-                     address: locationEntity.address ?? "",
-                     title: locationEntity.title,
-                     note: locationEntity.note,
-                     pointLatitude: locationEntity.pointLatitude,
-                     pointLongitude: locationEntity.pointLongitude,
-                     boxMinLatitude: locationEntity.boxMinLatitude == 0.0 ? nil : locationEntity.boxMinLatitude,
-                     boxMinLongitude: locationEntity.boxMinLongitude == 0.0 ? nil : locationEntity.boxMinLongitude,
-                     boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
-                     boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
-                     locationType: locationEntity.locationType,
-                     colorType: locationEntity.colorType,
-                     receivedAt: locationEntity.receivedAt
-                 )
-             }
+            let locations = locationsSet.compactMap { locationEntity -> Location? in
+                guard let locationId = locationEntity.id else { return nil }
+                return Location(
+                    id: locationId,
+                    address: locationEntity.address ?? "",
+                    title: locationEntity.title,
+                    note: locationEntity.note,
+                    pointLatitude: locationEntity.pointLatitude,
+                    pointLongitude: locationEntity.pointLongitude,
+                    boxMinLatitude: locationEntity.boxMinLatitude == 0.0 ? nil : locationEntity.boxMinLatitude,
+                    boxMinLongitude: locationEntity.boxMinLongitude == 0.0 ? nil : locationEntity.boxMinLongitude,
+                    boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
+                    boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
+                    locationType: locationEntity.locationType,
+                    colorType: locationEntity.colorType,
+                    receivedAt: locationEntity.receivedAt
+                )
+            }
              
-             return (caseInfo, locations)
-         }
-     }
+            return (caseInfo, locations)
+        }
+    }
     
     func deleteCase(id: UUID) async throws {
         try await context.perform {
@@ -137,34 +138,35 @@ struct CaseRepository: CaseRepositoryProtocol {
     }
     
     /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
-      /// - Parameter caseId: 저장할 Case의 UUID
-      /// - Throws: CoreData 저장 에러
-      func loadMockDataIfNeeded(caseId: UUID) async throws {
-          // 이미 Location 데이터가 있는지 확인
-          let (_, existingLocations) = try await fetchAllDataOfSpecificCase(for: caseId)
-          guard existingLocations.isEmpty else {
-              print(" [CaseRepository] 이미 Location 데이터가 있습니다. 목데이터를 로드하지 않습니다.")
-              return
-          }
+    /// - Parameter caseId: 저장할 Case의 UUID
+    /// - Throws: CoreData 저장 에러
+    func loadMockDataIfNeeded(caseId: UUID) async throws {
+        // 이미 Location 데이터가 있는지 확인
+        let (_, existingLocations) = try await fetchAllDataOfSpecificCase(for: caseId)
+        guard existingLocations.isEmpty else {
+            print(" [CaseRepository] 이미 Location 데이터가 있습니다. 목데이터를 로드하지 않습니다.")
+            return
+        }
           
-          print("⚠️ [CaseRepository] Location 데이터가 없습니다. 목데이터를 로드합니다...")
+        print("⚠️ [CaseRepository] Location 데이터가 없습니다. 목데이터를 로드합니다...")
           
-          // LocationRepository를 통해 목데이터 로드
-          let locationRepository = LocationRepository(context: context)
-          try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
+        // LocationRepository를 통해 목데이터 로드
+        let locationRepository = LocationRepository(context: context)
+        try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
           
-          print("✅ [CaseRepository] 목데이터 로드 완료")
-      }
+        print("✅ [CaseRepository] 목데이터 로드 완료")
+    }
 }
 
 // TODO: - Preview용 Mock Repository
 
 struct MockCaseRepository: CaseRepositoryProtocol {
     func fetchCases() async throws -> [Case] { [] }
-    func fetchAllDataOfSpecificCase(for caseId: UUID) async throws -> (case: Case?, location: [Location]) {
-        return (nil, [])
+    func fetchAllDataOfSpecificCase(for _: UUID) async throws -> (case: Case?, location: [Location]) {
+        (nil, [])
     }
-    func loadMockDataIfNeeded(caseId: UUID) async throws {}
-    func deleteCase(id: UUID) async throws {}
-    func createCase(model: Case) async throws {}
+
+    func loadMockDataIfNeeded(caseId _: UUID) async throws {}
+    func deleteCase(id _: UUID) async throws {}
+    func createCase(model _: Case) async throws {}
 }

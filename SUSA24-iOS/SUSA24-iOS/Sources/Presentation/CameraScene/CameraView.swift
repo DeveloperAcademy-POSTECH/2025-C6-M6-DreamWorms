@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CameraView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     

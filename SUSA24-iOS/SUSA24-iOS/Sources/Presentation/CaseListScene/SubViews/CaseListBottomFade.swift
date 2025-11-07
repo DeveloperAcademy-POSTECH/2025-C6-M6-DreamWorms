@@ -34,7 +34,7 @@ struct CaseListBottomFade: View {
                         stops: [
                             .init(color: .black.opacity(0.0), location: 0.00),
                             .init(color: .black.opacity(0.4), location: 0.35),
-                            .init(color: .black.opacity(1.0), location: 1.00)
+                            .init(color: .black.opacity(1.0), location: 1.00),
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -52,6 +52,6 @@ struct CaseListBottomFade: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    CaseListBottomFade(onAddCaseTapped: {})
-//}
+// }

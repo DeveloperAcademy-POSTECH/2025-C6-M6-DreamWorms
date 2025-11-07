@@ -9,7 +9,6 @@ import CoreData
 import SwiftUI
 
 struct CaseListFeature: DWReducer {
-    
     private let repository: CaseRepositoryProtocol
     init(repository: CaseRepositoryProtocol) { self.repository = repository }
     
@@ -41,11 +40,11 @@ struct CaseListFeature: DWReducer {
                 }
             }
             
-        case .loadCases(let cases):
+        case let .loadCases(cases):
             state.cases = cases
             return .none
             
-        case .deleteTapped(let item):
+        case let .deleteTapped(item):
             return .task { [repository] in
                 do {
                     try await repository.deleteCase(id: item.id)

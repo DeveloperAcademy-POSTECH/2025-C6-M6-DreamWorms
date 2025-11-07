@@ -9,7 +9,6 @@ import Foundation
 
 /// JSON 파일을 Bundle에서 로드하고 디코딩하는 유틸리티
 enum JSONLoader {
-    
     /// Bundle에서 JSON 파일을 로드하여 지정된 타입으로 디코딩합니다.
     ///
     /// - Parameters:
@@ -21,7 +20,7 @@ enum JSONLoader {
     /// - Throws: `JSONLoaderError` 타입의 에러
     static func load<T: Decodable>(
         _ filename: String,
-        as type: T.Type = T.self,
+        as _: T.Type = T.self,
         from bundle: Bundle = .main,
         using decoder: JSONDecoder = .default
     ) throws -> T {
@@ -73,11 +72,11 @@ enum JSONLoaderError: LocalizedError, Sendable {
     
     var errorDescription: String? {
         switch self {
-        case .fileNotFound(let filename):
+        case let .fileNotFound(filename):
             "JSON file not found: \(filename)"
-        case .dataLoadingFailed(let filename, let error):
+        case let .dataLoadingFailed(filename, error):
             "Failed to load data from \(filename): \(error.localizedDescription)"
-        case .decodingFailed(let filename, let error):
+        case let .decodingFailed(filename, error):
             "Failed to decode JSON from \(filename): \(error.localizedDescription)"
         }
     }

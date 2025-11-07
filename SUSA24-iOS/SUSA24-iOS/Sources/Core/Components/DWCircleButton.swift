@@ -37,7 +37,6 @@ struct DWCircleButton: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension DWCircleButton {
-    
     /// 버튼의 크기를 설정합니다
     /// - Parameter size: 버튼의 width, height 공통 크기
     @discardableResult
@@ -72,6 +71,6 @@ extension DWCircleButton {
     }
 }
 
-//#Preview {
+// #Preview {
 //    DWCircleButton(image: Image(.setting), action: {})
-//}
+// }

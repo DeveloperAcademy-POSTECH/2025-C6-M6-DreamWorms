@@ -1,5 +1,5 @@
 //
-//  TimeLineEmptyState.swift
+//  TimeLineEmpty.swift
 //  SUSA24-iOS
 //
 //  Created by Demian Yoo on 11/5/25.
@@ -44,7 +44,6 @@ struct TimeLineEmptyState: View {
 // MARK: - Progressive Disclosure
 
 extension TimeLineEmptyState {
-    
     // MARK: - 텍스트 스타일
     
     /// 폰트를 설정합니다.
@@ -107,18 +106,18 @@ extension TimeLineEmptyState {
     }
 }
 
-//#Preview("Empty State - Default") {
+// #Preview("Empty State - Default") {
 //    TimeLineEmptyState(
 //        message: "아직 확인된 기지국 정보가 없어요."
 //    )
 //    .setupBackground(.black)
 //    .setupRadius(15)
-//}
+// }
 //
-//#Preview("Empty State - With Radius") {
+// #Preview("Empty State - With Radius") {
 //    TimeLineEmptyState(
 //        message: "데이터가 없습니다"
 //    )
 //    .setupBackground(.mainAlternative)
 //    .setupRadius(12)
-//}
+// }

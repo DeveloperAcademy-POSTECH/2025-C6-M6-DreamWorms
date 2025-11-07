@@ -31,4 +31,3 @@ enum KakaoSearchError: LocalizedError, Sendable {
         }
     }
 }
-

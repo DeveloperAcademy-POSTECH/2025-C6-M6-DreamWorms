@@ -50,7 +50,7 @@ struct DWTextField<Field: Hashable>: View {
     /// 플레이스홀더 (필드 안에 표시됩니다)
     var placeholder: String?
     /// 에러 메시지 (포커스 중이며 비어 있을 때 표시됩니다)
-    var errorMessage: String? = nil
+    var errorMessage: String?
     
     /// 텍스트 입력 영역의 패딩
     var contentPadding: EdgeInsets = .init(top: 18, leading: 20, bottom: 18, trailing: 12)
@@ -59,7 +59,7 @@ struct DWTextField<Field: Hashable>: View {
     /// 키보드 하단 리턴 버튼 타입
     var submitLabel: SubmitLabel = .done
     /// 리턴 버튼 탭 시 실행되는 액션
-    var onSubmit: (() -> Void)? = nil
+    var onSubmit: (() -> Void)?
     
     private var focus: FocusState<Field?>.Binding {
         externalFocus ?? $internalFocus
@@ -131,7 +131,7 @@ struct DWTextField<Field: Hashable>: View {
             
             Group {
                 switch currentState {
-                case .error(let message):
+                case let .error(message):
                     HStack(alignment: .center, spacing: 6) {
                         Image(.warningCircle)
                         Text(message)
@@ -150,7 +150,6 @@ struct DWTextField<Field: Hashable>: View {
 }
 
 extension DWTextField {
-    
     /// 텍스트 필드가 비어 있고 포커스 중일 때 표시할 에러 메시지를 설정합니다.
     ///
     /// - Parameter message: 사용자에게 보여질 에러 메시지
@@ -186,7 +185,7 @@ extension DWTextField {
     }
 }
 
-//#Preview("DWTextField States") {
+// #Preview("DWTextField States") {
 //    VStack(spacing: 40) {
 //        DWTextField(
 //            text: .constant(""),
@@ -210,4 +209,4 @@ extension DWTextField {
 //        .frame(height: 82)
 //    }
 //    .padding(16)
-//}
+// }

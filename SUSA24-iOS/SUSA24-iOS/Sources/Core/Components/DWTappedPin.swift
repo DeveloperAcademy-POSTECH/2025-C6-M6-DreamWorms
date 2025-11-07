@@ -30,7 +30,7 @@ struct DWTappedPinStyle: ButtonStyle {
                 width: fixedSize?.width,
                 height: fixedSize?.height,
                 alignment: .center
-                )
+            )
             .background(configuration.isPressed ? tappedBg : normalBg)
             .clipShape(Capsule())
             .overlay(
@@ -106,7 +106,6 @@ struct DWTappedPin: View {
 // MARK: - Progressive Disclosure
 
 extension DWTappedPin {
-    
     // MARK: - 탭 피드백
     
     /// 탭 피드백 배경색을 설정합니다.

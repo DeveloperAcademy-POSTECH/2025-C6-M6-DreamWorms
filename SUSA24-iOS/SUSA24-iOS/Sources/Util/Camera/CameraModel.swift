@@ -227,6 +227,4 @@ final class CameraModel: NSObject {
     }
 }
 
-extension CameraModel {
-    
-}
+extension CameraModel {}

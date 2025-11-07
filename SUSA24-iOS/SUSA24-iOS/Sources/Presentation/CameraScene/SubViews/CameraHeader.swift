@@ -32,6 +32,6 @@ struct CameraHeader: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    CameraHeader(onBackTapped: {}, onScanTapped: {})
-//}
+// }

@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SettingView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     

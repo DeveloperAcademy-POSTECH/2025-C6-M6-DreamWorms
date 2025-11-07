@@ -12,7 +12,7 @@ enum NetworkHeader {
     /// 카카오 API 공통 헤더
     static var kakaoHeaders: HTTPHeaders {
         [
-            NetworkConstant.KakaoAPIHeaderKey.authorization: "KakaoAK \(Config.kakaoRestAPIKey)"
+            NetworkConstant.KakaoAPIHeaderKey.authorization: "KakaoAK \(Config.kakaoRestAPIKey)",
         ]
     }
     
@@ -24,4 +24,3 @@ enum NetworkHeader {
         ]
     }
 }
-

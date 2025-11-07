@@ -16,7 +16,7 @@ struct RootView: View {
 
     private let moduleFactory: ModuleFactoryProtocol
     
-    public init(
+    init(
         moduleFactory: ModuleFactoryProtocol
     ) {
         self.moduleFactory = moduleFactory
@@ -39,13 +39,13 @@ struct RootView: View {
                         moduleFactory.makeCaseAddView(context: context)
                     case .caseListScene:
                         moduleFactory.makeCaseListView(context: context)
-                    case .dashboardScene(let caseID):
+                    case let .dashboardScene(caseID):
                         moduleFactory.makeDashboardView(caseID: caseID, context: context)
-                    case .mainTabScene(let caseID):
+                    case let .mainTabScene(caseID):
                         moduleFactory.makeMainTabView(caseID: caseID, context: context)
-                    case .mapScene(let caseID):
+                    case let .mapScene(caseID):
                         moduleFactory.makeMapView(caseID: caseID, context: context)
-                    case .onePageScene(let caseID):
+                    case let .onePageScene(caseID):
                         moduleFactory.makeOnePageView(caseID: caseID, context: context)
                     case .searchScene:
                         moduleFactory.makeSearchView()

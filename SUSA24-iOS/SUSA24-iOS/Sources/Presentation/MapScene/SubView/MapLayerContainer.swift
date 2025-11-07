@@ -52,7 +52,6 @@ struct MapLayerContainer: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension MapLayerContainer {
-    
     /// 버튼 간격을 설정합니다.
     /// - Parameter spacing: 버튼 간격 값
     @discardableResult
@@ -105,9 +104,8 @@ extension MapLayerContainer {
     }
 }
 
-
-//#Preview {
+// #Preview {
 //    MapLayerContainer()
 //        .padding()
 //        .background(Color.blue.opacity(0.3))
-//}
+// }

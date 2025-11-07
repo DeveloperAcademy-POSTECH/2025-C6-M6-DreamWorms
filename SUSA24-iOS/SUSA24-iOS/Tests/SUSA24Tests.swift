@@ -6,12 +6,11 @@
 //
 
 import CoreData
-import XCTest
 @testable import SUSA24_iOS
+import XCTest
 
 @MainActor
 final class SUSA24Tests: XCTestCase {
-    
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -30,7 +29,7 @@ final class SUSA24Tests: XCTestCase {
     
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
-        self.measure {
+        measure {
             // Put the code you want to measure the time of here.
         }
     }
@@ -92,7 +91,7 @@ final class SUSA24Tests: XCTestCase {
             "y": "37.5",
             "radius": 1000,
             "page": 1,
-            "size": 15
+            "size": 15,
         ]
         
         // When
@@ -107,77 +106,80 @@ final class SUSA24Tests: XCTestCase {
     // MARK: - API Tests
     
     // MARK: 좌표로 주소 조회 API 테스트
+
     @MainActor
     func testFetchLocationFromCoord() async throws {
         // Given
-        let longitude = "128.537763550346"
-        let latitude = "35.8189266589744"
-        
-        // When
-        let response: KakaoCoordToLocationResponseDTO = try await KakaoSearchAPIManager.shared.fetchLocationFromCoord(
-            x: longitude,
-            y: latitude,
+        let requestDTO = KakaoCoordToLocationRequestDTO(
+            x: "128.537763550346",
+            y: "35.8189266589744",
             inputCoord: "WGS84"
         )
         
+        // When
+        let response: KakaoCoordToLocationResponseDTO = try await KakaoSearchAPIManager.shared.fetchLocationFromCoord(requestDTO)
+        
         // Then
-        print("✅ 좌표로 주소 조회 API 호출 성공")
-        print("totalCount: \(response.meta.totalCount)")
-        print("documents count: \(response.documents.count)")
-        print("========================================")
+        var logOutput = "✅ 좌표로 주소 조회 API 호출 성공\n"
+        logOutput += "totalCount: \(response.meta.totalCount)\n"
+        logOutput += "documents count: \(response.documents.count)\n"
+        logOutput += "========================================\n"
         for (index, document) in response.documents.enumerated() {
-            print("\n[Document \(index + 1)]")
+            logOutput += "\n[Document \(index + 1)]\n"
             if let address = document.address {
-                print("  [지번 주소]")
-                print("    addressName: \(address.addressName)")
-                if let region1 = address.region1depthName { print("    region1depthName: \(region1)") }
-                if let region2 = address.region2depthName { print("    region2depthName: \(region2)") }
-                if let region3 = address.region3depthName { print("    region3depthName: \(region3)") }
-                if let region4 = address.region4depthName { print("    region4depthName: \(region4)") }
-                if let regionType = address.regionType { print("    regionType: \(regionType)") }
-                if let code = address.code { print("    code: \(code)") }
-                if let x = address.x { print("    x: \(x)") }
-                if let y = address.y { print("    y: \(y)") }
-                if let mountainYn = address.mountainYn { print("    mountainYn: \(mountainYn)") }
-                if let mainAddressNo = address.mainAddressNo { print("    mainAddressNo: \(mainAddressNo)") }
-                if let subAddressNo = address.subAddressNo { print("    subAddressNo: \(subAddressNo)") }
-                if let zipCode = address.zipCode { print("    zipCode: \(zipCode)") }
+                logOutput += "  [지번 주소]\n"
+                logOutput += "    addressName: \(address.addressName)\n"
+                if let region1 = address.region1depthName { logOutput += "    region1depthName: \(region1)\n" }
+                if let region2 = address.region2depthName { logOutput += "    region2depthName: \(region2)\n" }
+                if let region3 = address.region3depthName { logOutput += "    region3depthName: \(region3)\n" }
+                if let region4 = address.region4depthName { logOutput += "    region4depthName: \(region4)\n" }
+                if let regionType = address.regionType { logOutput += "    regionType: \(regionType)\n" }
+                if let code = address.code { logOutput += "    code: \(code)\n" }
+                if let x = address.x { logOutput += "    x: \(x)\n" }
+                if let y = address.y { logOutput += "    y: \(y)\n" }
+                if let mountainYn = address.mountainYn { logOutput += "    mountainYn: \(mountainYn)\n" }
+                if let mainAddressNo = address.mainAddressNo { logOutput += "    mainAddressNo: \(mainAddressNo)\n" }
+                if let subAddressNo = address.subAddressNo { logOutput += "    subAddressNo: \(subAddressNo)\n" }
+                if let zipCode = address.zipCode { logOutput += "    zipCode: \(zipCode)\n" }
             }
             if let roadAddress = document.roadAddress {
-                print("  [도로명 주소]")
-                print("    addressName: \(roadAddress.addressName)")
-                if let region1 = roadAddress.region1depthName { print("    region1depthName: \(region1)") }
-                if let region2 = roadAddress.region2depthName { print("    region2depthName: \(region2)") }
-                if let region3 = roadAddress.region3depthName { print("    region3depthName: \(region3)") }
-                if let region4 = roadAddress.region4depthName { print("    region4depthName: \(region4)") }
-                if let regionType = roadAddress.regionType { print("    regionType: \(regionType)") }
-                if let code = roadAddress.code { print("    code: \(code)") }
-                if let x = roadAddress.x { print("    x: \(x)") }
-                if let y = roadAddress.y { print("    y: \(y)") }
-                if let buildingName = roadAddress.buildingName { print("    buildingName: \(buildingName)") }
-                if let buildingCode = roadAddress.buildingCode { print("    buildingCode: \(buildingCode)") }
-                if let roadName = roadAddress.roadName { print("    roadName: \(roadName)") }
-                if let undergroundYn = roadAddress.undergroundYn { print("    undergroundYn: \(undergroundYn)") }
-                if let mainBuildingNo = roadAddress.mainBuildingNo { print("    mainBuildingNo: \(mainBuildingNo)") }
-                if let subBuildingNo = roadAddress.subBuildingNo { print("    subBuildingNo: \(subBuildingNo)") }
-                if let zoneNo = roadAddress.zoneNo { print("    zoneNo: \(zoneNo)") }
+                logOutput += "  [도로명 주소]\n"
+                logOutput += "    addressName: \(roadAddress.addressName)\n"
+                if let region1 = roadAddress.region1depthName { logOutput += "    region1depthName: \(region1)\n" }
+                if let region2 = roadAddress.region2depthName { logOutput += "    region2depthName: \(region2)\n" }
+                if let region3 = roadAddress.region3depthName { logOutput += "    region3depthName: \(region3)\n" }
+                if let region4 = roadAddress.region4depthName { logOutput += "    region4depthName: \(region4)\n" }
+                if let regionType = roadAddress.regionType { logOutput += "    regionType: \(regionType)\n" }
+                if let code = roadAddress.code { logOutput += "    code: \(code)\n" }
+                if let x = roadAddress.x { logOutput += "    x: \(x)\n" }
+                if let y = roadAddress.y { logOutput += "    y: \(y)\n" }
+                if let buildingName = roadAddress.buildingName { logOutput += "    buildingName: \(buildingName)\n" }
+                if let buildingCode = roadAddress.buildingCode { logOutput += "    buildingCode: \(buildingCode)\n" }
+                if let roadName = roadAddress.roadName { logOutput += "    roadName: \(roadName)\n" }
+                if let undergroundYn = roadAddress.undergroundYn { logOutput += "    undergroundYn: \(undergroundYn)\n" }
+                if let mainBuildingNo = roadAddress.mainBuildingNo { logOutput += "    mainBuildingNo: \(mainBuildingNo)\n" }
+                if let subBuildingNo = roadAddress.subBuildingNo { logOutput += "    subBuildingNo: \(subBuildingNo)\n" }
+                if let zoneNo = roadAddress.zoneNo { logOutput += "    zoneNo: \(zoneNo)\n" }
             }
         }
-        print("========================================")
+        logOutput += "========================================\n"
+        
+        print(logOutput)
+        let attachment = XCTAttachment(string: logOutput)
+        attachment.lifetime = .keepAlways
+        add(attachment)
         
         XCTAssertGreaterThan(response.meta.totalCount, 0)
         XCTAssertFalse(response.documents.isEmpty)
     }
     
     // MARK: 키워드로 장소 검색 API 테스트
+
     @MainActor
     func testFetchPlaceFromKeyword() async throws {
         // Given
-        let query = "대구광역시 달서구 월배로 지하 223"
-        
-        // When
-        let response: KakaoKeywordToPlaceResponseDTO = try await KakaoSearchAPIManager.shared.fetchPlaceFromKeyword(
-            query: query,
+        let requestDTO = KakaoKeywordToPlaceRequestDTO(
+            query: "대구광역시 달서구 월배로 지하 223",
             x: nil,
             y: nil,
             radius: nil,
@@ -185,30 +187,38 @@ final class SUSA24Tests: XCTestCase {
             size: 15
         )
         
+        // When
+        let response: KakaoKeywordToPlaceResponseDTO = try await KakaoSearchAPIManager.shared.fetchPlaceFromKeyword(requestDTO)
+        
         // Then
-        print("✅ 키워드로 장소 검색 API 호출 성공")
-        print("검색 키워드: \(query)")
-        print("totalCount: \(response.meta.totalCount)")
-        print("pageableCount: \(response.meta.pageableCount)")
-        print("isEnd: \(response.meta.isEnd)")
-        print("documents count: \(response.documents.count)")
-        print("========================================")
+        var logOutput = "✅ 키워드로 장소 검색 API 호출 성공\n"
+        logOutput += "검색 키워드: \(requestDTO.query)\n"
+        logOutput += "totalCount: \(response.meta.totalCount)\n"
+        logOutput += "pageableCount: \(response.meta.pageableCount)\n"
+        logOutput += "isEnd: \(response.meta.isEnd)\n"
+        logOutput += "documents count: \(response.documents.count)\n"
+        logOutput += "========================================\n"
         for (index, document) in response.documents.enumerated() {
-            print("\n[Document \(index + 1)]")
-            if let placeName = document.placeName { print("  placeName: \(placeName)") }
-            if let categoryName = document.categoryName { print("  categoryName: \(categoryName)") }
-            if let categoryGroupCode = document.categoryGroupCode { print("  categoryGroupCode: \(categoryGroupCode)") }
-            if let categoryGroupName = document.categoryGroupName { print("  categoryGroupName: \(categoryGroupName)") }
-            if let phone = document.phone { print("  phone: \(phone)") }
-            if let addressName = document.addressName { print("  addressName: \(addressName)") }
-            if let roadAddressName = document.roadAddressName { print("  roadAddressName: \(roadAddressName)") }
-            if let x = document.x { print("  x: \(x)") }
-            if let y = document.y { print("  y: \(y)") }
-            if let id = document.id { print("  id: \(id)") }
-            if let placeUrl = document.placeUrl { print("  placeUrl: \(placeUrl)") }
-            if let distance = document.distance { print("  distance: \(distance)m") }
+            logOutput += "\n[Document \(index + 1)]\n"
+            if let placeName = document.placeName { logOutput += "  placeName: \(placeName)\n" }
+            if let categoryName = document.categoryName { logOutput += "  categoryName: \(categoryName)\n" }
+            if let categoryGroupCode = document.categoryGroupCode { logOutput += "  categoryGroupCode: \(categoryGroupCode)\n" }
+            if let categoryGroupName = document.categoryGroupName { logOutput += "  categoryGroupName: \(categoryGroupName)\n" }
+            if let phone = document.phone { logOutput += "  phone: \(phone)\n" }
+            if let addressName = document.addressName { logOutput += "  addressName: \(addressName)\n" }
+            if let roadAddressName = document.roadAddressName { logOutput += "  roadAddressName: \(roadAddressName)\n" }
+            if let x = document.x { logOutput += "  x: \(x)\n" }
+            if let y = document.y { logOutput += "  y: \(y)\n" }
+            if let id = document.id { logOutput += "  id: \(id)\n" }
+            if let placeUrl = document.placeUrl { logOutput += "  placeUrl: \(placeUrl)\n" }
+            if let distance = document.distance { logOutput += "  distance: \(distance)m\n" }
         }
-        print("========================================")
+        logOutput += "========================================\n"
+        
+        print(logOutput)
+        let attachment = XCTAttachment(string: logOutput)
+        attachment.lifetime = .keepAlways
+        add(attachment)
         
         XCTAssertGreaterThan(response.meta.totalCount, 0)
         XCTAssertFalse(response.documents.isEmpty)
@@ -219,7 +229,6 @@ final class SUSA24Tests: XCTestCase {
 
 @MainActor
 final class LocationRepositoryTests: XCTestCase {
-    
     var context: NSManagedObjectContext!
     var repository: LocationRepository!
     var caseId: UUID!
@@ -230,7 +239,7 @@ final class LocationRepositoryTests: XCTestCase {
         let container = NSPersistentContainer(name: "SUSA24_iOS")
         container.persistentStoreDescriptions.first?.type = NSInMemoryStoreType
         container.loadPersistentStores { _, error in
-            if let error = error { fatalError("Store load failed: \(error)") }
+            if let error { fatalError("Store load failed: \(error)") }
         }
         context = container.viewContext
         
@@ -241,12 +250,12 @@ final class LocationRepositoryTests: XCTestCase {
         let caseEntity = CaseEntity(context: context)
         caseEntity.id = caseId
         caseEntity.name = "테스트"
-        caseEntity.number = "TEST-001"  // 필수 필드
-        caseEntity.crime = "테스트 범죄"  // 필수 필드
+        caseEntity.number = "TEST-001" // 필수 필드
+        caseEntity.crime = "테스트 범죄" // 필수 필드
         
         suspect = SuspectEntity(context: context)
         suspect.id = UUID()
-        suspect.name = ""  // 빈 문자열
+        suspect.name = "" // 빈 문자열
         suspect.relateCase = caseEntity
         caseEntity.addToSuspects(suspect)
         
@@ -271,10 +280,10 @@ final class LocationRepositoryTests: XCTestCase {
 //            receivedAt: nil
 //        )
 //        try await repository.createLocations(data: [location], caseId: caseId)
-//        
+//
 //        // When: 조회
 //        let locations = try await repository.fetchLocations(caseId: caseId)
-//        
+//
 //        // Then
 //        XCTAssertEqual(locations.count, 1)
 //        XCTAssertEqual(locations.first?.id, location.id)
@@ -296,10 +305,10 @@ final class LocationRepositoryTests: XCTestCase {
 //            locationType: 1,
 //            receivedAt: nil
 //        )
-//        
+//
 //        // When
 //        try await repository.createLocations(data: [location], caseId: caseId)
-//        
+//
 //        // Then
 //        let locations = try await repository.fetchLocations(caseId: caseId)
 //        XCTAssertEqual(locations.count, 1)
@@ -325,7 +334,7 @@ final class LocationRepositoryTests: XCTestCase {
         
 //        // When
 //        try await repository.deleteLocation(id: location.id)
-//        
+//
 //        // Then
 //        let locations = try await repository.fetchLocations(caseId: caseId)
 //        XCTAssertEqual(locations.count, 0)

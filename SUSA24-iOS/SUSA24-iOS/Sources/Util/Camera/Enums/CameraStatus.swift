@@ -6,6 +6,7 @@
 //
 
 // MARK: - Camera Status
+
 /// 카메라 권한 + 상태
 
 enum CameraStatus {
@@ -19,17 +20,17 @@ enum CameraStatus {
     var description: String {
         switch self {
         case .notInitialized:
-            return "초기화되지 않음"
+            "초기화되지 않음"
         case .checking:
-            return "권한 확인 중"
+            "권한 확인 중"
         case .unauthorized:
-            return "권한 없음"
+            "권한 없음"
         case .running:
-            return "실행 중"
+            "실행 중"
         case .failed:
-            return "실패"
+            "실패"
         case .stopped:
-            return "중지됨"
+            "중지됨"
         }
     }
 }

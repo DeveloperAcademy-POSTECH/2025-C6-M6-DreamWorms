@@ -13,7 +13,7 @@ struct FullScreenPhotoPicker: UIViewControllerRepresentable {
         let parent: FullScreenPhotoPicker
         init(_ parent: FullScreenPhotoPicker) { self.parent = parent }
 
-        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        func picker(_: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             defer { parent.isPresented.wrappedValue = false }
 
             guard let provider = results.first?.itemProvider,
@@ -21,7 +21,8 @@ struct FullScreenPhotoPicker: UIViewControllerRepresentable {
 
             provider.loadObject(ofClass: UIImage.self) { object, _ in
                 if let image = object as? UIImage,
-                   let data = image.jpegData(compressionQuality: 1.0) {
+                   let data = image.jpegData(compressionQuality: 1.0)
+                {
                     Task { @MainActor in
                         self.parent.onPicked(image, data)
                     }
@@ -45,6 +46,6 @@ struct FullScreenPhotoPicker: UIViewControllerRepresentable {
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+    func updateUIViewController(_: PHPickerViewController, context _: Context) {}
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 }

@@ -46,7 +46,6 @@ struct DWSearchBar: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension DWSearchBar {
-    
     /// 검색 바의 높이를 설정합니다.
     /// - Parameter height: 검색 바의 높이 값
     @discardableResult

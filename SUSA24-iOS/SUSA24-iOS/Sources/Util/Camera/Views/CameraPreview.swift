@@ -5,47 +5,46 @@
 //  Created by taeni on 11/5/25.
 //
 
-import SwiftUI
 @preconcurrency import AVFoundation
+import SwiftUI
 
 /// 카메라 캡처 내용을 표시하는 뷰
 struct CameraPreview: UIViewRepresentable {
-    
     private let source: PreviewSource
     
     init(source: PreviewSource) {
         self.source = source
     }
     
-    func makeUIView(context: Context) -> PreviewView {
+    func makeUIView(context _: Context) -> PreviewView {
         let preview = PreviewView()
         // 프리뷰 레이어와 캡처 세션을 연결합니다.
         source.connect(to: preview)
         return preview
     }
     
-    func updateUIView(_ previewView: PreviewView, context: Context) {
+    func updateUIView(_: PreviewView, context _: Context) {
         // No-op
     }
     
     /// 캡처된 내용을 표시하는 클래스
     /// AVCaptureVideoPreviewLayer를 소유하고 캡처된 내용을 표시합니다.
     class PreviewView: UIView, PreviewTarget {
-        
         init() {
             super.init(frame: .zero)
-    #if targetEnvironment(simulator)
-            // 캡처 API는 실제 디바이스에서만 작동합니다.
-            // 시뮬레이터에서는 정적 이미지를 표시합니다.
-            let imageView = UIImageView(frame: UIScreen.main.bounds)
-            imageView.image = UIImage(named: "video_mode")
-            imageView.contentMode = .scaleAspectFill
-            imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            addSubview(imageView)
-    #endif
+            #if targetEnvironment(simulator)
+                // 캡처 API는 실제 디바이스에서만 작동합니다.
+                // 시뮬레이터에서는 정적 이미지를 표시합니다.
+                let imageView = UIImageView(frame: UIScreen.main.bounds)
+                imageView.image = UIImage(named: "video_mode")
+                imageView.contentMode = .scaleAspectFill
+                imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                addSubview(imageView)
+            #endif
         }
         
-        required init?(coder: NSCoder) {
+        @available(*, unavailable)
+        required init?(coder _: NSCoder) {
             fatalError("init(coder:) has not been implemented")
         }
         
@@ -86,7 +85,6 @@ protocol PreviewTarget {
 
 /// PreviewSource의 기본 구현
 struct DefaultPreviewSource: PreviewSource {
-    
     private let session: AVCaptureSession
     
     init(session: AVCaptureSession) {

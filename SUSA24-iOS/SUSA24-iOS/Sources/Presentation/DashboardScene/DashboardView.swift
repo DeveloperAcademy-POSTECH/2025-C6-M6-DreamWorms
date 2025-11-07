@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct DashboardView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     
@@ -96,19 +95,19 @@ private extension DashboardView {
     func formatStay(_ minutes: Int) -> String {
         let hour = minutes / 60
         let min = minutes % 60
-        if hour > 0 && min > 0 { return "\(hour)시간 \(min)분 체류" }
-        if hour > 0          { return "\(hour)시간 체류" }
+        if hour > 0, min > 0 { return "\(hour)시간 \(min)분 체류" }
+        if hour > 0 { return "\(hour)시간 체류" }
         return "\(min)분 체류"
     }
 }
 
 //// MARK: - Preview
 //
-//#if DEBUG
-//import SwiftUI
+// #if DEBUG
+// import SwiftUI
 //
 ///// 프리뷰 전용 목업 레포지토리 (대시보드가 onAppear에서 불러가도록)
-//private struct DesignMockLocationRepository: LocationRepositoryProtocol {
+// private struct DesignMockLocationRepository: LocationRepositoryProtocol {
 //    func fetchLocations(caseId: UUID) async throws -> [Location] {
 //        var list: [Location] = []
 //
@@ -189,9 +188,9 @@ private extension DashboardView {
 //
 //    func deleteLocation(id: UUID) async throws {}
 //    func createLocations(data: [Location], caseId: UUID) async throws {}
-//}
+// }
 //
-//#Preview("Dashboard – LocationCard (TOP3)") {
+// #Preview("Dashboard – LocationCard (TOP3)") {
 //    DashboardView(
 //        store: DWStore(
 //            initialState: DashboardFeature.State(),
@@ -200,5 +199,5 @@ private extension DashboardView {
 //        currentCaseID: UUID()
 //    )
 //    .environment(AppCoordinator())
-//}
-//#endif
+// }
+// #endif

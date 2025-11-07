@@ -337,6 +337,50 @@
         }
       }
     },
+    "mapview_placeInfo_basic_Info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기본 정보"
+          }
+        }
+      }
+    },
+    "mapview_placeInfo_jibun" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지번"
+          }
+        }
+      }
+    },
+    "mapview_placeInfo_phone_number" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전화번호"
+          }
+        }
+      }
+    },
+    "mapview_placeInfo_road" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도로명"
+          }
+        }
+      }
+    },
     "photoDetails_currentIndex" : {
       "comment" : "이미지 상세_현재이미지/총 이미지 수",
       "extractionState" : "manual",

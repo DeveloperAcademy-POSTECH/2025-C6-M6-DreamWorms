@@ -84,7 +84,7 @@ extension MapFilterButton {
     }
 }
 
-//#Preview {
+// #Preview {
 //    HStack(spacing: 10) {
 //        MapFilterButton(
 //            text: "기지국 범위",
@@ -92,14 +92,14 @@ extension MapFilterButton {
 //            action: {}
 //        )
 //        .setupDefaultIcon(Image("icn_cov_default"))
-//        
+//
 //        MapFilterButton(
 //            text: "누적 빈도",
 //            isActive: false,
 //            action: {}
 //        )
 //        .setupDefaultIcon(Image("icn_freq_default"))
-//        
+//
 //        MapFilterButton(
 //            text: "최근 기지국",
 //            isActive: false,
@@ -108,5 +108,5 @@ extension MapFilterButton {
 //        .setupDefaultIcon(Image("icn_cell_default"))
 //    }
 //    .padding()
-//}
+// }
 //
