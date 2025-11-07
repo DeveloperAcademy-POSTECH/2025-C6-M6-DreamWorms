@@ -104,7 +104,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
         caseID: UUID,
         context: NSManagedObjectContext
     ) -> OnePageView {
-        let view = OnePageView()
+        let repository = LocationRepository(context: context)
+        let store = DWStore(
+            initialState: OnePageFeature.State(),
+            reducer: OnePageFeature(repository: repository)
+        )
+        let view = OnePageView(store: store, currentCaseID: caseID)
         return view
     }
     

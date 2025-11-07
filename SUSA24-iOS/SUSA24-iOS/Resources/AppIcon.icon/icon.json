@@ -1,7 +1,8 @@
 {
-  "fill" : "system-light",
+  "fill" : "automatic",
   "groups" : [
     {
+      "blend-mode" : "normal",
       "layers" : [
         {
           "image-name" : "1_per 2.svg",
@@ -15,6 +16,7 @@
           }
         },
         {
+          "blend-mode" : "normal",
           "glass" : true,
           "hidden" : false,
           "image-name" : "0_boun.svg",
@@ -30,11 +32,11 @@
         }
       ],
       "shadow" : {
-        "kind" : "neutral",
+        "kind" : "layer-color",
         "opacity" : 0.5
       },
       "translucency" : {
-        "enabled" : true,
+        "enabled" : false,
         "value" : 0.5
       }
     }

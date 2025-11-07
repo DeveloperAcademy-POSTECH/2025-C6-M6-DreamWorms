@@ -7,6 +7,9 @@
     "%lld" : {
 
     },
+    "%lld/10" : {
+
+    },
     "%lld개" : {
 
     },
@@ -623,7 +626,7 @@
       }
     },
     "visitDuration" : {
-      "comment" : "체류 시간",
+      "comment" : "대시보드_체류시간",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
@@ -635,7 +638,7 @@
       }
     },
     "visitFrequency" : {
-      "comment" : "맵뷰_필터_누적빈도",
+      "comment" : "대시보드_방문빈도",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
@@ -645,6 +648,9 @@
           }
         }
       }
+    },
+    "사진" : {
+
     }
   },
   "version" : "1.1"
