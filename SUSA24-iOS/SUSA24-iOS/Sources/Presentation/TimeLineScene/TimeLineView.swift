@@ -69,10 +69,7 @@ struct TimeLineView: View {
                 )
             }
         }
-        .task {
-            @MainActor in
-            store.send(.onAppear)
-        }
+        .task { store.send(.onAppear) }
     }
     
     // MARK: - Helper Methods

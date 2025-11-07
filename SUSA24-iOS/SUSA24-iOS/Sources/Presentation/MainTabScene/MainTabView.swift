@@ -7,10 +7,7 @@
 
 import SwiftUI
 
-struct MainTabView<MapView: View,
-                   DashboardView: View,
-                   OnePageView: View
->: View {
+struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
     
     // MARK: - Dependencies
     
@@ -89,9 +86,7 @@ struct MainTabView<MapView: View,
             .interactiveDismissDisabled(true)
         }
         .navigationBarBackButtonHidden(true)
-        .task { @MainActor in
-            store.send(.onAppear)
-        }
+        .task { store.send(.onAppear) }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
             guard let caseInfo = newCaseInfo else { return }
             timeLineStore.send(.updateData(

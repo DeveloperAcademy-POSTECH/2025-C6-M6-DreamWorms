@@ -152,39 +152,39 @@ extension DWSheetSearchBar {
 
 // MARK: - Preview
 
-#Preview("Search Bar - States") {
-    SearchBarStatePreview()
-}
-
-// 미리보기 Helper
-private struct SearchBarStatePreview: View {
-    @State private var text = ""
-    @FocusState private var isFocused: Bool
-
-    var body: some View {
-        HStack {
-            DWSheetSearchBar(
-                text: $text,
-                isFocused: $isFocused,
-            )
-            .setupPlaceholder("기지국 검색")
-
-            if isFocused {
-                Button {
-                    isFocused = false
-                } label: {
-                    Image(.xmark)
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(.labelNeutral)
-                        .frame(width: 44, height: 44)
-                        .background(.mainBackground)
-                        .clipShape(Circle())
-                }
-                .transition(.opacity)
-            }
-        }
-        .padding()
-        .animation(.snappy, value: isFocused)
-        .background(Color(.black))
-    }
-}
+//#Preview("Search Bar - States") {
+//    SearchBarStatePreview()
+//}
+//
+//// 미리보기 Helper
+//private struct SearchBarStatePreview: View {
+//    @State private var text = ""
+//    @FocusState private var isFocused: Bool
+//
+//    var body: some View {
+//        HStack {
+//            DWSheetSearchBar(
+//                text: $text,
+//                isFocused: $isFocused,
+//            )
+//            .setupPlaceholder("기지국 검색")
+//
+//            if isFocused {
+//                Button {
+//                    isFocused = false
+//                } label: {
+//                    Image(.xmark)
+//                        .font(.system(size: 20, weight: .medium))
+//                        .foregroundStyle(.labelNeutral)
+//                        .frame(width: 44, height: 44)
+//                        .background(.mainBackground)
+//                        .clipShape(Circle())
+//                }
+//                .transition(.opacity)
+//            }
+//        }
+//        .padding()
+//        .animation(.snappy, value: isFocused)
+//        .background(Color(.black))
+//    }
+//}

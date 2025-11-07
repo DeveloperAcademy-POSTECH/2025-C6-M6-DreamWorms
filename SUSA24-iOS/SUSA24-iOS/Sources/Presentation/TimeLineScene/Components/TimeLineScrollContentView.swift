@@ -15,7 +15,7 @@ struct TimeLineScrollContentView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                VStack(spacing: 0) {
                     ForEach(groupedLocations) { group in
                         VStack(spacing: 0) {
                             // Scroll Anchor
@@ -51,7 +51,7 @@ struct TimeLineScrollContentView: View {
                                 .padding(.horizontal, 16)
                                 .padding(.top, 16)
                             }
-                            .background(.labelCoolNormal)
+                            .background(.labelCoolNormal.opacity(0.4))
                             .clipShape(RoundedRectangle(cornerRadius: 24))
                             .padding(.horizontal, 16)
                         }
