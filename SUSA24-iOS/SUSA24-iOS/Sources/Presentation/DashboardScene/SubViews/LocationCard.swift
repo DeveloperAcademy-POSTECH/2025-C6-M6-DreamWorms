@@ -23,7 +23,7 @@ struct LocationCard: View {
     let onTap: (() -> Void)? = nil
     
     var isButton: Bool = true
-    var iconBackgroundColor: Color = .primaryNormal
+    var iconBackgroundColor: Color = .labelNeutral
         
     var body: some View {
         Button(
@@ -71,15 +71,20 @@ struct LocationCard: View {
     private var leadingIcon: some View {
         switch type {
         case .icon(let image):
-            image
-                .resizable()
-                .scaledToFit()
+            Circle()
+                .fill(iconBackgroundColor)
                 .frame(width: 32, height: 32)
-                .foregroundColor(.white)
+                .overlay {
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.white)
+                }
         case .number(let num):
             ZStack {
                 Circle()
-                    .fill(iconBackgroundColor)
+                    .fill(.primaryNormal)
                     .frame(width: 32, height: 32)
                 Text("\(num+1)")
                     .font(.numberSemiBold14)
@@ -108,6 +113,8 @@ extension LocationCard {
     }
 }
 
+// MARK: - Preivew
+
 //#Preview {
 //    VStack {
 //        LocationCard(
@@ -118,12 +125,66 @@ extension LocationCard {
 //        )
 //        
 //        LocationCard(
-//            type: .icon(Image(.testHome)),
+//            type: .icon(Image(.icnPin)),
 //            title: "기지국 주소",
 //            description: "19시간 체류",
 //            isButton: true
 //        )
 //        .setupAsButton(false)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.red.color)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.orange.color)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.yellow.color)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.lightGreen.color)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.darkGreen.color)
+//        
+//        LocationCard(
+//            type: .icon(Image(.icnPin)),
+//            title: "기지국 주소",
+//            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.purple.color)
 //    }
 //    .padding(.horizontal, 16)
 //}
