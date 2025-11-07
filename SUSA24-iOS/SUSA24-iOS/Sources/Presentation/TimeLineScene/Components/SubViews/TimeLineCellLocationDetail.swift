@@ -55,7 +55,7 @@ struct TimeLineCellLocationDetail: View {
                 .foregroundStyle(.labelAlternative)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.bottom, 22)
+        .padding(.bottom, 16)
     }
 }
 

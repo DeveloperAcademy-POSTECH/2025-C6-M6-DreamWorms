@@ -54,7 +54,7 @@ struct DWSheetSearchBar: View {
     @FocusState.Binding var isFocused: Bool
     
     /// 플레이스홀더 (필드 안에 표시됩니다)
-    var placeholder: String?
+    var placeholder: LocalizedStringResource?
     /// 텍스트 입력 영역의 패딩
     var contentPadding: EdgeInsets = .init(top: 11, leading: 16, bottom: 11, trailing: 12)
     
@@ -117,7 +117,7 @@ extension DWSheetSearchBar {
     ///
     /// - Parameter text: 검색 바에 표시될 플레이스홀더
     @discardableResult
-    func setupPlaceholder(_ text: String) -> Self {
+    func setupPlaceholder(_ text: LocalizedStringResource) -> Self {
         var v = self
         v.placeholder = text
         return v
@@ -155,15 +155,15 @@ extension DWSheetSearchBar {
 //#Preview("Search Bar - States") {
 //    SearchBarStatePreview()
 //}
-
-// 미리보기 Helper
+//
+//// 미리보기 Helper
 //private struct SearchBarStatePreview: View {
 //    @State private var text = ""
 //    @FocusState private var isFocused: Bool
 //
 //    var body: some View {
 //        HStack {
-//            DWSearchBar(
+//            DWSheetSearchBar(
 //                text: $text,
 //                isFocused: $isFocused,
 //            )

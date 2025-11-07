@@ -20,7 +20,7 @@ import SwiftUI
 /// )
 /// ```
 struct TimeLineEmptyState: View {
-    let message: String
+    let message: LocalizedStringResource
     
     var textFont: Font = .bodyMedium14
     var textColor: Color = .labelAlternative
@@ -34,7 +34,7 @@ struct TimeLineEmptyState: View {
             .font(textFont)
             .foregroundStyle(textColor)
             .multilineTextAlignment(textAlignment)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(contentPadding)
             .background(backgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))

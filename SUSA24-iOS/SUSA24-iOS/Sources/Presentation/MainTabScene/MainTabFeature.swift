@@ -48,6 +48,8 @@ struct MainTabFeature: DWReducer {
         
         /// 현재 선택된 탭
         var selectedTab: MainTabIdentifier = .map
+        
+        
     }
     
     // MARK: - Action
@@ -84,6 +86,8 @@ struct MainTabFeature: DWReducer {
             let reposiotry = caseRepository
             return .task {
                 do {
+                    try await reposiotry.loadMockDataIfNeeded(caseId: caseId)
+                    
                     let (caseInfo, locations) = try await reposiotry.fetchAllDataOfSpecificCase(for: caseId)
                     return .loadCaseInfoDetail(case: caseInfo, locations: locations)
                 } catch {
@@ -93,6 +97,7 @@ struct MainTabFeature: DWReducer {
         case .loadCaseInfoDetail(let caseInfo, let locations):
             state.caseInfo = caseInfo
             state.locations = locations
+        
             return .none
             
         case .selectTab(let tab):

@@ -50,7 +50,7 @@
       }
     },
     "bottomSheet_no_cellData" : {
-      "comment" : "기지국_정보_없음",
+      "comment" : "기지국_정보가_없음",
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
@@ -116,7 +116,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스캔이 저장되지 않고 삭제됩니다.  중단하시겠습니까?"
+            "value" : "스캔이 저장되지 않고 삭제됩니다. 중단하시겠습니까?"
           }
         }
       }
