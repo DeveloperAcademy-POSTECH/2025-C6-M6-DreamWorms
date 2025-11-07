@@ -112,7 +112,8 @@ struct LocationRepository: LocationRepositoryProtocol {
             }
             
             guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity>,
-                  let suspect = suspectsSet.first else {
+                  let suspect = suspectsSet.first
+            else {
                 throw NSError(domain: "LocationRepository", code: 2, userInfo: [NSLocalizedDescriptionKey: "Suspect not found"])
             }
             
@@ -147,11 +148,8 @@ struct LocationRepository: LocationRepositoryProtocol {
     }
 }
 
-
 struct MockLocationRepository: LocationRepositoryProtocol {
-    func fetchLocations(caseId: UUID) async throws -> [Location] { [] }
-    func deleteLocation(id: UUID) async throws {}
-    func createLocations(data: [Location], caseId: UUID) async throws {}
+    func fetchLocations(caseId _: UUID) async throws -> [Location] { [] }
+    func deleteLocation(id _: UUID) async throws {}
+    func createLocations(data _: [Location], caseId _: UUID) async throws {}
 }
-
-

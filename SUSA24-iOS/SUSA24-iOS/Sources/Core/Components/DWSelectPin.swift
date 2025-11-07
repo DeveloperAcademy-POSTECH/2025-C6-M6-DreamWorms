@@ -49,7 +49,6 @@ import SwiftUI
 ///     )
 /// ```
 struct DWSelectPin: View {
-    
     // MARK: - Properties
     
     let text: String
@@ -92,7 +91,6 @@ struct DWSelectPin: View {
 // MARK: - Progressive Disclosure
 
 extension DWSelectPin {
-    
     // MARK: - 선택 상태 (Selected State)
     
     /// 선택 시 배경색을 설정합니다.
@@ -180,29 +178,29 @@ extension DWSelectPin {
 
 //// MARK: - Preview
 //
-//#Preview("Select Pin - Default") {
+// #Preview("Select Pin - Default") {
 //    DWSelectPinDefaultPreview()
-//}
+// }
 //
-//#Preview("Select Pin - Custom") {
+// #Preview("Select Pin - Custom") {
 //    DWSelectPinCustomPreview()
-//}
+// }
 //
-//#Preview("Select Pin - Real Use Case") {
+// #Preview("Select Pin - Real Use Case") {
 //    DWSelectPinRealUseCasePreview()
-//}
+// }
 //
 //// MARK: - Preview Helpers
 //
-//private struct DWSelectPinDefaultPreview: View {
+// private struct DWSelectPinDefaultPreview: View {
 //    @State private var selected = "10.30"
-//    
+//
 //    var body: some View {
 //        VStack(spacing: 16) {
 //            Text("기본 스타일")
 //                .font(.caption)
 //                .bold()
-//            
+//
 //            HStack(spacing: 12) {
 //                ForEach(["10.29", "10.30", "10.31"], id: \.self) { day in
 //                    DWSelectPin(
@@ -215,20 +213,20 @@ extension DWSelectPin {
 //        }
 //        .padding()
 //    }
-//}
+// }
 //
-//private struct DWSelectPinCustomPreview: View {
+// private struct DWSelectPinCustomPreview: View {
 //    @State private var selected1 = "Blue"
 //    @State private var selected2 = "Red"
 //    @State private var selected3 = "Green"
-//    
+//
 //    var body: some View {
 //        VStack(spacing: 32) {
 //            // Blue
 //            VStack(spacing: 16) {
 //                Text("커스텀: 파랑")
 //                    .font(.caption)
-//                
+//
 //                HStack(spacing: 12) {
 //                    ForEach(["Blue", "Sky", "Navy"], id: \.self) { item in
 //                        DWSelectPin(
@@ -241,12 +239,12 @@ extension DWSelectPin {
 //                    }
 //                }
 //            }
-//            
+//
 //            // Red
 //            VStack(spacing: 16) {
 //                Text("커스텀: 빨강")
 //                    .font(.caption)
-//                
+//
 //                HStack(spacing: 12) {
 //                    ForEach(["Red", "Pink", "Rose"], id: \.self) { item in
 //                        DWSelectPin(
@@ -261,12 +259,12 @@ extension DWSelectPin {
 //                    }
 //                }
 //            }
-//            
+//
 //            // Green
 //            VStack(spacing: 16) {
 //                Text("커스텀: 초록")
 //                    .font(.caption)
-//                
+//
 //                HStack(spacing: 12) {
 //                    ForEach(["Green", "Mint", "Lime"], id: \.self) { item in
 //                        DWSelectPin(
@@ -284,17 +282,17 @@ extension DWSelectPin {
 //        }
 //        .padding()
 //    }
-//}
+// }
 //
-//private struct DWSelectPinRealUseCasePreview: View {
+// private struct DWSelectPinRealUseCasePreview: View {
 //    @State private var selectedCategory = "거주지"
-//    
+//
 //    var body: some View {
 //        VStack(spacing: 16) {
 //            Text("실제 사용 예시")
 //                .font(.caption)
 //                .bold()
-//            
+//
 //            ScrollView(.horizontal, showsIndicators: false) {
 //                HStack(spacing: 12) {
 //                    ForEach(["전체", "거주지", "직장", "기타"], id: \.self) { category in
@@ -310,4 +308,4 @@ extension DWSelectPin {
 //        }
 //        .padding()
 //    }
-//}
+// }

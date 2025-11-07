@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CaseAddFeature: DWReducer {
-    
     private let repository: CaseRepositoryProtocol
     init(repository: CaseRepositoryProtocol) { self.repository = repository }
     
@@ -19,7 +18,7 @@ struct CaseAddFeature: DWReducer {
         var caseNumber: String = ""
         var suspectName: String = ""
         var crime: String = ""
-        var suspectProfileImage: String? = nil
+        var suspectProfileImage: String?
         var isFormComplete: Bool {
             [caseName, caseNumber, suspectName, crime]
                 .allSatisfy { !$0.isEmpty }
@@ -41,15 +40,15 @@ struct CaseAddFeature: DWReducer {
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
-        case .updateCaseName(let name):
+        case let .updateCaseName(name):
             state.caseName = name; return .none
-        case .updateCaseNumber(let number):
+        case let .updateCaseNumber(number):
             state.caseNumber = number; return .none
-        case .updateSuspectName(let name):
+        case let .updateSuspectName(name):
             state.suspectName = name; return .none
-        case .updateCrimeType(let name):
+        case let .updateCrimeType(name):
             state.crime = name; return .none
-        case .setProfileImage(let image):
+        case let .setProfileImage(image):
             state.suspectProfileImage = image; return .none
         case .addCaseButtonTapped:
             let model = Case(

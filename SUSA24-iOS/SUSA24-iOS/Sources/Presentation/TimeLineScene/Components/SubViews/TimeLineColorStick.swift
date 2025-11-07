@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//MARK: - State
+// MARK: - State
 
 /// 'TimeLineColorStack'의 상태를 정의합니다.
 ///
@@ -31,7 +31,7 @@ enum TimeLineColorStickState: Equatable {
     }
 }
 
-//MARK: - View
+// MARK: - View
 
 /// 타임라인 셀 내에서 사용되는 막대(Bar) 컴포넌트
 ///
@@ -50,7 +50,6 @@ enum TimeLineColorStickState: Equatable {
 /// ```
 ///
 struct TimeLineColorStick: View {
-    
     let state: TimeLineColorStickState
     let isLast: Bool
     
@@ -69,8 +68,7 @@ struct TimeLineColorStick: View {
                 .shadow(color: state.spotColor.opacity(shadowOpacity),
                         radius: shadowRadius,
                         x: 0,
-                        y: 0
-                )
+                        y: 0)
                 .padding(contentPadding)
             
             Rectangle()
@@ -81,9 +79,9 @@ struct TimeLineColorStick: View {
     }
 }
 
-//MARK: - Progressive Disclosure
+// MARK: - Progressive Disclosure
+
 extension TimeLineColorStick {
-    
     /// 막대 높이를 설정합니다.
     ///
     /// - Parameter value: 막대의 세로 길이 (기본값: 80)
@@ -106,8 +104,9 @@ extension TimeLineColorStick {
 }
 
 // MARK: - Preview
+
 //
-//#Preview("Timeline Bar - States") {
+// #Preview("Timeline Bar - States") {
 //    HStack(spacing: 24) {
 //        TimeLineColorStick(state: .top1)
 //        TimeLineColorStick(state: .top2)
@@ -116,4 +115,4 @@ extension TimeLineColorStick {
 //    }
 //    .padding()
 //    .background(.testBackground)
-//}
+// }

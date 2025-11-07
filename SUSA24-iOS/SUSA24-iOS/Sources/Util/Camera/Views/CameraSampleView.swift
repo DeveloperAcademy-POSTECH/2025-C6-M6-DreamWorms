@@ -15,12 +15,13 @@ struct CameraSampleView: View {
     var body: some View {
         ZStack {
             // MARK: - 카메라 프리뷰
+
             CameraPreview(source: camera.previewSource)
             
             VStack {
                 // MARK: - 상단: 상태 표시
+
                 HStack {
-                    
                     Spacer()
                     
                     VStack(alignment: .trailing, spacing: 4) {
@@ -42,11 +43,10 @@ struct CameraSampleView: View {
                 Spacer()
                 
                 // MARK: - 하단: 컨트롤 버튼
+
                 HStack(spacing: 12) {
-                    
                     // 토치 버튼
                     DWCircleButton(image: Image(systemName: camera.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"), action: { Task { await camera.toggleTorch() } })
-                    
                     
                     Spacer()
                     // 촬영 버튼
@@ -57,13 +57,13 @@ struct CameraSampleView: View {
                     
                     // 초기화 버튼
                     DWCircleButton(image: Image(.delete), action: camera.clearAllPhotos)
-                    
-                }
+                 }
                 .padding(16)
             }
             .padding(16)
             
             // MARK: - 좌측 하단: 마지막 썸네일
+
             VStack {
                 Spacer()
                 
@@ -98,6 +98,7 @@ struct CameraSampleView: View {
     }
     
     // MARK: - 촬영 함수
+
     private func capturePhoto() {
         Task {
             do {
@@ -112,6 +113,6 @@ struct CameraSampleView: View {
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    CameraSampleView()
-//}
+// }

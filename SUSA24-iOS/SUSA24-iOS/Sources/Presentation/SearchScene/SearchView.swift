@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SearchView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     

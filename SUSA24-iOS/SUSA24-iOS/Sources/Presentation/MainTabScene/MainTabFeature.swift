@@ -21,7 +21,6 @@ import SwiftUI
 /// - ``Action``
 
 struct MainTabFeature: DWReducer {
-    
     private let caseRepository: CaseRepositoryProtocol
     
     /// MainTabFeature를 초기화합니다.
@@ -29,7 +28,6 @@ struct MainTabFeature: DWReducer {
     init(caseRepository: CaseRepositoryProtocol) {
         self.caseRepository = caseRepository
     }
-    
     
     // MARK: - State
     
@@ -90,12 +88,13 @@ struct MainTabFeature: DWReducer {
                     return .loadCaseInfoDetail(case: nil, locations: [])
                 }
             }
-        case .loadCaseInfoDetail(let caseInfo, let locations):
+
+        case let .loadCaseInfoDetail(caseInfo, locations):
             state.caseInfo = caseInfo
             state.locations = locations
             return .none
             
-        case .selectTab(let tab):
+        case let .selectTab(tab):
             state.selectedTab = tab
             return .none
         }

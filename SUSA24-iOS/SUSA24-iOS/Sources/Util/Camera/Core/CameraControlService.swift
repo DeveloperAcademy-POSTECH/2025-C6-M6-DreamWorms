@@ -5,7 +5,6 @@
 //  Created by taeni on 11/5/25.
 //
 
-
 import AVFoundation
 
 /// 카메라 디바이스를 제어하는 액터 (zoom, torch, focus 등)
@@ -74,7 +73,7 @@ actor CameraControlService {
     /// - Returns: 실제 설정된 줌 팩터
     /// 디폴트는 1.0
     func setZoom(to factor: CGFloat) -> CGFloat {
-        guard let device = device else { return 1.0 }
+        guard let device else { return 1.0 }
         
         do {
             try device.lockForConfiguration()
@@ -104,7 +103,7 @@ actor CameraControlService {
     /// 토치(손전등)를 켭니다.
     /// - Returns: 성공 여부
     func turnOnTorch() -> Bool {
-        guard let device = device, device.hasTorch else { return false }
+        guard let device, device.hasTorch else { return false }
         
         do {
             try device.lockForConfiguration()
@@ -121,7 +120,7 @@ actor CameraControlService {
     /// 토치(손전등)를 끕니다.
     /// - Returns: 성공 여부
     func turnOffTorch() -> Bool {
-        guard let device = device, device.hasTorch else { return false }
+        guard let device, device.hasTorch else { return false }
         
         do {
             try device.lockForConfiguration()
@@ -139,9 +138,9 @@ actor CameraControlService {
     /// - Returns: 토치 켜짐 여부
     func toggleTorch() -> Bool {
         if isTorchOn {
-            return !turnOffTorch()
+            !turnOffTorch()
         } else {
-            return turnOnTorch()
+            turnOnTorch()
         }
     }
     
@@ -149,7 +148,7 @@ actor CameraControlService {
     
     /// 연속 자동 포커스를 설정합니다.
     private func setupFocusMode() throws {
-        guard let device = device else { return }
+        guard let device else { return }
         
         try device.lockForConfiguration()
         defer { device.unlockForConfiguration() }
@@ -167,7 +166,7 @@ actor CameraControlService {
     /// - Parameters:
     ///   - point: 뷰에서의 포인트 (0~1 정규화 좌표)
     func focusOnPoint(_ point: CGPoint) {
-        guard let device = device else { return }
+        guard let device else { return }
         
         do {
             try device.lockForConfiguration()
@@ -191,6 +190,6 @@ actor CameraControlService {
     
     /// 디바이스의 줌 가능 범위를 반환합니다.
     func getZoomRange() -> ClosedRange<CGFloat> {
-        return minimumZoom...maximumZoom
+        minimumZoom ... maximumZoom
     }
 }

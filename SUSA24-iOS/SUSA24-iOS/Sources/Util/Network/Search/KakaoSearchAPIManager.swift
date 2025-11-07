@@ -36,7 +36,7 @@ final class KakaoSearchAPIManager {
     /// - Throws: `KakaoSearchError`
     private func request<T: Decodable>(
         url: String,
-        responseType: T.Type
+        responseType _: T.Type
     ) async throws -> T {
         do {
             let requestData = try await session
@@ -74,7 +74,7 @@ extension KakaoSearchAPIManager {
             parameters: [
                 "x": requestDTO.x,
                 "y": requestDTO.y,
-                "inputCoord": requestDTO.inputCoord
+                "inputCoord": requestDTO.inputCoord,
             ]
         )
         return try await request(url: fullURL, responseType: KakaoCoordToLocationResponseDTO.self)
@@ -93,7 +93,7 @@ extension KakaoSearchAPIManager {
                 "y": requestDTO.y,
                 "radius": requestDTO.radius,
                 "page": requestDTO.page,
-                "size": requestDTO.size
+                "size": requestDTO.size,
             ]
         )
         return try await request(url: fullURL, responseType: KakaoKeywordToPlaceResponseDTO.self)

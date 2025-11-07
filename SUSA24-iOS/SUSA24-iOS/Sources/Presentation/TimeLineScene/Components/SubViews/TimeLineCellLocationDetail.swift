@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//MARK: - View
+// MARK: - View
 
 /// 타임라인 위치 정보 셀 컴포넌트
 ///
@@ -39,7 +39,8 @@ struct TimeLineCellLocationDetail: View {
         // Localizable 포맷 사용
         return String(localized: .timeRangeFormat(
             start: start,
-            end: end))
+            end: end
+        ))
     }
     
     var body: some View {
@@ -62,7 +63,6 @@ struct TimeLineCellLocationDetail: View {
 // MARK: - Progressive Disclosure
 
 extension TimeLineCellLocationDetail {
-    
     /// 시간 포맷을 설정합니다.
     ///
     /// - Parameter format: DateFormatter 형식 문자열
@@ -78,14 +78,14 @@ extension TimeLineCellLocationDetail {
 
 //// MARK: - Preview
 //
-//#Preview("Location Detail Cell - States") {
+// #Preview("Location Detail Cell - States") {
 //    VStack(spacing: 20) {
 //        // 12시간 형식 (기본)
 //        VStack(alignment: .leading, spacing: 8) {
 //            Text("12시간 형식 (PM/AM)")
 //                .font(.caption)
 //                .foregroundStyle(.secondary)
-//            
+//
 //            TimeLineCellLocationDetail(
 //                caseTitle: "기지국 위치 정보",
 //                startTime: Date().addingTimeInterval(-3600),  // 1시간 전
@@ -95,15 +95,15 @@ extension TimeLineCellLocationDetail {
 //            .background(.mainAlternative)
 //            .clipShape(RoundedRectangle(cornerRadius: 12))
 //        }
-//        
+//
 //        Divider()
-//        
+//
 //        // 24시간 형식
 //        VStack(alignment: .leading, spacing: 8) {
 //            Text("24시간 형식")
 //                .font(.caption)
 //                .foregroundStyle(.secondary)
-//            
+//
 //            TimeLineCellLocationDetail(
 //                caseTitle: "기지국 위치 정보",
 //                startTime: Date().addingTimeInterval(-7200),  // 2시간 전
@@ -114,31 +114,31 @@ extension TimeLineCellLocationDetail {
 //            .background(.mainAlternative)
 //            .clipShape(RoundedRectangle(cornerRadius: 12))
 //        }
-//        
+//
 //        Divider()
-//        
+//
 //        // 실제 사용 예시 (리스트에서)
 //        VStack(alignment: .leading, spacing: 8) {
 //            Text("리스트에서 사용")
 //                .font(.caption)
 //                .foregroundStyle(.secondary)
-//            
+//
 //            LocationDetailListPreview()
 //        }
 //    }
 //    .padding(16)
-//}
+// }
 //
 //// MARK: - Preview Helpers
 //
-//private struct LocationDetailListPreview: View {
+// private struct LocationDetailListPreview: View {
 //    // CoreData에서 가져온 데이터 시뮬레이션
 //    let mockLocations: [(Date, Date)] = [
 //        (Date().addingTimeInterval(-7200), Date().addingTimeInterval(-5400)),  // 2시간 전 ~ 1.5시간 전
 //        (Date().addingTimeInterval(-3600), Date().addingTimeInterval(-1800)),  // 1시간 전 ~ 30분 전
 //        (Date().addingTimeInterval(-900), Date())                               // 15분 전 ~ 현재
 //    ]
-//    
+//
 //    var body: some View {
 //        VStack(spacing: 12) {
 //            ForEach(mockLocations.indices, id: \.self) { index in
@@ -147,7 +147,7 @@ extension TimeLineCellLocationDetail {
 //                    Circle()
 //                        .fill(.primaryNormal)
 //                        .frame(width: 8, height: 8)
-//                    
+//
 //                    // 위치 정보
 //                    TimeLineCellLocationDetail(
 //                        caseTitle: "기지국 위치 정보",
@@ -161,4 +161,4 @@ extension TimeLineCellLocationDetail {
 //            }
 //        }
 //    }
-//}
+// }

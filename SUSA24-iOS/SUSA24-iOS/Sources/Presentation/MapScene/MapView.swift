@@ -5,11 +5,10 @@
 //  Created by mini on 10/29/25.
 //
 
-import SwiftUI
 import NMapsMap
+import SwiftUI
 
 struct MapView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     
@@ -26,7 +25,7 @@ struct MapView: View {
             NaverMapView(onMapTapped: { latlng in
                 handleMapTap(latlng: latlng)
             })
-                .ignoresSafeArea()
+            .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
                 MapHeader(

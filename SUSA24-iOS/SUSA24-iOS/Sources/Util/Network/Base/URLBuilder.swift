@@ -27,7 +27,7 @@ enum URLBuilder {
         
         // nil이 아닌 값만 필터링하여 쿼리 아이템 생성
         let queryItems = parameters
-            .compactMapValues { $0 }  // nil 값 제거
+            .compactMapValues { $0 } // nil 값 제거
             .map { URLQueryItem(name: $0.key, value: $0.value) }
         
         components?.queryItems = queryItems.isEmpty ? nil : queryItems
@@ -62,7 +62,7 @@ extension URLBuilder {
     ) throws -> String {
         // Any? 타입을 String?로 변환
         let stringParameters = parameters.mapValues { value -> String? in
-            guard let value = value else { return nil }
+            guard let value else { return nil }
             
             if let string = value as? String {
                 return string
@@ -88,4 +88,3 @@ extension URLBuilder {
         try? build(baseURL: baseURL, parameters: parameters)
     }
 }
-

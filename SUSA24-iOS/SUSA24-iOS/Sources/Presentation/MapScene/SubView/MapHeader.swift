@@ -32,10 +32,10 @@ struct MapHeader: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    MapHeader(
 //        onBackTapped: {},
 //        onSearchTapped: {}
 //    )
 //    .padding()
-//}
+// }

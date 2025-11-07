@@ -14,7 +14,7 @@ struct PersistenceController {
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "SUSA24_iOS")
+        self.container = NSPersistentContainer(name: "SUSA24_iOS")
         
         let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
         if inMemory || isPreview {
@@ -29,9 +29,9 @@ struct PersistenceController {
         container.loadPersistentStores { _, error in
             if let error {
                 #if DEBUG
-                assertionFailure("CoreData load error: \(error)")
+                    assertionFailure("CoreData load error: \(error)")
                 #else
-                print("CoreData load error: \(error)")
+                    print("CoreData load error: \(error)")
                 #endif
             }
         }

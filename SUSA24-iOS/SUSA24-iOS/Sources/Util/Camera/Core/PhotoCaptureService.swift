@@ -9,6 +9,7 @@ import AVFoundation
 import UIKit
 
 // MARK: - Delegate Conformance
+
 extension PhotoCaptureService: AVCapturePhotoCaptureDelegate {}
 
 /// 사진 촬영 및 관리를 담당합니다.
@@ -76,7 +77,7 @@ final class PhotoCaptureService: NSObject {
     
     func addCapturedPhoto(_ photoData: Data) async {
         guard capturedPhotos.count < maxPhotosLimit else {
-            let continuation =  getNextContinuation()
+            let continuation = getNextContinuation()
             continuation?.resume(throwing: PhotoCaptureError.maxPhotosExceeded)
             return
         }
@@ -92,12 +93,12 @@ final class PhotoCaptureService: NSObject {
         lastThumbnail = capturedPhoto.thumbnail
         updateCapturability()
         
-        let continuation =  getNextContinuation()
+        let continuation = getNextContinuation()
         continuation?.resume(returning: capturedPhoto)
     }
     
     func resumeWithError(_ error: Error) async {
-        let continuation =  getNextContinuation()
+        let continuation = getNextContinuation()
         continuation?.resume(throwing: error)
     }
     
@@ -126,6 +127,7 @@ final class PhotoCaptureService: NSObject {
 }
 
 // MARK: - AVCapturePhotoCaptureDelegate
+
 extension PhotoCaptureService {
     /// 사진 촬영 완료 후 호출되는 메서드
     /// - Parameters:
@@ -133,12 +135,12 @@ extension PhotoCaptureService {
     ///   - photo: 촬영된 사진 데이터
     ///   - error: 촬영 중 발생한 에러 (성공시 nil)
     nonisolated func photoOutput(
-        _ output: AVCapturePhotoOutput,
+        _: AVCapturePhotoOutput,
         didFinishProcessingPhoto photo: AVCapturePhoto,
         error: Error?
     ) {
         // 에러 처리
-        if let error = error {
+        if let error {
             Task {
                 await self.resumeWithError(error)
             }

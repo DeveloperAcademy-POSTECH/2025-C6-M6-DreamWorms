@@ -86,7 +86,7 @@ actor CameraCaptureSession {
     /// - Parameter photoOutput: 추가할 AVCapturePhotoOutput
     /// - Throws: 추가 실패 시 에러
     func addPhotoOutput(_ photoOutput: AVCapturePhotoOutput) throws {
-        guard let session = session else {
+        guard let session else {
             throw CameraSessionError.sessionNotConfigured
         }
         

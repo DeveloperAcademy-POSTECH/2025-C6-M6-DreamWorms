@@ -16,7 +16,7 @@ struct PlaceInfoSheet: View {
     var body: some View {
         if isLoading {
             CircleProgressView()
-            .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity)
         } else {
             VStack(alignment: .leading) {
                 PlaceInfoSheetHeader(
@@ -168,13 +168,13 @@ struct CircleProgressView: View {
     }
 }
 
-
 // MARK: - Preview
+
 //
-//#Preview("전체 시트") {
+// #Preview("전체 시트") {
 //    struct PreviewWrapper: View {
 //        @State private var isPresented = false
-//        
+//
 //        var body: some View {
 //            Button("시트 열기") {
 //                isPresented = true
@@ -195,30 +195,30 @@ struct CircleProgressView: View {
 //            }
 //        }
 //    }
-//    
-//    return PreviewWrapper()
-//}
 //
-//#Preview("타이틀 + X 버튼") {
+//    return PreviewWrapper()
+// }
+//
+// #Preview("타이틀 + X 버튼") {
 //    ZStack {
 //        Color.gray.opacity(0.1)
-//        
+//
 //        VStack(spacing: 0) {
 //            PlaceInfoSheetHeader(
 //                title: "장소명/건물명",
 //                onClose: {}
 //            )
-//            
+//
 //            Spacer()
 //        }
 //    }
 //    .frame(height: 200)
-//}
+// }
 //
-//#Preview("기본 정보 섹션") {
+// #Preview("기본 정보 섹션") {
 //    ZStack {
 //        Color.gray.opacity(0.1)
-//        
+//
 //        VStack(spacing: 0) {
 //            PlaceInfoSheetContent(
 //                placeInfo: PlaceInfo(
@@ -228,9 +228,9 @@ struct CircleProgressView: View {
 //                    phoneNumber: "010-9934-9349"
 //                )
 //            )
-//            
+//
 //            Spacer()
 //        }
 //    }
 //    .frame(height: 300)
-//}
+// }

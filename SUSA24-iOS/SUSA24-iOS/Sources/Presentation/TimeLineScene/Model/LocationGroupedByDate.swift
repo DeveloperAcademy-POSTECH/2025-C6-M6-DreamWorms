@@ -20,11 +20,12 @@ struct LocationGroupedByDate: Identifiable, Equatable, Sendable {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "M월 d일 (E)"
-        return formatter.string(from:date)
+        return formatter.string(from: date)
     }
 }
 
 // MARK: - 변환 로직
+
 extension LocationGroupedByDate {
     /// Location 배열을 날짜별로 그룹화
     /// - Parameter locations: CoreData에서 가져온 Location 배열
@@ -44,9 +45,9 @@ extension LocationGroupedByDate {
         
         // 3. LocationGroupedByDate로 변환 ( map을 활용해서 key, locations를 평탄화 )
         // 다음 시간 순으로 최신순하고 구조체에 담기
-        let result = grouped.map { (date, locations) -> LocationGroupedByDate in
+        let result = grouped.map { date, locations -> LocationGroupedByDate in
             // 시간순으로 정렬 (최신순)
-            let sorted = locations.sorted() {
+            let sorted = locations.sorted {
                 ($0.receivedAt ?? Date()) > ($1.receivedAt ?? Date())
             }
             return LocationGroupedByDate(date: date, locations: sorted)

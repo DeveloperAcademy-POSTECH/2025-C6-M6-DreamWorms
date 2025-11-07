@@ -108,4 +108,3 @@ struct KakaoRoadAddress: Decodable, Sendable {
     /// 우편번호
     let zoneNo: String?
 }
-

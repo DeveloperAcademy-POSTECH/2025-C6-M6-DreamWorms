@@ -5,14 +5,13 @@
 //  Created by mini on 10/31/25.
 //
 
-import SwiftUI
 import NMapsMap
+import SwiftUI
 
 // MARK: - Reducer
 
 /// 지도 화면의 상태와 액션을 관리하는 Reducer입니다.
 struct MapFeature: DWReducer {
-    
     private let repository: LocationRepositoryProtocol
     
     init(repository: LocationRepositoryProtocol) {
@@ -100,11 +99,11 @@ struct MapFeature: DWReducer {
                 }
             }
             
-        case .loadLocations(let locations):
+        case let .loadLocations(locations):
             state.locations = locations
             return .none
             
-        case .selectFilter(let filter):
+        case let .selectFilter(filter):
             switch filter {
             case .cellStationRange:
                 state.isBaseStationRangeSelected.toggle()
@@ -121,8 +120,8 @@ struct MapFeature: DWReducer {
             
         // MARK: - 위치정보 시트 관련 액션 처리
             
-        case .mapTapped(let latlng):
-            // 위치정보 시트 표시 및 로딩 상태 설정            
+        case let .mapTapped(latlng):
+            // 위치정보 시트 표시 및 로딩 상태 설정
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
             state.selectedPlaceInfo = PlaceInfo(
@@ -147,7 +146,7 @@ struct MapFeature: DWReducer {
                 }
             }
             
-        case .showPlaceInfo(let placeInfo):
+        case let .showPlaceInfo(placeInfo):
             // 위치정보 데이터를 상태에 저장하고 로딩 완료 처리
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
@@ -233,11 +232,11 @@ enum MapFilterType: String, CaseIterable {
     var iconName: String {
         switch self {
         case .cellStationRange:
-            return "icn_cell_range_filter"
+            "icn_cell_range_filter"
         case .visitFrequency:
-            return "icn_visit_frequency_filter"
+            "icn_visit_frequency_filter"
         case .recentBaseStation:
-            return "icn_cell_station_filter"
+            "icn_cell_station_filter"
         }
     }
 }

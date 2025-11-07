@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct OnePageFeature: DWReducer {
-    
     // MARK: - State
     
     struct State: DWState {}
@@ -19,8 +18,7 @@ struct OnePageFeature: DWReducer {
     
     // MARK: - Reducer
     
-    func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
-        switch action {
-        }
+    func reduce(into _: inout State, action: Action) -> DWEffect<Action> {
+        switch action {}
     }
 }

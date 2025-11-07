@@ -5,8 +5,8 @@
 //  Created by mini on 10/31/25.
 //
 
-import SwiftUI
 import NMapsMap
+import SwiftUI
 
 struct NaverMapView: UIViewRepresentable {
     var onMapTapped: ((NMGLatLng) -> Void)?
@@ -21,8 +21,7 @@ struct NaverMapView: UIViewRepresentable {
         return mapView
     }
 
-    func updateUIView(_ uiView: NMFMapView, context: Context) {
-    }
+    func updateUIView(_: NMFMapView, context _: Context) {}
     
     class Coordinator: NSObject, NMFMapViewTouchDelegate {
         let parent: NaverMapView
@@ -31,12 +30,11 @@ struct NaverMapView: UIViewRepresentable {
             self.parent = parent
         }
         
-        func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
+        func mapView(_: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
             parent.onMapTapped?(latlng)
         }
     }
 }
-
 
 // MARK: - Extension Method
 
@@ -47,10 +45,9 @@ extension NMGLatLng {
     /// - Returns: 카카오 API 요청 DTO
     func toKakaoRequestDTO(inputCoord: String? = "WGS84") -> KakaoCoordToLocationRequestDTO {
         KakaoCoordToLocationRequestDTO(
-            x: String(lng),  // 경도 (네이버 lng → 카카오 x)
-            y: String(lat),  // 위도 (네이버 lat → 카카오 y)
+            x: String(lng), // 경도 (네이버 lng → 카카오 x)
+            y: String(lat), // 위도 (네이버 lat → 카카오 y)
             inputCoord: inputCoord
         )
     }
 }
-

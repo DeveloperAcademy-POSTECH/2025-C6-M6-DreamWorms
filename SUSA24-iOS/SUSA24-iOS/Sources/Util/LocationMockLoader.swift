@@ -5,10 +5,10 @@
 //  Created by Moo on 11/3/25.
 //
 
-import Foundation
 import CoreData
+import Foundation
 
-nonisolated private struct WeeklyCellLocationDTO: Decodable, Sendable {
+private nonisolated struct WeeklyCellLocationDTO: Decodable, Sendable {
     let address: String
     let receivedAt: Date
     let pointLatitude: Double
@@ -23,9 +23,9 @@ nonisolated private struct WeeklyCellLocationDTO: Decodable, Sendable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        address = try container.decode(String.self, forKey: .address)
-        pointLatitude = try container.decode(Double.self, forKey: .pointLatitude)
-        pointLongitude = try container.decode(Double.self, forKey: .pointLongitude)
+        self.address = try container.decode(String.self, forKey: .address)
+        self.pointLatitude = try container.decode(Double.self, forKey: .pointLatitude)
+        self.pointLongitude = try container.decode(Double.self, forKey: .pointLongitude)
         
         let dateString = try container.decode(String.self, forKey: .receivedAt)
         let formatter = DateFormatter()
@@ -38,7 +38,7 @@ nonisolated private struct WeeklyCellLocationDTO: Decodable, Sendable {
                 debugDescription: "Invalid date format: \(dateString). Expected format: yyyy-MM-dd'T'HH:mm:ss"
             )
         }
-        receivedAt = date
+        self.receivedAt = date
     }
 }
 

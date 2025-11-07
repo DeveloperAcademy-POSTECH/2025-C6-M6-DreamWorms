@@ -10,7 +10,6 @@ import Foundation
 /// 비동기 사이드 이펙트(네트워크, 타이머, 파일 I/O 등)를 모델링합니다.
 /// 작업이 완료되면 후속 `Action`을 방출하여 단방향 데이터 흐름을 유지합니다.
 public struct DWEffect<Action: DWAction>: Sendable {
-    
     /// Effect 실행 본문입니다. `downstream`에 후속 액션을 전달하면
     /// `Store`가 그 액션을 다시 `reduce` 흐름으로 연결합니다.
     public let run: @Sendable (@escaping @Sendable (Action) -> Void) async -> Void

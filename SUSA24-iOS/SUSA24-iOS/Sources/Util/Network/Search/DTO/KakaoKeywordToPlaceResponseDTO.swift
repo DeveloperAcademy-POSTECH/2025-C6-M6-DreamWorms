@@ -47,4 +47,3 @@ struct KakaoPlaceDocument: Decodable, Sendable {
     /// 거리(단위: 미터)
     let distance: String?
 }
-

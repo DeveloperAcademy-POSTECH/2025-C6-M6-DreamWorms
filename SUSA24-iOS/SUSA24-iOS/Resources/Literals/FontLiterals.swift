@@ -22,7 +22,6 @@ enum FontName: String {
 // MARK: - Font Extension
 
 extension Font {
-    
     // MARK: - Title
     
     static let titleSemiBold22: Font = .custom(FontName.notoSansSemiBold.rawValue, size: 22)
@@ -55,7 +54,6 @@ extension Font {
 // MARK: - UIFont Extension
 
 extension UIFont {
-
     // MARK: - Title
     
     static let titleSemiBold22: UIFont = .custom(.notoSansSemiBold, size: 22)

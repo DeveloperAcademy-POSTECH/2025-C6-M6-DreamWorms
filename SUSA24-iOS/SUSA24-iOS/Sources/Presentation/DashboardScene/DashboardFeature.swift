@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct DashboardFeature: DWReducer {
-    
     private let repository: LocationRepositoryProtocol
     init(repository: LocationRepositoryProtocol) { self.repository = repository }
     
@@ -16,7 +15,7 @@ struct DashboardFeature: DWReducer {
     
     struct State: DWState {
         var tab: DashboardPickerTab = .visitDuration
-        var caseID: UUID? = nil
+        var caseID: UUID?
         var topVisitDurationLocations = [StayAddress]()
         var isLoadingTop = false
     }
@@ -33,12 +32,11 @@ struct DashboardFeature: DWReducer {
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
-            
-        case .setTab(let tab):
+        case let .setTab(tab):
             state.tab = tab
             return .none
             
-        case .onAppear(let caseID):
+        case let .onAppear(caseID):
             state.caseID = caseID
             return .task { [repository] in
                 do {
@@ -50,7 +48,7 @@ struct DashboardFeature: DWReducer {
                 }
             }
             
-        case .setTopVisitDuration(let visits):
+        case let .setTopVisitDuration(visits):
             state.topVisitDurationLocations = visits
             return .none
         }
@@ -75,6 +73,6 @@ private extension DashboardFeature {
         }
 
         let stays = bucket.map { StayAddress(address: $0.key, totalMinutes: $0.value * sampleMinutes) }
-        return stays.sorted { $0.totalMinutes > $1.totalMinutes }.prefix(topK).map { $0 }
+        return stays.sorted { $0.totalMinutes > $1.totalMinutes }.prefix(topK).map(\.self)
     }
 }

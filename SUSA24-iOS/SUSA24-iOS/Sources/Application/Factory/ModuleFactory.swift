@@ -45,7 +45,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let repository = CaseRepository(context: context)
         let store = DWStore(
             initialState: CaseListFeature.State(),
-            reducer: CaseListFeature(repository: repository))
+            reducer: CaseListFeature(repository: repository)
+        )
         let view = CaseListView(store: store)
         return view
     }
@@ -67,7 +68,6 @@ final class ModuleFactory: ModuleFactoryProtocol {
         caseID: UUID,
         context: NSManagedObjectContext
     ) -> MainTabView<MapView, DashboardView, OnePageView> {
-        
         let caseRepository = CaseRepository(context: context)
         
         let store = DWStore(
@@ -89,20 +89,21 @@ final class ModuleFactory: ModuleFactoryProtocol {
     }
     
     func makeMapView(
-        caseID: UUID,
+        caseID _: UUID,
         context: NSManagedObjectContext
     ) -> MapView {
         let repository = LocationRepository(context: context)
         let store = DWStore(
             initialState: MapFeature.State(),
-            reducer: MapFeature(repository: repository))
+            reducer: MapFeature(repository: repository)
+        )
         let view = MapView(store: store)
         return view
     }
     
     func makeOnePageView(
-        caseID: UUID,
-        context: NSManagedObjectContext
+        caseID _: UUID,
+        context _: NSManagedObjectContext
     ) -> OnePageView {
         let view = OnePageView()
         return view

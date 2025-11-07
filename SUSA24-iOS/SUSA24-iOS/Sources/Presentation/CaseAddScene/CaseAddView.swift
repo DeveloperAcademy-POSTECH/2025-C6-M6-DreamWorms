@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CaseAddView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     
@@ -121,7 +120,7 @@ private extension CaseAddView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    CaseAddView(
 //        store: DWStore(
 //            initialState: CaseAddFeature.State(),
@@ -129,4 +128,4 @@ private extension CaseAddView {}
 //        )
 //    )
 //    .environment(AppCoordinator())
-//}
+// }

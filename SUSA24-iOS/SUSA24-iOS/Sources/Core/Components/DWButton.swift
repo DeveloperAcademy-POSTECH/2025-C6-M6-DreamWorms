@@ -21,7 +21,7 @@ struct DWButton: View {
     let title: String
     let action: () -> Void
     
-    var iconImage: Image? = nil
+    var iconImage: Image?
     var foregroundColor: Color = .white
     var backgroundColor: Color = .primaryNormal
     var verticalPadding: CGFloat = 16
@@ -58,7 +58,6 @@ struct DWButton: View {
 // MARK: - Extension Methods (Progressive Disclosure)
 
 extension DWButton {
-    
     /// 아이콘을 설정합니다.
     /// - Parameter image: 선행 아이콘 이미지. `nil`이면 아이콘을 숨깁니다.
     @discardableResult

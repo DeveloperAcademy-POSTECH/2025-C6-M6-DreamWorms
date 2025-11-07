@@ -6,12 +6,11 @@
 //
 
 import CoreData
-import XCTest
 @testable import SUSA24_iOS
+import XCTest
 
 @MainActor
 final class SUSA24Tests: XCTestCase {
-    
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -30,7 +29,7 @@ final class SUSA24Tests: XCTestCase {
     
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
-        self.measure {
+        measure {
             // Put the code you want to measure the time of here.
         }
     }
@@ -92,7 +91,7 @@ final class SUSA24Tests: XCTestCase {
             "y": "37.5",
             "radius": 1000,
             "page": 1,
-            "size": 15
+            "size": 15,
         ]
         
         // When
@@ -107,6 +106,7 @@ final class SUSA24Tests: XCTestCase {
     // MARK: - API Tests
     
     // MARK: 좌표로 주소 조회 API 테스트
+
     @MainActor
     func testFetchLocationFromCoord() async throws {
         // Given
@@ -174,6 +174,7 @@ final class SUSA24Tests: XCTestCase {
     }
     
     // MARK: 키워드로 장소 검색 API 테스트
+
     @MainActor
     func testFetchPlaceFromKeyword() async throws {
         // Given
@@ -228,7 +229,6 @@ final class SUSA24Tests: XCTestCase {
 
 @MainActor
 final class LocationRepositoryTests: XCTestCase {
-    
     var context: NSManagedObjectContext!
     var repository: LocationRepository!
     var caseId: UUID!
@@ -239,7 +239,7 @@ final class LocationRepositoryTests: XCTestCase {
         let container = NSPersistentContainer(name: "SUSA24_iOS")
         container.persistentStoreDescriptions.first?.type = NSInMemoryStoreType
         container.loadPersistentStores { _, error in
-            if let error = error { fatalError("Store load failed: \(error)") }
+            if let error { fatalError("Store load failed: \(error)") }
         }
         context = container.viewContext
         
@@ -250,12 +250,12 @@ final class LocationRepositoryTests: XCTestCase {
         let caseEntity = CaseEntity(context: context)
         caseEntity.id = caseId
         caseEntity.name = "테스트"
-        caseEntity.number = "TEST-001"  // 필수 필드
-        caseEntity.crime = "테스트 범죄"  // 필수 필드
+        caseEntity.number = "TEST-001" // 필수 필드
+        caseEntity.crime = "테스트 범죄" // 필수 필드
         
         suspect = SuspectEntity(context: context)
         suspect.id = UUID()
-        suspect.name = ""  // 빈 문자열
+        suspect.name = "" // 빈 문자열
         suspect.relateCase = caseEntity
         caseEntity.addToSuspects(suspect)
         
@@ -280,10 +280,10 @@ final class LocationRepositoryTests: XCTestCase {
 //            receivedAt: nil
 //        )
 //        try await repository.createLocations(data: [location], caseId: caseId)
-//        
+//
 //        // When: 조회
 //        let locations = try await repository.fetchLocations(caseId: caseId)
-//        
+//
 //        // Then
 //        XCTAssertEqual(locations.count, 1)
 //        XCTAssertEqual(locations.first?.id, location.id)
@@ -305,10 +305,10 @@ final class LocationRepositoryTests: XCTestCase {
 //            locationType: 1,
 //            receivedAt: nil
 //        )
-//        
+//
 //        // When
 //        try await repository.createLocations(data: [location], caseId: caseId)
-//        
+//
 //        // Then
 //        let locations = try await repository.fetchLocations(caseId: caseId)
 //        XCTAssertEqual(locations.count, 1)
@@ -334,7 +334,7 @@ final class LocationRepositoryTests: XCTestCase {
         
 //        // When
 //        try await repository.deleteLocation(id: location.id)
-//        
+//
 //        // Then
 //        let locations = try await repository.fetchLocations(caseId: caseId)
 //        XCTAssertEqual(locations.count, 0)

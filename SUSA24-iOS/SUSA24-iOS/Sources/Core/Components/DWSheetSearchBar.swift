@@ -62,7 +62,7 @@ struct DWSheetSearchBar: View {
     var submitLabel: SubmitLabel = .search
     
     /// 리턴 버튼 탭 시 실행되는 액션
-    var onSubmit: (() -> Void)? = nil
+    var onSubmit: (() -> Void)?
     
     var body: some View {
         HStack {
@@ -112,7 +112,6 @@ struct DWSheetSearchBar: View {
 // MARK: - Progressive Disclosure
 
 extension DWSheetSearchBar {
-    
     /// 플레이스홀더 텍스트를 설정합니다.
     ///
     /// - Parameter text: 검색 바에 표시될 플레이스홀더
@@ -152,12 +151,12 @@ extension DWSheetSearchBar {
 
 // MARK: - Preview
 
-//#Preview("Search Bar - States") {
+// #Preview("Search Bar - States") {
 //    SearchBarStatePreview()
-//}
+// }
 
 // 미리보기 Helper
-//private struct SearchBarStatePreview: View {
+// private struct SearchBarStatePreview: View {
 //    @State private var text = ""
 //    @FocusState private var isFocused: Bool
 //
@@ -187,4 +186,4 @@ extension DWSheetSearchBar {
 //        .animation(.snappy, value: isFocused)
 //        .background(Color(.black))
 //    }
-//}
+// }

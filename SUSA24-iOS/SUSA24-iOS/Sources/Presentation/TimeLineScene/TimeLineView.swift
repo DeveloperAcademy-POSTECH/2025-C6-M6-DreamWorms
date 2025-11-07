@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct TimeLineView: View {
-    
     // MARK: - Dependencies
     
     @State private var store = DWStore(

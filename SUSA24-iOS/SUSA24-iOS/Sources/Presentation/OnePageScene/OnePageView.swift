@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct OnePageView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     

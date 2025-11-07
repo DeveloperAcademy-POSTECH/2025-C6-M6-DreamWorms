@@ -46,7 +46,7 @@ struct TimeLineBottomSheetHeader: View {
                     Circle()
                         .fill(.labelAssistive)
                         .frame(width: 3, height: 3)
-                        .padding(.horizontal,6)
+                        .padding(.horizontal, 6)
                     
                     // 오른쪽: 위치 개수
                     HStack(spacing: 2) {
@@ -66,7 +66,7 @@ struct TimeLineBottomSheetHeader: View {
 
 //// MARK: - Preview
 //
-//#Preview("TimeLine BottomSheet Header") {
+// #Preview("TimeLine BottomSheet Header") {
 //    VStack(spacing: 0) {
 //        TimeLineBottomSheetHeader(
 //            title: "대구 청테이프",
@@ -101,5 +101,5 @@ struct TimeLineBottomSheetHeader: View {
 //        }
 //    }
 //    .background(.mainBackground)
-//}
+// }
 //

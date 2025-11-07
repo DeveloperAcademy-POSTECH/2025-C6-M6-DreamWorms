@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CaseListView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     
@@ -65,7 +64,7 @@ private extension CaseListView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    CaseListView()
 //        .environment(AppCoordinator())
-//}
+// }

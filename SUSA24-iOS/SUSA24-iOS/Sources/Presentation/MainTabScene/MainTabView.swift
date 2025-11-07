@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct MainTabView<MapView: View,
-                    DashboardView: View,
-                    OnePageView: View>: View {
-
+    DashboardView: View,
+    OnePageView: View>: View
+{
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
@@ -20,9 +20,9 @@ struct MainTabView<MapView: View,
     @State private var selectedDetent: PresentationDetent = PresentationDetent.height(66)
     
     private let mapShortDetent = PresentationDetent.height(73)
-    private let mapMidDetnet   = PresentationDetent.fraction(0.4)
+    private let mapMidDetnet = PresentationDetent.fraction(0.4)
     private let mapLargeDetent = PresentationDetent.large
-    private let otherDetent    = PresentationDetent.height(66)
+    private let otherDetent = PresentationDetent.height(66)
     
     private var showDividerByDetent: Bool {
         let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetnet, mapLargeDetent]
@@ -69,8 +69,8 @@ struct MainTabView<MapView: View,
             }
             .presentationDetents(
                 store.state.selectedTab == .map
-                ? [mapShortDetent, mapMidDetnet, mapLargeDetent]
-                : [otherDetent],
+                    ? [mapShortDetent, mapMidDetnet, mapLargeDetent]
+                    : [otherDetent],
                 selection: $selectedDetent
             )
             .presentationBackgroundInteraction(.enabled)
@@ -91,7 +91,7 @@ private extension MainTabView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    let mainTabStore = DWStore(
 //        initialState: MainTabFeature.State(),
 //        reducer: MainTabFeature()
@@ -102,4 +102,4 @@ private extension MainTabView {}
 //    )
 //    return MainTabView(mainTabStore: mainTabStore, mapStore: mapStore)
 //        .environment(AppCoordinator())
-//}
+// }
