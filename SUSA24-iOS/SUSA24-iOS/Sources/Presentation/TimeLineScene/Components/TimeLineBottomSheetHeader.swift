@@ -60,6 +60,7 @@ struct TimeLineBottomSheetHeader: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 }

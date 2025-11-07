@@ -18,5 +18,5 @@ enum AppRoute: Hashable {
     case searchScene
     case selectLocationScene
     case settingScene
-    case timeLineScene
+//    case timeLineScene
 }

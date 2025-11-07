@@ -19,12 +19,18 @@ struct DWTappedPinStyle: ButtonStyle {
     var tappedBorder: Color
     
     var padding: EdgeInsets
+    var fixedSize: CGSize? = CGSize(width: 70, height: 35)
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.numberMedium16)
             .foregroundStyle(configuration.isPressed ? tappedText : normalText)
             .padding(padding)
+            .frame(
+                width: fixedSize?.width,
+                height: fixedSize?.height,
+                alignment: .center
+                )
             .background(configuration.isPressed ? tappedBg : normalBg)
             .clipShape(Capsule())
             .overlay(
@@ -189,7 +195,7 @@ extension DWTappedPin {
 
 #Preview("Tapped Pin ") {
     DWTappedPin(
-        text: "10:20",
+        text: "1:20",
         action: {
             print("삭제")
         }

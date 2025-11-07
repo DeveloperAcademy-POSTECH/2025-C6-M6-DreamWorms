@@ -53,8 +53,8 @@ struct RootView: View {
                         moduleFactory.makeSelectLocationView()
                     case .settingScene:
                         moduleFactory.makeSettingView()
-                    case .timeLineScene:
-                        moduleFactory.makeTimeLineView()
+//                    case .timeLineScene:
+//                        moduleFactory.makeTimeLineView()
                     }
                 }
         }
