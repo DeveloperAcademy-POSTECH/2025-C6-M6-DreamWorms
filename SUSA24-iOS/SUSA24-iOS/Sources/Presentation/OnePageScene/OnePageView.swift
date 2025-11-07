@@ -57,7 +57,7 @@ struct OnePageView: View {
                             )
                         )
                     ) {
-                        VStack(spacing: 12) {
+                        LazyVStack(spacing: 12) {
                             ForEach(store.state.items) { item in
                                 LocationCard(
                                     type: .icon(LocationType(item.locationType).icon),
