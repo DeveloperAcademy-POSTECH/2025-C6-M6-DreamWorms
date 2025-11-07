@@ -86,7 +86,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         
         let view = MainTabView(
             store: store,
-            mapView: { _ in mapView },
+            mapView: {  mapView },
             dashboardView: { dashboardView },
             onePageView: { onePageView }
         )
