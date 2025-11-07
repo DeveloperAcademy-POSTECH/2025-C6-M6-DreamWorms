@@ -113,7 +113,7 @@ struct MapView: View {
             )
             .presentationDetents([.fraction(0.4)])
             .presentationBackgroundInteraction(.enabled)
-            .presentationDragIndicator(.visible)
+            .presentationDragIndicator(.hidden)
         }
     }
     
@@ -127,12 +127,12 @@ struct MapView: View {
 
 // MARK: - Preview
 
-#Preview {
-    let repository = MockLocationRepository()
-    let store = DWStore(
-        initialState: MapFeature.State(caseId: UUID()),
-        reducer: MapFeature(repository: repository)
-    )
-    return MapView(store: store)
-        .environment(AppCoordinator())
-}
+// #Preview {
+//    let repository = MockLocationRepository()
+//    let store = DWStore(
+//        initialState: MapFeature.State(caseId: UUID()),
+//        reducer: MapFeature(repository: repository)
+//    )
+//    return MapView(store: store)
+//        .environment(AppCoordinator())
+// }

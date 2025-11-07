@@ -124,12 +124,6 @@ struct MapFeature: DWReducer {
             // 위치정보 시트 표시 및 로딩 상태 설정
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
-            state.selectedPlaceInfo = PlaceInfo(
-                title: "",
-                jibunAddress: "",
-                roadAddress: "",
-                phoneNumber: ""
-            )
             let requestDTO = latlng.toKakaoRequestDTO()
             return .task {
                 do {
@@ -163,6 +157,8 @@ struct MapFeature: DWReducer {
     }
     
     // MARK: - 위치정보 시트 관련 함수
+    
+    // TODO: 메서드 분리하기
     
     /// 좌표를 기반으로 위치정보를 조회합니다.
     /// - Parameter requestDTO: 조회할 좌표의 요청 DTO
