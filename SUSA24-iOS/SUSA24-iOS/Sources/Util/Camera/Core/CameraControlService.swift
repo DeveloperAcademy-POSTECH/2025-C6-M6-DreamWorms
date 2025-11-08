@@ -5,7 +5,6 @@
 //  Created by taeni on 11/5/25.
 //
 
-
 import AVFoundation
 
 /// 카메라 디바이스를 제어하는 액터 (zoom, torch, focus 등)
@@ -14,8 +13,15 @@ actor CameraControlService {
     private(set) var zoomFactor: CGFloat = 1.0
     private(set) var isTorchOn: Bool = false
     
-    private let minimumZoom: CGFloat = 0.5
-    private let maximumZoom: CGFloat = 12.0
+    // 디바이스의 실제 Zoom 가능한 범위
+    // default 는 1.0
+    private var minimumZoom: CGFloat {
+        device?.minAvailableVideoZoomFactor ?? 1.0
+    }
+    
+    private var maximumZoom: CGFloat {
+        device?.activeFormat.videoMaxZoomFactor ?? 12.0
+    }
     
     // MARK: - Device Setup
     
@@ -28,6 +34,7 @@ actor CameraControlService {
             position: .back
         ) {
             device = dualWideCamera
+            _ = try? setupFocusMode()
             return
         }
         
@@ -38,6 +45,7 @@ actor CameraControlService {
             position: .back
         ) {
             device = tripleCamera
+            _ = try? setupFocusMode()
             return
         }
         
@@ -70,33 +78,39 @@ actor CameraControlService {
     // MARK: - Zoom Control
     
     /// 지정된 줌 팩터를 가져와 줌을 설정합니다.
-    /// - Parameter factor: 줌 팩터 (0.5 ~ 12.0)
+    /// - Parameter factor: 줌 팩터 (디바이스의 최소~최대 범위)
     /// - Returns: 실제 설정된 줌 팩터
     /// 디폴트는 1.0
     func setZoom(to factor: CGFloat) -> CGFloat {
-        guard let device = device else { return 1.0 }
+        
+        guard let device = device else {
+            return 1.0
+        }
         
         do {
             try device.lockForConfiguration()
             defer { device.unlockForConfiguration() }
             
             let clampedZoom = max(minimumZoom, min(factor, maximumZoom))
+            
+            print("🔍 [CameraControlService] clampedZoom: \(clampedZoom) (범위: \(minimumZoom)~\(maximumZoom))")
+            
             device.videoZoomFactor = clampedZoom
             zoomFactor = clampedZoom
             
             return clampedZoom
         } catch {
-            print("설정 실패: \(error.localizedDescription)")
             return zoomFactor
         }
     }
     
-    /// Pinch 제스처로 상대적 줌을 조절합니다.
+    /// Pinch 제스처로 상대적 줌 조정.
     /// - Parameter delta: 줌 변경 배수
     /// - Returns: 실제 설정된 줌 팩터
     func applyPinchZoom(delta: CGFloat) -> CGFloat {
         let newZoom = zoomFactor * delta
-        return setZoom(to: newZoom)
+        let result = setZoom(to: newZoom)
+        return result
     }
     
     // MARK: - Torch Control
@@ -167,7 +181,9 @@ actor CameraControlService {
     /// - Parameters:
     ///   - point: 뷰에서의 포인트 (0~1 정규화 좌표)
     func focusOnPoint(_ point: CGPoint) {
-        guard let device = device else { return }
+        guard let device = device else {
+            return
+        }
         
         do {
             try device.lockForConfiguration()
@@ -183,13 +199,13 @@ actor CameraControlService {
                 device.exposureMode = .autoExpose
             }
         } catch {
-            print("포커스 설정 실패: \(error.localizedDescription)")
+            // TODO: error 처리
         }
     }
     
     // MARK: - Utility
     
-    /// 디바이스의 줌 가능 범위를 반환합니다.
+    /// 디바이스의 줌 가능 범위 반환.
     func getZoomRange() -> ClosedRange<CGFloat> {
         return minimumZoom...maximumZoom
     }

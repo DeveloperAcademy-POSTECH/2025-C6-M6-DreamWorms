@@ -74,6 +74,7 @@ struct CameraPreview: UIViewRepresentable {
             previewLayer.frame = bounds
         }
         
+        // 모든 터치를 상위로 통과시킴
         override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
             return nil
         }
