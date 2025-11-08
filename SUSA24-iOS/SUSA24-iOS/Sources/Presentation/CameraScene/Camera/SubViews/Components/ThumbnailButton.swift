@@ -37,20 +37,17 @@ struct ThumbnailButton: View {
     
     var body: some View {
         Button(action: action) {
-            if count == 0 {
-                DefaultThumbnailView()
+            if let uiImage = uiImage, count > 0 {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 56, height: 56)
+                    .cornerRadius(8)
+                    .clipped()
             } else {
-                if let uiImage = uiImage {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 56, height: 56)
-                        .cornerRadius(8)
-                        .clipped()
-                } else {
-                    DefaultThumbnailView()
-                }
+                DefaultThumbnailView()
             }
         }
+        .dwBadge(count)
     }
 }
