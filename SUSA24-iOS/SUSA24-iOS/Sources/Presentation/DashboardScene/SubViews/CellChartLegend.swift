@@ -25,7 +25,7 @@ struct CellChartLegend: View {
                         Capsule()
                             .fill(weekStyleScale.first(where: { $0.key == "\(week)주차" })?.value ?? .labelAssistive)
                             .frame(width: 10, height: 3)
-                        Text("\(week)주차")
+                        Text(.chartLegendWeek(number: week))
                             .font(.bodyMedium10)
                             .foregroundStyle(.labelNormal)
                     }
