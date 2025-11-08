@@ -108,15 +108,15 @@ private extension CameraView {
 }
 
 // MARK: - Preview
-
-#Preview {
-    let camera = CameraModel()
-    let store = DWStore(
-        initialState: CameraFeature.State(
-            previewSource: camera.previewSource
-        ),
-        reducer: CameraFeature(camera: camera)
-    )
-    
-    CameraView(store: store)
-}
+//
+//#Preview {
+//    let camera = CameraModel()
+//    let store = DWStore(
+//        initialState: CameraFeature.State(
+//            previewSource: camera.previewSource
+//        ),
+//        reducer: CameraFeature(camera: camera)
+//    )
+//    
+//    CameraView(store: store)
+//}
