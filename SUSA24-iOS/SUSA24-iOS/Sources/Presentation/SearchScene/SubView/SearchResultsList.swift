@@ -1,5 +1,5 @@
 //
-//  SearchResultsList`.swift
+//  SearchResultsList.swift
 //  SUSA24-iOS
 //
 //  Created by Moo on 11/7/25.
@@ -73,7 +73,7 @@ struct SearchListItem: View {
 
 // MARK: - Preview
     
-//#Preview("SearchResultsList") {
+// #Preview("SearchResultsList") {
 //    SearchResultsList(
 //        items: [
 //            SearchResultItem(
@@ -108,4 +108,4 @@ struct SearchListItem: View {
 //    )
 //    .padding()
 //    .background(.mainBackground)
-//}
+// }

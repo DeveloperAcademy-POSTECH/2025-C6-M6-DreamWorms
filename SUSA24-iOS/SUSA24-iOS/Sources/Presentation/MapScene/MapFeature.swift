@@ -178,7 +178,7 @@ struct MapFeature: DWReducer {
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
-            // 명령을 소비했으므로 버스에 보관된 값을 초기화합니다.
+            // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.request = nil
             return .none
             
