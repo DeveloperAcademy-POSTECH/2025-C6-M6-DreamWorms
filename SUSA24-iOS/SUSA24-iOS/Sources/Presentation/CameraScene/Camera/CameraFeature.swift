@@ -2,33 +2,30 @@
 //  CameraFeature.swift
 //  SUSA24-iOS
 //
-//  Created by taeni on 10/31/25.
+//  Created by taeni on 11/7/25.
 //
 
 import SwiftUI
 import UIKit
 
+/// - 카메라 생명주기 관리 (start/stop)
+/// - 사진 촬영 및 관리 (최대 10장 제한)
+/// - 줌 및 포커스 제어
 struct CameraFeature: DWReducer {
     
     // MARK: - Dependency Injection
     
-    private let cameraManager: CameraModel
+    private let camera: CameraModel
     
-    init(cameraManager: CameraModel) {
-        self.cameraManager = cameraManager
+    init(camera: CameraModel) {
+        self.camera = camera
     }
     
     // MARK: - State
     
     struct State: DWState {
-        /// 촬영된 사진의 개수
-        var photoCount: Int = 0
         
-        /// 마지막으로 촬영된 사진의 썸네일 (UIImage?)
-        var lastThumbnail: UIImage? = nil
-        
-        /// 모든 촬영된 사진
-        var allPhotos: [CapturedPhoto] = []
+        // MARK: Camera State
         
         /// 카메라 프리뷰 소스
         var previewSource: PreviewSource
@@ -36,11 +33,35 @@ struct CameraFeature: DWReducer {
         /// 카메라 상태
         var cameraStatus: CameraStatus = .notInitialized
         
+        /// 카메라가 실행 중인지 여부
+        var isRunning: Bool = false
+        
+        // MARK: Photo State
+        
+        /// 촬영된 사진의 개수
+        var photoCount: Int = 0
+        
+        /// 마지막으로 촬영된 사진의 썸네일
+        var lastThumbnail: UIImage?
+        
+        /// 모든 촬영된 사진
+        var allPhotos: [CapturedPhoto] = []
+        
         /// 사진 촬영이 가능한 상태인지 여부
         var isCaptureAvailable: Bool = true
         
+        // MARK: UI State
+        
         /// 사진 상세보기 화면 표시 여부
         var isPhotoDetailsPresented: Bool = false
+        
+        // MARK: Gesture State
+        
+        /// Pinch Zoom의 마지막 스케일 값
+        var lastZoomScale: CGFloat = 1.0
+        
+        /// 현재 줌 배율
+        var currentZoomFactor: CGFloat = 1.0
         
         // MARK: - Initialization
         
@@ -52,23 +73,30 @@ struct CameraFeature: DWReducer {
     // MARK: - Action
     
     enum Action: DWAction {
+        
+        // MARK: Lifecycle Actions
+        
         /// 화면이 나타날 때 발생하는 액션
         case onAppear
         
         /// 화면이 사라질 때 발생하는 액션
         case onDisappear
         
-        /// 사진 촬영 버튼 탭
-        case capturePhotoTapped
-        
-        /// 사진 상세보기 뷰 이동
-        case showPhotoDetails
-        
-        /// 사진 상세보기 뷰 닫기
-        case closePhotoDetails
+        // MARK: Camera Control Actions
         
         /// 카메라 상태를 업데이트하는 액션
         case setCameraStatus(CameraStatus)
+        
+        /// 카메라 실행 상태를 업데이트하는 액션
+        case setCameraRunning(Bool)
+        
+        // MARK: Photo Capture Actions
+        
+        /// 사진 촬영 버튼 탭
+        case captureButtonTapped
+        
+        /// 사진 촬영 완료 후 상태 동기화 시작
+        case syncPhotoState
         
         /// 사진 개수를 업데이트하는 액션
         case updatePhotoCount(Int)
@@ -81,77 +109,114 @@ struct CameraFeature: DWReducer {
         
         /// 사진 촬영 가능 상태를 업데이트하는 액션
         case updateCaptureAvailability(Bool)
+        
+        // MARK: UI Actions
+        
+        /// 사진 상세보기 버튼 탭
+        case photoDetailsTapped
+        
+        /// 사진 상세보기 화면 닫기
+        case closePhotoDetails
+        
+        // MARK: Gesture Actions
+
+        /// Pinch Zoom 제스처 변경
+        case pinchZoomChanged(CGFloat)
+        
+        /// Pinch Zoom 제스처 종료
+        case pinchZoomEnded
+        
+        /// Tap to Focus
+        case tapToFocus(CGPoint)
+        
+        /// 줌 배율 업데이트
+        case updateZoomFactor(CGFloat)
     }
     
     // MARK: - Reducer
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
+            
+        // MARK: Lifecycle
+            
         case .onAppear:
-            return .task { [cameraManager] in
-                // 카메라 시작
-                await cameraManager.start()
-                return .setCameraStatus(.running)
+            return .task { [camera] in
+                await camera.start()
+                let status = await camera.cameraStatus
+                return .setCameraStatus(status)
             }
             
         case .onDisappear:
-            return .task { [cameraManager] in
-                await cameraManager.stop()
+            return .task { [camera] in
+                await camera.stop()
                 return .setCameraStatus(.stopped)
             }
             
-        case .capturePhotoTapped:
+        // MARK: Camera Control
+            
+        case .setCameraStatus(let status):
+            state.cameraStatus = status
+            
+            // running 상태면 isRunning도 업데이트
+            if status == .running {
+                return .task { [camera] in
+                    let isRunning = await camera.isRunning
+                    return .setCameraRunning(isRunning)
+                }
+            }
+            return .none
+            
+        case .setCameraRunning(let isRunning):
+            state.isRunning = isRunning
+            return .none
+            
+        // MARK: Photo Capture
+            
+        case .captureButtonTapped:
             guard state.isCaptureAvailable else {
                 return .none
             }
             
-            return .task { [cameraManager] in
+            return .task { [camera] in
                 do {
-                    let photo = try await cameraManager.capturePhoto()
-                    let photoCount = await cameraManager.photoCount
-                    let thumbnail = await cameraManager.lastThumbnail
-                    let allPhotos = await cameraManager.getAllPhotos()
-                    
-                    // 순차적으로 state 업데이트
-                    var actions: [Action] = [
-                        .updatePhotoCount(photoCount),
-                        .updateThumbnail(thumbnail),
-                        .updateAllPhotos(allPhotos)
-                    ]
-                    
-                    // 최대 10장 체크
-                    // TODO: toast 띄우기
-                    if photoCount >= 10 {
-                        actions.append(.updateCaptureAvailability(false))
-                    }
-                    
-                    return actions.first ?? .none
+                    _ = try await camera.capturePhoto()
+                    return .syncPhotoState
                 } catch {
-                    print("사진 촬영 실패: \(error.localizedDescription)")
                     return .none
                 }
             }
             
-        case .showPhotoDetails:
-            guard !state.allPhotos.isEmpty else { return .none }
-            state.isPhotoDetailsPresented = true
-            return .none
-            
-        case .closePhotoDetails:
-            state.isPhotoDetailsPresented = false
-            return .none
-            
-        case .setCameraStatus(let status):
-            state.cameraStatus = status
-            return .none
+        // 의문 : 3가지의 동작인데, downstream 으로 처리하는게 나은가? 아니면 이대로? (어차피 downstream이 감싸고 있음)
+        case .syncPhotoState:
+            // 첫 번째: photoCount 업데이트
+            return .task { [camera] in
+                let photoCount = await camera.photoCount
+                return .updatePhotoCount(photoCount)
+            }
             
         case .updatePhotoCount(let count):
             state.photoCount = count
-            return .none
+            
+            // 10장 제한 체크
+            if count >= 10 {
+                state.isCaptureAvailable = false
+            }
+            
+            // 두 번째: thumbnail 업데이트
+            return .task { [camera] in
+                let thumbnail = await camera.lastThumbnail
+                return .updateThumbnail(thumbnail)
+            }
             
         case .updateThumbnail(let image):
             state.lastThumbnail = image
-            return .none
+            
+            // 세 번째: allPhotos 업데이트
+            return .task { [camera] in
+                let allPhotos = await camera.getAllPhotos()
+                return .updateAllPhotos(allPhotos)
+            }
             
         case .updateAllPhotos(let photos):
             state.allPhotos = photos
@@ -160,6 +225,47 @@ struct CameraFeature: DWReducer {
         case .updateCaptureAvailability(let isAvailable):
             state.isCaptureAvailable = isAvailable
             return .none
+            
+        // MARK: UI
+            
+        case .photoDetailsTapped:
+            guard !state.allPhotos.isEmpty else {
+                // 토스트 띄움
+                return .none
+            }
+            
+            state.isPhotoDetailsPresented = true
+            return .none
+            
+        case .closePhotoDetails:
+            state.isPhotoDetailsPresented = false
+            return .none
+            
+        // MARK: Gestures
+            
+        case .pinchZoomChanged(let scale):
+            let delta = scale / state.lastZoomScale
+            state.lastZoomScale = scale
+            
+            return .task { [camera] in
+                await camera.applyPinchZoom(delta: delta)
+                let newZoomFactor = await camera.zoomFactor
+                return .updateZoomFactor(newZoomFactor)
+            }
+            
+        case .pinchZoomEnded:
+            state.lastZoomScale = 1.0
+            return .none
+            
+        case .updateZoomFactor(let factor):
+            state.currentZoomFactor = factor
+            return .none
+            
+        case .tapToFocus(let focusPoint):
+            return .task { [camera] in
+                await camera.focusOnPoint(focusPoint)
+                return .none
+            }
         }
     }
 }
