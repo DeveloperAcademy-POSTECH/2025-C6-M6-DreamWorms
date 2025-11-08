@@ -23,112 +23,29 @@ struct DashboardView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            Text(.testAnalyze)
-                .font(.titleSemiBold22)
-                .kerning(-0.44)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 80)
-                .padding(.bottom, 38)
-                .padding(.horizontal, 16)
+            DashboardHeader(
+                // TODO: - 추후 Foundation Model 연동시 수정 필요
+                title: String(localized: .testAnalyze),
+                onBack: { coordinator.pop() }
+            )
             
             ScrollView {
-                // MARK: - 순위 섹션
-                
-                VStack {
-                    Picker(
-                        "",
-                        selection: Binding(
-                            get: { store.state.tab },
-                            set: { store.send(.setTab($0)) }
-                        )
-                    ) {
-                        ForEach(DashboardPickerTab.allCases, id: \.title) { tab in
-                            Text(tab.title).tag(tab)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 295)
-                    .padding(.bottom, 24)
-                    
-                    DashboardSectionHeader(title: store.state.tab.sectionTitle)
-                        .setupDescription(store.state.tab.sectionDescription)
-                        .padding(.bottom, 18)
-                    
-                    VStack(spacing: 6) {
-                        if store.state.topVisitDurationLocations.isEmpty {
-                            TimeLineEmptyState(message: .bottomSheetNoCellData)
-                        } else {
-                            ForEach(
-                                store.state.topVisitDurationLocations.enumerated(),
-                                id: \.offset
-                            ) { id, item in
-                                LocationCard(
-                                    type: .number(id),
-                                    title: item.address,
-                                    description: formatStay(item.totalMinutes)
-                                )
-                            }
-                        }
-                    }
-                }
+                DashboardRankSection(
+                    currentTab: Binding(
+                        get: { store.state.tab },
+                        set: { store.send(.setTab($0)) }
+                    ),
+                    topLocations: store.state.topVisitDurationLocations
+                )
                 .padding(.bottom, 34)
                 .padding(.horizontal, 16)
-                
-                // MARK: - 차트 섹션
-                
-                VStack {
-                    DashboardSectionHeader(
-                        title: String(localized: .dashboardVisitDurationCellTowerTitle)
-                    )
-                    .padding(.top, 20)
-                    .padding(.bottom, 17)
-                    .padding(.horizontal, 16)
-                    
-                    VStack(spacing: 12) {
-                        if store.state.cellCharts.isEmpty {
-                            TimeLineEmptyState(message: .bottomSheetNoCellData)
-                        } else {
-                            ForEach(store.state.cellCharts.prefix(3)) { chart in
-                                let binding = Binding<Weekday>(
-                                    get: {
-                                        store.state.cellCharts.first(
-                                            where: { $0.id == chart.id }
-                                        )?.selectedWeekday ?? .mon
-                                    },
-                                    set: { newValue in
-                                        store.send(.setChartWeekday(id: chart.id, weekday: newValue))
-                                    }
-                                )
-
-                                CellHourlyChart(
-                                    selectionWeekday: binding,
-                                    address: chart.address,
-                                    summary: chart.summary,
-                                    series: chart.series
-                                )
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
+                                
+                DashboardChartSection(
+                    cellCharts: store.state.cellCharts,
+                    send: { store.send($0) }
+                )
                 .padding(.bottom, 54)
                 .background(.mainAlternative)
-            }
-        }
-        .overlay(alignment: .topLeading) {
-            HStack {
-                DWGlassEffectCircleButton(
-                    image: Image(.back),
-                    action: { coordinator.pop() }
-                )
-                .setupSize(44)
-                .setupIconSize(18)
-                .padding(.leading, 16)
-                
-                Spacer()
-            }
-            .safeAreaInset(edge: .top) {
-                Color.white.ignoresSafeArea().frame(height: 0)
             }
         }
         .task {
@@ -143,16 +60,7 @@ extension DashboardView {}
 
 // MARK: - Private Extension Methods
 
-private extension DashboardView {
-    /// "19시간 10분 체류" 같이 사람이 읽기 쉬운 문자열로 바꾸기
-    func formatStay(_ minutes: Int) -> String {
-        let hour = minutes / 60
-        let min = minutes % 60
-        if hour > 0, min > 0 { return "\(hour)시간 \(min)분 체류" }
-        if hour > 0 { return "\(hour)시간 체류" }
-        return "\(min)분 체류"
-    }
-}
+private extension DashboardView {}
 
 // MARK: - Preview
 
@@ -162,85 +70,10 @@ private extension DashboardView {
     /// 프리뷰 전용 목업 레포지토리 (대시보드가 onAppear에서 불러가도록)
     private struct DesignMockLocationRepository: LocationRepositoryProtocol {
         func fetchLocations(caseId _: UUID) async throws -> [Location] {
-            var list: [Location] = [
+            let list: [Location] = [
                 Location(id: UUID(), address: "미니네 천안 집", pointLatitude: 37.5759, pointLongitude: 126.9768, locationType: 2, colorType: 0, receivedAt: Date.now),
             ]
             return list
-//            var list: [Location] = []
-//
-//            // 주소 A: 7회 (샘플분=5 → 35분)
-//            for i in 0 ..< 20 {
-//                list.append(
-//                    Location(
-//                        id: UUID(),
-//                        address: "태니네 집",
-//                        title: "A-\(i)",
-//                        note: nil,
-//                        pointLatitude: 37.5759,
-//                        pointLongitude: 126.9768,
-//                        boxMinLatitude: nil, boxMinLongitude: nil,
-//                        boxMaxLatitude: nil, boxMaxLongitude: nil,
-//                        locationType: 2, colorType: 0, // 👈 대시보드 집계 대상
-//                        receivedAt: Date().addingTimeInterval(TimeInterval(-i * 300))
-//                    )
-//                )
-//            }
-//
-//            // 주소 B: 3회 (15분)
-//            for i in 0 ..< 3 {
-//                list.append(
-//                    Location(
-//                        id: UUID(),
-//                        address: "노우네집",
-//                        title: "B-\(i)",
-//                        note: nil,
-//                        pointLatitude: 37.5499,
-//                        pointLongitude: 126.9149,
-//                        boxMinLatitude: nil, boxMinLongitude: nil,
-//                        boxMaxLatitude: nil, boxMaxLongitude: nil,
-//                        locationType: 2, colorType: 2,
-//                        receivedAt: Date().addingTimeInterval(TimeInterval(-i * 600))
-//                    )
-//                )
-//            }
-//
-//            // 주소 C: 빈 주소(→ "기지국 주소"로 치환), 5회 (25분)
-//            for i in 0 ..< 5 {
-//                list.append(
-//                    Location(
-//                        id: UUID(),
-//                        address: "미니네집",
-//                        title: "C-\(i)",
-//                        note: nil,
-//                        pointLatitude: 37.56,
-//                        pointLongitude: 126.99,
-//                        boxMinLatitude: nil, boxMinLongitude: nil,
-//                        boxMaxLatitude: nil, boxMaxLongitude: nil,
-//                        locationType: 2, colorType: 4,
-//                        receivedAt: Date().addingTimeInterval(TimeInterval(-i * 900))
-//                    )
-//                )
-//            }
-//
-//            // 주소 D: 10회지만 타입 1 → 집계 제외
-//            for i in 0 ..< 10 {
-//                list.append(
-//                    Location(
-//                        id: UUID(),
-//                        address: "태니네집",
-//                        title: "D-\(i)",
-//                        note: nil,
-//                        pointLatitude: 37.5072,
-//                        pointLongitude: 126.7214,
-//                        boxMinLatitude: nil, boxMinLongitude: nil,
-//                        boxMaxLatitude: nil, boxMaxLongitude: nil,
-//                        locationType: 1, colorType: 6, // 👈 제외 대상
-//                        receivedAt: Date().addingTimeInterval(TimeInterval(-i * 1200))
-//                    )
-//                )
-//            }
-//
-//            return list.shuffled()
         }
     
         func deleteLocation(id _: UUID) async throws {}
