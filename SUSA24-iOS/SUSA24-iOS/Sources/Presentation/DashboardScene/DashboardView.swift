@@ -22,61 +22,91 @@ struct DashboardView: View {
     // MARK: - View
     
     var body: some View {
-        ScrollView {
-            VStack {
-                Text(.testAnalyze)
-                    .font(.titleSemiBold22)
-                    .kerning(-0.44)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 30)
-                
-                Picker(
-                    "",
-                    selection: Binding(
-                        get: { store.state.tab },
-                        set: { store.send(.setTab($0)) }
-                    )
-                ) {
-                    ForEach(DashboardPickerTab.allCases, id: \.title) { tab in
-                        Text(tab.title).tag(tab)
+        VStack(spacing: 0) {
+            Text(.testAnalyze)
+                .font(.titleSemiBold22)
+                .kerning(-0.44)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 80)
+                .padding(.bottom, 38)
+                .padding(.horizontal, 16)
+            
+            ScrollView {
+                // MARK: - 순위 섹션
+                VStack {
+                    Picker(
+                        "",
+                        selection: Binding(
+                            get: { store.state.tab },
+                            set: { store.send(.setTab($0)) }
+                        )
+                    ) {
+                        ForEach(DashboardPickerTab.allCases, id: \.title) { tab in
+                            Text(tab.title).tag(tab)
+                        }
                     }
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 295)
-                .padding(.top, 38)
-                
-                // MARK: - 채류시간 순위 섹션
-                
-                DashboardSectionHeader(title: store.state.tab.sectionTitle)
-                    .setupDescription(store.state.tab.sectionDescription)
-                    .padding(.top, 24)
-                
-                VStack(spacing: 6) {
-                    if store.state.topVisitDurationLocations.isEmpty {
-                        // TODO: - 데이터 없을 때 어떻게 띄울까 ~~~
-                    } else {
-                        ForEach(
-                            store.state.topVisitDurationLocations.enumerated(),
-                            id: \.offset
-                        ) { id, item in
-                            LocationCard(
-                                type: .number(id),
-                                title: item.address,
-                                description: formatStay(item.totalMinutes)
-                            )
+                    .pickerStyle(.segmented)
+                    .frame(width: 295)
+                    .padding(.bottom, 24)
+                    
+                    DashboardSectionHeader(title: store.state.tab.sectionTitle)
+                        .setupDescription(store.state.tab.sectionDescription)
+                        .padding(.bottom, 18)
+                    
+                    VStack(spacing: 6) {
+                        if store.state.topVisitDurationLocations.isEmpty {
+                            // TODO: - 데이터 없을 때 어떻게 띄울까 ~~~
+                        } else {
+                            ForEach(
+                                store.state.topVisitDurationLocations.enumerated(),
+                                id: \.offset
+                            ) { id, item in
+                                LocationCard(
+                                    type: .number(id),
+                                    title: item.address,
+                                    description: formatStay(item.totalMinutes)
+                                )
+                            }
                         }
                     }
                 }
-                .padding(.top, 16)
+                .padding(.bottom, 34)
+                .padding(.horizontal, 16)
                 
-                // MARK: - 기지국별 체류시간 섹션
+                // MARK: - 차트 섹션
                 
-                DashboardSectionHeader(title: String(localized: .dashboardVisitDurationCellTowerTitle))
-                    .padding(.top, 20)
-                
-                // TODO: - Swift Chart
+                VStack {
+                    DashboardSectionHeader(title: String(localized: .dashboardVisitDurationCellTowerTitle))
+                        .padding(.top, 20)
+                        .padding(.bottom, 17)
+                        .padding(.horizontal, 16)
+                    
+                    VStack(spacing: 12) {
+                        CellHourlyChart(selectionWeekday: .constant(.mon), series: [])
+                        CellHourlyChart(selectionWeekday: .constant(.mon), series: [])
+                        CellHourlyChart(selectionWeekday: .constant(.mon), series: [])
+                    }
+                    .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 54)
+                .background(.mainAlternative)
             }
-            .padding(.horizontal, 16)
+        }
+        .overlay(alignment: .topLeading) {
+            HStack {
+                DWGlassEffectCircleButton(
+                    image: Image(.back),
+                    action: { coordinator.pop() }
+                )
+                .setupSize(44)
+                .setupIconSize(18)
+                .padding(.leading, 16)
+                
+                Spacer()
+            }
+            .safeAreaInset(edge: .top) {
+                Color.white.ignoresSafeArea().frame(height: 0)
+            }
         }
         .task {
             store.send(.onAppear(currentCaseID))

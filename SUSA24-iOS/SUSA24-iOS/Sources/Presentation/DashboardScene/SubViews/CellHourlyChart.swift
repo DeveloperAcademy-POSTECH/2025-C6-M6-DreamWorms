@@ -51,7 +51,6 @@ struct CellHourlyChart: View {
                         .foregroundStyle(.labelNormal)
                 }
             }
-            .frame(width: .infinity, alignment: .trailing)
             .padding(.bottom, series.isEmpty ? 0 : 16)
             .opacity(series.isEmpty ? 0 : 1)
 
@@ -107,13 +106,19 @@ struct CellHourlyChart: View {
         .padding(.horizontal, 16)
         .background(.mainBackground)
         .cornerRadius(12)
+        .shadow(
+            color: .black.opacity(0.05),
+            radius: 12,
+            x: 0,
+            y: 2
+        )
     }
 }
 
 #Preview {
     @Previewable @State var selectionWeekday: Weekday = .mon
     ZStack {
-        Color.labelCoolNormal.ignoresSafeArea()
+        Color.mainAlternative.ignoresSafeArea()
         
         VStack(spacing: 12) {
             CellHourlyChart(selectionWeekday: $selectionWeekday, address: "퇴계로20길 56", summary: "오전 7-8시에 주로 머물렀습니다.", series: [
