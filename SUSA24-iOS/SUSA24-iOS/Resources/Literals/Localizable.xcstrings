@@ -4,6 +4,12 @@
     "" : {
 
     },
+    "%@" : {
+
+    },
+    "%@ 기지국에서" : {
+
+    },
     "%lld" : {
 
     },
@@ -11,6 +17,9 @@
 
     },
     "%lld개" : {
+
+    },
+    "1주차" : {
 
     },
     "analyze" : {
@@ -265,6 +274,18 @@
         }
       }
     },
+    "dashboard_emptyChartMessage" : {
+      "comment" : "대시보드_엠티 차트_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 데이터가 없습니다."
+          }
+        }
+      }
+    },
     "dashboard_visitDurationCellTower_Title" : {
       "comment" : "대시보드_기지국별 체류시간_타이틀",
       "extractionState" : "manual",
@@ -324,6 +345,9 @@
           }
         }
       }
+    },
+    "Hour" : {
+
     },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
@@ -693,7 +717,13 @@
         }
       }
     },
+    "Visits" : {
+
+    },
     "사진" : {
+
+    },
+    "주차" : {
 
     }
   },

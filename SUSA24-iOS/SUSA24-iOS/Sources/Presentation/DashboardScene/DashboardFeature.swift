@@ -17,7 +17,8 @@ struct DashboardFeature: DWReducer {
         var tab: DashboardPickerTab = .visitDuration
         var caseID: UUID?
         var topVisitDurationLocations = [StayAddress]()
-        var isLoadingTop = false
+        var hourlySeries: [HourlyVisit] = []
+        var topAddress: String?
     }
     
     // MARK: - Action
@@ -26,6 +27,7 @@ struct DashboardFeature: DWReducer {
         case setTab(DashboardPickerTab)
         case onAppear(UUID)
         case setTopVisitDuration([StayAddress])
+        case setHourlySeries([HourlyVisit], topAddress: String)
     }
     
     // MARK: - Reducer
@@ -42,6 +44,10 @@ struct DashboardFeature: DWReducer {
                 do {
                     let locations = try await repository.fetchLocations(caseId: caseID)
                     let top3Locations = await topAddressStays(from: locations)
+                    
+                    let topAddress = try await locations.mostVisitedCellAddress()
+                    let series = await locations.hourlySeries(for: topAddress)
+                    
                     return .setTopVisitDuration(top3Locations)
                 } catch {
                     return .none
@@ -50,6 +56,11 @@ struct DashboardFeature: DWReducer {
             
         case let .setTopVisitDuration(visits):
             state.topVisitDurationLocations = visits
+            return .none
+            
+        case let .setHourlySeries(series, topAddress):
+            state.hourlySeries = series
+            state.topAddress = topAddress.isEmpty ? nil : topAddress
             return .none
         }
     }
