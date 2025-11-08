@@ -13,15 +13,27 @@ struct CellChartGraph: View {
     let tickHours: [Int]
     let weekStyleScale: KeyValuePairs<String, Color>
     
+    private var availableWeeks: [Int] {
+        Array(Set(series.map(\.weekIndex))).sorted()
+    }
+    
     var body: some View {
-        Chart(series) { item in
-            LineMark(
-                x: .value("Hour", item.hour),
-                y: .value("Visits", item.count),
-                series: .value("주차", item.weekLabel)
-            )
-            .foregroundStyle(by: .value("주차", item.weekLabel))
-            .interpolationMethod(.catmullRom)
+        Chart {
+            ForEach(availableWeeks, id: \.self) { week in
+                let weekData = series
+                    .filter { $0.weekIndex == week }
+                    .sorted { $0.hour < $1.hour }
+
+                ForEach(weekData) { item in
+                    LineMark(
+                        x: .value("Hour", item.hour),
+                        y: .value("Visits", item.count),
+                        series: .value("주차", "\(week)주차")
+                    )
+                }
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(by: .value("주차", "\(week)주차"))
+            }
         }
         .chartLegend(.hidden)
         .chartForegroundStyleScale(weekStyleScale)
@@ -45,6 +57,5 @@ struct CellChartGraph: View {
                 .setupFont(.bodyMedium12)
                 .opacity(series.isEmpty ? 1 : 0)
         }
-        .animation(.easeInOut(duration: 0.5), value: series)
     }
 }

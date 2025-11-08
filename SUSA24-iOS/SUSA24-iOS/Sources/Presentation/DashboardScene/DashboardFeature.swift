@@ -16,18 +16,30 @@ struct DashboardFeature: DWReducer {
     struct State: DWState {
         var tab: DashboardPickerTab = .visitDuration
         var caseID: UUID?
-        var topVisitDurationLocations = [StayAddress]()
-        var cellCharts: [CellChartData] = []
         
+        /// 상단 TOP3 체류 기지국 카드 데이터
+        var topVisitDurationLocations: [StayAddress] = []
+
+        /// 시간대별 기지국 차트 카드 데이터
+        var cellCharts: [CellChartData] = []
+
+        /// 원본 Location 데이터 (필요시 추가 가공용)
         var locations: [Location] = []
     }
     
     // MARK: - Action
     
     enum Action: DWAction {
+        /// 상단 탭 변경
         case setTab(DashboardPickerTab)
+
+        /// 화면 진입 시 호출 (데이터 로딩 트리거)
         case onAppear(UUID)
+
+        /// 초기 데이터 세팅 (fetch + 가공 완료 후)
         case setInitialData(locations: [Location], top3: [StayAddress], chart: [CellChartData])
+
+        /// 개별 차트에서 요일이 변경되었을 때
         case setChartWeekday(id: CellChartData.ID, weekday: Weekday)
     }
     
@@ -41,6 +53,7 @@ struct DashboardFeature: DWReducer {
             
         case let .onAppear(caseID):
             state.caseID = caseID
+            // 초기 진입 시: Location fetch → TOP3 + 차트 데이터 생성
             return .task { [repository] in
                 do {
                     let locations = try await repository.fetchLocations(caseId: caseID)
@@ -63,38 +76,18 @@ struct DashboardFeature: DWReducer {
             return .none
             
         case let .setChartWeekday(id, weekday):
-            guard !state.locations.isEmpty else { return .none }
-
-            // 공통 baseWeekStart 계산
-            let cellLocations = state.locations.filter { $0.locationType == 2 }
-            guard let firstDate = cellLocations.compactMap(\.receivedAt).min() else { return .none }
-
-            let calendar = Calendar.current
-            func startOfWeek(_ date: Date) -> Date {
-                calendar.date(
-                    from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-                )!
-            }
-            let baseWeekStart = startOfWeek(firstDate)
-
             guard let index = state.cellCharts.firstIndex(where: { $0.id == id }) else {
                 return .none
             }
 
-            let address = state.cellCharts[index].address
+            var chart = state.cellCharts[index]
+            let filtered = chart.allSeries.filter { $0.weekday == weekday }
 
-            // 해당 차트(주소)에 대해 선택된 요일 기반 series/summary 재계산
-            let newSeries = state.locations.hourlySeries(
-                for: address,
-                baseWeekStart: baseWeekStart,
-                maxWeeks: 4,
-                targetWeekday: weekday
-            )
-            let newSummary = state.locations.summary(for: newSeries)
-
-            state.cellCharts[index].selectedWeekday = weekday
-            state.cellCharts[index].series = newSeries
-            state.cellCharts[index].summary = newSummary
+            chart.selectedWeekday = weekday
+            chart.series = filtered
+            chart.summary = makeHourlySummary(for: filtered)
+            
+            state.cellCharts[index] = chart
 
             return .none
         }
@@ -111,7 +104,7 @@ private extension DashboardFeature {
         topK: Int = 3
     ) -> [StayAddress] {
         let filteredLocations = locations.filter { $0.locationType == 2 }
-        var bucket: [String: Int] = [:]
+        var bucket = [String: Int]()
         
         for location in filteredLocations {
             let key = location.address.isEmpty ? "기지국 주소" : location.address
@@ -124,165 +117,140 @@ private extension DashboardFeature {
 }
 
 private extension Array<Location> {
+    /// CoreData Location 데이터를 기반으로 차트용 `CellChartData` 배열을 생성합니다.
     func buildCellChartData(
         topK: Int = 3,
         maxWeeks: Int = 4
     ) -> [CellChartData] {
-        let cellLocations = filter { $0.locationType == 2 }
-        guard let firstDate = cellLocations.compactMap(\.receivedAt).min() else { return [] }
+        let cells = filter { $0.locationType == 2 }
+        guard
+            let firstDate = cells.compactMap(\.receivedAt).min(),
+            let lastDate = cells.compactMap(\.receivedAt).max()
+        else { return [] }
 
         let calendar = Calendar.current
-        func startOfWeek(_ date: Date) -> Date {
-            calendar.date(
-                from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-            )!
-        }
-        let baseWeekStart = startOfWeek(firstDate)
+        let baseWeekStart = calendar.date(
+            from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: firstDate)
+        ) ?? firstDate
 
+        let days = calendar.dateComponents([.day], from: baseWeekStart, to: lastDate).day ?? 0
+        let actualWeeks = Swift.min(maxWeeks, days / 7 + 1)
         let addresses = topCellAddresses(topK: topK)
 
         return addresses.map { address in
-            // 초기 요일: 가장 방문 많은 요일 or .mon
-            let initialWeekday = mostActiveWeekday(
+            let allSeries = hourlySeriesForAllWeekdays(
                 for: address,
                 baseWeekStart: baseWeekStart,
-                maxWeeks: maxWeeks
+                maxWeeks: actualWeeks
+            )
+
+            let today = Date()
+            let initialWeekday = Weekday(
+                systemWeekday: calendar.component(.weekday, from: today)
             ) ?? .mon
 
-            let series = hourlySeries(
-                for: address,
-                baseWeekStart: baseWeekStart,
-                maxWeeks: maxWeeks,
-                targetWeekday: initialWeekday
-            )
-            let summary = summary(for: series)
+            let initialSeries = allSeries.filter { $0.weekday == initialWeekday }
+            let summary = makeHourlySummary(for: initialSeries)
 
             return CellChartData(
                 address: address,
                 selectedWeekday: initialWeekday,
-                summary: summary,
-                series: series
+                allSeries: allSeries,
+                series: initialSeries,
+                summary: summary
             )
         }
     }
 
+    /// Location 배열에서 상위 K개의 기지국 주소를 반환합니다.
+    ///
+    /// - Parameter topK: 반환할 주소 개수
+    /// - Returns: 방문 빈도 내림차순으로 정렬된 상위 주소 배열
     func topCellAddresses(topK: Int) -> [String] {
         let cells = filter { $0.locationType == 2 }
-        let buckets = Dictionary(grouping: cells) {
+        let grouped = Dictionary(grouping: cells) {
             $0.address.isEmpty ? "기지국 주소" : $0.address
         }
-        return buckets
+
+        return grouped
             .sorted { $0.value.count > $1.value.count }
             .prefix(topK)
             .map(\.key)
     }
 
-    func hourlySeries(
-        for address: String,
-        baseWeekStart: Date,
-        maxWeeks: Int,
-        targetWeekday: Weekday
-    ) -> [HourlyVisit] {
-        let calendar = Calendar.current
-        let normalizedAddress = address.isEmpty ? "기지국 주소" : address
-
-        var buckets: [Int: [Int: Int]] = [:] // weekIndex -> hour -> count
-
-        for loc in self {
-            guard
-                loc.locationType == 2,
-                (loc.address.isEmpty ? "기지국 주소" : loc.address) == normalizedAddress,
-                let ts = loc.receivedAt
-            else { continue }
-
-            let diffWeeks = calendar.dateComponents(
-                [.weekOfYear],
-                from: baseWeekStart,
-                to: ts
-            ).weekOfYear ?? 0
-            let weekIndex = diffWeeks + 1
-            guard (1 ... maxWeeks).contains(weekIndex) else { continue }
-
-            let systemWeekday = calendar.component(.weekday, from: ts)
-            guard let weekday = Weekday(systemWeekday: systemWeekday) else { continue }
-
-            // 선택된 요일만 포함
-            guard weekday == targetWeekday else { continue }
-
-            let hour = calendar.component(.hour, from: ts)
-            buckets[weekIndex, default: [:]][hour, default: 0] += 1
-        }
-
-        var result: [HourlyVisit] = []
-        for weekIndex in 1 ... maxWeeks {
-            for hour in 0 ... 23 {
-                let count = buckets[weekIndex]?[hour] ?? 0
-                result.append(
-                    HourlyVisit(
-                        weekIndex: weekIndex,
-                        weekday: targetWeekday,
-                        hour: hour,
-                        count: count
-                    )
-                )
-            }
-        }
-        return result
-    }
-
-    func summary(for series: [HourlyVisit]) -> String {
-        // 1) count > 0 인 주차만 모아서 그 중 가장 늦은 주차 선택
-        guard let latestWeek = series
-            .filter({ $0.count > 0 })
-            .map(\.weekIndex)
-            .max()
-        else { return "" }
-
-        // 2) 그 주차에서 가장 많이 머문 시간대 찾기
-        let candidates = series.filter { $0.weekIndex == latestWeek && $0.count > 0 }
-        guard let best = candidates.max(by: { $0.count < $1.count }) else { return "" }
-
-        let startHour = best.hour
-        let endHour = (best.hour + 1) % 24
-
-        func hourText(_ h: Int) -> String {
-            switch h {
-            case 0: "오전 0시"
-            case 1 ..< 12: "오전 \(h)시"
-            case 12: "오후 12시"
-            default: "오후 \(h - 12)시"
-            }
-        }
-
-        return "\(hourText(startHour))-\(hourText(endHour))에 주로 머물렀습니다."
-    }
-
-    /// 주소별로 가장 방문이 많은 요일을 찾아 초기 선택값으로 쓰기
-    func mostActiveWeekday(
+    /// 특정 기지국 주소에 대해, 1~N주차 × 모든 요일 × 시간대별 방문 빈도를 계산합니다.
+    ///
+    /// - Parameters:
+    ///   - address: 분석할 기지국 주소
+    ///   - baseWeekStart: 첫 주의 시작일
+    ///   - maxWeeks: 최대 주차 수 (데이터 기간 기반으로 계산됨)
+    /// - Returns: `HourlyVisit` 배열 (주차별·요일별·시간별 방문 카운트)
+    func hourlySeriesForAllWeekdays(
         for address: String,
         baseWeekStart: Date,
         maxWeeks: Int
-    ) -> Weekday? {
+    ) -> [HourlyVisit] {
         let calendar = Calendar.current
-        let normalizedAddress = address.isEmpty ? "기지국 주소" : address
+        let normalized = address.isEmpty ? "기지국 주소" : address
 
-        var counts: [Weekday: Int] = [:]
+        // [주차: [요일: [시간: 카운트]]]
+        var buckets: [Int: [Weekday: [Int: Int]]] = [:]
 
-        for loc in self {
+        for location in self where location.locationType == 2 {
             guard
-                loc.locationType == 2,
-                (loc.address.isEmpty ? "기지국 주소" : loc.address) == normalizedAddress,
-                let ts = loc.receivedAt
+                (location.address.isEmpty ? "기지국 주소" : location.address) == normalized,
+                let time = location.receivedAt
             else { continue }
 
-            let diffWeeks = calendar.dateComponents([.weekOfYear], from: baseWeekStart, to: ts).weekOfYear ?? 0
-            let weekIndex = diffWeeks + 1
+            let daysDiff = calendar.dateComponents([.day], from: baseWeekStart, to: time).day ?? 0
+            let weekIndex = daysDiff / 7 + 1
             guard (1 ... maxWeeks).contains(weekIndex) else { continue }
 
-            guard let weekday = Weekday(systemWeekday: calendar.component(.weekday, from: ts)) else { continue }
-            counts[weekday, default: 0] += 1
-        }
+            guard let weekday = Weekday(systemWeekday: calendar.component(.weekday, from: time)) else { continue }
+            let hour = calendar.component(.hour, from: time)
 
-        return counts.max(by: { $0.value < $1.value })?.key
+            buckets[weekIndex, default: [:]][weekday, default: [:]][hour, default: 0] += 1
+        }
+        let validWeeks = buckets.keys.sorted()
+
+        return validWeeks.flatMap { weekIndex in
+            Weekday.allCases.flatMap { weekday in
+                (0 ... 23).map { hour in
+                    HourlyVisit(
+                        weekIndex: weekIndex,
+                        weekday: weekday,
+                        hour: hour,
+                        count: buckets[weekIndex]?[weekday]?[hour] ?? 0
+                    )
+                }
+            }
+        }
     }
+}
+
+/// 시계열 방문 데이터(`HourlyVisit`)를 요약 문장으로 변환합니다.
+///
+/// - Parameter series: 요약할 `HourlyVisit` 배열
+/// - Returns: “오전 8시–오전 9시에 주로 머물렀습니다.” 형태의 설명 문자열
+func makeHourlySummary(for series: [HourlyVisit]) -> String {
+    guard let latestWeek = series.filter({ $0.count > 0 }).map(\.weekIndex).max() else {
+        return ""
+    }
+
+    let candidates = series.filter { $0.weekIndex == latestWeek && $0.count > 0 }
+    guard let best = candidates.max(by: { $0.count < $1.count }) else { return "" }
+
+    let startHour = best.hour
+    let endHour = (best.hour + 1) % 24
+
+    func hourText(_ h: Int) -> String {
+        switch h {
+        case 0: "오전 0시"
+        case 1 ..< 12: "오전 \(h)시"
+        case 12: "오후 12시"
+        default: "오후 \(h - 12)시"
+        }
+    }
+
+    return "\(hourText(startHour))-\(hourText(endHour))에 주로 머물렀습니다."
 }
