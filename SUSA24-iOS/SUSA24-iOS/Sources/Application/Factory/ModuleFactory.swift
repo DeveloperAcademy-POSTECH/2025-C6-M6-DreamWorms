@@ -29,6 +29,7 @@ protocol ModuleFactoryProtocol {
 final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
+    private lazy var mapDispatcher = MapDispatcher()
     
     func makeCameraView() -> CameraSampleView {
         let view = CameraSampleView()
@@ -109,9 +110,9 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let repository = LocationRepository(context: context)
         let store = DWStore(
             initialState: MapFeature.State(),
-            reducer: MapFeature(repository: repository)
+            reducer: MapFeature(repository: repository, dispatcher: mapDispatcher)
         )
-        let view = MapView(store: store)
+        let view = MapView(store: store, dispatcher: mapDispatcher)
         return view
     }
     
@@ -129,7 +130,11 @@ final class ModuleFactory: ModuleFactoryProtocol {
     }
     
     func makeSearchView() -> SearchView {
-        let view = SearchView()
+        let store = DWStore(
+            initialState: SearchFeature.State(),
+            reducer: SearchFeature(dispatcher: mapDispatcher)
+        )
+        let view = SearchView(store: store)
         return view
     }
     
