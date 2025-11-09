@@ -7,9 +7,6 @@
     "%@" : {
 
     },
-    "%@ 기지국에서" : {
-
-    },
     "%lld" : {
 
     },
@@ -17,9 +14,6 @@
 
     },
     "%lld개" : {
-
-    },
-    "%lld주차" : {
 
     },
     "analyze" : {
@@ -270,6 +264,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사건을 추가하거나\n확인할 사건을 선택하세요."
+          }
+        }
+      }
+    },
+    "chart_CellLocationTitle" : {
+      "comment" : "차트_상단 기지국 내용 입력 공간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(location)@ 기지국에서"
+          }
+        }
+      }
+    },
+    "chart_legend_week" : {
+      "comment" : "차트_우측 상단 주석",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(number)lld주차"
           }
         }
       }
