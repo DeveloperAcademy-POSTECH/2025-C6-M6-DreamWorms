@@ -13,7 +13,11 @@ protocol ModuleFactoryProtocol {
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
-    func makeLocationOverviewView() -> LocationOverviewView
+    func makeLocationOverviewView(
+        caseID: UUID,
+        baseAddress: String,
+        context: NSManagedObjectContext
+    ) -> LocationOverviewView
     func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<
         MapView,
         DashboardView,
@@ -69,8 +73,21 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeLocationOverviewView() -> LocationOverviewView {
-        let view = LocationOverviewView()
+    func makeLocationOverviewView(
+        caseID: UUID,
+        baseAddress: String,
+        context: NSManagedObjectContext
+    ) -> LocationOverviewView {
+        let repository = LocationRepository(context: context)
+        let store = DWStore(
+            initialState: LocationOverviewFeature.State(),
+            reducer: LocationOverviewFeature(repository: repository)
+        )
+        let view = LocationOverviewView(
+            store: store,
+            caseID: caseID,
+            baseAddress: baseAddress
+        )
         return view
     }
 
