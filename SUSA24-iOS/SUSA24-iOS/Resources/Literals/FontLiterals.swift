@@ -47,6 +47,7 @@ extension Font {
 
     static let numberMedium16: Font = .custom(FontName.pretendardMedium.rawValue, size: 16)
     static let numberMedium15: Font = .custom(FontName.pretendardMedium.rawValue, size: 15)
+    static let numberRegular13: Font = .custom(FontName.pretendardRegular.rawValue, size: 13)
     static let numberRegular15: Font = .custom(FontName.pretendardRegular.rawValue, size: 15)
     static let numberSemiBold14: Font = .custom(FontName.pretendardSemiBold.rawValue, size: 14)
 }
@@ -78,6 +79,7 @@ extension UIFont {
     
     static let numberMedium16: UIFont = .custom(.pretendardMedium, size: 16)
     static let numberMedium15: UIFont = .custom(.pretendardMedium, size: 15)
+    static let numberRegular13: UIFont = .custom(.pretendardRegular, size: 13)
     static let numberRegular15: UIFont = .custom(.pretendardRegular, size: 15)
     static let numberSemiBold14: UIFont = .custom(.pretendardSemiBold, size: 14)
 }

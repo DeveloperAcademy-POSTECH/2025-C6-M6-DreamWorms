@@ -265,6 +265,28 @@
         }
       }
     },
+    "CCTV" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV"
+          }
+        }
+      }
+    },
+    "cell_station" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국"
+          }
+        }
+      }
+    },
     "dashboard_visitDurationCellTower_Title" : {
       "comment" : "대시보드_기지국별 체류시간_타이틀",
       "extractionState" : "manual",
@@ -325,6 +347,28 @@
         }
       }
     },
+    "layer_setting_coverage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 반경"
+          }
+        }
+      }
+    },
+    "layer_setting_toggle_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 세부 정보"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
@@ -333,6 +377,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지도"
+          }
+        }
+      }
+    },
+    "map_setting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 설정"
           }
         }
       }
