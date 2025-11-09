@@ -57,7 +57,7 @@ struct CameraSampleView: View {
                     
                     // 초기화 버튼
                     DWCircleButton(image: Image(.delete), action: camera.clearAllPhotos)
-                 }
+                }
                 .padding(16)
             }
             .padding(16)
