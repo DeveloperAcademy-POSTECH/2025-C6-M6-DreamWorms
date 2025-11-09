@@ -13,6 +13,7 @@ protocol ModuleFactoryProtocol {
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
+    func makeLocationOverviewView() -> LocationOverviewView
     func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<
         MapView,
         DashboardView,
@@ -68,6 +69,11 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
+    func makeLocationOverviewView() -> LocationOverviewView {
+        let view = LocationOverviewView()
+        return view
+    }
+
     func makeMainTabView(
         caseID: UUID,
         context: NSManagedObjectContext

@@ -41,6 +41,8 @@ struct RootView: View {
                         moduleFactory.makeCaseListView(context: context)
                     case let .dashboardScene(caseID):
                         moduleFactory.makeDashboardView(caseID: caseID, context: context)
+                    case .locationOverviewScene:
+                        moduleFactory.makeLocationOverviewView()
                     case let .mainTabScene(caseID):
                         moduleFactory.makeMainTabView(caseID: caseID, context: context)
                     case let .mapScene(caseID):
