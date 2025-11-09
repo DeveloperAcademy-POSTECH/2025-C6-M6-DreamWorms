@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-// MARK: - Zoomable Image View
-
 struct ZoomableImageView: View {
     let image: UIImage
     @Binding var zoomState: ZoomState
