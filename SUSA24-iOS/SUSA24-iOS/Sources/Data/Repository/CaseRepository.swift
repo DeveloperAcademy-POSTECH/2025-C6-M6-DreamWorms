@@ -144,9 +144,10 @@ struct CaseRepository: CaseRepositoryProtocol {
             
             if let data = imageData,
                let path = try? ImageFileStorage.saveProfileImage(
-                data,
-                for: suspectEntity.id ?? UUID()
-               ) {
+                   data,
+                   for: suspectEntity.id ?? UUID()
+               )
+            {
                 // 이미지 경로만 CoreData에 보관
                 suspectEntity.profileImage = path
             }
@@ -184,7 +185,8 @@ struct MockCaseRepository: CaseRepositoryProtocol {
     func fetchAllDataOfSpecificCase(for _: UUID) async throws -> (case: Case?, location: [Location]) {
         (nil, [])
     }
+
     func loadMockDataIfNeeded(caseId _: UUID) async throws {}
     func deleteCase(id _: UUID) async throws {}
-    func createCase(model: Case, imageData: Data?) async throws {}
+    func createCase(model _: Case, imageData _: Data?) async throws {}
 }

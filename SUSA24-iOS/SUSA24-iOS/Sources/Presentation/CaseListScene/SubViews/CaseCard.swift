@@ -36,7 +36,8 @@ struct CaseCard: View {
                 Spacer()
                 
                 if let path = item.suspectProfileImage,
-                   let uiImage = ImageFileStorage.loadProfileImage(from: path) {
+                   let uiImage = ImageFileStorage.loadProfileImage(from: path)
+                {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
