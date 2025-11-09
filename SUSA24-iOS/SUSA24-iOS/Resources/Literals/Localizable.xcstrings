@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "%@" : {
+
+    },
     "%lld" : {
 
     },
@@ -265,6 +268,42 @@
         }
       }
     },
+    "chart_CellLocationTitle" : {
+      "comment" : "차트_상단 기지국 내용 입력 공간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(location)@ 기지국에서"
+          }
+        }
+      }
+    },
+    "chart_legend_week" : {
+      "comment" : "차트_우측 상단 주석",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(number)lld주차"
+          }
+        }
+      }
+    },
+    "dashboard_emptyChartMessage" : {
+      "comment" : "대시보드_엠티 차트_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 데이터가 없습니다."
+          }
+        }
+      }
+    },
     "dashboard_visitDurationCellTower_Title" : {
       "comment" : "대시보드_기지국별 체류시간_타이틀",
       "extractionState" : "manual",
@@ -324,6 +363,9 @@
           }
         }
       }
+    },
+    "Hour" : {
+
     },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
@@ -693,7 +735,13 @@
         }
       }
     },
+    "Visits" : {
+
+    },
     "사진" : {
+
+    },
+    "주차" : {
 
     }
   },
