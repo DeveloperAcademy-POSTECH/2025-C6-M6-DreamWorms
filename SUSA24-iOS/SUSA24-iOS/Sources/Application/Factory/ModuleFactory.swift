@@ -9,7 +9,7 @@ import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
-    func makeCameraView() -> CameraSampleView
+    func makeCameraView(caseID: UUID) -> CameraView
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
@@ -24,14 +24,22 @@ protocol ModuleFactoryProtocol {
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
     func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
+    func makeScanLoadView() -> ScanLoadView
+    func makePhotoDetailsView() -> PhotoDetailsView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
     
-    func makeCameraView() -> CameraSampleView {
-        let view = CameraSampleView()
+    func makeCameraView(caseID: UUID) -> CameraView {
+        // cameraModel 주입
+        let camera = CameraModel()
+        let store = DWStore(
+            initialState: CameraFeature.State(caseID: caseID ,previewSource: camera.previewSource),
+            reducer: CameraFeature(camera: camera)
+        )
+        let view = CameraView(store: store, camera: camera)
         return view
     }
     
@@ -156,6 +164,16 @@ final class ModuleFactory: ModuleFactoryProtocol {
         )
         
         let view = TimeLineView(store: store)
+        return view
+    }
+    
+    func makePhotoDetailsView() -> PhotoDetailsView {
+        let view = PhotoDetailsView()
+        return view
+    }
+    
+    func makeScanLoadView() -> ScanLoadView {
+        let view = ScanLoadView()
         return view
     }
 }
