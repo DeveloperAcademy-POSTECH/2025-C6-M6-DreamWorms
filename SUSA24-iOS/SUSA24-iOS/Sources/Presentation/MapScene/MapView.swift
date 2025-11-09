@@ -15,11 +15,11 @@ struct MapView: View {
     // MARK: - Dependencies
     
     @State var store: DWStore<MapFeature>
-
+    
     // MARK: - Properties
     
     // MARK: - View
-
+    
     var body: some View {
         ZStack {
             NaverMapView(onMapTapped: { latlng in
@@ -81,7 +81,14 @@ struct MapView: View {
                         
                         DWGlassEffectCircleButton(
                             image: Image(.scan),
-                            action: { coordinator.push(.cameraScene) }
+                            action: {
+                                if let caseId = store.state.caseId {
+                                    coordinator.push(.cameraScene(caseID: caseId))
+                                } else {
+                                    // caseId를 못받아와서 임시로 적용
+                                    coordinator.push(.cameraScene(caseID: UUID()))
+                                }
+                            }
                         )
                         .setupSize(48)
                         .setupIconSize(width: 25, height: 19)
