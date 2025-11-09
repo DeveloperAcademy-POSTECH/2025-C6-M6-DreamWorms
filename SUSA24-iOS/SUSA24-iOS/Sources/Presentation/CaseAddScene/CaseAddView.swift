@@ -103,7 +103,7 @@ struct CaseAddView: View {
         .fullScreenCover(isPresented: $showPhotoPicker) {
             FullScreenPhotoPicker(isPresented: $showPhotoPicker) { image, data in
                 selectedImage = Image(uiImage: image)
-                store.send(.setProfileImage(data.base64EncodedString()))
+                store.send(.setProfileImage(data))
             }
             .ignoresSafeArea()
         }
