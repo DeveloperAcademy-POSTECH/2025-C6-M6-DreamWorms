@@ -46,6 +46,12 @@ struct MapFeature: DWReducer {
         
         /// 지도 레이어 시트의 표시 상태입니다. `MapLayerContainer` 버튼 토글과 연결됩니다.
         var isMapLayerSheetPresented: Bool = false
+        /// 지도 레이어의 커버리지 반경입니다.
+        var mapLayerCoverageRange: CoverageRangeType = .half
+        /// CCTV 레이어 표시 여부입니다.
+        var isCCTVLayerEnabled: Bool = true
+        /// 기지국 레이어 표시 여부입니다.
+        var isBaseStationLayerEnabled: Bool = false
         
         // MARK: - 위치정보 시트 관련 상태
         
@@ -71,6 +77,14 @@ struct MapFeature: DWReducer {
         case selectFilter(MapFilterType)
         /// 지도 레이어 시트를 토글하는 액션입니다.
         case toggleMapLayerSheet
+        /// 지도 레이어 시트 표시 상태를 직접 설정합니다.
+        case setMapLayerSheetPresented(Bool)
+        /// 지도 레이어 커버리지 반경을 설정합니다.
+        case setMapLayerCoverage(CoverageRangeType)
+        /// CCTV 레이어 표시 여부를 설정합니다.
+        case setCCTVLayerEnabled(Bool)
+        /// 기지국 레이어 표시 여부를 설정합니다.
+        case setBaseStationLayerEnabled(Bool)
         
         // MARK: - 위치정보 시트 관련 액션
         
@@ -134,6 +148,22 @@ struct MapFeature: DWReducer {
             
         case .toggleMapLayerSheet:
             state.isMapLayerSheetPresented.toggle()
+            return .none
+            
+        case let .setMapLayerSheetPresented(isPresented):
+            state.isMapLayerSheetPresented = isPresented
+            return .none
+            
+        case let .setMapLayerCoverage(range):
+            state.mapLayerCoverageRange = range
+            return .none
+            
+        case let .setCCTVLayerEnabled(isEnabled):
+            state.isCCTVLayerEnabled = isEnabled
+            return .none
+            
+        case let .setBaseStationLayerEnabled(isEnabled):
+            state.isBaseStationLayerEnabled = isEnabled
             return .none
             
         // MARK: - 위치정보 시트 관련 액션 처리

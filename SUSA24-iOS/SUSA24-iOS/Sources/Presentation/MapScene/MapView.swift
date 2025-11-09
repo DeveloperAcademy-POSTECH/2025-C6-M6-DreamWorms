@@ -37,7 +37,7 @@ struct MapView: View {
                     // 지도 카메라 이동이 완료되었으므로 상태의 명령을 초기화합니다.
                     store.send(.consumeTargetCoordinate)
                 },
-                onMapTapped: { latlng in handleMapTap(latlng: latlng) }
+                onMapTapped: { latlng in store.send(.mapTapped(latlng)) }
             )
             .ignoresSafeArea()
             
@@ -107,7 +107,6 @@ struct MapView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        // TODO: 지도 레이어 시트 구현 (store.state.isMapLayerSheetPresented 사용)
         .onAppear {
             store.send(.onAppear)
         }
@@ -118,6 +117,28 @@ struct MapView: View {
             case let .moveToSearchResult(coordinate, placeInfo):
                 store.send(.moveToSearchResult(coordinate, placeInfo))
             }
+        }
+        .sheet(isPresented: Binding(
+            get: { store.state.isMapLayerSheetPresented },
+            set: { store.send(.setMapLayerSheetPresented($0)) }
+        )) {
+            MapLayerSettingSheet(
+                selectedRange: Binding(
+                    get: { store.state.mapLayerCoverageRange },
+                    set: { store.send(.setMapLayerCoverage($0)) }
+                ),
+                isCCTVEnabled: Binding(
+                    get: { store.state.isCCTVLayerEnabled },
+                    set: { store.send(.setCCTVLayerEnabled($0)) }
+                ),
+                isBaseStationEnabled: Binding(
+                    get: { store.state.isBaseStationLayerEnabled },
+                    set: { store.send(.setBaseStationLayerEnabled($0)) }
+                ),
+                onClose: { store.send(.setMapLayerSheetPresented(false)) }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: Binding(
             get: { store.state.isPlaceInfoSheetPresented },
@@ -137,13 +158,6 @@ struct MapView: View {
             .presentationBackgroundInteraction(.enabled)
             .presentationDragIndicator(.hidden)
         }
-    }
-    
-    // MARK: - Private Methods
-    
-    /// 지도에서 탭 이벤트를 받으면 해당 좌표로 상세 정보를 조회하도록 `MapFeature`에 액션을 전달합니다.
-    private func handleMapTap(latlng: NMGLatLng) {
-        store.send(.mapTapped(latlng))
     }
 }
 
