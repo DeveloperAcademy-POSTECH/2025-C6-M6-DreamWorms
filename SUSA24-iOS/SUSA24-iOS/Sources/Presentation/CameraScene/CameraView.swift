@@ -83,7 +83,7 @@ struct CameraView: View {
                     uiImage: store.state.lastThumbnail,
                     isCapturing: store.state.isCapturing,
                     onDetailsTapped: {
-                        coordinator.push(.photoDetailsScene)
+                        coordinator.push(.photoDetailsScene(photos: store.state.allPhotos, camera: camera))
                     },
                     onPhotoCaptureTapped: {
                         store.send(.captureButtonTapped)

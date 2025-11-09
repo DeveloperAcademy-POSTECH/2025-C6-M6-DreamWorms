@@ -55,8 +55,8 @@ struct RootView: View {
                         moduleFactory.makeSettingView()
 //                    case .timeLineScene:
 //                        moduleFactory.makeTimeLineView()
-                    case .photoDetailsScene:
-                        moduleFactory.makePhotoDetailsView()
+                    case .photoDetailsScene(let photos, let camera):
+                        moduleFactory.makePhotoDetailsView(photos: photos, camera: camera)
                     case .scanLoadScene:
                         moduleFactory.makeScanLoadView()
                     }

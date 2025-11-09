@@ -19,6 +19,6 @@ enum AppRoute: Hashable {
     case selectLocationScene
     case settingScene
     case scanLoadScene
-    case photoDetailsScene
+    case photoDetailsScene(photos: [CapturedPhoto], camera: CameraModel)
 //    case timeLineScene
 }
