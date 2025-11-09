@@ -17,7 +17,7 @@ struct DWBadge: View {
                 .frame(width: 28, height: 28)
             
             Text("\(count)")
-                .font(.system(size: 13, weight: .bold))
+                .font(.titleSemiBold14)
                 .foregroundColor(.white)
         }
         .offset(x: 12, y: -12)
