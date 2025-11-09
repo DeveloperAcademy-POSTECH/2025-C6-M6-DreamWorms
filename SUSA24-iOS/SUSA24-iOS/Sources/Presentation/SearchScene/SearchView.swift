@@ -62,9 +62,9 @@ struct SearchView: View {
         .background(.mainAlternative)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            store.send(.onAppear)
             Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 100_000_000)
+                store.send(.onAppear)
+                try? await Task.sleep(for: seconds(0.1))
                 isSearchFieldFocused = .search
             }
         }
@@ -72,7 +72,7 @@ struct SearchView: View {
             searchTask?.cancel()
             guard !newValue.isEmpty else { return }
             searchTask = Task {
-                try? await Task.sleep(nanoseconds: 300_000_000)
+                try? await Task.sleep(for: seconds(0.3))
                 guard !Task.isCancelled, store.state.searchText == newValue else { return }
                 store.send(.searchKeyword(newValue))
             }
