@@ -30,9 +30,33 @@ public struct DWEffect<Action: DWAction>: Sendable {
         }
     }
     
+    /// 비동기 작업을 수행한 뒤, 결과로 `Action?`을 방출하는 이펙트를 생성합니다.
+    ///
+    /// - Parameter work: 비동기 작업을 수행하는 클로저.
+    /// - Returns: 작업 완료 후 액션을 전파하는 이펙트.
+    ///
     public static func task(_ work: @escaping @Sendable () async -> Action?) -> Self {
         .init { downstream in
             if let a = await work() { downstream(a) }
+        }
+    }
+    
+    /// 여러 개의 이펙트를 동시에 실행하여, 각각이 방출하는 액션들을 모두 전달합니다.
+    ///
+    /// - Parameter effects: 동시에 실행할 여러 `DWEffect` 인스턴스.
+    /// - Returns: 주어진 모든 이펙트를 병렬 실행하는 새로운 `DWEffect`.
+    ///
+    /// 이 메서드는 내부적으로 `withTaskGroup`을 사용하여 모든 이펙트를 병렬 실행합니다.
+    /// 각 이펙트가 방출한 액션은 `Store`로 즉시 전파되어 reducer에 전달됩니다.
+    public static func merge(_ effects: DWEffect<Action>...) -> DWEffect<Action> {
+        .init { downstream in
+            await withTaskGroup(of: Void.self) { group in
+                for effect in effects {
+                    group.addTask {
+                        await effect.run(downstream)
+                    }
+                }
+            }
         }
     }
 }
