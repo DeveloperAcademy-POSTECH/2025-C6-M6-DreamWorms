@@ -32,10 +32,14 @@ struct MapView: View {
     var body: some View {
         ZStack {
             NaverMapView(
-                targetCoordinate: store.state.targetCoordinate,
-                onMoveConsumed: {
+                cameraTargetCoordinate: store.state.cameraTargetCoordinate,
+                shouldFocusMyLocation: store.state.shouldFocusMyLocation,
+                onCameraMoveConsumed: {
                     // 지도 카메라 이동이 완료되었으므로 상태의 명령을 초기화합니다.
-                    store.send(.consumeTargetCoordinate)
+                    store.send(.clearCameraTarget)
+                },
+                onMyLocationFocusConsumed: {
+                    store.send(.clearFocusMyLocationFlag)
                 },
                 onMapTapped: { latlng in store.send(.mapTapped(latlng)) }
             )
@@ -90,7 +94,9 @@ struct MapView: View {
                             onLayerTapped: {
                                 store.send(.toggleMapLayerSheet)
                             },
-                            onRecenterTapped: nil
+                            onRecenterTapped: {
+                                store.send(.requestFocusMyLocation)
+                            }
                         )
                         
                         DWGlassEffectCircleButton(
