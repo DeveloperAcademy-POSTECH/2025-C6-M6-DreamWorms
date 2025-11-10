@@ -32,7 +32,25 @@ struct ReceiveMessageIntent: AppIntent {
         let caseRepository = CaseRepository(context: context)
         let locationRepository = LocationRepository(context: context)
         
+        // 1. 발신자 번호 확인
+        guard let senderNumber else {
+            print(" X [AppIntent] 발신자 번호가 없습니다.")
+            print("========================================\n")
+            return .result()
+        }
+        
+        print("발신자: \(senderNumber)")
+        
+        // 2. 발신자 번호로 케이스 찾기
+        guard let caseID = try await caseRepository.findCaseByPhoneNumber(senderNumber) else {
+            print(" X [AppIntent] 등록되지 않은 발신자입니다.")
+            print("========================================\n")
+            return .result()
+        }
+        
+        print(" 매칭된 케이스: \(caseID)")
         
         return .result()
+        
     }
 }
