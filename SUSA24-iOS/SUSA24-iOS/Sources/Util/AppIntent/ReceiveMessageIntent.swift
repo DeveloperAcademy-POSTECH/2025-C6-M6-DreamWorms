@@ -50,7 +50,46 @@ struct ReceiveMessageIntent: AppIntent {
         
         print(" 매칭된 케이스: \(caseID)")
         
-        return .result()
+        // 3. 주소 추출
+        guard let address = MessageParser.extractAddress(from: messageBody) else {
+            print(" 주소를 추출할 수 없습니다.")
+            print("   본문: \(messageBody)")
+            print("========================================\n")
+            return .result()
+        }
         
+        print(" 추출된 주소: \(address)")
+        
+        // 4. 좌표 변환 및 저장
+        do {
+            let geocodeResult = try await GeocodeService.shared.geocode(address: address)
+            
+            guard let latitude = geocodeResult.latitude,
+                  let longitude = geocodeResult.longitude
+            else {
+                print(" 좌표 변환 실패")
+                print("========================================\n")
+                return .result()
+            }
+            
+            print("🗺️  좌표: (\(latitude), \(longitude))")
+            
+            // Repository를 통한 저장
+            try await locationRepository.createLocationFromMessage(
+                caseID: caseID,
+                address: geocodeResult.fullAddress,
+                latitude: latitude,
+                longitude: longitude
+            )
+            
+            print(" 위치 정보 저장 완료")
+            print("========================================\n")
+            
+        } catch {
+            print(" 오류 발생: \(error)")
+            print("========================================\n")
+        }
+        
+        return .result()
     }
 }
