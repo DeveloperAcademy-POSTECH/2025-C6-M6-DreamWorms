@@ -43,7 +43,7 @@ struct TimeLineSearchBar: View {
         }
         .padding(.horizontal, 16)
         .animation(.snappy, value: isSearchFocused)
-     }
+    }
 }
 
 //

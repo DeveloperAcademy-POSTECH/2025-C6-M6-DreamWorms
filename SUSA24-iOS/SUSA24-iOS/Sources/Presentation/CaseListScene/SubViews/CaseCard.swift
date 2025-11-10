@@ -35,10 +35,21 @@ struct CaseCard: View {
                 }
                 Spacer()
                 
-                Image(.imgProfile)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 70, height: 70)
+                if let path = item.suspectProfileImage,
+                   let uiImage = ImageFileStorage.loadProfileImage(from: path)
+                {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 70, height: 70)
+                        .clipShape(Circle())
+                } else {
+                    Image(.imgProfile)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 70, height: 70)
+                        .clipShape(Circle())
+                }
             }
             .padding(.top, 8)
             
