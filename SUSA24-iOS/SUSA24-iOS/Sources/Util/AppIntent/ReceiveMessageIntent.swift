@@ -26,6 +26,13 @@ struct ReceiveMessageIntent: AppIntent {
     
     @MainActor
     func perform() async throws -> some IntentResult {
+        
+        // Repository 생성
+        let context = PersistenceController.shared.container.viewContext
+        let caseRepository = CaseRepository(context: context)
+        let locationRepository = LocationRepository(context: context)
+        
+        
         return .result()
     }
 }
