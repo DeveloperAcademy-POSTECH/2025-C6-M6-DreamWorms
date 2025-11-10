@@ -64,7 +64,7 @@ struct SearchView: View {
         .onAppear {
             Task { @MainActor in
                 store.send(.onAppear)
-                try? await Task.sleep(for: seconds(0.1))
+                try? await Task.sleep(for: .seconds(0.1))
                 isSearchFieldFocused = .search
             }
         }
@@ -72,7 +72,7 @@ struct SearchView: View {
             searchTask?.cancel()
             guard !newValue.isEmpty else { return }
             searchTask = Task {
-                try? await Task.sleep(for: seconds(0.3))
+                try? await Task.sleep(for: .seconds(0.3))
                 guard !Task.isCancelled, store.state.searchText == newValue else { return }
                 store.send(.searchKeyword(newValue))
             }

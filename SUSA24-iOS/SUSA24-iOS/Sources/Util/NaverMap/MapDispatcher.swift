@@ -39,7 +39,17 @@ import Observation
 @Observable
 final class MapDispatcher {
     /// 다른 뷰로부터 입력된 요청입니다. MapView 감지하여 onChange로 Action을 실행시킵니다.
-    var request: RequestType?
+    private(set) var request: RequestType?
+    
+    /// 외부 모듈에서 지도 명령을 발행합니다.
+    func send(_ request: RequestType) {
+        self.request = request
+    }
+    
+    /// 명령 완료를 표시합니다.
+    func consume() {
+        request = nil
+    }
     
     /// MapDispatcher가 전달할 수 있는 지도 명령 요청의 목록입니다.
     enum RequestType: Equatable {

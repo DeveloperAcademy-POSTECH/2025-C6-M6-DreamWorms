@@ -14,7 +14,7 @@ struct SearchResultsList: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+            ForEach(items) { item in
                 Button {
                     onItemSelected(item)
                 } label: {
@@ -23,7 +23,7 @@ struct SearchResultsList: View {
                 }
                 .buttonStyle(.plain)
                 
-                if index < items.count - 1 {
+                if item.id != items.last?.id {
                     Divider()
                         .background(.labelAssistive)
                 }

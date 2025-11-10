@@ -117,7 +117,7 @@ struct TimeLineFeature: DWReducer {
             
             // 다음 프레임에서 초기화
             return .task {
-                try? await Task.sleep(for: seconds(0.1))
+                try? await Task.sleep(for: .seconds(0.1))
                 return .resetScrollTarget
             }
             

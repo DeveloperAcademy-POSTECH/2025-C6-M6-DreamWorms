@@ -132,7 +132,7 @@ struct SearchFeature: DWReducer {
                 roadAddress: item.roadAddress,
                 phoneNumber: item.phoneNumber
             )
-            dispatcher.request = .moveToSearchResult(coordinate: coordinate, placeInfo: placeInfo)
+            dispatcher.send(.moveToSearchResult(coordinate: coordinate, placeInfo: placeInfo))
             state.shouldDismiss = true
             return .none
             
