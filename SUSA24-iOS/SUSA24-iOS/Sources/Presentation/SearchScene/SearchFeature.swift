@@ -9,8 +9,13 @@ import SwiftUI
 
 /// 검색 화면의 상태와 동작을 관리하는 Redux 스타일 리듀서입니다.
 struct SearchFeature: DWReducer {
+    private let searchService: SearchAPIService
     private let dispatcher: MapDispatcher
-    init(dispatcher: MapDispatcher) { self.dispatcher = dispatcher }
+    
+    init(searchService: SearchAPIService, dispatcher: MapDispatcher) {
+        self.searchService = searchService
+        self.dispatcher = dispatcher
+    }
     
     // MARK: - State
     
@@ -81,7 +86,7 @@ struct SearchFeature: DWReducer {
                         size: 15
                     )
 
-                    let response = try await KakaoSearchAPIManager.shared.fetchPlaceFromKeyword(requestDTO)
+                    let response = try await searchService.fetchPlaceFromKeyword(requestDTO)
                     
                     // KakaoPlaceDocument를 SearchResultItem으로 변환
                     let results = response.documents.map { document in
