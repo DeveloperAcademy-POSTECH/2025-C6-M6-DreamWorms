@@ -60,6 +60,10 @@ struct DWTextField<Field: Hashable>: View {
     var submitLabel: SubmitLabel = .done
     /// 리턴 버튼 탭 시 실행되는 액션
     var onSubmit: (() -> Void)?
+    /// 텍스트 필드의 높이입니다. nil이면 기본 높이를 사용합니다.
+    var height: CGFloat?
+    /// 텍스트 필드의 배경색입니다.
+    var backgroundColor: Color = .mainAlternative
     
     private var focus: FocusState<Field?>.Binding {
         externalFocus ?? $internalFocus
@@ -88,7 +92,7 @@ struct DWTextField<Field: Hashable>: View {
             
             ZStack {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(.mainAlternative)
+                    .fill(backgroundColor)
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(currentState.borderColor, lineWidth: 1)
                     .animation(.easeInOut(duration: 0.2), value: currentState.isError)
@@ -143,11 +147,13 @@ struct DWTextField<Field: Hashable>: View {
             }
             .font(.captionRegular12)
         }
-        .frame(height: currentState.isError ? 104 : 82)
+        .frame(height: height ?? (currentState.isError ? 104 : 82))
         .animation(.snappy(duration: 0.2), value: currentState.isError)
         .animation(.snappy(duration: 0.2), value: text)
     }
 }
+
+// MARK: - Style
 
 extension DWTextField {
     /// 텍스트 필드가 비어 있고 포커스 중일 때 표시할 에러 메시지를 설정합니다.
@@ -182,6 +188,22 @@ extension DWTextField {
         var v = self
         v.keyboard = type; v.submitLabel = submit; v.onSubmit = onSubmit
         return v
+    }
+    
+    /// 텍스트 필드의 높이를 설정합니다.
+    ///
+    /// - Parameter height: 설정할 높이 값
+    /// - Note: nil을 전달하면 기본 높이(에러 상태: 104, 일반 상태: 82)를 사용합니다.
+    @discardableResult
+    func setupHeight(_ height: CGFloat?) -> Self {
+        var v = self; v.height = height; return v
+    }
+    
+    /// 텍스트 필드 배경색을 설정합니다.
+    /// - Parameter color: 적용할 배경색 (`.mainAlternative`가 기본값)
+    @discardableResult
+    func setupBackgroundColor(_ color: Color = .mainAlternative) -> Self {
+        var v = self; v.backgroundColor = color; return v
     }
 }
 

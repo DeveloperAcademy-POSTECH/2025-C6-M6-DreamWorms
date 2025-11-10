@@ -2,29 +2,43 @@
 //  MapView.swift
 //  SUSA24-iOS
 //
-//  Created by mini on 10/29/25.
+//  Updated by Moo on 11/08/25.
 //
 
 import NMapsMap
 import SwiftUI
 
+/// 네이버 지도와 위치 정보 시트를 함께 렌더링하고, 명령 디스패처(MapDispatcher)의 요청을 소비해 지도 이동/시트 갱신을 수행하는 메인 지도 화면입니다.
 struct MapView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
     
     // MARK: - Dependencies
     
-    @State var store: DWStore<MapFeature>
-
+    @State private var store: DWStore<MapFeature>
+    @Bindable private var dispatcher: MapDispatcher
+    
     // MARK: - Properties
+    
+    // MARK: - Initializer
+    
+    init(store: DWStore<MapFeature>, dispatcher: MapDispatcher) {
+        self._store = State(initialValue: store)
+        self._dispatcher = Bindable(dispatcher)
+    }
     
     // MARK: - View
 
     var body: some View {
         ZStack {
-            NaverMapView(onMapTapped: { latlng in
-                handleMapTap(latlng: latlng)
-            })
+            NaverMapView(
+                targetCoordinate: store.state.targetCoordinate,
+                onMoveConsumed: {
+                    // 지도 카메라 이동이 완료되었으므로 상태의 명령을 초기화합니다.
+                    store.send(.consumeTargetCoordinate)
+                },
+                onMapTapped: { latlng in handleMapTap(latlng: latlng) }
+            )
             .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
@@ -97,6 +111,14 @@ struct MapView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .onChange(of: dispatcher.request) { _, request in
+            guard let request else { return }
+            // 명령 디스패처가 발행한 지도 명령을 Reducer 흐름으로 전달합니다.
+            switch request {
+            case let .moveToSearchResult(coordinate, placeInfo):
+                store.send(.moveToSearchResult(coordinate, placeInfo))
+            }
+        }
         .sheet(isPresented: Binding(
             get: { store.state.isPlaceInfoSheetPresented },
             set: { _ in store.send(.hidePlaceInfo) }
@@ -119,7 +141,7 @@ struct MapView: View {
     
     // MARK: - Private Methods
     
-    /// 맵 터치 시 좌표로 주소 정보를 조회합니다.
+    /// 지도에서 탭 이벤트를 받으면 해당 좌표로 상세 정보를 조회하도록 `MapFeature`에 액션을 전달합니다.
     private func handleMapTap(latlng: NMGLatLng) {
         store.send(.mapTapped(latlng))
     }
@@ -131,8 +153,11 @@ struct MapView: View {
 //    let repository = MockLocationRepository()
 //    let store = DWStore(
 //        initialState: MapFeature.State(caseId: UUID()),
-//        reducer: MapFeature(repository: repository)
+//        reducer: MapFeature(repository: repository, dispatcher: MapDispatcher())
 //    )
-//    return MapView(store: store)
+//    return MapView(
+//        store: store,
+//        dispatcher: MapDispatcher()
+//    )
 //        .environment(AppCoordinator())
 // }
