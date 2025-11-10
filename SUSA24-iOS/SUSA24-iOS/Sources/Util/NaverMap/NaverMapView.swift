@@ -59,6 +59,8 @@ struct NaverMapView: UIViewRepresentable {
             Task { @MainActor in
                 onCameraMoveConsumed?()
             }
+        } else if cameraTargetCoordinate == nil {
+            context.coordinator.lastCameraTarget = nil
         }
         
         // 2) 현위치 포커싱 명령 적용
