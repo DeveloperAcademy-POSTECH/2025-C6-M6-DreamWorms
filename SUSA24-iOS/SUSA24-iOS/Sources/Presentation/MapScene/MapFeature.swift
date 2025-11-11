@@ -15,13 +15,23 @@ import NMapsMap
 ///   2. `dispatcher`: 다른 모듈(Search 등)에서 발생한 지도 명령을 전달받기 위한 버스 객체
 struct MapFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
+    private let searchService: SearchAPIService
+    private let cctvService: CCTVAPIService
     private let dispatcher: MapDispatcher
     
     /// - Parameters:
     ///   - repository: 위치 데이터를 로드하기 위한 저장소
+    ///   - searchAPIService: 검색 API 서비스
     ///   - dispatcher: 외부 모듈에서 전달되는 지도 명령을 중계하는 객체
-    init(repository: LocationRepositoryProtocol, dispatcher: MapDispatcher) {
+    init(
+        repository: LocationRepositoryProtocol,
+        searchService: SearchAPIService,
+        cctvService: CCTVAPIService,
+        dispatcher: MapDispatcher
+    ) {
         self.repository = repository
+        self.searchService = searchService
+        self.cctvService = cctvService
         self.dispatcher = dispatcher
     }
     
@@ -253,7 +263,7 @@ struct MapFeature: DWReducer {
     /// - Throws: API 호출 실패 시 에러를 던집니다.
     private func fetchPlaceInfo(from requestDTO: KakaoCoordToLocationRequestDTO) async throws -> PlaceInfo {
         // 1단계: 좌표로 주소 조회 (Kakao 좌표→주소 변환 API)
-        let coordResponse = try await KakaoSearchAPIManager.shared.fetchLocationFromCoord(requestDTO)
+        let coordResponse = try await searchService.fetchLocationFromCoord(requestDTO)
         guard let document = coordResponse.documents.first else {
             return PlaceInfo(
                 title: "",
@@ -277,7 +287,7 @@ struct MapFeature: DWReducer {
                 size: 1
             )
             
-            let keywordResponse = try await KakaoSearchAPIManager.shared.fetchPlaceFromKeyword(keywordRequestDTO)
+            let keywordResponse = try await searchService.fetchPlaceFromKeyword(keywordRequestDTO)
             
             if let placeDocument = keywordResponse.documents.first {
                 // 키워드 검색 성공: 장소명과 전화번호 포함하여 표시

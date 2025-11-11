@@ -9,7 +9,7 @@ import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
-    func makeCameraView() -> CameraSampleView
+    func makeCameraView(caseID: UUID) -> CameraView
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
@@ -24,15 +24,25 @@ protocol ModuleFactoryProtocol {
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
     func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
+    func makeScanLoadView() -> ScanLoadView
+    func makePhotoDetailsView(photos: [CapturedPhoto], camera: CameraModel) -> PhotoDetailsView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
     private lazy var mapDispatcher = MapDispatcher()
+    private lazy var searchService = KakaoSearchAPIService()
+    private lazy var cctvService = VWorldCCTVAPIService()
     
-    func makeCameraView() -> CameraSampleView {
-        let view = CameraSampleView()
+    func makeCameraView(caseID: UUID) -> CameraView {
+        // cameraModel 주입
+        let camera = CameraModel()
+        let store = DWStore(
+            initialState: CameraFeature.State(caseID: caseID ,previewSource: camera.previewSource),
+            reducer: CameraFeature(camera: camera)
+        )
+        let view = CameraView(store: store, camera: camera)
         return view
     }
     
@@ -110,7 +120,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let repository = LocationRepository(context: context)
         let store = DWStore(
             initialState: MapFeature.State(),
-            reducer: MapFeature(repository: repository, dispatcher: mapDispatcher)
+            reducer: MapFeature(
+                repository: repository,
+                searchService: searchService,
+                cctvService: cctvService,
+                dispatcher: mapDispatcher
+            )
         )
         let view = MapView(store: store, dispatcher: mapDispatcher)
         return view
@@ -136,7 +151,10 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeSearchView() -> SearchView {
         let store = DWStore(
             initialState: SearchFeature.State(),
-            reducer: SearchFeature(dispatcher: mapDispatcher)
+            reducer: SearchFeature(
+                searchService: searchService,
+                dispatcher: mapDispatcher
+            )
         )
         let view = SearchView(store: store)
         return view
@@ -165,6 +183,24 @@ final class ModuleFactory: ModuleFactoryProtocol {
         )
         
         let view = TimeLineView(store: store)
+        return view
+    }
+    
+    func makePhotoDetailsView(
+        photos: [CapturedPhoto],
+        camera: CameraModel
+    ) -> PhotoDetailsView {
+        let store = DWStore(
+            initialState: PhotoDetailsFeature.State(
+                photos: photos
+            ),
+            reducer: PhotoDetailsFeature(camera: camera)
+        )
+        return PhotoDetailsView(store: store)
+    }
+    
+    func makeScanLoadView() -> ScanLoadView {
+        let view = ScanLoadView()
         return view
     }
 }
