@@ -9,7 +9,7 @@ import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
-    func makeCameraView() -> CameraSampleView
+    func makeCameraView(caseID: UUID) -> CameraView
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
@@ -24,6 +24,8 @@ protocol ModuleFactoryProtocol {
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
     func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
+    func makeScanLoadView() -> ScanLoadView
+    func makePhotoDetailsView(photos: [CapturedPhoto], camera: CameraModel) -> PhotoDetailsView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
@@ -33,8 +35,14 @@ final class ModuleFactory: ModuleFactoryProtocol {
     private lazy var searchService = KakaoSearchAPIService()
     private lazy var cctvService = VWorldCCTVAPIService()
     
-    func makeCameraView() -> CameraSampleView {
-        let view = CameraSampleView()
+    func makeCameraView(caseID: UUID) -> CameraView {
+        // cameraModel 주입
+        let camera = CameraModel()
+        let store = DWStore(
+            initialState: CameraFeature.State(caseID: caseID ,previewSource: camera.previewSource),
+            reducer: CameraFeature(camera: camera)
+        )
+        let view = CameraView(store: store, camera: camera)
         return view
     }
     
@@ -175,6 +183,24 @@ final class ModuleFactory: ModuleFactoryProtocol {
         )
         
         let view = TimeLineView(store: store)
+        return view
+    }
+    
+    func makePhotoDetailsView(
+        photos: [CapturedPhoto],
+        camera: CameraModel
+    ) -> PhotoDetailsView {
+        let store = DWStore(
+            initialState: PhotoDetailsFeature.State(
+                photos: photos
+            ),
+            reducer: PhotoDetailsFeature(camera: camera)
+        )
+        return PhotoDetailsView(store: store)
+    }
+    
+    func makeScanLoadView() -> ScanLoadView {
+        let view = ScanLoadView()
         return view
     }
 }

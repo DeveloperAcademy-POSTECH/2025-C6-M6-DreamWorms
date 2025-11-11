@@ -7,6 +7,7 @@
 
 import AVFoundation
 
+/// TODO: 전체적으로 에러처리 해야함, print 제거 필요
 /// 카메라 디바이스를 제어하는 액터 (zoom, torch, focus 등)
 actor CameraControlService {
     private(set) var device: AVCaptureDevice?
@@ -135,13 +136,19 @@ actor CameraControlService {
     }
     
     /// 토치를 토글합니다.
-    /// - Returns: 토치 켜짐 여부
+    /// - Returns: 토글 후의 토치 켜짐 여부 (isTorchOn)
     func toggleTorch() -> Bool {
         if isTorchOn {
-            !turnOffTorch()
+            // 끄기 시도: turnOffTorch()는 성공 여부를 반환하지만,
+            // 토글 함수의 목적은 isTorchOn 상태를 업데이트하는 것.
+            _ = turnOffTorch()
         } else {
-            turnOnTorch()
+            // 켜기 시도: turnOnTorch()는 성공 여부를 반환.
+            _ = turnOnTorch()
         }
+        
+        // 최종 상태를 반환합니다.
+        return isTorchOn
     }
     
     // MARK: - Focus Control
