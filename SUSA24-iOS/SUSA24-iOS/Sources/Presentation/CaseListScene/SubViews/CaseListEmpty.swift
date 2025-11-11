@@ -24,6 +24,7 @@ struct CaseListEmpty: View {
                     .foregroundStyle(.labelAssistive)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
