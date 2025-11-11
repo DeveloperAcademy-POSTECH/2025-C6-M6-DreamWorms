@@ -16,7 +16,7 @@ struct PhotoDetailsView: View {
     init(store: DWStore<PhotoDetailsFeature>) {
         _store = State(initialValue: store)
         
-        // 각 사진마다 ZoomState 초기화 시킴
+        // 각 사진마다 ZoomState 초기화 시킨다.
         var states: [UUID: ZoomState] = [:]
         for photo in store.state.photos {
             states[photo.id] = ZoomState()
