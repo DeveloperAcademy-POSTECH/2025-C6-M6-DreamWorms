@@ -118,7 +118,7 @@ final class SUSA24Tests: XCTestCase {
         )
         
         // When
-        let response = try await VWorldService().fetchCCTVByBox(requestDTO)
+        let response = try await VWorldCCTVAPIService().fetchCCTVByBox(requestDTO)
         
         // Then
         var logOutput = "✅ VWorld CCTV BOX 검색 성공\n"
@@ -155,7 +155,7 @@ final class SUSA24Tests: XCTestCase {
         let requestDTO = VWorldPolygonRequestDTO(coordinates: coordinates, size: 10, page: 1)
         
         // When
-        let response = try await VWorldService().fetchCCTVByPolygon(requestDTO)
+        let response = try await VWorldCCTVAPIService().fetchCCTVByPolygon(requestDTO)
         
         // Then
         var logOutput = "✅ VWorld CCTV Polygon 검색 성공\n"
