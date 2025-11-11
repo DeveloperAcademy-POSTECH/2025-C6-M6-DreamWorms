@@ -10,8 +10,7 @@ import CoreVideo
 import Foundation
 import CoreImage
 
-/// 프레임을 처리하고 문서 감지 + 렌즈 얼룩 감지 결과를 스트림으로 제공합니다
-/// (매 프레임)
+/// 프레임을 처리하고 문서 감지 + 렌즈 얼룩 감지 결과를 스트림으로 제공합니다 (매 프레임)
 actor DocumentDetectionProcessor {
     // 문서 감지
     private var documentContinuation: AsyncStream<DocumentDetectionResult>.Continuation?
@@ -51,7 +50,7 @@ actor DocumentDetectionProcessor {
     /// 프레임을 처리합니다 (매 프레임 처리)
     /// - Parameters:
     ///   - buffer: CVImageBuffer
-    ///   - timestamp: 프레임 타임스탬프
+    ///   - timestamp: 프레임 타임스탐프
     func processFrame(
         _ buffer: CVImageBuffer,
         timestamp: TimeInterval
@@ -135,11 +134,13 @@ actor DocumentDetectionProcessor {
                 timestamp: timestamp
             )
         } catch {
+            print("❌ 문서 감지 실패: \(error.localizedDescription)")
             return nil
         }
     }
     
-    /// 렌즈 얼룩 감지
+    /// 렌즈 얼룩을 감지합니다 (iOS 26+, async/await API)
+    /// - Note: DetectLensSmudgeRequest는 async/await 패턴 사용
     private func detectLensSmudge(
         _ buffer: CVImageBuffer,
         timestamp: TimeInterval
@@ -147,6 +148,7 @@ actor DocumentDetectionProcessor {
         let ciImage = CIImage(cvImageBuffer: buffer)
         
         do {
+            // iOS 26+: DetectLensSmudgeRequest 사용 (async/await)
             let request = DetectLensSmudgeRequest(.revision1)
             let smudgeObservation = try await request.perform(on: ciImage, orientation: .up)
             
@@ -156,7 +158,7 @@ actor DocumentDetectionProcessor {
                 timestamp: timestamp
             )
         } catch {
-            // 감지 실패 시 깨끗하다고 가정함
+            // 감지 실패 시 깨끗하다고 가정
             return LensSmudgeDetectionResult(
                 confidence: 0.0,
                 isSmudged: false,

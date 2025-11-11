@@ -8,58 +8,7 @@
 import Foundation
 import Vision
 
-/// 주소 추출 유틸리티
-///
-/// 테이블과 텍스트에서 한국 주소를 추출하고 정규화합니다.
 enum AddressExtractor {
-    
-    // MARK: - 통합 워크플로우
-    
-    /// 문서 분석 결과에서 주소를 추출하는 통합 메서드
-    ///
-    /// - Parameter result: DocumentAnalysisResult
-    /// - Returns: 추출된 주소 배열
-    ///
-    /// ## 추출 로직
-    /// 1. 테이블이 있으면 테이블에서만 추출
-    /// 2. 테이블이 없으면 텍스트에서 추출
-    /// 3. 한국 주소 패턴 매칭 및 정규화
-    static func extractAddressesFromAnalysis(
-        _ result: DocumentAnalysisResult
-    ) async -> [String] {
-        if let tables = result.tables, !tables.isEmpty {
-            // 테이블에서 추출
-            return await extractAddressesFromTables(tables)
-        } else {
-            // 텍스트에서 추출
-            return await extractAddressesFromText(result.recognizedText)
-        }
-    }
-    
-    // MARK: - 테이블 추출
-    
-    /// 여러 테이블에서 주소를 추출합니다.
-    /// - Parameter tables: DocumentObservation 테이블 배열
-    /// - Returns: 추출된 주소 배열
-    static func extractAddressesFromTables(
-        _ tables: [DocumentObservation.Container.Table]
-    ) async -> [String] {
-        var allAddresses: [String] = []
-        
-        for table in tables {
-            // "주소" 컬럼 찾기
-            let columnAddresses = await extractAddressColumnFromTable(table)
-            
-            // 주소 패턴 추출
-            let addresses = await extractAddressesFromText(
-                columnAddresses.joined(separator: " ")
-            )
-            
-            allAddresses.append(contentsOf: addresses)
-        }
-        
-        return allAddresses
-    }
     
     /// 문서 테이블에서 모든 주소를 추출합니다.
     /// - Parameter tables: DocumentObservation 테이블들
@@ -85,8 +34,6 @@ enum AddressExtractor {
         return extractedAddresses
     }
     
-    // MARK: - 텍스트 추출
-    
     /// 문서 텍스트에서 한국 주소 패턴을 추출합니다.
     /// - Parameter text: 검색할 텍스트
     /// - Returns: 추출된 주소 배열
@@ -96,8 +43,6 @@ enum AddressExtractor {
             .map { KoreanAddressPattern.normalize($0) }
             .filter { !$0.isEmpty }
     }
-    
-    // MARK: - 유틸리티
     
     /// 추출된 주소 배열을 정규화합니다.
     /// - Parameter addresses: 정규화할 주소 배열
@@ -142,7 +87,6 @@ enum AddressExtractor {
                 }
             }
         }
-        
         return addressCells
     }
 }

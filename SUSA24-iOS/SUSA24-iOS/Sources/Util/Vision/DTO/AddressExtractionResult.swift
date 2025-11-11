@@ -9,13 +9,13 @@ import Foundation
 import Vision
 
 /// 주소 추출
-enum AddressExtractionSource: Sendable {
+enum AddressExtractionSource {
     case table
     case text
 }
 
 /// 주소 추출 결과를 나타내는 모델
-struct AddressExtractionResult: Sendable {
+struct AddressExtractionResult {
     /// [주소: 중복 횟수]
     var addresses: [String: Int] = [:]
     
@@ -29,11 +29,9 @@ struct AddressExtractionResult: Sendable {
     var extractionSource: AddressExtractionSource?
     
     /// 인식된 테이블들 (Bounding box 그리기용)
-    /// Vision Framework의 Table 타입은 Sendable이 아니므로 주의
     var tables: [DocumentObservation.Container.Table]?
     
     /// 인식된 문서 (Bounding box 그리기용)
-    /// Vision Framework의 Container 타입은 Sendable이 아니므로 주의
     var document: DocumentObservation.Container?
     
     /// 추출 시각
