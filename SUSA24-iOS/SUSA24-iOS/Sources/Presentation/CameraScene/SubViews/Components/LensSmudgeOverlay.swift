@@ -14,8 +14,6 @@ struct LensSmudgeOverlay: View {
     var body: some View {
         VStack {
             HStack {
-                Text(smudge.statusColor)
-                    .font(.system(size: 16))
                 Text(smudge.statusText)
                     .font(.caption)
                     .foregroundColor(.white)
