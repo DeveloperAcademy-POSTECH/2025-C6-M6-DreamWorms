@@ -14,10 +14,12 @@ struct CaseListHeader: View {
         VStack(spacing: 20) {
             HStack {
                 Spacer()
-                DWCircleButton(
+                DWGlassEffectCircleButton(
                     image: Image(.setting),
                     action: onSettingTapped
                 )
+                .setupSize(44)
+                .setupIconSize(width: 25, height: 19)
             }
             
             Text(.caseListNavigationTitle)
@@ -26,7 +28,7 @@ struct CaseListHeader: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.leading, 24)
-        .padding(.trailing, 26)
+        .padding(.trailing, 16)
     }
 }
 

@@ -103,64 +103,34 @@ final class SUSA24Tests: XCTestCase {
         XCTAssertTrue(result.starts(with: baseURL))
     }
     
-    // MARK: - API Tests
+    // MARK: VWorld CCTV BOX 검색 API 테스트
     
-    // MARK: 좌표로 주소 조회 API 테스트
-
     @MainActor
-    func testFetchLocationFromCoord() async throws {
+    func testFetchCCTVByBox() async throws {
         // Given
-        let requestDTO = KakaoCoordToLocationRequestDTO(
-            x: "128.537763550346",
-            y: "35.8189266589744",
-            inputCoord: "WGS84"
+        let requestDTO = VWorldBoxRequestDTO(
+            minLng: 129.36,
+            minLat: 36.02,
+            maxLng: 129.38,
+            maxLat: 36.04,
+            size: 10,
+            page: 1
         )
         
         // When
-        let response: KakaoCoordToLocationResponseDTO = try await KakaoSearchAPIManager.shared.fetchLocationFromCoord(requestDTO)
+        let response = try await VWorldCCTVAPIService().fetchCCTVByBox(requestDTO)
         
         // Then
-        var logOutput = "✅ 좌표로 주소 조회 API 호출 성공\n"
-        logOutput += "totalCount: \(response.meta.totalCount)\n"
-        logOutput += "documents count: \(response.documents.count)\n"
+        var logOutput = "✅ VWorld CCTV BOX 검색 성공\n"
+        logOutput += "검색 영역: (\(requestDTO.minLng), \(requestDTO.minLat)) ~ (\(requestDTO.maxLng), \(requestDTO.maxLat))\n"
+        logOutput += "결과 개수: \(response.features.count)\n"
         logOutput += "========================================\n"
-        for (index, document) in response.documents.enumerated() {
-            logOutput += "\n[Document \(index + 1)]\n"
-            if let address = document.address {
-                logOutput += "  [지번 주소]\n"
-                logOutput += "    addressName: \(address.addressName)\n"
-                if let region1 = address.region1depthName { logOutput += "    region1depthName: \(region1)\n" }
-                if let region2 = address.region2depthName { logOutput += "    region2depthName: \(region2)\n" }
-                if let region3 = address.region3depthName { logOutput += "    region3depthName: \(region3)\n" }
-                if let region4 = address.region4depthName { logOutput += "    region4depthName: \(region4)\n" }
-                if let regionType = address.regionType { logOutput += "    regionType: \(regionType)\n" }
-                if let code = address.code { logOutput += "    code: \(code)\n" }
-                if let x = address.x { logOutput += "    x: \(x)\n" }
-                if let y = address.y { logOutput += "    y: \(y)\n" }
-                if let mountainYn = address.mountainYn { logOutput += "    mountainYn: \(mountainYn)\n" }
-                if let mainAddressNo = address.mainAddressNo { logOutput += "    mainAddressNo: \(mainAddressNo)\n" }
-                if let subAddressNo = address.subAddressNo { logOutput += "    subAddressNo: \(subAddressNo)\n" }
-                if let zipCode = address.zipCode { logOutput += "    zipCode: \(zipCode)\n" }
-            }
-            if let roadAddress = document.roadAddress {
-                logOutput += "  [도로명 주소]\n"
-                logOutput += "    addressName: \(roadAddress.addressName)\n"
-                if let region1 = roadAddress.region1depthName { logOutput += "    region1depthName: \(region1)\n" }
-                if let region2 = roadAddress.region2depthName { logOutput += "    region2depthName: \(region2)\n" }
-                if let region3 = roadAddress.region3depthName { logOutput += "    region3depthName: \(region3)\n" }
-                if let region4 = roadAddress.region4depthName { logOutput += "    region4depthName: \(region4)\n" }
-                if let regionType = roadAddress.regionType { logOutput += "    regionType: \(regionType)\n" }
-                if let code = roadAddress.code { logOutput += "    code: \(code)\n" }
-                if let x = roadAddress.x { logOutput += "    x: \(x)\n" }
-                if let y = roadAddress.y { logOutput += "    y: \(y)\n" }
-                if let buildingName = roadAddress.buildingName { logOutput += "    buildingName: \(buildingName)\n" }
-                if let buildingCode = roadAddress.buildingCode { logOutput += "    buildingCode: \(buildingCode)\n" }
-                if let roadName = roadAddress.roadName { logOutput += "    roadName: \(roadName)\n" }
-                if let undergroundYn = roadAddress.undergroundYn { logOutput += "    undergroundYn: \(undergroundYn)\n" }
-                if let mainBuildingNo = roadAddress.mainBuildingNo { logOutput += "    mainBuildingNo: \(mainBuildingNo)\n" }
-                if let subBuildingNo = roadAddress.subBuildingNo { logOutput += "    subBuildingNo: \(subBuildingNo)\n" }
-                if let zoneNo = roadAddress.zoneNo { logOutput += "    zoneNo: \(zoneNo)\n" }
-            }
+        for (index, feature) in response.features.enumerated() {
+            logOutput += "\n[CCTV \(index + 1)]\n"
+            logOutput += "  ID: \(feature.id)\n"
+            logOutput += "  이름: \(feature.properties.cctvname)\n"
+            logOutput += "  위치: \(feature.properties.locate)\n"
+            logOutput += "  좌표: (\(feature.geometry.coordinates[0]), \(feature.geometry.coordinates[1]))\n"
         }
         logOutput += "========================================\n"
         
@@ -169,49 +139,38 @@ final class SUSA24Tests: XCTestCase {
         attachment.lifetime = .keepAlways
         add(attachment)
         
-        XCTAssertGreaterThan(response.meta.totalCount, 0)
-        XCTAssertFalse(response.documents.isEmpty)
+        XCTAssertFalse(response.features.isEmpty)
     }
     
-    // MARK: 키워드로 장소 검색 API 테스트
-
+    // MARK: VWorld CCTV Polygon 검색 API 테스트
+    
     @MainActor
-    func testFetchPlaceFromKeyword() async throws {
+    func testFetchCCTVByPolygon() async throws {
         // Given
-        let requestDTO = KakaoKeywordToPlaceRequestDTO(
-            query: "대구광역시 달서구 월배로 지하 223",
-            x: nil,
-            y: nil,
-            radius: nil,
-            page: 1,
-            size: 15
-        )
+        let coordinates = [
+            MapCoordinate(latitude: 36.02, longitude: 129.36),
+            MapCoordinate(latitude: 36.02, longitude: 129.38),
+            MapCoordinate(latitude: 36.04, longitude: 129.37),
+        ]
+        let requestDTO = VWorldPolygonRequestDTO(coordinates: coordinates, size: 10, page: 1)
         
         // When
-        let response: KakaoKeywordToPlaceResponseDTO = try await KakaoSearchAPIManager.shared.fetchPlaceFromKeyword(requestDTO)
+        let response = try await VWorldCCTVAPIService().fetchCCTVByPolygon(requestDTO)
         
         // Then
-        var logOutput = "✅ 키워드로 장소 검색 API 호출 성공\n"
-        logOutput += "검색 키워드: \(requestDTO.query)\n"
-        logOutput += "totalCount: \(response.meta.totalCount)\n"
-        logOutput += "pageableCount: \(response.meta.pageableCount)\n"
-        logOutput += "isEnd: \(response.meta.isEnd)\n"
-        logOutput += "documents count: \(response.documents.count)\n"
+        var logOutput = "✅ VWorld CCTV Polygon 검색 성공\n"
+        logOutput += "검색 좌표:\n"
+        for (index, coord) in coordinates.enumerated() {
+            logOutput += "  \(index + 1). (\(coord.longitude), \(coord.latitude))\n"
+        }
+        logOutput += "결과 개수: \(response.features.count)\n"
         logOutput += "========================================\n"
-        for (index, document) in response.documents.enumerated() {
-            logOutput += "\n[Document \(index + 1)]\n"
-            if let placeName = document.placeName { logOutput += "  placeName: \(placeName)\n" }
-            if let categoryName = document.categoryName { logOutput += "  categoryName: \(categoryName)\n" }
-            if let categoryGroupCode = document.categoryGroupCode { logOutput += "  categoryGroupCode: \(categoryGroupCode)\n" }
-            if let categoryGroupName = document.categoryGroupName { logOutput += "  categoryGroupName: \(categoryGroupName)\n" }
-            if let phone = document.phone { logOutput += "  phone: \(phone)\n" }
-            if let addressName = document.addressName { logOutput += "  addressName: \(addressName)\n" }
-            if let roadAddressName = document.roadAddressName { logOutput += "  roadAddressName: \(roadAddressName)\n" }
-            if let x = document.x { logOutput += "  x: \(x)\n" }
-            if let y = document.y { logOutput += "  y: \(y)\n" }
-            if let id = document.id { logOutput += "  id: \(id)\n" }
-            if let placeUrl = document.placeUrl { logOutput += "  placeUrl: \(placeUrl)\n" }
-            if let distance = document.distance { logOutput += "  distance: \(distance)m\n" }
+        for (index, feature) in response.features.enumerated() {
+            logOutput += "\n[CCTV \(index + 1)]\n"
+            logOutput += "  ID: \(feature.id)\n"
+            logOutput += "  이름: \(feature.properties.cctvname)\n"
+            logOutput += "  위치: \(feature.properties.locate)\n"
+            logOutput += "  좌표: (\(feature.geometry.coordinates[0]), \(feature.geometry.coordinates[1]))\n"
         }
         logOutput += "========================================\n"
         
@@ -220,8 +179,7 @@ final class SUSA24Tests: XCTestCase {
         attachment.lifetime = .keepAlways
         add(attachment)
         
-        XCTAssertGreaterThan(response.meta.totalCount, 0)
-        XCTAssertFalse(response.documents.isEmpty)
+        XCTAssertFalse(response.features.isEmpty)
     }
 }
 

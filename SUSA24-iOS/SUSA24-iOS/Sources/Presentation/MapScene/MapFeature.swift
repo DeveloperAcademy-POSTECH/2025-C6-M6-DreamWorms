@@ -6,16 +6,33 @@
 //
 
 import NMapsMap
-import SwiftUI
 
 // MARK: - Reducer
 
-/// 지도 화면의 상태와 액션을 관리하는 Reducer입니다.
+/// 지도 씬의 비즈니스 로직 및 명령 전달을 담당하는 Reducer입니다.
+/// - 두 가지 의존성을 받습니다.
+///   1. `repository`: CoreData 또는 API로부터 위치 데이터를 읽기 위한 저장소
+///   2. `dispatcher`: 다른 모듈(Search 등)에서 발생한 지도 명령을 전달받기 위한 버스 객체
 struct MapFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
+    private let searchService: SearchAPIService
+    private let cctvService: CCTVAPIService
+    private let dispatcher: MapDispatcher
     
-    init(repository: LocationRepositoryProtocol) {
+    /// - Parameters:
+    ///   - repository: 위치 데이터를 로드하기 위한 저장소
+    ///   - searchAPIService: 검색 API 서비스
+    ///   - dispatcher: 외부 모듈에서 전달되는 지도 명령을 중계하는 객체
+    init(
+        repository: LocationRepositoryProtocol,
+        searchService: SearchAPIService,
+        cctvService: CCTVAPIService,
+        dispatcher: MapDispatcher
+    ) {
         self.repository = repository
+        self.searchService = searchService
+        self.cctvService = cctvService
+        self.dispatcher = dispatcher
     }
     
     // MARK: - State
@@ -24,17 +41,20 @@ struct MapFeature: DWReducer {
     struct State: DWState {
         /// 표시할 위치 데이터 배열입니다.
         var locations: [Location] = []
-        /// 현재 선택된 케이스의 UUID입니다.
+        /// 현재 선택된 케이스의 UUID입니다. `onAppear` 시 CoreData로부터 위치 데이터를 로드하는 데 사용됩니다.
         var caseId: UUID?
+        /// 명령 디스패처로부터 전달된 지도 이동 명령을 반영할 목표 좌표입니다.
+        /// `MapView`가 해당 좌표를 소비하면 `.consumeTargetCoordinate` 액션으로 다시 nil로 초기화합니다.
+        var targetCoordinate: MapCoordinate?
         
         /// 기지국 범위 필터의 선택 상태입니다.
         var isBaseStationRangeSelected: Bool = false
         /// 누적 빈도 필터의 선택 상태입니다.
         var isVisitFrequencySelected: Bool = false
-        /// 최근 기지국 필터의 선택 상태입니다.
+        /// 최근 기지국 필터의 선택 상태입니다. 최근 기지국 필터 토글 시 사용됩니다.
         var isRecentBaseStationSelected: Bool = false
         
-        /// 지도 레이어 시트의 표시 상태입니다.
+        /// 지도 레이어 시트의 표시 상태입니다. `MapLayerContainer` 버튼 토글과 연결됩니다.
         var isMapLayerSheetPresented: Bool = false
         
         // MARK: - 위치정보 시트 관련 상태
@@ -72,8 +92,16 @@ struct MapFeature: DWReducer {
         /// API 호출 완료 후 위치정보 데이터를 시트에 표시합니다.
         /// - Parameter placeInfo: 표시할 위치정보 데이터
         case showPlaceInfo(PlaceInfo)
-        /// 위치정보 시트를 닫는 액션입니다.
+        /// 위치정보 시트를 닫는 액션입니다. 사용자가 시트를 드래그 내려 닫거나 Close 버튼을 누를 때 호출됩니다.
         case hidePlaceInfo
+        /// 검색 결과를 선택했을 때 지도 카메라를 해당 좌표로 이동시키고,
+        /// 선택된 장소 정보를 시트에 표시하는 액션입니다.
+        /// - Parameters:
+        ///   - coordinate: 이동할 지도 좌표
+        ///   - placeInfo: 바텀시트에 표시할 장소 메타데이터
+        case moveToSearchResult(MapCoordinate, PlaceInfo)
+        /// 지도 카메라 이동이 완료되면 호출되는 액션입니다. `targetCoordinate`를 초기화합니다.
+        case consumeTargetCoordinate
     }
     
     // MARK: - Reducer
@@ -153,6 +181,21 @@ struct MapFeature: DWReducer {
             state.isPlaceInfoLoading = false
             state.selectedPlaceInfo = nil
             return .none
+            
+        case let .moveToSearchResult(coordinate, placeInfo):
+            // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
+            state.targetCoordinate = coordinate
+            state.selectedPlaceInfo = placeInfo
+            state.isPlaceInfoLoading = false
+            state.isPlaceInfoSheetPresented = true
+            // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
+            dispatcher.consume()
+            return .none
+            
+        case .consumeTargetCoordinate:
+            // 지도 카메라 이동이 완료되었음을 반영합니다.
+            state.targetCoordinate = nil
+            return .none
         }
     }
     
@@ -166,7 +209,7 @@ struct MapFeature: DWReducer {
     /// - Throws: API 호출 실패 시 에러를 던집니다.
     private func fetchPlaceInfo(from requestDTO: KakaoCoordToLocationRequestDTO) async throws -> PlaceInfo {
         // 1단계: 좌표로 주소 조회 (Kakao 좌표→주소 변환 API)
-        let coordResponse = try await KakaoSearchAPIManager.shared.fetchLocationFromCoord(requestDTO)
+        let coordResponse = try await searchService.fetchLocationFromCoord(requestDTO)
         guard let document = coordResponse.documents.first else {
             return PlaceInfo(
                 title: "",
@@ -190,7 +233,7 @@ struct MapFeature: DWReducer {
                 size: 1
             )
             
-            let keywordResponse = try await KakaoSearchAPIManager.shared.fetchPlaceFromKeyword(keywordRequestDTO)
+            let keywordResponse = try await searchService.fetchPlaceFromKeyword(keywordRequestDTO)
             
             if let placeDocument = keywordResponse.documents.first {
                 // 키워드 검색 성공: 장소명과 전화번호 포함하여 표시

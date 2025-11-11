@@ -40,16 +40,19 @@ struct OnePageView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                FadingProfileImage(suspectImage: suspectImage)
-                
+                FadingProfileImage(
+                    suspectImage: store.state.suspectImage.map {
+                        Image(uiImage: $0)
+                    }
+                )
                 LazyVStack(
                     spacing: 0,
                     pinnedViews: [.sectionHeaders]
                 ) {
                     Section(
                         header: OnePageStickyHeader(
-                            suspectName: "피의자명",
-                            crime: "범죄명",
+                            suspectName: store.state.suspectName,
+                            crime: store.state.crime,
                             selection: Binding(
                                 get: { store.state.selection },
                                 set: { store.send(.selectionChanged($0)) }
