@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
+    
+    @Environment(TabBarVisibility.self)
+    private var tabBarVisibility
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
@@ -63,7 +66,10 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             case .onePage: onePageView()
             }
         }
-        .sheet(isPresented: .constant(true)) {
+        .sheet(isPresented: Binding(
+            get: { tabBarVisibility.isVisible },
+            set: { _ in }
+        )) {
             DWTabBar(
                 activeTab: Binding(
                     get: { store.state.selectedTab },
