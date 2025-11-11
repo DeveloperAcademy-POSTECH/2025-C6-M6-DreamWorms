@@ -232,6 +232,18 @@
         }
       }
     },
+    "caseAdd_suspect_PhoneNumber" : {
+      "comment" : "추적_셀_전화번호_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "피의자 추적 전화번호"
+          }
+        }
+      }
+    },
     "caseAdd_suspectName" : {
       "comment" : "케이스 추가_텍스트필드 타이틀_피의자명",
       "extractionState" : "manual",
@@ -495,6 +507,18 @@
         }
       }
     },
+    "placeholder_suspectPhoneNumber" : {
+      "comment" : "플레이스홀더_추적기지국 번호를 입력해 주세요.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "010-1234-5678"
+          }
+        }
+      }
+    },
     "recentBaseStation" : {
       "comment" : "맵뷰_필터_최근기지국",
       "extractionState" : "manual",
@@ -735,12 +759,27 @@
         }
       }
     },
+    "기지국 위치정보 저장하기" : {
+
+    },
+    "메시지 본문" : {
+
+    },
+    "발신자 번호" : {
+
+    },
+    "본문: ${messageBody}" : {
+   
+    },
     "Visits" : {
 
     },
     "사진" : {
 
     },
+    "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
+    
+    } ,
     "주차" : {
 
     }
