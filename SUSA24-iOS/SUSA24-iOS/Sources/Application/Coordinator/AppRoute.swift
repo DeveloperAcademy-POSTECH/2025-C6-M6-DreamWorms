@@ -8,7 +8,7 @@
 import Foundation
 
 enum AppRoute: Hashable {
-    case cameraScene
+    case cameraScene(caseID: UUID)
     case caseAddScene
     case caseListScene
     case dashboardScene(caseID: UUID)
@@ -18,5 +18,7 @@ enum AppRoute: Hashable {
     case searchScene
     case selectLocationScene
     case settingScene
+    case scanLoadScene
+    case photoDetailsScene(photos: [CapturedPhoto], camera: CameraModel)
 //    case timeLineScene
 }

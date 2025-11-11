@@ -95,7 +95,14 @@ struct MapView: View {
                         
                         DWGlassEffectCircleButton(
                             image: Image(.scan),
-                            action: { coordinator.push(.cameraScene) }
+                            // TODO: 작업이 안되어있어서 임시로 UUID 생성해서 넣음
+                            action: {
+                                if let caseId = store.state.caseId {
+                                    coordinator.push(.cameraScene(caseID: caseId))
+                                } else {
+                                    coordinator.push(.cameraScene(caseID: UUID()))
+                                }
+                            }
                         )
                         .setupSize(48)
                         .setupIconSize(width: 25, height: 19)
