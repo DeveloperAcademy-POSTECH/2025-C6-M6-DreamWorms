@@ -229,6 +229,18 @@
         }
       }
     },
+    "caseAdd_suspect_PhoneNumber" : {
+      "comment" : "추적_셀_전화번호_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "피의자 추적 전화번호"
+          }
+        }
+      }
+    },
     "caseAdd_suspectName" : {
       "comment" : "케이스 추가_텍스트필드 타이틀_피의자명",
       "extractionState" : "manual",
@@ -449,6 +461,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "피의자명을 입력해 주세요."
+          }
+        }
+      }
+    },
+    "placeholder_suspectPhoneNumber" : {
+      "comment" : "플레이스홀더_추적기지국 번호를 입력해 주세요.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "010-1234-5678"
           }
         }
       }
