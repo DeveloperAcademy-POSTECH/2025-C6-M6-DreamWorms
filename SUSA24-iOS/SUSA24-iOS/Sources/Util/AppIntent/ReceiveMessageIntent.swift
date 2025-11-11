@@ -61,7 +61,7 @@ struct ReceiveMessageIntent: AppIntent {
         
         // 4. 좌표 변환 및 저장
         do {
-            let geocodeResult = try await GeocodeService.shared.geocode(address: address)
+            let geocodeResult = try await NaverGeocodeAPIService.shared.geocode(address: address)
             
             guard let latitude = geocodeResult.latitude,
                   let longitude = geocodeResult.longitude
