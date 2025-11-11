@@ -9,12 +9,7 @@ import Foundation
 import Vision
 
 /// 문서 분석 결과를 나타내는 모델
-///
-/// ## 주의사항
-/// Vision Framework의
-/// DocumentObservation 타입들은 Sendable이 아니므로
-/// actor 간 전달 시 주의
-struct DocumentAnalysisResult: Sendable {
+struct DocumentAnalysisResult {
     /// 인식된 테이블들
     var tables: [DocumentObservation.Container.Table]?
     

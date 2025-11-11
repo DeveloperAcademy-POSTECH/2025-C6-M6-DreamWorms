@@ -13,7 +13,7 @@ enum DuplicateCounter {
     /// 주소 배열에서 중복을 제거하고 개수를 센다.
     /// - Parameter addresses: 주소 배열
     /// - Returns: [주소: 개수] 딕셔너리
-    static func countDuplicates(_ addresses: [String]) async throws -> [String: Int] {
+    static func countDuplicates(_ addresses: [String]) -> [String: Int] {
         var countDict: [String: Int] = [:]
         
         for address in addresses {
@@ -31,8 +31,8 @@ enum DuplicateCounter {
     /// - Returns: 정렬된 배열 [(주소, 개수)]
     static func sortByCount(_ addressCount: [String: Int]) -> [(address: String, count: Int)] {
         addressCount
-            .sorted { $0.value > $1.value }         // [(key: String, value: Int)]
-            .map { (address: $0.key, count: $0.value) } 
+            .sorted { $0.value > $1.value }
+            .map { (address: $0.key, count: $0.value) }
     }
     
     /// 최소 개수 이상의 주소들만 필터링합니다.
@@ -56,9 +56,9 @@ enum DuplicateCounter {
     /// 여러 주소 배열을 합쳐서 개수를 센다.
     /// - Parameter addressArrays: 주소 배열들
     /// - Returns: [주소: 개수] 딕셔너리
-    static func mergeCounts(_ addressArrays: [[String]]) async throws -> [String: Int] {
+    static func mergeCounts(_ addressArrays: [[String]]) -> [String: Int] {
         let flatAddresses = addressArrays.flatMap { $0 }
-        return try await countDuplicates(flatAddresses)
+        return countDuplicates(flatAddresses)
     }
     
     /// 두 주소 딕셔너리를 병합합니다.

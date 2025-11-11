@@ -31,6 +31,9 @@ protocol ModuleFactoryProtocol {
 final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
+    private lazy var mapDispatcher = MapDispatcher()
+    private lazy var searchService = KakaoSearchAPIService()
+    private lazy var cctvService = VWorldCCTVAPIService()
     
     func makeCameraView(caseID: UUID) -> CameraView {
         // cameraModel 주입
@@ -117,9 +120,14 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let repository = LocationRepository(context: context)
         let store = DWStore(
             initialState: MapFeature.State(),
-            reducer: MapFeature(repository: repository)
+            reducer: MapFeature(
+                repository: repository,
+                searchService: searchService,
+                cctvService: cctvService,
+                dispatcher: mapDispatcher
+            )
         )
-        let view = MapView(store: store)
+        let view = MapView(store: store, dispatcher: mapDispatcher)
         return view
     }
     
@@ -127,17 +135,28 @@ final class ModuleFactory: ModuleFactoryProtocol {
         caseID: UUID,
         context: NSManagedObjectContext
     ) -> OnePageView {
-        let repository = LocationRepository(context: context)
+        let caseRepository = CaseRepository(context: context)
+        let locationRepository = LocationRepository(context: context)
         let store = DWStore(
             initialState: OnePageFeature.State(),
-            reducer: OnePageFeature(repository: repository)
+            reducer: OnePageFeature(
+                caseRepository: caseRepository,
+                locationRepository: locationRepository
+            )
         )
         let view = OnePageView(store: store, currentCaseID: caseID)
         return view
     }
     
     func makeSearchView() -> SearchView {
-        let view = SearchView()
+        let store = DWStore(
+            initialState: SearchFeature.State(),
+            reducer: SearchFeature(
+                searchService: searchService,
+                dispatcher: mapDispatcher
+            )
+        )
+        let view = SearchView(store: store)
         return view
     }
     

@@ -9,7 +9,7 @@ import Foundation
 
 /// 문서 분석 결과 모델
 ///
-/// Vision Framework로 추출한 주소 정보와 중복 횟수를 담는다.
+/// Vision Framework로 추출한 주소 정보와 중복 개수를 담습니다.
 struct ScanResult: Identifiable, Sendable {
     /// 고유 식별자
     let id: UUID

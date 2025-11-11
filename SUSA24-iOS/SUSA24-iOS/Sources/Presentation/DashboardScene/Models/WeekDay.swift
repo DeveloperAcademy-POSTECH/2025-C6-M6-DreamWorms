@@ -10,6 +10,20 @@ import SwiftUI
 enum Weekday: Int, CaseIterable, Identifiable {
     case mon, tue, wed, thu, fri, sat, sun
     var id: Int { rawValue }
+    
+    init?(systemWeekday: Int) {
+        switch systemWeekday {
+        case 2: self = .mon
+        case 3: self = .tue
+        case 4: self = .wed
+        case 5: self = .thu
+        case 6: self = .fri
+        case 7: self = .sat
+        case 1: self = .sun
+        default: return nil
+        }
+    }
+    
     var shortKR: String {
         switch self {
         case .mon: "월"

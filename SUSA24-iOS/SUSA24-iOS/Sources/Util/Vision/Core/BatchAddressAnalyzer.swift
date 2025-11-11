@@ -22,11 +22,7 @@ import Vision
 ///     print("진행률: \(progress.currentIndex)/\(progress.totalCount)")
 /// }
 /// ```
-actor BatchAddressAnalyzer {
-    
-    // MARK: - Properties
-    
-    private let analyzer = DocumentAnalyzer()
+final class BatchAddressAnalyzer: Sendable {
     
     /// 분석 진행 상태를 나타내는 구조체
     struct AnalysisProgress {
@@ -109,7 +105,7 @@ actor BatchAddressAnalyzer {
                 let addresses = try await analyzeSinglePhoto(photo)
                 
                 // 결과 병합
-                mergedAddresses = await DuplicateCounter.mergeDictionaries(mergedAddresses, addresses)
+                mergedAddresses = DuplicateCounter.mergeDictionaries(mergedAddresses, addresses)
                 successCount += 1
                 
             } catch {
@@ -129,18 +125,43 @@ actor BatchAddressAnalyzer {
     // MARK: - Private Methods
     
     /// 단일 이미지를 분석하여 주소를 추출합니다.
-    ///
     /// - Parameter photo: 분석할 사진
     /// - Returns: [주소: 개수] 딕셔너리
     /// - Throws: 분석 실패 시 VisionAnalysisError
     private func analyzeSinglePhoto(_ photo: CapturedPhoto) async throws -> [String: Int] {
         // 1. 문서 분석 (테이블 + 텍스트)
-        let analysisResult = try await analyzer.analyzeDocument(from: photo.data)
+        let analysisResult = try await DocumentAnalyzer.analyzeDocument(from: photo.data)
         
-        // 2. 주소 추출 (통합 메서드 사용)
-        let addresses = await AddressExtractor.extractAddressesFromAnalysis(analysisResult)
+        var allAddresses: [String] = []
         
-        // 3. 중복 제거 및 카운팅
-        return try await DuplicateCounter.countDuplicates(addresses)
+        // 2. 테이블이 있으면 테이블에서만 추출 (중복 방지)
+        if let tables = analysisResult.tables, !tables.isEmpty {
+            let extractedTableAddresses = await extractAddressFromTable(tables)
+            allAddresses.append(contentsOf: extractedTableAddresses)
+        } else {
+            // 3. 테이블이 없으면 텍스트에서 추출
+            let extractedTextAddresses = await extractAddressFromText(analysisResult.recognizedText)
+            allAddresses.append(contentsOf: extractedTextAddresses)
+        }
+        
+        // 4. 중복 제거 및 카운팅
+        return DuplicateCounter.countDuplicates(allAddresses)
+    }
+    
+    /// 테이블에서 주소를 추출합니다.
+    private func extractAddressFromTable(_ tables: [DocumentObservation.Container.Table]) async -> [String] {
+        var allAddresses: [String] = []
+        
+        for table in tables {
+            let addresses = await AddressExtractor.extractAddressColumnFromTable(table)
+            allAddresses.append(contentsOf: addresses)
+        }
+        
+        return await AddressExtractor.extractAddressesFromText(allAddresses.joined(separator: " "))
+    }
+    
+    /// 텍스트에서 주소를 추출합니다.
+    private func extractAddressFromText(_ text: String) async -> [String] {
+        await AddressExtractor.extractAddressesFromText(text)
     }
 }

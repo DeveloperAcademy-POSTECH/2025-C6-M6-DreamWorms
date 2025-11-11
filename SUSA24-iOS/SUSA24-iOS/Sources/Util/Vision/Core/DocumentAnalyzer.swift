@@ -8,15 +8,15 @@
 import Vision
 import UIKit
 
-/// Vision Framework를 사용하여 문서를 분석하는 Actor
-/// Thread-safe한 Vision 요청 처리를 담당합니다.
-actor DocumentAnalyzer {
+/// Vision Framework를 사용하여 문서를 분석하는 유틸리티
+/// Stateless 구조체로 static 메서드만 제공합니다.
+struct DocumentAnalyzer: Sendable {
     
     /// 이미지 데이터에서 문서를 인식하고 분석합니다.
     /// - Parameter imageData: 분석할 이미지 데이터
     /// - Returns: DocumentAnalysisResult
     /// - Throws: 분석 실패 시 VisionAnalysisError
-    func analyzeDocument(from imageData: Data) async throws -> DocumentAnalysisResult {
+    static func analyzeDocument(from imageData: Data) async throws -> DocumentAnalysisResult {
         let request = RecognizeDocumentsRequest()
         
         // Vision 요청 실행 (async/await)
@@ -43,7 +43,7 @@ actor DocumentAnalyzer {
     /// - Parameter imageData: 분석할 이미지 데이터
     /// - Returns: 발견된 테이블들
     /// - Throws: 분석 실패 시 VisionAnalysisError
-    func extractTables(from imageData: Data) async throws -> [DocumentObservation.Container.Table] {
+    static func extractTables(from imageData: Data) async throws -> [DocumentObservation.Container.Table] {
         let request = RecognizeDocumentsRequest()
         
         // Vision 요청 실행
@@ -64,7 +64,7 @@ actor DocumentAnalyzer {
     /// - Parameter imageData: 분석할 이미지 데이터
     /// - Returns: 인식된 텍스트
     /// - Throws: 분석 실패 시 VisionAnalysisError
-    func extractText(from imageData: Data) async throws -> String {
+    static func extractText(from imageData: Data) async throws -> String {
         let request = RecognizeDocumentsRequest()
         
         // Vision 요청 실행

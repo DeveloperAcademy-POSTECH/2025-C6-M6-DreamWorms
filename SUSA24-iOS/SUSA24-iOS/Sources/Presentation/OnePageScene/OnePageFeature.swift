@@ -12,8 +12,16 @@ struct OnePageFeature: DWReducer {
         .residence: [0], .workplace: [1], .others: [3], .all: [0, 1, 3],
     ]
     
-    private let repository: LocationRepositoryProtocol
-    init(repository: LocationRepositoryProtocol) { self.repository = repository }
+    private let caseRepository: CaseRepositoryProtocol
+    private let locationRepository: LocationRepositoryProtocol
+    
+    init(
+        caseRepository: CaseRepositoryProtocol,
+        locationRepository: LocationRepositoryProtocol
+    ) {
+        self.caseRepository = caseRepository
+        self.locationRepository = locationRepository
+    }
     
     // MARK: - State
     
@@ -21,6 +29,9 @@ struct OnePageFeature: DWReducer {
         var selection: Category = .all
         var caseID: UUID?
         var items: [Location] = []
+        var suspectName: String = ""
+        var crime: String = ""
+        var suspectImage: UIImage?
     }
     
     // MARK: - Action
@@ -28,6 +39,8 @@ struct OnePageFeature: DWReducer {
     enum Action: DWAction {
         case selectionChanged(Category)
         case onAppear(UUID)
+        case loadCaseInfo(UUID)
+        case setCaseInfo(String, String, UIImage?)
         case loadLocations(UUID, Category)
         case setLocationItems([Location])
     }
@@ -50,15 +63,40 @@ struct OnePageFeature: DWReducer {
         case let .onAppear(caseID):
             state.caseID = caseID
             let selection = state.selection
-            return .task {
-                .loadLocations(caseID, selection)
+            return .merge(
+                .task { .loadCaseInfo(caseID) },
+                .task { .loadLocations(caseID, selection) }
+            )
+            
+        case let .loadCaseInfo(caseID):
+            return .task { [caseRepository] in
+                do {
+                    let result = try await caseRepository.fetchAllDataOfSpecificCase(for: caseID)
+                    if let caseInfo = result.case {
+                        let image: UIImage? = await {
+                            guard let path = caseInfo.suspectProfileImage else { return nil }
+                            return await ImageFileStorage.loadProfileImage(from: path)
+                        }()
+                        return .setCaseInfo(caseInfo.suspect, caseInfo.crime, image)
+                    } else {
+                        return .setCaseInfo("", "", nil)
+                    }
+                } catch {
+                    return .setCaseInfo("", "", nil)
+                }
             }
+            
+        case let .setCaseInfo(name, crime, image):
+            state.suspectName = name
+            state.crime = crime
+            state.suspectImage = image
+            return .none
 
         case let .loadLocations(caseID, selection):
-            return .task { [repository, categoryTypeMap] in
+            return .task { [locationRepository, categoryTypeMap] in
                 do {
                     let types = categoryTypeMap[selection] ?? [0, 1, 3]
-                    let locations = try await repository.fetchNoCellLocations(
+                    let locations = try await locationRepository.fetchNoCellLocations(
                         caseId: caseID,
                         locationType: types
                     )
