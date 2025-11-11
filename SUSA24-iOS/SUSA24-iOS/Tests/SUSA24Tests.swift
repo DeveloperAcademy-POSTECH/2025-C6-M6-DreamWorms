@@ -614,7 +614,7 @@ final class AppIntentIntegrationTests: XCTestCase {
         print("\n🗺️  5단계: 좌표 변환 (실제 API 호출)")
         print("  ⏳ Naver Geocode API 호출 중...")
         
-        let geocodeResult = try await GeocodeService.shared.geocode(address: address)
+        let geocodeResult = try await NaverGeocodeAPIService.shared.geocode(address: address)
         
         guard let latitude = geocodeResult.latitude,
               let longitude = geocodeResult.longitude
@@ -734,7 +734,7 @@ final class AppIntentIntegrationTests: XCTestCase {
             
             print("  ✅ 케이스 매칭: \(caseID.uuidString)")
             
-            let geocodeResult = try await GeocodeService.shared.geocode(address: message.address)
+            let geocodeResult = try await NaverGeocodeAPIService.shared.geocode(address: message.address)
             guard let lat = geocodeResult.latitude, let lon = geocodeResult.longitude else {
                 XCTFail("좌표 변환 실패: \(message.address)")
                 continue
