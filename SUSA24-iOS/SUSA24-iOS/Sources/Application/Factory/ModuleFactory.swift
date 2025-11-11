@@ -30,6 +30,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
     private lazy var mapDispatcher = MapDispatcher()
+    private lazy var searchService = KakaoSearchAPIService()
+    private lazy var cctvService = VWorldCCTVAPIService()
     
     func makeCameraView() -> CameraSampleView {
         let view = CameraSampleView()
@@ -110,7 +112,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let repository = LocationRepository(context: context)
         let store = DWStore(
             initialState: MapFeature.State(),
-            reducer: MapFeature(repository: repository, dispatcher: mapDispatcher)
+            reducer: MapFeature(
+                repository: repository,
+                searchService: searchService,
+                cctvService: cctvService,
+                dispatcher: mapDispatcher
+            )
         )
         let view = MapView(store: store, dispatcher: mapDispatcher)
         return view
@@ -136,7 +143,10 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeSearchView() -> SearchView {
         let store = DWStore(
             initialState: SearchFeature.State(),
-            reducer: SearchFeature(dispatcher: mapDispatcher)
+            reducer: SearchFeature(
+                searchService: searchService,
+                dispatcher: mapDispatcher
+            )
         )
         let view = SearchView(store: store)
         return view
