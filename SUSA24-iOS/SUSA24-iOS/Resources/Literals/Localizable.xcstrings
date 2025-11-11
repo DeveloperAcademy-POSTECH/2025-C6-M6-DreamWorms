@@ -10,7 +10,20 @@
     "%lld" : {
 
     },
+    "%lld/%lld" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "%lld/10" : {
+
+    },
+    "%lld%%" : {
 
     },
     "%lld개" : {
@@ -531,6 +544,9 @@
         }
       }
     },
+    "ScanLoad" : {
+
+    },
     "scanLoad_subTitle" : {
       "comment" : "스캔 로딩_서브타이틀",
       "extractionState" : "manual",
@@ -738,10 +754,10 @@
     "Visits" : {
 
     },
-    "사진" : {
+    "Week" : {
 
     },
-    "주차" : {
+    "사진" : {
 
     }
   },

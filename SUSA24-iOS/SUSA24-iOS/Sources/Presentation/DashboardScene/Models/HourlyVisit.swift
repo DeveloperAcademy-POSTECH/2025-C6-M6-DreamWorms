@@ -13,6 +13,4 @@ struct HourlyVisit: Identifiable, Hashable {
     let weekday: Weekday
     let hour: Int
     let count: Int
-    
-    var weekLabel: String { "\(weekIndex)주차" }
 }

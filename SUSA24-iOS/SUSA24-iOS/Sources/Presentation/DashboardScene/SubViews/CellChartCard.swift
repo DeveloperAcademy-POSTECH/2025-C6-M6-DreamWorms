@@ -10,9 +10,7 @@ import SwiftUI
 
 struct CellChartCard: View {
     @Binding var selectionWeekday: Weekday
-    var address: String = ""
-    var summary: String = ""
-    let series: [HourlyVisit]
+    let chart: CellChartData
     
     private let tickHours = Array(stride(from: 0, through: 21, by: 3))
     private let weekStyleScale: KeyValuePairs<String, Color> = [
@@ -21,14 +19,18 @@ struct CellChartCard: View {
         "3주차": .primaryStrong,
         "4주차": .primaryLight2,
     ]
-    private var availableWeeks: [Int] {
-        let set = Set(series.map(\.weekIndex))
-        return set.sorted()
+    
+    private var series: [HourlyVisit] {
+        chart.seriesByWeekday[selectionWeekday] ?? []
+    }
+    
+    private var summary: String {
+        chart.summaryByWeekday[selectionWeekday] ?? ""
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            CellChartTitle(address: address, summary: summary)
+            CellChartTitle(address: chart.address, summary: summary)
                 .padding(.bottom, 32)
             
             CellChartLegend(
@@ -43,6 +45,7 @@ struct CellChartCard: View {
                 tickHours: tickHours,
                 weekStyleScale: weekStyleScale
             )
+            .id(selectionWeekday)
             .frame(height: 142)
             .padding(.bottom, 18)
             
@@ -60,19 +63,3 @@ struct CellChartCard: View {
         )
     }
 }
-
-//#Preview {
-//    @Previewable @State var selectionWeekday: Weekday = .mon
-//    ZStack {
-//        Color.mainAlternative.ignoresSafeArea()
-//        
-//        VStack(spacing: 12) {
-//            CellChartCard(selectionWeekday: $selectionWeekday, address: "퇴계로20길 56", summary: "오전 7-8시에 주로 머물렀습니다.", series: [
-//            ])
-//            
-//            CellChartCard(selectionWeekday: $selectionWeekday, series: [
-//            ])
-//        }
-//        .padding(.horizontal, 16)
-//    }
-//}

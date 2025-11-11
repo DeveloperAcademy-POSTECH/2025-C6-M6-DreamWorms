@@ -10,7 +10,7 @@ import SwiftUI
 struct DashboardChartSection: View {
     let cellCharts: [CellChartData]
     let send: (DashboardFeature.Action) -> Void
-    
+
     var body: some View {
         VStack {
             DashboardSectionHeader(
@@ -32,15 +32,16 @@ struct DashboardChartSection: View {
                                 )?.selectedWeekday ?? .mon
                             },
                             set: { newValue in
-                                send(.setChartWeekday(id: chart.id, weekday: newValue))
+                                send(.setChartWeekday(
+                                    id: chart.id,
+                                    weekday: newValue
+                                ))
                             }
                         )
 
                         CellChartCard(
                             selectionWeekday: binding,
-                            address: chart.address,
-                            summary: chart.summary,
-                            series: chart.series
+                            chart: chart
                         )
                     }
                 }
