@@ -17,6 +17,9 @@ struct DashboardFeature: DWReducer {
         var tab: DashboardPickerTab = .visitDuration
         var caseID: UUID?
         
+        /// 현재 caseID에 대해 초기 데이터(fetch + 가공)가 완료되었는지 여부
+        var hasLoaded: Bool = false
+        
         /// 상단 TOP3 체류 기지국 카드 데이터
         var topVisitDurationLocations: [StayAddress] = []
 
@@ -52,19 +55,27 @@ struct DashboardFeature: DWReducer {
             return .none
             
         case let .onAppear(caseID):
+            // 동일 caseID에 대해 이미 초기 로딩을 끝냈다면, 불필요한 fetch 방지
+            if state.caseID == caseID, state.hasLoaded { return .none }
+            
+            // caseID가 바뀌었거나 처음 진입한 경우 → 새로 로딩
             state.caseID = caseID
-            // 초기 진입 시: Location fetch → TOP3 + 차트 데이터 생성
+            state.hasLoaded = false
+            
+            // Location fetch → TOP3 + 차트 데이터 생성
             return .task { [repository] in
                 do {
                     let locations = try await repository.fetchLocations(caseId: caseID)
                     let top3Locations = await topAddressStays(from: locations)
                     let chartLocations = await locations.buildCellChartData()
+                    
                     return .setInitialData(
                         locations: locations,
                         top3: top3Locations,
                         chart: chartLocations
                     )
                 } catch {
+                    // TODO: - 에러 상태 액션 분리해서 사용자에게 알려줄지 여부는 추후 결정
                     return .none
                 }
             }
@@ -73,6 +84,7 @@ struct DashboardFeature: DWReducer {
             state.locations = locations
             state.topVisitDurationLocations = top3
             state.cellCharts = charts
+            state.hasLoaded = true
             return .none
             
         case let .setChartWeekday(id, weekday):
@@ -85,7 +97,7 @@ struct DashboardFeature: DWReducer {
 
             chart.selectedWeekday = weekday
             chart.series = filtered
-            chart.summary = makeHourlySummary(for: filtered)
+            chart.summary = filtered.makeHourlySummary()
             
             state.cellCharts[index] = chart
 
@@ -97,27 +109,28 @@ struct DashboardFeature: DWReducer {
 // MARK: - Private Extensions
 
 private extension DashboardFeature {
-    /// 기지국 데이터(locationType == 2)를 대상으로, 주소별 체류시간(분)을 누적해 상위 K개 반환하는 메서드
+    /// 기지국 데이터(locationType == 2)를 대상으로, 주소별 체류시간(분)을 누적해 상위 K개 반환
     func topAddressStays(
         from locations: [Location],
         sampleMinutes: Int = 5,
         topK: Int = 3
     ) -> [StayAddress] {
-        let filteredLocations = locations.filter { $0.locationType == 2 }
-        var bucket = [String: Int]()
-        
-        for location in filteredLocations {
-            let key = location.address.isEmpty ? "기지국 주소" : location.address
-            bucket[key, default: 0] += 1
-        }
+        let bucket = locations
+            .filter { $0.locationType == 2 }
+            .reduce(into: [String: Int]()) { result, location in
+                let key = location.address.isEmpty ? "기지국 주소" : location.address
+                result[key, default: 0] += 1
+            }
 
-        let stays = bucket.map { StayAddress(address: $0.key, totalMinutes: $0.value * sampleMinutes) }
-        return stays.sorted { $0.totalMinutes > $1.totalMinutes }.prefix(topK).map(\.self)
+        return bucket
+            .map { StayAddress(address: $0.key, totalMinutes: $0.value * sampleMinutes) }
+            .sorted { $0.totalMinutes > $1.totalMinutes }
+            .prefix(topK)
+            .map(\.self)
     }
 }
 
 private extension Array<Location> {
-    /// CoreData Location 데이터를 기반으로 차트용 `CellChartData` 배열을 생성합니다.
     func buildCellChartData(
         topK: Int = 3,
         maxWeeks: Int = 4
@@ -150,7 +163,7 @@ private extension Array<Location> {
             ) ?? .mon
 
             let initialSeries = allSeries.filter { $0.weekday == initialWeekday }
-            let summary = makeHourlySummary(for: initialSeries)
+            let summary = initialSeries.makeHourlySummary()
 
             return CellChartData(
                 address: address,
@@ -162,10 +175,6 @@ private extension Array<Location> {
         }
     }
 
-    /// Location 배열에서 상위 K개의 기지국 주소를 반환합니다.
-    ///
-    /// - Parameter topK: 반환할 주소 개수
-    /// - Returns: 방문 빈도 내림차순으로 정렬된 상위 주소 배열
     func topCellAddresses(topK: Int) -> [String] {
         let cells = filter { $0.locationType == 2 }
         let grouped = Dictionary(grouping: cells) {
@@ -178,13 +187,6 @@ private extension Array<Location> {
             .map(\.key)
     }
 
-    /// 특정 기지국 주소에 대해, 1~N주차 × 모든 요일 × 시간대별 방문 빈도를 계산합니다.
-    ///
-    /// - Parameters:
-    ///   - address: 분석할 기지국 주소
-    ///   - baseWeekStart: 첫 주의 시작일
-    ///   - maxWeeks: 최대 주차 수 (데이터 기간 기반으로 계산됨)
-    /// - Returns: `HourlyVisit` 배열 (주차별·요일별·시간별 방문 카운트)
     func hourlySeriesForAllWeekdays(
         for address: String,
         baseWeekStart: Date,
@@ -204,18 +206,19 @@ private extension Array<Location> {
 
             let daysDiff = calendar.dateComponents([.day], from: baseWeekStart, to: time).day ?? 0
             let weekIndex = daysDiff / 7 + 1
-            guard (1 ... maxWeeks).contains(weekIndex) else { continue }
+            guard (1...maxWeeks).contains(weekIndex) else { continue }
 
             guard let weekday = Weekday(systemWeekday: calendar.component(.weekday, from: time)) else { continue }
             let hour = calendar.component(.hour, from: time)
 
             buckets[weekIndex, default: [:]][weekday, default: [:]][hour, default: 0] += 1
         }
+
         let validWeeks = buckets.keys.sorted()
 
         return validWeeks.flatMap { weekIndex in
             Weekday.allCases.flatMap { weekday in
-                (0 ... 23).map { hour in
+                (0...23).map { hour in
                     HourlyVisit(
                         weekIndex: weekIndex,
                         weekday: weekday,
@@ -228,29 +231,32 @@ private extension Array<Location> {
     }
 }
 
-/// 시계열 방문 데이터(`HourlyVisit`)를 요약 문장으로 변환합니다.
-///
-/// - Parameter series: 요약할 `HourlyVisit` 배열
-/// - Returns: “오전 8시–오전 9시에 주로 머물렀습니다.” 형태의 설명 문자열
-func makeHourlySummary(for series: [HourlyVisit]) -> String {
-    guard let latestWeek = series.filter({ $0.count > 0 }).map(\.weekIndex).max() else {
-        return ""
-    }
-
-    let candidates = series.filter { $0.weekIndex == latestWeek && $0.count > 0 }
-    guard let best = candidates.max(by: { $0.count < $1.count }) else { return "" }
-
-    let startHour = best.hour
-    let endHour = (best.hour + 1) % 24
-
-    func hourText(_ h: Int) -> String {
-        switch h {
-        case 0: "오전 0시"
-        case 1 ..< 12: "오전 \(h)시"
-        case 12: "오후 12시"
-        default: "오후 \(h - 12)시"
+private extension Array where Element == HourlyVisit {
+    /// 시계열 방문 데이터(`HourlyVisit`)를 요약 문장으로 변환합니다.
+    ///
+    /// - Parameter series: 요약할 `HourlyVisit` 배열
+    /// - Returns: “오전 8시–오전 9시에 주로 머물렀습니다.” 형태의 설명 문자열
+    func makeHourlySummary() -> String {
+        guard let latestWeek = self.filter({ $0.count > 0 }).map(\.weekIndex).max() else {
+            return ""
         }
+
+        let candidates = self.filter { $0.weekIndex == latestWeek && $0.count > 0 }
+        guard let best = candidates.max(by: { $0.count < $1.count }) else { return "" }
+
+        let startHour = best.hour
+        let endHour = (best.hour + 1) % 24
+
+        func hourText(_ h: Int) -> String {
+            switch h {
+            case 0: "오전 0시"
+            case 1 ..< 12: "오전 \(h)시"
+            case 12: "오후 12시"
+            default: "오후 \(h - 12)시"
+            }
+        }
+
+        return "\(hourText(startHour))-\(hourText(endHour))에 주로 머물렀습니다."
     }
 
-    return "\(hourText(startHour))-\(hourText(endHour))에 주로 머물렀습니다."
 }
