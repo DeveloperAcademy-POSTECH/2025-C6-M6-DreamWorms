@@ -256,6 +256,42 @@
         }
       }
     },
+    "caseList_allCasePicker" : {
+      "comment" : "케이스 리스트_피커_전체 사건",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체 사건"
+          }
+        }
+      }
+    },
+    "caseList_emptyDescription" : {
+      "comment" : "케이스 리스트_엠티 설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건추가 버튼으로 사건을 등록해보세요."
+          }
+        }
+      }
+    },
+    "caseList_emptyTitle" : {
+      "comment" : "케이스 리스트_엠티 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추가된 사건이 없어요"
+          }
+        }
+      }
+    },
     "caseList_navigationTitle" : {
       "comment" : "케이스 리스트_네비게이션 타이틀",
       "extractionState" : "manual",
@@ -264,6 +300,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사건을 추가하거나\n확인할 사건을 선택하세요."
+          }
+        }
+      }
+    },
+    "caseList_shareCasePicker" : {
+      "comment" : "케이스 리스트_피커_공유 받은 사건",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공유 받은 사건"
           }
         }
       }
