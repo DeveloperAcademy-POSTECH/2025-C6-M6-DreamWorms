@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
-    
     @Environment(TabBarVisibility.self)
     private var tabBarVisibility
+
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>

@@ -5,8 +5,8 @@
 //  Created by mini on 10/29/25.
 //
 
-import SwiftUI
 import CoreData
+import SwiftUI
 
 @main
 struct SUSA24_iOSApp: App {

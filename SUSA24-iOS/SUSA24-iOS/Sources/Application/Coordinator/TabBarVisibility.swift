@@ -11,7 +11,6 @@ import SwiftUI
 @MainActor
 @Observable
 final class TabBarVisibility {
-    
     /// TabBar의 현재 상태
     var isVisible: Bool = true
     

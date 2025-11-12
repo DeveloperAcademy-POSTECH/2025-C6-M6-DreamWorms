@@ -13,7 +13,7 @@ import SwiftUI
 final class AppCoordinator {
     var path = NavigationPath()
     private var routes: [AppRoute] = []
-    private(set) var currentRoute: AppRoute? = nil
+    private(set) var currentRoute: AppRoute?
 
     func push(_ route: AppRoute) {
         path.append(route)
