@@ -105,6 +105,7 @@ struct CameraView: View {
             }
 
             // MARK: - 설정 메뉴 (우측 하단)
+
             // TODO: 임시 작업 디자인 반영 필요
             VStack {
                 Spacer()
@@ -201,12 +202,15 @@ struct CameraView: View {
             message: String(localized: .cameraPhotolimitMessage)
         )
         .onAppear {
+            print("onAppear")
             store.send(.viewDidAppear)
         }
         .onDisappear {
+            print("onDisappear")
             store.send(.viewDidDisappear)
         }
         .onChange(of: scenePhase) { _, newPhase in
+            print("\(newPhase)")
             switch newPhase {
             case .active:
                 store.send(.sceneDidBecomeActive)
@@ -240,7 +244,7 @@ struct CameraView: View {
 
 private extension CameraView {
     func handleBackTapped() {
-        // ✅ 뒤로가기 전에 카메라 중지
+        // 뒤로가기 전에 카메라 중지
         store.send(.stopForExit)
 
         if store.state.photoCount > 0 {
