@@ -4,9 +4,10 @@
 //  MapFeature.swift
 //  SUSA24-iOS
 //
-//  Created by mini on 10/31/25.
+//  Updated by Moo on 11/13/25.
 //
 
+import Foundation
 import NMapsMap
 
 // MARK: - Reducer
@@ -42,7 +43,21 @@ struct MapFeature: DWReducer {
         /// 표시할 위치 데이터 배열입니다.
         var locations: [Location] = []
         /// 표시할 기지국 데이터 배열입니다.
-        var cellStations: [CellStation] = []
+        var cellStations: [CellMarker] = []
+        /// 표시할 CCTV 데이터 배열입니다.
+        var cctvMarkers: [CCTVMarker] = []
+        /// 화면에 표시 중인 CCTV 캐시(ID -> CCTVMarker)
+        var cctvCache: [String: CCTVMarker] = [:]
+        /// CCTV 캐시의 순서를 유지하기 위한 ID 배열 (FIFO)
+        var cctvCacheOrder: [String] = []
+        /// 현재 캐시가 포괄하는 지도 범위
+        var cctvCachedBounds: MapBounds?
+        /// 현재 진행 중인 fetch가 요청한 범위
+        var cctvPendingFetchBounds: MapBounds?
+        /// 마지막으로 확인된 지도 범위
+        var lastCameraBounds: MapBounds?
+        /// 마지막으로 확인된 줌 레벨
+        var lastCameraZoom: Double = 0
         /// 현재 선택된 케이스의 UUID입니다. `onAppear` 시 CoreData로부터 위치 데이터를 로드하는 데 사용됩니다.
         var caseId: UUID?
         
@@ -71,6 +86,8 @@ struct MapFeature: DWReducer {
         var isCCTVLayerEnabled: Bool = false
         /// 기지국 레이어 표시 여부입니다.
         var isBaseStationLayerEnabled: Bool = false
+        /// CCTV 데이터 로딩 상태입니다.
+        var cctvFetchStatus: CCTVFetchStatus = .idle
         
         // MARK: - 위치정보 시트 관련 상태
         
@@ -93,7 +110,7 @@ struct MapFeature: DWReducer {
         case loadLocations([Location])
         /// 기지국 데이터를 로드하는 액션입니다.
         /// - Parameter cellStations: 로드할 기지국 데이터 배열
-        case loadCellStations([CellStation])
+        case loadCellMarkers([CellMarker])
         /// 필터를 선택/해제하는 액션입니다.
         /// - Parameter filter: 선택할 필터 타입
         case selectFilter(MapFilterType)
@@ -120,6 +137,23 @@ struct MapFeature: DWReducer {
         case showPlaceInfo(PlaceInfo)
         /// 위치정보 시트를 닫는 액션입니다. 사용자가 시트를 드래그 내려 닫거나 Close 버튼을 누를 때 호출됩니다.
         case hidePlaceInfo
+        
+        // MARK: - CCTV 데이터 로드
+        
+        /// 카메라 이동이 멈췄을 때 현재 지도를 기준으로 CCTV 데이터를 조회합니다.
+        /// - Parameters:
+        ///   - bounds: 지도 가시 영역의 경계
+        ///   - zoomLevel: 현재 줌 레벨
+        case cameraIdle(bounds: MapBounds, zoomLevel: Double)
+        /// CCTV 데이터를 조회하는 액션입니다.
+        /// - Parameter bounds: 조회할 지도 경계
+        case fetchCCTV(MapBounds)
+        /// CCTV 데이터 조회가 성공했을 때 호출되는 액션입니다.
+        /// - Parameter markers: 조회된 CCTV 정보 목록
+        case cctvFetchSucceeded([CCTVMarker])
+        /// CCTV 데이터 조회가 실패했을 때 호출되는 액션입니다.
+        /// - Parameter message: 오류 메시지
+        case cctvFetchFailed(String)
 
         // MARK: 카메라 명령
         
@@ -169,10 +203,10 @@ struct MapFeature: DWReducer {
                 // NOTE: API 붙으면 불러오는 로직 수정 필요.
                 .task {
                     do {
-                        let cellStations = try await CellStationLoader.loadFromJSON()
-                        return .loadCellStations(cellStations)
+                        let cellMarkers = try await CellStationLoader.loadFromJSON()
+                        return .loadCellMarkers(cellMarkers)
                     } catch {
-                        return .loadCellStations([])
+                        return .loadCellMarkers([])
                     }
                 }
             )
@@ -181,7 +215,7 @@ struct MapFeature: DWReducer {
             state.locations = locations
             return .none
             
-        case let .loadCellStations(cellStations):
+        case let .loadCellMarkers(cellStations):
             state.cellStations = cellStations
             return .none
             
@@ -209,7 +243,9 @@ struct MapFeature: DWReducer {
             return .none
             
         case let .setCCTVLayerEnabled(isEnabled):
-            state.isCCTVLayerEnabled = isEnabled
+            if let boundsToFetch = prepareCCTVFetchOnToggle(isEnabled: isEnabled, state: &state) {
+                return .send(.fetchCCTV(boundsToFetch))
+            }
             return .none
             
         case let .setBaseStationLayerEnabled(isEnabled):
@@ -252,6 +288,47 @@ struct MapFeature: DWReducer {
             state.selectedPlaceInfo = nil
             return .none
             
+        case let .cameraIdle(bounds, zoomLevel):
+            state.lastCameraBounds = bounds
+            state.lastCameraZoom = zoomLevel
+            
+            if let boundsToFetch = prepareCCTVFetch(bounds: bounds, zoomLevel: zoomLevel, state: &state) {
+                return .send(.fetchCCTV(boundsToFetch))
+            }
+            return .none
+            
+        case let .fetchCCTV(bounds):
+            state.cctvFetchStatus = .fetching
+            state.cctvPendingFetchBounds = bounds
+            return .task { [cctvService] in
+                let requestDTO = await VWorldBoxRequestDTO(
+                    minLng: bounds.minLongitude,
+                    minLat: bounds.minLatitude,
+                    maxLng: bounds.maxLongitude,
+                    maxLat: bounds.maxLatitude,
+                    size: NMConstants.defaultCCTVFetchSize,
+                    page: 1
+                )
+                    
+                do {
+                    let response = try await cctvService.fetchCCTVByBox(requestDTO)
+                    let markers = await MainActor.run {
+                        response.features.compactMap { CCTVMarker(feature: $0) }
+                    }
+                    return .cctvFetchSucceeded(markers)
+                } catch {
+                    return .cctvFetchFailed(error.localizedDescription)
+                }
+            }
+            
+        case let .cctvFetchSucceeded(markers):
+            handleCCTVFetchSucceeded(markers, state: &state)
+            return .none
+            
+        case let .cctvFetchFailed(message):
+            handleCCTVFetchFailed(message, state: &state)
+            return .none
+            
         case let .moveToSearchResult(coordinate, placeInfo):
             // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
             state.cameraTargetCoordinate = coordinate
@@ -281,9 +358,11 @@ struct MapFeature: DWReducer {
 // MARK: - Private Extensions
 
 private extension MapFeature {
-    /// 좌표를 기반으로 위치정보를 조회합니다.
+    // MARK: - Kakao Place Helpers
+    
+    /// 좌표를 기반으로 카카오 API에서 위치 정보를 조회합니다.
     func fetchPlaceInfo(from requestDTO: KakaoCoordToLocationRequestDTO) async throws -> PlaceInfo {
-        // 1단계: 좌표로 주소 조회 (Kakao 좌표→주소 변환 API)
+        // 좌표로 주소 조회 (Kakao 좌표→주소 변환 API)
         let coordResponse = try await searchService.fetchLocationFromCoord(requestDTO)
         guard let document = coordResponse.documents.first else {
             return PlaceInfo(
@@ -296,7 +375,7 @@ private extension MapFeature {
         let landAddress = document.address?.addressName ?? ""
         let roadAddress = document.roadAddress?.addressName ?? ""
         
-        // 2단계: buildingName이 있으면 키워드 검색 (Kakao 키워드→장소 검색 API)
+        // buildingName이 있으면 키워드 검색 (Kakao 키워드→장소 검색 API)
         // buildingName이 있는 경우, 장소명과 전화번호를 추가로 조회
         if let buildingName = document.roadAddress?.buildingName, !buildingName.isEmpty {
             let keywordRequestDTO = KakaoKeywordToPlaceRequestDTO(
@@ -333,24 +412,101 @@ private extension MapFeature {
             phoneNumber: ""
         )
     }
-}
-
-// MARK: - Map Filter Type
-
-/// 지도 화면에서 사용하는 필터 타입입니다.
-enum MapFilterType: String, CaseIterable {
-    case cellStationRange = "기지국 범위"
-    case visitFrequency = "누적 빈도"
-    case recentBaseStation = "최근 기지국"
     
-    var iconName: String {
-        switch self {
-        case .cellStationRange:
-            "icn_cell_range_filter"
-        case .visitFrequency:
-            "icn_visit_frequency_filter"
-        case .recentBaseStation:
-            "icn_cell_station_filter"
+    // MARK: - CCTV Fetch Decision
+    
+    /// CCTV 레이어 토글 시 fetch가 필요하면 bounds를 반환합니다.
+    func prepareCCTVFetchOnToggle(isEnabled: Bool, state: inout State) -> MapBounds? {
+        state.isCCTVLayerEnabled = isEnabled
+        guard isEnabled, let bounds = state.lastCameraBounds else { return nil }
+        return prepareCCTVFetch(bounds: bounds, zoomLevel: state.lastCameraZoom, state: &state)
+    }
+    
+    /// CCTV fetch가 필요한지 판단하고 fetch할 bounds를 반환합니다.
+    func prepareCCTVFetch(bounds: MapBounds, zoomLevel: Double, state: inout State) -> MapBounds? {
+        guard state.isCCTVLayerEnabled else { return nil }
+        guard zoomLevel >= NMConstants.minZoomForCCTV else { return nil }
+        
+        if let cachedBounds = state.cctvCachedBounds,
+           cachedBounds.contains(bounds),
+           !state.cctvCache.isEmpty { return nil }
+        
+        if case .fetching = state.cctvFetchStatus { return nil }
+        
+        state.cctvPendingFetchBounds = bounds
+        return bounds
+    }
+    
+    // MARK: - CCTV Fetch Result Handling
+    
+    /// CCTV fetch 성공 시 캐시와 상태를 갱신합니다.
+    func handleCCTVFetchSucceeded(_ markers: [CCTVMarker], state: inout State) {
+        state.cctvFetchStatus = .idle
+        defer { state.cctvPendingFetchBounds = nil }
+        
+        if let fetchBounds = state.cctvPendingFetchBounds {
+            if let cachedBounds = state.cctvCachedBounds, cachedBounds.intersects(fetchBounds) {
+                state.cctvCachedBounds = cachedBounds.union(fetchBounds)
+            } else {
+                resetCCTVCache(&state)
+                state.cctvCachedBounds = fetchBounds
+            }
+        } else {
+            resetCCTVCache(&state)
+            state.cctvCachedBounds = nil
         }
+        
+        mergeCCTVMarkers(markers, into: &state)
+    }
+    
+    /// CCTV fetch 실패 시 상태를 갱신합니다.
+    func handleCCTVFetchFailed(_ message: String, state: inout State) {
+        state.cctvFetchStatus = .failed(message)
+        state.cctvPendingFetchBounds = nil
+    }
+    
+    // MARK: - CCTV Cache Management
+    
+    /// CCTV 캐시를 초기화합니다.
+    func resetCCTVCache(_ state: inout State) {
+        state.cctvCache.removeAll()
+        state.cctvCacheOrder.removeAll()
+    }
+    
+    /// 새로 로드된 CCTV 마커를 캐시에 병합합니다.
+    func mergeCCTVMarkers(_ markers: [CCTVMarker], into state: inout State) {
+        guard !markers.isEmpty else {
+            state.cctvMarkers = state.cctvCacheOrder.compactMap { state.cctvCache[$0] }
+            return
+        }
+        
+        var uniqueIds: [String] = []
+        var seen = Set<String>()
+        for marker in markers where seen.insert(marker.id).inserted {
+            uniqueIds.append(marker.id)
+        }
+        
+        if !uniqueIds.isEmpty {
+            let incomingSet = Set(uniqueIds)
+            state.cctvCacheOrder.removeAll { incomingSet.contains($0) }
+            state.cctvCacheOrder.append(contentsOf: uniqueIds)
+        }
+        
+        for marker in markers {
+            state.cctvCache[marker.id] = marker
+        }
+        
+        trimCCTVCacheIfNeeded(&state)
+        state.cctvMarkers = state.cctvCacheOrder.compactMap { state.cctvCache[$0] }
+    }
+    
+    /// CCTV 캐시가 상한을 넘으면 오래된 항목을 제거합니다.
+    func trimCCTVCacheIfNeeded(_ state: inout State) {
+        let overflow = state.cctvCacheOrder.count - NMConstants.maxCachedCCTVCount
+        guard overflow > 0 else { return }
+        
+        let removedIds = state.cctvCacheOrder.prefix(overflow)
+        state.cctvCacheOrder.removeFirst(overflow)
+        removedIds.forEach { state.cctvCache.removeValue(forKey: $0) }
     }
 }
