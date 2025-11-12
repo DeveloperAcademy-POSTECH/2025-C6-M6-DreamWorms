@@ -414,6 +414,28 @@
     "Hour" : {
 
     },
+    "layer_setting_coverage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 반경"
+          }
+        }
+      }
+    },
+    "layer_setting_toggle_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 세부 정보"
+          }
+        }
+      }
+    },
     "locationOverview_title" : {
       "comment" : "대시보드 오버뷰_타이틀",
       "extractionState" : "manual",
@@ -820,6 +842,9 @@
         }
       }
     },
+    "Visits" : {
+
+    },
     "기지국 위치정보 저장하기" : {
 
     },
@@ -830,17 +855,14 @@
 
     },
     "본문: ${messageBody}" : {
-   
-    },
-    "Visits" : {
 
     },
     "사진" : {
 
     },
     "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
-    
-    } ,
+
+    },
     "주차" : {
 
     }
