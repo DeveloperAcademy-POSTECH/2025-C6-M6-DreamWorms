@@ -136,7 +136,6 @@ struct CaseAddScrollForm<Field: Hashable>: View {
                 }
             }
             .padding(.horizontal, 20)
-            .safeAreaPadding(.bottom, 20)
         }
         .scrollPosition(id: $scrollID)
         .scrollDisabled(true)
