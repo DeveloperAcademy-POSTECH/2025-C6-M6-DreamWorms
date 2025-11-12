@@ -66,7 +66,7 @@ struct CaseAddScrollForm<Field: Hashable>: View {
                         placeholder: String(localized: .placeholderSuspectPhoneNumber)
                     )
                     .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                    .setupKeyboard(.default, submit: .done)
+                    .setupKeyboard(.phonePad, submit: .done)
                     .id(phoneField)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }

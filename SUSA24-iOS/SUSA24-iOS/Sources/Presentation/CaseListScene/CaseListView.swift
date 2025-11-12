@@ -24,7 +24,7 @@ struct CaseListView: View {
             CaseListHeader(
                 onSettingTapped: { coordinator.push(.settingScene) }
             )
-            .padding(.bottom, 32)
+            .padding(.bottom, 36)
             
             Picker("", selection: Binding(
                 get: { store.state.selectedTab },
@@ -36,7 +36,7 @@ struct CaseListView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
-            .padding(.bottom, 16)
+            .padding(.bottom, 20)
             
             if store.state.selectedTab == .allCase, !store.state.cases.isEmpty {
                 ScrollView {
