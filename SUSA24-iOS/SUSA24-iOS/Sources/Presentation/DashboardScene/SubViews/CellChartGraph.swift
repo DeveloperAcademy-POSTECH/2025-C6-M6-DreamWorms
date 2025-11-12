@@ -88,16 +88,13 @@ struct CellChartGraph: View {
                 RuleMark(
                     x: .value("Selected Hour", hour)
                 )
-                .foregroundStyle(.primaryNormal.opacity(0.35))
+                .foregroundStyle(.labelCoolNormal)
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
                 .zIndex(-1)
                 .annotation(
                     position: .top,
                     spacing: 0,
-                    overflowResolution: .init(
-                        x: .fit(to: .chart),
-                        y: .disabled
-                    )
+                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)
                 ) {
                     valueSelectionPopover(selectedHour: hour)
                 }
@@ -141,41 +138,57 @@ extension CellChartGraph {
     func valueSelectionPopover(selectedHour: Int) -> some View {
         let data = visitsPerWeek(at: selectedHour)
         
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(String(format: "%02d시 체류 패턴", selectedHour))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            HStack(spacing: 20) {
+                .font(.bodyMedium10)
+                .foregroundStyle(.labelAlternative)
+                .padding(.bottom, 2)
+            
+            HStack(spacing: 12) {
                 ForEach(data) { item in
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
                         Text("\(item.count)")
-                            .font(.caption.bold())
+                            .font(.numberSemiBold18)
+                            .foregroundStyle(colorForWeek(item.weekIndex))
                         
                         Text("\(item.weekIndex)주차")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .font(.bodyMedium10)
+                            .foregroundStyle(.labelNormal.opacity(0.3))
                     }
                 }
             }
         }
-        .padding(6)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 4)
-                .foregroundStyle(Color.gray.opacity(0.8))
+                .foregroundStyle(.labelCoolNormal)
         }
     }
 }
 
 private extension CellChartGraph {
+    /// 주차 인덱스를 weekStyleScale의 키("n주차")로 매핑해 Color 반환
+    func colorForWeek(_ weekIndex: Int) -> Color {
+        let key = weekLabel(for: weekIndex)
+        return weekStyleScale.first(where: { $0.key == key })?.value ?? .primaryNormal
+    }
+    
     /// 특정 시간의 주차별 count
     func visitsPerWeek(at hour: Int) -> [WeekVisitSummary] {
-        let filtered = series.filter { $0.hour == hour && $0.count > 0 }
-        let grouped = Dictionary(grouping: filtered, by: { $0.weekIndex })
-        return grouped.keys.sorted().map { week in
-            WeekVisitSummary(
-                weekIndex: week,
-                count: grouped[week]?.map(\.count).reduce(0, +) ?? 0
-            )
+        // 전체 주차 범위 계산 (데이터가 없으면 1주차만)
+        let allWeeks = Array(1 ... (series.map(\.weekIndex).max() ?? 1))
+
+        // 주차별 방문 데이터 그룹화
+        let grouped = Dictionary(
+            grouping: series.filter { $0.hour == hour },
+            by: { $0.weekIndex }
+        )
+
+        // 모든 주차를 순회하며 0인 주차도 포함
+        return allWeeks.map { week in
+            let total = grouped[week]?.map(\.count).reduce(0, +) ?? 0
+            return WeekVisitSummary(weekIndex: week, count: total)
         }
     }
     
