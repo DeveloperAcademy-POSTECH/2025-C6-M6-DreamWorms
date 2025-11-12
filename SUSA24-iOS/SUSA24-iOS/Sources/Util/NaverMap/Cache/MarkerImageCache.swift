@@ -50,7 +50,7 @@ actor MarkerImageCache {
     /// - Returns: 변환된 UIImage
     private func generateImage(for type: MarkerType) async -> UIImage {
         await MainActor.run {
-            let marker = Marker(type: type)
+            let marker = MarkerImage(type: type)
             let renderer = ImageRenderer(content: marker)
             renderer.scale = UIScreen.main.scale
             guard let uiImage = renderer.uiImage else {
