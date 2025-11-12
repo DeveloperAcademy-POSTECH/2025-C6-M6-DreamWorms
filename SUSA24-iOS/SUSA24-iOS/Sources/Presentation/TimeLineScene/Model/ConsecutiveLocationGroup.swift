@@ -39,20 +39,19 @@ struct ConsecutiveLocationGroup: Identifiable, Sendable, Hashable {
     }
 
     //MARK: - initalization
-    init(address: String, locations: [Location], state: TimeLineColorStickState) {
+    init(
+        address: String,
+        locations: [Location],
+        state: TimeLineColorStickState,
+        startTime: Date,
+        endTime: Date?
+    ) {
         self.id = UUID()
         self.address = address
         self.locations = locations
         self.state = state
-
-        let receivedTimes = locations.compactMap(\.receivedAt)
-        self.startTime = receivedTimes.min() ?? Date()
-
-        if locations.count > 1 {
-            self.endTime = receivedTimes.max()
-        } else {
-            self.endTime = nil
-        }
+        self.startTime = startTime
+        self.endTime = endTime
     }
 }
 
