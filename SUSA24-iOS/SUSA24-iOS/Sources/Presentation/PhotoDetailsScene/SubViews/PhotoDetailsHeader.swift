@@ -39,6 +39,6 @@ struct PhotoDetailsHeader: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    PhotoDetailsHeader(currentIndex: 1, totalCount: 9, onBackTapped: {}, onDeleteTapped: {})
-//}
+// }

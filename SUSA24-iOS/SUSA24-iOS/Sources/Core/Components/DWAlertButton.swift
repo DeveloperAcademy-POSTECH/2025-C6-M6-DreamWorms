@@ -19,9 +19,9 @@ struct DWAlertButton {
 
         var defaultTitle: String {
             switch self {
-            case .default: return "확인"
-            case .destructive: return "삭제"
-            case .cancel: return "취소"
+            case .default: "확인"
+            case .destructive: "삭제"
+            case .cancel: "취소"
             }
         }
     }
@@ -36,7 +36,6 @@ struct DWAlertButton {
         self.action = action
     }
 }
-
 
 struct DWAlertModifier: ViewModifier {
     @Binding var isPresented: Bool
@@ -98,8 +97,7 @@ struct DWAlertModifier: ViewModifier {
                                 .padding(.trailing, 2)
                         }
                         alertButton(primaryButton, isPrimary: true)
-                    
-                    }
+                     }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)
@@ -136,22 +134,22 @@ struct DWAlertModifier: ViewModifier {
     private func textColor(for style: DWAlertButton.ButtonStyle, isPrimary: Bool) -> Color {
         switch style {
         case .destructive:
-            return .white
+            .white
         case .cancel:
-            return .labelNormal
+            .labelNormal
         case .default:
-            return isPrimary ? .white : .labelNormal
+            isPrimary ? .white : .labelNormal
         }
     }
     
     private func backgroundColor(for style: DWAlertButton.ButtonStyle, isPrimary: Bool) -> Color {
         switch style {
         case .destructive:
-            return .pointRed1
+            .pointRed1
         case .cancel:
-            return .labelAlternative.opacity(0.45)
+            .labelAlternative.opacity(0.45)
         case .default:
-            return isPrimary ? .primaryNormal : .labelAlternative.opacity(0.45)
+            isPrimary ? .primaryNormal : .labelAlternative.opacity(0.45)
         }
     }
 }
@@ -191,23 +189,24 @@ extension View {
 }
 
 // MARK: - Preview
+
 //
-//#Preview("Alert 사용 방법") {
+// #Preview("Alert 사용 방법") {
 //    struct PreviewContainer: View {
 //        @State private var showBasicAlert = false
 //        @State private var showDestructiveAlert = false
 //        @State private var showSingleAlert = true
-//        
+//
 //        var body: some View {
 //            VStack(spacing: 20) {
 //                Button("기본 Alert") {
 //                    showBasicAlert = true
 //                }
-//                
+//
 //                Button("Destructive Alert") {
 //                    showDestructiveAlert = true
 //                }
-//                
+//
 //                Button("단일 버튼 Alert") {
 //                    showSingleAlert = true
 //                }
@@ -239,6 +238,6 @@ extension View {
 //            }
 //        }
 //    }
-//    
+//
 //    return PreviewContainer()
-//}
+// }

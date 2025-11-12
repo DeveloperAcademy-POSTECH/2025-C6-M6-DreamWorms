@@ -5,13 +5,12 @@
 //  Created by taeni on 11/8/25.
 //
 
-import Foundation
 import CoreVideo
+import Foundation
 import Vision
 
 /// Vision Framework 기능을 제공하는 서비스
 final class VisionService: VisionServiceProtocol, Sendable {
-    
     // MARK: - Dependencies
     
     private let documentDetector: DocumentDetectionProcessor
@@ -25,15 +24,15 @@ final class VisionService: VisionServiceProtocol, Sendable {
     // MARK: - 실시간 감지
     
     func startDocumentDetection(
-        frameStream: AsyncStream<CVImageBuffer>
+        frameStream _: AsyncStream<CVImageBuffer>
     ) async -> AsyncStream<DocumentDetectionResult> {
-        return documentDetector.getResultStream()
+        documentDetector.getResultStream()
     }
     
     func startLensSmudgeDetection(
-        frameStream: AsyncStream<CVImageBuffer>
+        frameStream _: AsyncStream<CVImageBuffer>
     ) async -> AsyncStream<LensSmudgeDetectionResult> {
-        return documentDetector.getSmudgeStream()
+        documentDetector.getSmudgeStream()
     }
     
     // MARK: - 주소 추출

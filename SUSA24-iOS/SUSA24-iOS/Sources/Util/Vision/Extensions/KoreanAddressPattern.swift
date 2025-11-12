@@ -9,8 +9,8 @@ import Foundation
 
 /// 한국 주소 패턴 정의
 enum KoreanAddressPattern {
-    
     // MARK: - 도로명 주소 정규식
+
     /// 도로명 주소: [도로명]{2,}(로|길)[번지]
     /// 예: 강서구 지사동 1197, 포항시 남구 지곡로 77
     static let streetAddressRegex: NSRegularExpression = {
@@ -19,6 +19,7 @@ enum KoreanAddressPattern {
     }()
     
     // MARK: - 지번 주소 정규식
+
     /// 지번 주소: [지명]+(읍|동)[공백][번지]
     /// 예: 지사동 1299, 지사동 산 30, 법방동 1833
     static let lotAddressRegex: NSRegularExpression = {
@@ -31,6 +32,7 @@ enum KoreanAddressPattern {
     }()
     
     // MARK: - 통합 한국 주소 정규식
+
     /// 도로명 + 지번 주소 모두 매칭
     static let koreanAddressRegex: NSRegularExpression = {
         // 광역시도를 포함한 전체 주소 패턴

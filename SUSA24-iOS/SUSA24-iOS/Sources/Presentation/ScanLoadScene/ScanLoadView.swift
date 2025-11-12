@@ -1,5 +1,5 @@
 //
-//  ScanLoadFeature.swift
+//  ScanLoadView.swift
 //  SUSA24-iOS
 //
 //  Created by taeni on 10/31/25.
@@ -37,7 +37,7 @@ private extension ScanLoadView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    ScanLoadView()
 //        .environment(AppCoordinator())
-//}
+// }
