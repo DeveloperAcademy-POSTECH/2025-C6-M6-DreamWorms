@@ -15,9 +15,13 @@ struct CellChartGraph: View {
 
     /// 단일 선택된 시간 (부모와 공유)
     @Binding var selectedHour: Int?
-
-    private func weekLabel(for weekIndex: Int) -> String {
-        "\(weekIndex)주차"
+    
+    /// 시간별 총 방문 수(모든 주차 합산). 최신 주만 쓰고 싶다면 아래 합산 대상 필터를 변경하세요.
+    private var totalByHour: [Int: Int] {
+        let base = series
+        return base.reduce(into: [Int: Int]()) { dict, item in
+            dict[item.hour, default: 0] += item.count
+        }
     }
 
     /// 현재 시리즈에서 실제 존재하는 hour 집합
@@ -51,14 +55,25 @@ struct CellChartGraph: View {
 
     var body: some View {
         Chart {
+            if let band = bestHighBand() {
+                RectangleMark(
+                    xStart: .value("from", band.lowerBound),
+                    xEnd: .value("to", band.upperBound + 1),
+                    yStart: .value("min", 0),
+                    yEnd: .value("max", 11)
+                )
+                .foregroundStyle(.primaryNormal.opacity(0.15))
+                .zIndex(-2)
+            }
+            
             ForEach(series, id: \.id) { item in
                 LineMark(
                     x: .value("Hour", item.hour),
                     y: .value("Visits", item.count),
                     series: .value("Week", weekLabel(for: item.weekIndex))
                 )
-                .lineStyle(StrokeStyle(lineWidth: 2.5))
-                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
                 .foregroundStyle(by: .value("Week", weekLabel(for: item.weekIndex)))
 
                 PointMark(
@@ -122,18 +137,6 @@ extension CellChartGraph {
         var id: Int { weekIndex }
     }
 
-    /// 특정 시간의 주차별 count
-    private func visitsPerWeek(at hour: Int) -> [WeekVisitSummary] {
-        let filtered = series.filter { $0.hour == hour && $0.count > 0 }
-        let grouped = Dictionary(grouping: filtered, by: { $0.weekIndex })
-        return grouped.keys.sorted().map { week in
-            WeekVisitSummary(
-                weekIndex: week,
-                count: grouped[week]?.map(\.count).reduce(0, +) ?? 0
-            )
-        }
-    }
-
     @ViewBuilder
     func valueSelectionPopover(selectedHour: Int) -> some View {
         let data = visitsPerWeek(at: selectedHour)
@@ -161,4 +164,86 @@ extension CellChartGraph {
                 .foregroundStyle(Color.gray.opacity(0.8))
         }
     }
+}
+
+private extension CellChartGraph {
+    /// 특정 시간의 주차별 count
+    func visitsPerWeek(at hour: Int) -> [WeekVisitSummary] {
+        let filtered = series.filter { $0.hour == hour && $0.count > 0 }
+        let grouped = Dictionary(grouping: filtered, by: { $0.weekIndex })
+        return grouped.keys.sorted().map { week in
+            WeekVisitSummary(
+                weekIndex: week,
+                count: grouped[week]?.map(\.count).reduce(0, +) ?? 0
+            )
+        }
+    }
+    
+    /// 시간대 총합을 이동평균으로 부드럽게 만듭니다.
+    /// - Parameter window: 이동평균 창 크기(기본 3)
+    func smoothedTotals(window: Int = 3) -> [Int: Double] {
+        let hours = 0 ... 23
+        let rangeSize = max(1, window)
+        let halfRange = rangeSize / 2
+        var smoothedValues: [Int: Double] = [:]
+
+        for hour in hours {
+            let startHour = hour - halfRange
+            let endHour = hour + halfRange
+
+            var totalCount = 0
+            var sampleCount = 0
+
+            for sample in startHour ... endHour {
+                let wrappedHour = (sample % 24 + 24) % 24
+                totalCount += totalByHour[wrappedHour] ?? 0
+                sampleCount += 1
+            }
+
+            smoothedValues[hour] = sampleCount > 0 ? Double(totalCount) / Double(sampleCount) : 0
+        }
+
+        return smoothedValues
+    }
+
+    /// 스무딩된 값에서 (최대값 * threshold) 이상인 연속 구간 중 가장 긴 구간을 반환합니다.
+    /// 없으면 최대값 하나의 시간 칸을 반환하고, 값이 전부 0이면 nil을 반환합니다.
+    func bestHighBand(threshold: Double = 0.8, window: Int = 3) -> ClosedRange<Int>? {
+        let smoothed = smoothedTotals(window: window)
+        guard let peakValue = smoothed.values.max(), peakValue > 0 else { return nil }
+
+        let cutoffValue = peakValue * threshold
+
+        var bestRange: (start: Int, end: Int)? = nil
+        var currentRangeStart: Int? = nil
+
+        for hour in 0 ... 24 {
+            let value = (hour <= 23) ? (smoothed[hour] ?? 0) : 0
+
+            if value >= cutoffValue {
+                if currentRangeStart == nil {
+                    currentRangeStart = hour
+                }
+            } else if let rangeStart = currentRangeStart {
+                let rangeEnd = min(hour - 1, 23)
+                if bestRange == nil || (rangeEnd - rangeStart) > (bestRange!.end - bestRange!.start) {
+                    bestRange = (rangeStart, rangeEnd)
+                }
+                currentRangeStart = nil
+            }
+        }
+
+        if let best = bestRange {
+            return best.start ... best.end
+        }
+
+        if let peakHour = (0 ... 23).max(by: { (smoothed[$0] ?? 0) < (smoothed[$1] ?? 0) }) {
+            return peakHour ... peakHour
+        }
+        
+        return nil
+    }
+    
+    /// 주차 Index를 받아 String "n주차"의 형태로 반환하는 메서드입니다.
+    func weekLabel(for weekIndex: Int) -> String { "\(weekIndex)주차" }
 }

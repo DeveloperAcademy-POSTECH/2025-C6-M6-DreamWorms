@@ -18,8 +18,8 @@ struct CellChartCard: View {
     private let weekStyleScale: KeyValuePairs<String, Color> = [
         "1주차": .primaryNormal,
         "2주차": .primaryLight1,
-        "3주차": .primaryStrong,
-        "4주차": .primaryLight2,
+        "3주차": .blue40,
+        "4주차": .blue20,
     ]
 
     private var series: [HourlyVisit] {
