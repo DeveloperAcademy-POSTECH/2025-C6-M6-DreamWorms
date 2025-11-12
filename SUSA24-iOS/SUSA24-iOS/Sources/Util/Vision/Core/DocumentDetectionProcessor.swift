@@ -5,10 +5,10 @@
 //  Created by taeni on 11/6/25.
 //
 
-import Vision
+import CoreImage
 import CoreVideo
 import Foundation
-import CoreImage
+import Vision
 
 /// 프레임을 처리하고 문서 감지 + 렌즈 얼룩 감지 결과를 스트림으로 제공합니다 (매 프레임)
 actor DocumentDetectionProcessor {
@@ -85,11 +85,11 @@ actor DocumentDetectionProcessor {
     
     /// 결과 스트림들을 반환합니다 (nonisolated)
     nonisolated func getResultStream() -> AsyncStream<DocumentDetectionResult> {
-        return self.documentStream
+        documentStream
     }
     
     nonisolated func getSmudgeStream() -> AsyncStream<LensSmudgeDetectionResult> {
-        return self.smudgeStream
+        smudgeStream
     }
     
     /// 문서를 감지합니다 (VNDetectDocumentSegmentationRequest)
@@ -110,7 +110,8 @@ actor DocumentDetectionProcessor {
             
             // VNDetectDocumentSegmentationRequest는 VNRectangleObservation을 반환
             guard let results = request.results,
-                  let observation = results.first else {
+                  let observation = results.first
+            else {
                 return nil
             }
             
@@ -124,7 +125,7 @@ actor DocumentDetectionProcessor {
                 observation.topLeft,
                 observation.topRight,
                 observation.bottomRight,
-                observation.bottomLeft
+                observation.bottomLeft,
             ]
             
             return DocumentDetectionResult(

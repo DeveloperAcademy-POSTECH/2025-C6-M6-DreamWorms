@@ -25,10 +25,10 @@ final class VisionModel {
     var isAnalyzing: Bool = false
     
     /// 마지막 분석 결과
-    var lastResult: AddressExtractionResult? = nil
+    var lastResult: AddressExtractionResult?
     
     /// 마지막 에러
-    var lastError: VisionAnalysisError? = nil
+    var lastError: VisionAnalysisError?
     
     // MARK: - Public Methods
     

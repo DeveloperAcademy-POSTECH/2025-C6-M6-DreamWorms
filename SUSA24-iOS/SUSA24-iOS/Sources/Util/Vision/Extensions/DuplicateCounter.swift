@@ -9,7 +9,6 @@ import Foundation
 
 /// 주소 중복을 카운팅하는 헬퍼
 enum DuplicateCounter {
-    
     /// 주소 배열에서 중복을 제거하고 개수를 센다.
     /// - Parameter addresses: 주소 배열
     /// - Returns: [주소: 개수] 딕셔너리
@@ -57,7 +56,7 @@ enum DuplicateCounter {
     /// - Parameter addressArrays: 주소 배열들
     /// - Returns: [주소: 개수] 딕셔너리
     static func mergeCounts(_ addressArrays: [[String]]) -> [String: Int] {
-        let flatAddresses = addressArrays.flatMap { $0 }
+        let flatAddresses = addressArrays.flatMap(\.self)
         return countDuplicates(flatAddresses)
     }
     

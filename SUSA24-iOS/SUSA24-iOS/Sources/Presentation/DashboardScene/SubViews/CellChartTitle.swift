@@ -19,7 +19,7 @@ struct CellChartTitle: View {
             .font(.bodyMedium12)
             .foregroundStyle(.primaryNormal)
             .padding(.vertical, 4)
-            .padding(.horizontal, 5) 
+            .padding(.horizontal, 5)
             .background(.primaryLight2)
             .cornerRadius(4)
             

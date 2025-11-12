@@ -1,5 +1,5 @@
 //
-//  PhotoDetailView.swift
+//  PhotoDetailsView.swift
 //  SUSA24-iOS
 //
 //  Created by taeni on 10/29/25.
@@ -35,7 +35,6 @@ struct PhotoDetailsView: View {
             .padding(.top, 6)
             .padding(.bottom, 54)
             
-            
             TabView(selection: Binding(
                 get: {
                     store.state.photos.indices.contains(store.state.currentIndex)
@@ -43,8 +42,9 @@ struct PhotoDetailsView: View {
                         : nil
                 },
                 set: { newId in
-                    if let newId = newId,
-                       let index = store.state.photos.firstIndex(where: { $0.id == newId }) {
+                    if let newId,
+                       let index = store.state.photos.firstIndex(where: { $0.id == newId })
+                    {
                         store.send(.currentIndexChanged(index))
                     }
                 }

@@ -39,7 +39,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         // cameraModel 주입
         let camera = CameraModel()
         let store = DWStore(
-            initialState: CameraFeature.State(caseID: caseID ,previewSource: camera.previewSource),
+            initialState: CameraFeature.State(caseID: caseID, previewSource: camera.previewSource),
             reducer: CameraFeature(camera: camera)
         )
         let view = CameraView(store: store, camera: camera)

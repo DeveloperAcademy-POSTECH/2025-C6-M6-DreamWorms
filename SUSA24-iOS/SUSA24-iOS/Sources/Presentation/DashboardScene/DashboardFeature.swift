@@ -206,7 +206,7 @@ private extension Array<Location> {
 
             let daysDiff = calendar.dateComponents([.day], from: baseWeekStart, to: time).day ?? 0
             let weekIndex = daysDiff / 7 + 1
-            guard (1...maxWeeks).contains(weekIndex) else { continue }
+            guard (1 ... maxWeeks).contains(weekIndex) else { continue }
 
             guard let weekday = Weekday(systemWeekday: calendar.component(.weekday, from: time)) else { continue }
             let hour = calendar.component(.hour, from: time)
@@ -218,7 +218,7 @@ private extension Array<Location> {
 
         return validWeeks.flatMap { weekIndex in
             Weekday.allCases.flatMap { weekday in
-                (0...23).map { hour in
+                (0 ... 23).map { hour in
                     HourlyVisit(
                         weekIndex: weekIndex,
                         weekday: weekday,
@@ -231,17 +231,17 @@ private extension Array<Location> {
     }
 }
 
-private extension Array where Element == HourlyVisit {
+private extension Array<HourlyVisit> {
     /// 시계열 방문 데이터(`HourlyVisit`)를 요약 문장으로 변환합니다.
     ///
     /// - Parameter series: 요약할 `HourlyVisit` 배열
     /// - Returns: “오전 8시–오전 9시에 주로 머물렀습니다.” 형태의 설명 문자열
     func makeHourlySummary() -> String {
-        guard let latestWeek = self.filter({ $0.count > 0 }).map(\.weekIndex).max() else {
+        guard let latestWeek = filter({ $0.count > 0 }).map(\.weekIndex).max() else {
             return ""
         }
 
-        let candidates = self.filter { $0.weekIndex == latestWeek && $0.count > 0 }
+        let candidates = filter { $0.weekIndex == latestWeek && $0.count > 0 }
         guard let best = candidates.max(by: { $0.count < $1.count }) else { return "" }
 
         let startHour = best.hour
@@ -258,5 +258,4 @@ private extension Array where Element == HourlyVisit {
 
         return "\(hourText(startHour))-\(hourText(endHour))에 주로 머물렀습니다."
     }
-
 }

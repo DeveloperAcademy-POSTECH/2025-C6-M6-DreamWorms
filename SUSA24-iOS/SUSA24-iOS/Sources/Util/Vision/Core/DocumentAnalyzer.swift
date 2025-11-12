@@ -5,13 +5,12 @@
 //  Created by taeni on 11/6/25.
 //
 
-import Vision
 import UIKit
+import Vision
 
 /// Vision Framework를 사용하여 문서를 분석하는 유틸리티
 /// Stateless 구조체로 static 메서드만 제공합니다.
 struct DocumentAnalyzer: Sendable {
-    
     /// 이미지 데이터에서 문서를 인식하고 분석합니다.
     /// - Parameter imageData: 분석할 이미지 데이터
     /// - Returns: DocumentAnalysisResult

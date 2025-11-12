@@ -16,7 +16,7 @@ struct ZoomableImageView: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
-            // TODO: 촬영된 이미지가 디바이스 전체 사이즈 크기다보니, width값에 맞추면 뷰에서 hifi 뷰 처럼 보기가 어려운 문제가 있음. -> 검토 필요
+                // TODO: 촬영된 이미지가 디바이스 전체 사이즈 크기다보니, width값에 맞추면 뷰에서 hifi 뷰 처럼 보기가 어려운 문제가 있음. -> 검토 필요
                 .frame(width: geometry.size.width)
                 .scaleEffect(zoomState.scale, anchor: zoomState.anchor)
                 .offset(zoomState.offset)
@@ -77,7 +77,7 @@ struct ZoomGestureModifier: ViewModifier {
         }
     }
 
-    private func handleMagnificationEnded(_ value: CGFloat) {
+    private func handleMagnificationEnded(_: CGFloat) {
         if isPinching {
             zoomState.scale = min(max(zoomState.scale, 1.0), 5.0)
             zoomState.lastScale = zoomState.scale
@@ -103,7 +103,7 @@ struct ZoomGestureModifier: ViewModifier {
         )
     }
 
-    private func handleDragEnded(_ value: DragGesture.Value) {
+    private func handleDragEnded(_: DragGesture.Value) {
         zoomState.lastOffset = zoomState.offset
     }
 }

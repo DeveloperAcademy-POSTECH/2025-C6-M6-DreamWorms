@@ -59,8 +59,8 @@ final class CameraModel: NSObject {
 }
 
 // MARK: - Camera Lifecycle + Control
+
 extension CameraModel {
-    
     /// 카메라를 시작합니다.
     func start() async {
         guard cameraStatus == .notInitialized else { return }
@@ -128,8 +128,8 @@ extension CameraModel {
 }
 
 // MARK: - Photo Capture
+
 extension CameraModel {
-    
     /// 사진을 촬영합니다.
     func capturePhoto() async throws -> CapturedPhoto {
         let photo = try await photoCaptureService.capturePhoto()
@@ -161,8 +161,8 @@ extension CameraModel {
 }
 
 // MARK: - Device Zoom, Torch Control, Focus
+
 extension CameraModel {
-    
     /// 줌을 설정합니다. (0.5 ~ 12.0배)
     func setZoom(to factor: CGFloat) async {
         guard !isCameraPaused else { return }
@@ -214,6 +214,7 @@ extension CameraModel {
 }
 
 // MARK: - Frame Stream
+
 extension CameraModel {
     /// 프레임 스트림을 반환합니다.
     func getFrameStream() -> AsyncStream<CVImageBuffer>? {
@@ -222,6 +223,7 @@ extension CameraModel {
 }
 
 // MARK: - Private Methods
+
 extension CameraModel {
     private func addPhotoCaptureOutput() async throws {
         try await captureSession.addPhotoOutput(photoCaptureService.output)
