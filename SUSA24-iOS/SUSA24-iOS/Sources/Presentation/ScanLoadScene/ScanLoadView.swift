@@ -139,18 +139,18 @@ private extension ScanLoadView {
 
 // MARK: - Preview
 
-#Preview {
-    let mockPhotos: [CapturedPhoto] = []
-
-    let store = DWStore(
-        initialState: ScanLoadFeature.State(),
-        reducer: ScanLoadFeature()
-    )
-
-    ScanLoadView(
-        caseID: UUID(),
-        photos: mockPhotos,
-        store: store
-    )
-    .environment(AppCoordinator())
-}
+//#Preview {
+//    let mockPhotos: [CapturedPhoto] = []
+//
+//    let store = DWStore(
+//        initialState: ScanLoadFeature.State(),
+//        reducer: ScanLoadFeature()
+//    )
+//
+//    ScanLoadView(
+//        caseID: UUID(),
+//        photos: mockPhotos,
+//        store: store
+//    )
+//    .environment(AppCoordinator())
+//}

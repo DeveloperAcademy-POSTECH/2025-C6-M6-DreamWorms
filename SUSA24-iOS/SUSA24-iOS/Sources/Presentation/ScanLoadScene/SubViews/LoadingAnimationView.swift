@@ -8,10 +8,6 @@
 import Combine
 import SwiftUI
 
-/// 스캔 진행 중 아이콘 애니메이션 뷰
-///
-/// - 더 부드럽고 현대적인 로딩 애니메이션
-/// - 문서 스캔 느낌의 시각적 피드백
 struct LoadingAnimationView: View {
     // MARK: - Constants
 
@@ -110,11 +106,11 @@ struct LoadingAnimationView: View {
 }
 
 // MARK: - Preview
-
-#Preview {
-    VStack(spacing: 24) {
-        LoadingAnimationView()
-    }
-    .padding(32)
-    .background(Color(.systemBackground))
-}
+//
+//#Preview {
+//    VStack(spacing: 24) {
+//        LoadingAnimationView()
+//    }
+//    .padding(32)
+//    .background(Color(.systemBackground))
+//}
