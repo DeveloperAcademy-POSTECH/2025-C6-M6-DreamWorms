@@ -2,29 +2,47 @@
 //  MapView.swift
 //  SUSA24-iOS
 //
-//  Created by mini on 10/29/25.
+//  Updated by Moo on 11/08/25.
 //
 
 import NMapsMap
 import SwiftUI
 
+/// 네이버 지도와 위치 정보 시트를 함께 렌더링하고, 명령 디스패처(MapDispatcher)의 요청을 소비해 지도 이동/시트 갱신을 수행하는 메인 지도 화면입니다.
 struct MapView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
     
     // MARK: - Dependencies
     
-    @State var store: DWStore<MapFeature>
-
+    @State private var store: DWStore<MapFeature>
+    @Bindable private var dispatcher: MapDispatcher
+    
     // MARK: - Properties
+    
+    // MARK: - Initializer
+    
+    init(store: DWStore<MapFeature>, dispatcher: MapDispatcher) {
+        self._store = State(initialValue: store)
+        self._dispatcher = Bindable(dispatcher)
+    }
     
     // MARK: - View
 
     var body: some View {
         ZStack {
-            NaverMapView(onMapTapped: { latlng in
-                handleMapTap(latlng: latlng)
-            })
+            NaverMapView(
+                cameraTargetCoordinate: store.state.cameraTargetCoordinate,
+                shouldFocusMyLocation: store.state.shouldFocusMyLocation,
+                onCameraMoveConsumed: {
+                    // 지도 카메라 이동이 완료되었으므로 상태의 명령을 초기화합니다.
+                    store.send(.clearCameraTarget)
+                },
+                onMyLocationFocusConsumed: {
+                    store.send(.clearFocusMyLocationFlag)
+                },
+                onMapTapped: { latlng in store.send(.mapTapped(latlng)) }
+            )
             .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
@@ -76,12 +94,21 @@ struct MapView: View {
                             onLayerTapped: {
                                 store.send(.toggleMapLayerSheet)
                             },
-                            onRecenterTapped: nil
+                            onRecenterTapped: {
+                                store.send(.requestFocusMyLocation)
+                            }
                         )
                         
                         DWGlassEffectCircleButton(
                             image: Image(.scan),
-                            action: { coordinator.push(.cameraScene) }
+                            // TODO: 작업이 안되어있어서 임시로 UUID 생성해서 넣음
+                            action: {
+                                if let caseId = store.state.caseId {
+                                    coordinator.push(.cameraScene(caseID: caseId))
+                                } else {
+                                    coordinator.push(.cameraScene(caseID: UUID()))
+                                }
+                            }
                         )
                         .setupSize(48)
                         .setupIconSize(width: 25, height: 19)
@@ -93,9 +120,38 @@ struct MapView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        // TODO: 지도 레이어 시트 구현 (store.state.isMapLayerSheetPresented 사용)
         .onAppear {
             store.send(.onAppear)
+        }
+        .onChange(of: dispatcher.request) { _, request in
+            guard let request else { return }
+            // 명령 디스패처가 발행한 지도 명령을 Reducer 흐름으로 전달합니다.
+            switch request {
+            case let .moveToSearchResult(coordinate, placeInfo):
+                store.send(.moveToSearchResult(coordinate, placeInfo))
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { store.state.isMapLayerSheetPresented },
+            set: { store.send(.setMapLayerSheetPresented($0)) }
+        )) {
+            MapLayerSettingSheet(
+                selectedRange: Binding(
+                    get: { store.state.mapLayerCoverageRange },
+                    set: { store.send(.setMapLayerCoverage($0)) }
+                ),
+                isCCTVEnabled: Binding(
+                    get: { store.state.isCCTVLayerEnabled },
+                    set: { store.send(.setCCTVLayerEnabled($0)) }
+                ),
+                isBaseStationEnabled: Binding(
+                    get: { store.state.isBaseStationLayerEnabled },
+                    set: { store.send(.setBaseStationLayerEnabled($0)) }
+                ),
+                onClose: { store.send(.setMapLayerSheetPresented(false)) }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: Binding(
             get: { store.state.isPlaceInfoSheetPresented },
@@ -116,13 +172,6 @@ struct MapView: View {
             .presentationDragIndicator(.hidden)
         }
     }
-    
-    // MARK: - Private Methods
-    
-    /// 맵 터치 시 좌표로 주소 정보를 조회합니다.
-    private func handleMapTap(latlng: NMGLatLng) {
-        store.send(.mapTapped(latlng))
-    }
 }
 
 // MARK: - Preview
@@ -131,8 +180,11 @@ struct MapView: View {
 //    let repository = MockLocationRepository()
 //    let store = DWStore(
 //        initialState: MapFeature.State(caseId: UUID()),
-//        reducer: MapFeature(repository: repository)
+//        reducer: MapFeature(repository: repository, dispatcher: MapDispatcher())
 //    )
-//    return MapView(store: store)
+//    return MapView(
+//        store: store,
+//        dispatcher: MapDispatcher()
+//    )
 //        .environment(AppCoordinator())
 // }

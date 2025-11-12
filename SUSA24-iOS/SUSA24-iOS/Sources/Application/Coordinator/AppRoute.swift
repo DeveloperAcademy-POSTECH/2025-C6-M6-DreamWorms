@@ -8,7 +8,7 @@
 import Foundation
 
 enum AppRoute: Hashable {
-    case cameraScene
+    case cameraScene(caseID: UUID)
     case caseAddScene
     case caseListScene
     case dashboardScene(caseID: UUID)
@@ -19,5 +19,20 @@ enum AppRoute: Hashable {
     case searchScene
     case selectLocationScene
     case settingScene
-//    case timeLineScene
+    case scanLoadScene
+    case photoDetailsScene(photos: [CapturedPhoto], camera: CameraModel)
+    //    case timeLineScene
+}
+
+extension AppRoute {
+    var useTabBar: Bool {
+        switch self {
+            // 보여주지 않을 화면들만 표시
+        case .cameraScene, .photoDetailsScene,
+                .scanLoadScene, .searchScene:
+            false
+        default:
+            true
+        }
+    }
 }

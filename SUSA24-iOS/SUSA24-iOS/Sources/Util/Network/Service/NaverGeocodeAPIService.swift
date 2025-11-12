@@ -1,15 +1,16 @@
 //
-//  GeocodeService.swift
+//  NaverGeocodeAPIService.swift
 //  SUSA24-iOS
 //
-//  Created by mini on 10/31/25.
+//  Created by Moo on 11/11/25.
 //
 
 import Alamofire
 import Foundation
 
-final class GeocodeService {
-    static let shared = GeocodeService()
+// TODO: `NetworkClient`를 사용하도록 리팩토링 필요.
+final class NaverGeocodeAPIService {
+    static let shared = NaverGeocodeAPIService()
     private init() {}
     
     private let session: Session = {
@@ -31,7 +32,7 @@ final class GeocodeService {
             .serializingData()
             .value
 
-        let response = try JSONDecoder().decode(GeocodeResponseDTO.self, from: requestData)
+        let response = try JSONDecoder().decode(NaverGeocodeResponseDTO.self, from: requestData)
 
         guard response.status == "OK" else {
             throw GeocodeError.invalidStatus(response.status, response.errorMessage)

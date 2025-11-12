@@ -69,31 +69,31 @@ private extension DashboardView {}
 
 // MARK: - Preview
 
-#if DEBUG
-    import SwiftUI
-
-    /// 프리뷰 전용 목업 레포지토리 (대시보드가 onAppear에서 불러가도록)
-    private struct DesignMockLocationRepository: LocationRepositoryProtocol {
-        func fetchLocations(caseId _: UUID) async throws -> [Location] {
-            let list: [Location] = [
-                Location(id: UUID(), address: "미니네 천안 집", pointLatitude: 37.5759, pointLongitude: 126.9768, locationType: 2, colorType: 0, receivedAt: Date.now),
-            ]
-            return list
-        }
-    
-        func deleteLocation(id _: UUID) async throws {}
-        func createLocations(data _: [Location], caseId _: UUID) async throws {}
-        func fetchNoCellLocations(caseId _: UUID, locationType _: [Int]) async throws -> [Location] { [] }
-    }
-
-    #Preview("Dashboard – LocationCard (TOP3)") {
-        DashboardView(
-            store: DWStore(
-                initialState: DashboardFeature.State(),
-                reducer: DashboardFeature(repository: DesignMockLocationRepository())
-            ),
-            currentCaseID: UUID()
-        )
-        .environment(AppCoordinator())
-    }
-#endif
+// #if DEBUG
+//    import SwiftUI
+//
+//    /// 프리뷰 전용 목업 레포지토리 (대시보드가 onAppear에서 불러가도록)
+//    private struct DesignMockLocationRepository: LocationRepositoryProtocol {
+//        func fetchLocations(caseId _: UUID) async throws -> [Location] {
+//            let list: [Location] = [
+//                Location(id: UUID(), address: "미니네 천안 집", pointLatitude: 37.5759, pointLongitude: 126.9768, locationType: 2, colorType: 0, receivedAt: Date.now),
+//            ]
+//            return list
+//        }
+//
+//        func deleteLocation(id _: UUID) async throws {}
+//        func createLocations(data _: [Location], caseId _: UUID) async throws {}
+//        func fetchNoCellLocations(caseId _: UUID, locationType _: [Int]) async throws -> [Location] { [] }
+//    }
+//
+//    #Preview("Dashboard – LocationCard (TOP3)") {
+//        DashboardView(
+//            store: DWStore(
+//                initialState: DashboardFeature.State(),
+//                reducer: DashboardFeature(repository: DesignMockLocationRepository())
+//            ),
+//            currentCaseID: UUID()
+//        )
+//        .environment(AppCoordinator())
+//    }
+// #endif

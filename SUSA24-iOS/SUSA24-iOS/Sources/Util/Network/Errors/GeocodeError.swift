@@ -2,7 +2,7 @@
 //  GeocodeError.swift
 //  SUSA24-iOS
 //
-//  Created by mini on 10/31/25.
+//  Created by Moo on 11/11/25.
 //
 
 import Foundation

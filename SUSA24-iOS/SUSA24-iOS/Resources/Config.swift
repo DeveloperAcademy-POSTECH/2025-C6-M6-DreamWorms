@@ -13,6 +13,7 @@ enum Config {
             static let naverMapClientID = "NAVER_CLOUD_MAP_API_CLIENT_ID"
             static let naverMapClientSecret = "NAVER_CLOUD_MAP_API_CLIENT_SECRET"
             static let kakaoRestAPIKey = "KAKAO_REST_API_KEY"
+            static let VWorldAPIKey = "VWORLD_CCTV_API_KEY"
         }
     }
     
@@ -42,6 +43,13 @@ extension Config {
     static let kakaoRestAPIKey: String = {
         guard let key = Config.infoDictionary[Keys.Plist.kakaoRestAPIKey] as? String else {
             fatalError("❌KAKAO_REST_API_KEY is not set in plist for this configuration❌")
+        }
+        return key
+    }()
+    
+    static let VWorldAPIKey: String = {
+        guard let key = Config.infoDictionary[Keys.Plist.VWorldAPIKey] as? String else {
+            fatalError("❌VWORLD_CCTV_API_KEY is not set in plist for this configuration❌")
         }
         return key
     }()
