@@ -63,6 +63,8 @@ struct RootView: View {
                             moduleFactory.makePhotoDetailsView(photos: photos, camera: camera)
                         case let .scanLoadScene(caseID, photos):
                             moduleFactory.makeScanLoadView(caseID: caseID, photos: photos)
+                        case let .scanListScene(caseID, scanResults):
+                            moduleFactory.makeScanListView(caseID: caseID, scanResults: scanResults, context: context)
                         }
                     }
                     .onChange(of: coordinator.currentRoute) {
