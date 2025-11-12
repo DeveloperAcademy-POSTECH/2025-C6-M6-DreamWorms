@@ -45,8 +45,13 @@ struct MapView: View {
                     store.send(.clearFocusMyLocationFlag)
                 },
                 onMapTapped: { latlng in store.send(.mapTapped(latlng)) },
+                onCameraIdle: { bounds, zoomLevel in
+                    store.send(.cameraIdle(bounds: bounds, zoomLevel: zoomLevel))
+                },
                 cellStations: store.state.cellStations,
                 isCellLayerEnabled: store.state.isBaseStationLayerEnabled,
+                cctvMarkers: store.state.cctvMarkers,
+                isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
                 infrastructureManager: infrastructureManager
             )
             .ignoresSafeArea()
