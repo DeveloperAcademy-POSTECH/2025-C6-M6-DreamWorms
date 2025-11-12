@@ -1,5 +1,5 @@
 //
-//  PhotoView.swift
+//  PhotoImageView.swift
 //  SUSA24-iOS
 //
 //  Created by taeni on 11/10/25.

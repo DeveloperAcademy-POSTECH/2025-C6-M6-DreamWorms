@@ -13,7 +13,6 @@ import UIKit
 /// - 줌 및 포커스 제어
 /// - 고급 기능: Torch, 자동 포커스, 문서 인식, 렌즈 얼룩 감지
 struct CameraFeature: DWReducer {
-    
     // MARK: - Dependency Injection
     
     private let camera: CameraModel
@@ -25,7 +24,6 @@ struct CameraFeature: DWReducer {
     // MARK: - State
     
     struct State: DWState {
-        
         // MARK: Case Info
         
         /// 현재 작업 중인 케이스 ID
@@ -117,7 +115,6 @@ struct CameraFeature: DWReducer {
     // MARK: - Action
     
     enum Action: DWAction {
-        
         // MARK: Lifecycle Actions
         
         case onAppear
@@ -175,12 +172,10 @@ struct CameraFeature: DWReducer {
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
-            
             // MARK: Lifecycle
             
         case .onAppear:
             return .task { [camera] in
-                
                 await camera.start()
                 let status = await camera.cameraStatus
                 
@@ -218,7 +213,7 @@ struct CameraFeature: DWReducer {
             
             // MARK: Camera Control
             
-        case .setCameraStatus(let status):
+        case let .setCameraStatus(status):
             state.cameraStatus = status
             
             if status == .running {
@@ -229,7 +224,7 @@ struct CameraFeature: DWReducer {
             }
             return .none
             
-        case .setCameraRunning(let isRunning):
+        case let .setCameraRunning(isRunning):
             state.isRunning = isRunning
             return .none
             
@@ -240,7 +235,7 @@ struct CameraFeature: DWReducer {
                 return .send(.showToast)
             }
             
-            guard state.isCaptureAvailable && !state.isCapturing else {
+            guard state.isCaptureAvailable, !state.isCapturing else {
                 return .none
             }
             
@@ -261,7 +256,7 @@ struct CameraFeature: DWReducer {
                 return .updatePhotoCount(photoCount)
             }
             
-        case .updatePhotoCount(let count):
+        case let .updatePhotoCount(count):
             state.photoCount = count
             
             if count >= 10 {
@@ -273,7 +268,7 @@ struct CameraFeature: DWReducer {
                 return .updateThumbnail(thumbnail)
             }
             
-        case .updateThumbnail(let image):
+        case let .updateThumbnail(image):
             state.lastThumbnail = image
             
             return .task { [camera] in
@@ -281,12 +276,12 @@ struct CameraFeature: DWReducer {
                 return .updateAllPhotos(allPhotos)
             }
             
-        case .updateAllPhotos(let photos):
+        case let .updateAllPhotos(photos):
             state.allPhotos = photos
             state.isCapturing = false
             return .none
             
-        case .updateCaptureAvailability(let isAvailable):
+        case let .updateCaptureAvailability(isAvailable):
             state.isCaptureAvailable = isAvailable
             return .none
             
@@ -310,7 +305,7 @@ struct CameraFeature: DWReducer {
             
             // MARK: Gestures
             
-        case .pinchZoomChanged(let scale):
+        case let .pinchZoomChanged(scale):
             let delta = scale / state.lastZoomScale
             state.lastZoomScale = scale
             
@@ -324,11 +319,11 @@ struct CameraFeature: DWReducer {
             state.lastZoomScale = 1.0
             return .none
             
-        case .updateZoomFactor(let factor):
+        case let .updateZoomFactor(factor):
             state.currentZoomFactor = factor
             return .none
             
-        case .tapToFocus(let focusPoint):
+        case let .tapToFocus(focusPoint):
             guard !state.isAutoFocusEnabled else {
                 return .none
             }
@@ -411,19 +406,17 @@ struct CameraFeature: DWReducer {
         case .visionProcessorInitialized:
             state.isVisionProcessorInitialized = true
             
-            if state.isDocumentDetectionEnabled && state.isLensSmudgeDetectionEnabled {
+            if state.isDocumentDetectionEnabled, state.isLensSmudgeDetectionEnabled {
                 return .send(.startDocumentDetectionStream)
-            }
-            else if state.isDocumentDetectionEnabled {
+            } else if state.isDocumentDetectionEnabled {
                 return .send(.startDocumentDetectionStream)
-            }
-            else if state.isLensSmudgeDetectionEnabled {
+            } else if state.isLensSmudgeDetectionEnabled {
                 return .send(.startLensSmudgeStream)
             }
             
             return .none
             
-            // TODO: 비효율적이여보임.
+        // TODO: 비효율적이여보임.
         case .startDocumentDetectionStream:
             return .init { [camera] downstream in
                 Task {
@@ -437,7 +430,7 @@ struct CameraFeature: DWReducer {
                 }
             }
             
-            // TODO: 비효율적이여보임.
+        // TODO: 비효율적이여보임.
         case .startLensSmudgeStream:
             return .init { [camera] downstream in
                 Task {
@@ -451,11 +444,11 @@ struct CameraFeature: DWReducer {
                 }
             }
             
-        case .updateDocumentDetection(let result):
+        case let .updateDocumentDetection(result):
             state.documentDetection = result
             return .none
             
-        case .updateLensSmudgeDetection(let result):
+        case let .updateLensSmudgeDetection(result):
             state.lensSmudgeDetection = result
             return .none
         }

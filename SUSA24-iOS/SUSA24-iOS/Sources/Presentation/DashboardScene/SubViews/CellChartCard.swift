@@ -61,18 +61,18 @@ struct CellChartCard: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    @Previewable @State var selectionWeekday: Weekday = .mon
 //    ZStack {
 //        Color.mainAlternative.ignoresSafeArea()
-//        
+//
 //        VStack(spacing: 12) {
 //            CellChartCard(selectionWeekday: $selectionWeekday, address: "퇴계로20길 56", summary: "오전 7-8시에 주로 머물렀습니다.", series: [
 //            ])
-//            
+//
 //            CellChartCard(selectionWeekday: $selectionWeekday, series: [
 //            ])
 //        }
 //        .padding(.horizontal, 16)
 //    }
-//}
+// }

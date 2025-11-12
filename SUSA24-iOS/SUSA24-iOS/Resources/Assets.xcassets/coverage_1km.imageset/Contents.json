@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "coverage_1km.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

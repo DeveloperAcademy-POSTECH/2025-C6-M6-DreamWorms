@@ -64,7 +64,7 @@ private extension DashboardView {}
 
 // MARK: - Preview
 
-//#if DEBUG
+// #if DEBUG
 //    import SwiftUI
 //
 //    /// 프리뷰 전용 목업 레포지토리 (대시보드가 onAppear에서 불러가도록)
@@ -75,7 +75,7 @@ private extension DashboardView {}
 //            ]
 //            return list
 //        }
-//    
+//
 //        func deleteLocation(id _: UUID) async throws {}
 //        func createLocations(data _: [Location], caseId _: UUID) async throws {}
 //        func fetchNoCellLocations(caseId _: UUID, locationType _: [Int]) async throws -> [Location] { [] }
@@ -91,4 +91,4 @@ private extension DashboardView {}
 //        )
 //        .environment(AppCoordinator())
 //    }
-//#endif
+// #endif

@@ -35,11 +35,11 @@ struct LensSmudgeOverlay: View {
     // color 임시
     func statusBackgroundColor(_ confidence: Float) -> Color {
         if confidence > 0.7 {
-            return Color.red.opacity(0.6)
+            Color.red.opacity(0.6)
         } else if confidence > 0.4 {
-            return Color.yellow.opacity(0.6)
+            Color.yellow.opacity(0.6)
         } else {
-            return Color.green.opacity(0.6)
+            Color.green.opacity(0.6)
         }
     }
 }
