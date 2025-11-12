@@ -21,9 +21,9 @@ struct LensSmudgeDetectionResult: Sendable {
     /// 렌즈 상태를 문자열로 반환
     var statusText: String {
         if confidence > 0.7 {
-            return "정확도를 위해 카메라 렌즈를 닦아주세요"
+            "정확도를 위해 카메라 렌즈를 닦아주세요"
         } else {
-            return ""
+            ""
         }
     }
 }

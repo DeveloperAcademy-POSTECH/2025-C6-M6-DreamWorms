@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct PhotoDetailsFeature: DWReducer {
-    
     // MARK: - Dependencies
     
     // CameraView 연동
@@ -59,8 +58,7 @@ struct PhotoDetailsFeature: DWReducer {
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
-            
-        case .currentIndexChanged(let newIndex):
+        case let .currentIndexChanged(newIndex):
             state.currentIndex = newIndex
             return .none
             

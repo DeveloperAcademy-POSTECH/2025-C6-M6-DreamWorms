@@ -26,7 +26,6 @@ struct DefaultThumbnailView: View {
 // MARK: - Thumbnail Button
 
 struct ThumbnailButton: View {
-    
     /// 촬영된 사진의 개수
     let count: Int
     
@@ -37,7 +36,7 @@ struct ThumbnailButton: View {
     
     var body: some View {
         Button(action: action) {
-            if let uiImage = uiImage, count > 0 {
+            if let uiImage, count > 0 {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()

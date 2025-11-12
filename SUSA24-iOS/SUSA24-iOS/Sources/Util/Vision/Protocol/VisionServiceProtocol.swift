@@ -5,8 +5,8 @@
 //  Created by taeni on 11/8/25.
 //
 
-import Foundation
 import CoreVideo
+import Foundation
 
 /// Vision Framework 기능을 제공하는 서비스 프로토콜
 ///
@@ -33,7 +33,6 @@ import CoreVideo
 /// print("추출된 주소: \(result.addresses)")
 /// ```
 protocol VisionServiceProtocol: Sendable {
-    
     // MARK: - 실시간 감지
     
     /// 프레임 스트림에서 문서를 실시간으로 감지합니다.

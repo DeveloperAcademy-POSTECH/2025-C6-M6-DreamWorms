@@ -5,12 +5,11 @@
 //  Created by taeni on 11/6/25.
 //
 
+import AVFoundation
 import SwiftUI
 import Vision
-import AVFoundation
 
 extension CameraModel {
-    
     /// Vision 분석을 활성화합니다
     /// - Note: 이미 활성화되어 있으면 무시
     func enableVisionAnalysis() {
@@ -90,11 +89,11 @@ extension CameraModel {
 extension CameraModel {
     /// 문서가 감지되었는지 여부 (UI용 computed property)
     var isDocumentDetected: Bool {
-        false  // View에서 documentDetection != nil로 확인하세요
+        false // View에서 documentDetection != nil로 확인하세요
     }
     
     /// 마지막 감지된 문서의 신뢰도 (0.0 ~ 1.0)
     var documentDetectionConfidence: Float {
-        0.0  // 기본값
+        0.0 // 기본값
     }
 }

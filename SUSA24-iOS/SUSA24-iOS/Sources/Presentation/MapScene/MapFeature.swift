@@ -68,7 +68,7 @@ struct MapFeature: DWReducer {
         /// 지도 레이어의 커버리지 반경입니다.
         var mapLayerCoverageRange: CoverageRangeType = .half
         /// CCTV 레이어 표시 여부입니다.
-        var isCCTVLayerEnabled: Bool = true
+        var isCCTVLayerEnabled: Bool = false
         /// 기지국 레이어 표시 여부입니다.
         var isBaseStationLayerEnabled: Bool = false
         
