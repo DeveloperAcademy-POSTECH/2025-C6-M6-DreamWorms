@@ -39,13 +39,22 @@ struct MapFeature: DWReducer {
     
     /// 지도 화면의 상태를 나타냅니다.
     struct State: DWState {
+        // MARK: 데이터 소스
+        
         /// 표시할 위치 데이터 배열입니다.
         var locations: [Location] = []
         /// 현재 선택된 케이스의 UUID입니다. `onAppear` 시 CoreData로부터 위치 데이터를 로드하는 데 사용됩니다.
         var caseId: UUID?
+        
+        // MARK: 카메라 명령 상태
+        
         /// 명령 디스패처로부터 전달된 지도 이동 명령을 반영할 목표 좌표입니다.
-        /// `MapView`가 해당 좌표를 소비하면 `.consumeTargetCoordinate` 액션으로 다시 nil로 초기화합니다.
-        var targetCoordinate: MapCoordinate?
+        /// `MapView`가 해당 좌표를 소비하면 `.clearCameraTarget` 액션으로 다시 nil로 초기화합니다.
+        var cameraTargetCoordinate: MapCoordinate?
+        /// 현위치를 포커싱해야 하는지 여부입니다.
+        var shouldFocusMyLocation: Bool = false
+        
+        // MARK: 지도 레이어/필터 UI 상태
         
         /// 기지국 범위 필터의 선택 상태입니다.
         var isBaseStationRangeSelected: Bool = false
@@ -56,6 +65,12 @@ struct MapFeature: DWReducer {
         
         /// 지도 레이어 시트의 표시 상태입니다. `MapLayerContainer` 버튼 토글과 연결됩니다.
         var isMapLayerSheetPresented: Bool = false
+        /// 지도 레이어의 커버리지 반경입니다.
+        var mapLayerCoverageRange: CoverageRangeType = .half
+        /// CCTV 레이어 표시 여부입니다.
+        var isCCTVLayerEnabled: Bool = false
+        /// 기지국 레이어 표시 여부입니다.
+        var isBaseStationLayerEnabled: Bool = false
         
         // MARK: - 위치정보 시트 관련 상태
         
@@ -81,6 +96,14 @@ struct MapFeature: DWReducer {
         case selectFilter(MapFilterType)
         /// 지도 레이어 시트를 토글하는 액션입니다.
         case toggleMapLayerSheet
+        /// 지도 레이어 시트 표시 상태를 직접 설정합니다.
+        case setMapLayerSheetPresented(Bool)
+        /// 지도 레이어 커버리지 반경을 설정합니다.
+        case setMapLayerCoverage(CoverageRangeType)
+        /// CCTV 레이어 표시 여부를 설정합니다.
+        case setCCTVLayerEnabled(Bool)
+        /// 기지국 레이어 표시 여부를 설정합니다.
+        case setBaseStationLayerEnabled(Bool)
         
         // MARK: - 위치정보 시트 관련 액션
         
@@ -94,14 +117,21 @@ struct MapFeature: DWReducer {
         case showPlaceInfo(PlaceInfo)
         /// 위치정보 시트를 닫는 액션입니다. 사용자가 시트를 드래그 내려 닫거나 Close 버튼을 누를 때 호출됩니다.
         case hidePlaceInfo
+
+        // MARK: 카메라 명령
+        
         /// 검색 결과를 선택했을 때 지도 카메라를 해당 좌표로 이동시키고,
         /// 선택된 장소 정보를 시트에 표시하는 액션입니다.
         /// - Parameters:
         ///   - coordinate: 이동할 지도 좌표
         ///   - placeInfo: 바텀시트에 표시할 장소 메타데이터
         case moveToSearchResult(MapCoordinate, PlaceInfo)
-        /// 지도 카메라 이동이 완료되면 호출되는 액션입니다. `targetCoordinate`를 초기화합니다.
-        case consumeTargetCoordinate
+        /// 지도 카메라 이동이 완료되면 호출되는 액션입니다. `cameraTargetCoordinate`를 초기화합니다.
+        case clearCameraTarget
+        /// 현위치 버튼을 탭했을 때 호출되는 액션입니다.
+        case requestFocusMyLocation
+        /// 현위치 포커싱 명령을 소비합니다.
+        case clearFocusMyLocationFlag
     }
     
     // MARK: - Reducer
@@ -146,6 +176,22 @@ struct MapFeature: DWReducer {
             state.isMapLayerSheetPresented.toggle()
             return .none
             
+        case let .setMapLayerSheetPresented(isPresented):
+            state.isMapLayerSheetPresented = isPresented
+            return .none
+            
+        case let .setMapLayerCoverage(range):
+            state.mapLayerCoverageRange = range
+            return .none
+            
+        case let .setCCTVLayerEnabled(isEnabled):
+            state.isCCTVLayerEnabled = isEnabled
+            return .none
+            
+        case let .setBaseStationLayerEnabled(isEnabled):
+            state.isBaseStationLayerEnabled = isEnabled
+            return .none
+            
         // MARK: - 위치정보 시트 관련 액션 처리
             
         case let .mapTapped(latlng):
@@ -184,7 +230,7 @@ struct MapFeature: DWReducer {
             
         case let .moveToSearchResult(coordinate, placeInfo):
             // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
-            state.targetCoordinate = coordinate
+            state.cameraTargetCoordinate = coordinate
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
@@ -192,9 +238,17 @@ struct MapFeature: DWReducer {
             dispatcher.consume()
             return .none
             
-        case .consumeTargetCoordinate:
+        case .clearCameraTarget:
             // 지도 카메라 이동이 완료되었음을 반영합니다.
-            state.targetCoordinate = nil
+            state.cameraTargetCoordinate = nil
+            return .none
+            
+        case .requestFocusMyLocation:
+            state.shouldFocusMyLocation = true
+            return .none
+            
+        case .clearFocusMyLocationFlag:
+            state.shouldFocusMyLocation = false
             return .none
         }
     }

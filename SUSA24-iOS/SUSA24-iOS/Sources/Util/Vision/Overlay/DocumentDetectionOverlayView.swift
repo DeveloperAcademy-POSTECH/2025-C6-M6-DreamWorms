@@ -15,13 +15,13 @@ struct DocumentDetectionOverlayView: UIViewRepresentable {
     let documentDetection: DocumentDetectionResult?
     let screenSize: CGSize
     
-    func makeUIView(context: Context) -> OverlayUIView {
+    func makeUIView(context _: Context) -> OverlayUIView {
         let view = OverlayUIView()
         view.backgroundColor = .clear
         return view
     }
     
-    func updateUIView(_ uiView: OverlayUIView, context: Context) {
+    func updateUIView(_ uiView: OverlayUIView, context _: Context) {
         if let detection = documentDetection {
             uiView.updateDetection(detection, screenSize: screenSize)
         } else {
@@ -48,7 +48,7 @@ class OverlayUIView: UIView {
     
     private func setupLayers() {
         // CAShapeLayer로 문서 경계와 반투명 배경을 함께 그리기 (perspective 유지)
-        shapeLayer.fillColor = UIColor(Color.primaryLight1.opacity(0.15)).cgColor  // 반투명 파란색 배경
+        shapeLayer.fillColor = UIColor(Color.primaryLight1.opacity(0.15)).cgColor // 반투명 파란색 배경
         shapeLayer.strokeColor = UIColor.primaryLight1.cgColor
         shapeLayer.lineWidth = 3
         shapeLayer.lineCap = .round
@@ -69,15 +69,15 @@ class OverlayUIView: UIView {
         // Perspective가 있는 사각형 경로 생성 (4개 꼭짓점 연결)
         // 메모 앱처럼 사각형이 아닌 사다리꼴 등의 형태로 표시됨
         let path = UIBezierPath()
-        path.move(to: screenCorners[0])      // 좌상
-        path.addLine(to: screenCorners[1])   // 우상
-        path.addLine(to: screenCorners[2])   // 우하
-        path.addLine(to: screenCorners[3])   // 좌하
-        path.close()                         // 좌상으로 다시 연결
+        path.move(to: screenCorners[0]) // 좌상
+        path.addLine(to: screenCorners[1]) // 우상
+        path.addLine(to: screenCorners[2]) // 우하
+        path.addLine(to: screenCorners[3]) // 좌하
+        path.close() // 좌상으로 다시 연결
         
         // CAShapeLayer 업데이트 (배경 + 테두리 모두 처리)
         CATransaction.begin()
-        CATransaction.setDisableActions(true)  // 애니메이션 비활성화 (성능)
+        CATransaction.setDisableActions(true) // 애니메이션 비활성화 (성능)
         shapeLayer.path = path.cgPath
         CATransaction.commit()
     }
@@ -93,13 +93,13 @@ class OverlayUIView: UIView {
 
 // MARK: - Helper Extensions
 
-extension Array where Element == CGPoint {
+extension Array<CGPoint> {
     /// 포인트 배열의 경계 상자를 계산합니다
     func boundingBox() -> CGRect {
         guard !isEmpty else { return .zero }
         
-        let xs = map { $0.x }
-        let ys = map { $0.y }
+        let xs = map(\.x)
+        let ys = map(\.y)
         
         let minX = xs.min() ?? 0
         let maxX = xs.max() ?? 0
@@ -118,26 +118,26 @@ extension Array where Element == CGPoint {
 // MARK: - Preview
 
 #if DEBUG
-struct DocumentDetectionOverlayView_Previews: PreviewProvider {
-    static var previews: some View {
-        let sampleDetection = DocumentDetectionResult(
-            boundingBox: CGRect(x: 0.1, y: 0.2, width: 0.8, height: 0.6),
-            corners: [
-                CGPoint(x: 0.1, y: 0.2),
-                CGPoint(x: 0.9, y: 0.25),
-                CGPoint(x: 0.85, y: 0.8),
-                CGPoint(x: 0.15, y: 0.75)
-            ],
-            confidence: 0.95,
-            timestamp: 0
-        )
+    struct DocumentDetectionOverlayView_Previews: PreviewProvider {
+        static var previews: some View {
+            let sampleDetection = DocumentDetectionResult(
+                boundingBox: CGRect(x: 0.1, y: 0.2, width: 0.8, height: 0.6),
+                corners: [
+                    CGPoint(x: 0.1, y: 0.2),
+                    CGPoint(x: 0.9, y: 0.25),
+                    CGPoint(x: 0.85, y: 0.8),
+                    CGPoint(x: 0.15, y: 0.75),
+                ],
+                confidence: 0.95,
+                timestamp: 0
+            )
         
-        DocumentDetectionOverlayView(
-            documentDetection: sampleDetection,
-            screenSize: CGSize(width: 375, height: 812)
-        )
-        .frame(width: 375, height: 812)
-        .background(Color.black)
+            DocumentDetectionOverlayView(
+                documentDetection: sampleDetection,
+                screenSize: CGSize(width: 375, height: 812)
+            )
+            .frame(width: 375, height: 812)
+            .background(Color.black)
+        }
     }
-}
 #endif

@@ -10,7 +10,20 @@
     "%lld" : {
 
     },
+    "%lld/%lld" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "%lld/10" : {
+
+    },
+    "%lld%%" : {
 
     },
     "%lld개" : {
@@ -280,6 +293,28 @@
         }
       }
     },
+    "cctv" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV"
+          }
+        }
+      }
+    },
+    "cell_station" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국"
+          }
+        }
+      }
+    },
     "chart_CellLocationTitle" : {
       "comment" : "차트_상단 기지국 내용 입력 공간",
       "extractionState" : "manual",
@@ -379,6 +414,28 @@
     "Hour" : {
 
     },
+    "layer_setting_coverage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 반경"
+          }
+        }
+      }
+    },
+    "layer_setting_toggle_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 세부 정보"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
@@ -387,6 +444,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지도"
+          }
+        }
+      }
+    },
+    "map_setting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 설정"
           }
         }
       }
@@ -554,6 +622,9 @@
           }
         }
       }
+    },
+    "ScanLoad" : {
+
     },
     "scanLoad_subTitle" : {
       "comment" : "스캔 로딩_서브타이틀",

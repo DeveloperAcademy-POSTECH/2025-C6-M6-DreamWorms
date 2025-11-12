@@ -9,7 +9,6 @@ import SwiftUI
 
 /// 카메라 촬영 화면 - 순수 UI만 담당
 struct CameraView: View {
-    
     @Environment(AppCoordinator.self)
     private var coordinator
     
@@ -40,13 +39,16 @@ struct CameraView: View {
     var body: some View {
         ZStack {
             // MARK: - 카메라 프리뷰 (전체 화면)
+
             CameraPreview(source: store.state.previewSource)
                 .ignoresSafeArea()
             
             // MARK: - 문서 감지 오버레이 (조건부 표시)
+
             // TODO: UIScreen 제거
             if store.state.isDocumentDetectionEnabled,
-                let detection = store.state.documentDetection {
+               let detection = store.state.documentDetection
+            {
                 DocumentDetectionOverlayView(
                     documentDetection: detection,
                     screenSize: UIScreen.main.bounds.size
@@ -56,12 +58,15 @@ struct CameraView: View {
             }
             
             // MARK: - 렌즈 얼룩 상태 표시 (조건부)
+
             if store.state.isLensSmudgeDetectionEnabled,
-                let smudge = store.state.lensSmudgeDetection {
+               let smudge = store.state.lensSmudgeDetection
+            {
                 LensSmudgeOverlay(smudge: smudge)
             }
             
             // MARK: - 헤더 (상단 오버레이)
+
             VStack(spacing: 0) {
                 CameraHeader(
                     onBackTapped: handleBackTapped,
@@ -74,6 +79,7 @@ struct CameraView: View {
             }
             
             // MARK: - 컨트롤러 (하단 오버레이)
+
             VStack(spacing: 0) {
                 Spacer()
                     .allowsHitTesting(false)
@@ -92,13 +98,14 @@ struct CameraView: View {
             }
             
             // MARK: - 설정 메뉴 (우측 하단)
+
             // 일단은 임시
 //            VStack {
 //                Spacer()
-//                
+//
 //                HStack {
 //                    Spacer()
-//                    
+//
 //                    Menu {
 //                        // MARK: - 기본 설정
 //                        Section("기본 설정") {
@@ -109,7 +116,7 @@ struct CameraView: View {
 //                                    systemImage: store.state.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"
 //                                )
 //                            }
-//                            
+//
 //                            // 자동 포커스
 //                            Button(action: { store.send(.toggleAutoFocus) }) {
 //                                Label(
@@ -118,7 +125,7 @@ struct CameraView: View {
 //                                )
 //                            }
 //                        }
-//                        
+//
 //                        // MARK: - Vision 기능
 //                        Section("Vision 기능") {
 //                            // 문서 인식
@@ -137,7 +144,7 @@ struct CameraView: View {
 //                                    Image(systemName: store.state.isDocumentDetectionEnabled ? "doc.viewfinder.fill" : "doc.viewfinder")
 //                                }
 //                            }
-//                            
+//
 //                            // 렌즈 얼룩 감지
 //                            Button(action: { store.send(.toggleLensSmudgeDetection) }) {
 //                                Label {
@@ -205,8 +212,7 @@ struct CameraView: View {
             ) {
                 coordinator.pop()
             }
-            Button(String(localized: .cameraExitCancel)) {
-            }
+            Button(String(localized: .cameraExitCancel)) {}
         } message: {
             Text(String(localized: .cameraExitAlertContent))
         }
@@ -216,7 +222,6 @@ struct CameraView: View {
 // MARK: - Private Computed Properties
 
 private extension CameraView {
-    
     func handleBackTapped() {
         if store.state.photoCount > 0 {
             showExitConfirmation = true
@@ -230,7 +235,7 @@ private extension CameraView {
             .onChanged { scale in
                 store.send(.pinchZoomChanged(scale))
             }
-            .onEnded { finalScale in
+            .onEnded { _ in
                 store.send(.pinchZoomEnded)
             }
     }
@@ -239,8 +244,9 @@ private extension CameraView {
         guard let window = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })
             .first?.windows
-            .first else {
-                return
+            .first
+        else {
+            return
         }
         
         let normalizedX = location.x / window.bounds.width
@@ -252,11 +258,11 @@ private extension CameraView {
     
     func statusBackgroundColor(_ confidence: Float) -> Color {
         if confidence > 0.7 {
-            return Color.red.opacity(0.6)
+            Color.red.opacity(0.6)
         } else if confidence > 0.4 {
-            return Color.yellow.opacity(0.6)
+            Color.yellow.opacity(0.6)
         } else {
-            return Color.green.opacity(0.6)
+            Color.green.opacity(0.6)
         }
     }
 }

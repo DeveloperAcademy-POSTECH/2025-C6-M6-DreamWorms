@@ -63,14 +63,15 @@ struct PlaceInfoSheetHeader: View {
             
             Spacer()
             
-            Button(action: onClose) {
-                Image(.xmark)
-                    .frame(width: circleWidth, height: circleHeight)
-                    .foregroundStyle(.labelAlternative)
-            }
-            .frame(width: headerSize, height: headerSize)
-            .background(.labelAssistive)
-            .clipShape(Circle())
+            DWGlassEffectCircleButton(
+                image: Image(.xmark),
+                action: onClose
+            )
+            .setupSize(headerSize)
+            .setupIconSize(width: circleWidth, height: circleHeight)
+            .setupIconColor(.labelNeutral)
+            .setupbuttonBackgroundColor(.labelAssistive)
+            .setupInteractiveEffect(false)
         }
         .padding(.horizontal, horizontalPadding)
         .padding(.top, topPadding)

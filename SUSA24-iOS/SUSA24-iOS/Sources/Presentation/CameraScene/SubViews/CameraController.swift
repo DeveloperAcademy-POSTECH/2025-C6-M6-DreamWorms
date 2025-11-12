@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct CameraController: View {
-    
     let count: Int
-    var uiImage: UIImage? = nil
+    var uiImage: UIImage?
     // 촬영 중인가?
     let isCapturing: Bool
     
@@ -40,7 +39,7 @@ struct CameraController: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    CameraController(
 //        count: 3,
 //        uiImage: nil,
@@ -48,4 +47,4 @@ struct CameraController: View {
 //        onDetailsTapped: {},
 //        onPhotoCaptureTapped: {}
 //    )
-//}
+// }

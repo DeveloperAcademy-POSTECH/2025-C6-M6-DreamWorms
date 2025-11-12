@@ -23,7 +23,6 @@ import Vision
 /// }
 /// ```
 final class BatchAddressAnalyzer: Sendable {
-    
     /// 분석 진행 상태를 나타내는 구조체
     struct AnalysisProgress {
         let currentIndex: Int
@@ -73,7 +72,6 @@ final class BatchAddressAnalyzer: Sendable {
         _ photos: [CapturedPhoto],
         progressHandler: (@MainActor (AnalysisProgress) async -> Void)? = nil
     ) async -> BatchAnalysisResult {
-        
         guard !photos.isEmpty else {
             return BatchAnalysisResult(
                 addresses: [:],
@@ -89,9 +87,8 @@ final class BatchAddressAnalyzer: Sendable {
         
         // 순차적으로 각 이미지 분석
         for (index, photo) in photos.enumerated() {
-            
             // 진행 상태 알림
-            if let progressHandler = progressHandler {
+            if let progressHandler {
                 let progress = AnalysisProgress(
                     currentIndex: index + 1,
                     totalCount: photos.count,

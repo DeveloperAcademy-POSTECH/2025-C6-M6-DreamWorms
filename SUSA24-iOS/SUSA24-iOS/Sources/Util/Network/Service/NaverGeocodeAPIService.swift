@@ -1,5 +1,5 @@
 //
-//  GeocodeAPIService.swift
+//  NaverGeocodeAPIService.swift
 //  SUSA24-iOS
 //
 //  Created by Moo on 11/11/25.
@@ -8,7 +8,7 @@
 import Alamofire
 import Foundation
 
-/// TODO: `NetworkClient`를 사용하도록 리팩토링 필요.
+// TODO: `NetworkClient`를 사용하도록 리팩토링 필요.
 final class NaverGeocodeAPIService {
     static let shared = NaverGeocodeAPIService()
     private init() {}
