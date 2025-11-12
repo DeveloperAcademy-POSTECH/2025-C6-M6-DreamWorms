@@ -24,7 +24,7 @@ protocol ModuleFactoryProtocol {
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
     func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
-    func makeScanLoadView() -> ScanLoadView
+    func makeScanLoadView(caseID: UUID, photos: [CapturedPhoto]) -> ScanLoadView
     func makePhotoDetailsView(photos: [CapturedPhoto], camera: CameraModel) -> PhotoDetailsView
 }
 
@@ -199,8 +199,20 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return PhotoDetailsView(store: store)
     }
     
-    func makeScanLoadView() -> ScanLoadView {
-        let view = ScanLoadView()
-        return view
+    func makeScanLoadView(
+        caseID: UUID,
+        photos: [CapturedPhoto]
+    ) -> ScanLoadView {
+        let batchAnalyzer = BatchAddressAnalyzer()
+        let feature = ScanLoadFeature(batchAnalyzer: batchAnalyzer)
+        let store = DWStore(
+            initialState: ScanLoadFeature.State(),
+            reducer: feature
+        )
+        return ScanLoadView(
+            caseID: caseID,
+            photos: photos,
+            store: store
+        )
     }
 }
