@@ -17,10 +17,11 @@ struct CaseAddFeature: DWReducer {
         var caseName: String = ""
         var caseNumber: String = ""
         var suspectName: String = ""
+        var suspectPhoneNumber: String = ""
         var crime: String = ""
         var suspectProfileImage: Data?
         var isFormComplete: Bool {
-            [caseName, caseNumber, suspectName, crime]
+            [caseName, caseNumber, suspectName, suspectPhoneNumber, crime]
                 .allSatisfy { !$0.isEmpty }
         }
     }
@@ -31,6 +32,7 @@ struct CaseAddFeature: DWReducer {
         case updateCaseName(String)
         case updateCaseNumber(String)
         case updateSuspectName(String)
+        case updateSuspectPhoneNumber(String)
         case updateCrimeType(String)
         case setProfileImage(Data?)
         case addCaseButtonTapped
@@ -46,6 +48,8 @@ struct CaseAddFeature: DWReducer {
             state.caseNumber = number; return .none
         case let .updateSuspectName(name):
             state.suspectName = name; return .none
+        case let .updateSuspectPhoneNumber(number):
+            state.suspectPhoneNumber = number; return .none
         case let .updateCrimeType(name):
             state.crime = name; return .none
         case let .setProfileImage(image):
@@ -62,10 +66,15 @@ struct CaseAddFeature: DWReducer {
             )
             
             let imageData = state.suspectProfileImage
+            let phoneNumber = state.suspectPhoneNumber.isEmpty ? nil : state.suspectPhoneNumber
             
             return .task {
                 do {
-                    try await repository.createCase(model: model, imageData: imageData)
+                    try await repository.createCase(
+                        model: model,
+                        imageData: imageData,
+                        phoneNumber: phoneNumber
+                    )
                     return .none
                 } catch {
                     return .none

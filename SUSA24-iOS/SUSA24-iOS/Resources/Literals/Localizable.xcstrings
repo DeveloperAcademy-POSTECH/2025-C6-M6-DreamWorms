@@ -248,6 +248,18 @@
         }
       }
     },
+    "caseAdd_suspect_PhoneNumber" : {
+      "comment" : "추적_셀_전화번호_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "피의자 추적 전화번호"
+          }
+        }
+      }
+    },
     "caseAdd_suspectName" : {
       "comment" : "케이스 추가_텍스트필드 타이틀_피의자명",
       "extractionState" : "manual",
@@ -280,6 +292,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사건을 추가하거나\n확인할 사건을 선택하세요."
+          }
+        }
+      }
+    },
+    "cctv" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV"
+          }
+        }
+      }
+    },
+    "cell_station" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국"
           }
         }
       }
@@ -386,6 +420,28 @@
     "Hour" : {
 
     },
+    "layer_setting_coverage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 반경"
+          }
+        }
+      }
+    },
+    "layer_setting_toggle_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 세부 정보"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
@@ -394,6 +450,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지도"
+          }
+        }
+      }
+    },
+    "map_setting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 설정"
           }
         }
       }
@@ -516,6 +583,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "피의자명을 입력해 주세요."
+          }
+        }
+      }
+    },
+    "placeholder_suspectPhoneNumber" : {
+      "comment" : "플레이스홀더_추적기지국 번호를 입력해 주세요.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "010-1234-5678"
           }
         }
       }
@@ -775,7 +854,22 @@
     "Week" : {
 
     },
+    "기지국 위치정보 저장하기" : {
+
+    },
+    "메시지 본문" : {
+
+    },
+    "발신자 번호" : {
+
+    },
+    "본문: ${messageBody}" : {
+
+    },
     "사진" : {
+
+    },
+    "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
 
     }
   },

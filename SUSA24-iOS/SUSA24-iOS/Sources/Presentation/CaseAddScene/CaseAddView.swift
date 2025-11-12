@@ -17,7 +17,7 @@ struct CaseAddView: View {
     
     // MARK: - Properties
     
-    enum Field: Hashable { case name, number, suspect, crime }
+    enum Field: Hashable { case name, number, suspect, phone, crime }
     
     @FocusState private var focus: Field?
     @State private var showPhotoDialog: Bool = false
@@ -77,6 +77,10 @@ struct CaseAddView: View {
                         get: { store.state.suspectName },
                         set: { store.send(.updateSuspectName($0)) }
                     ),
+                    suspectPhoneNumber: Binding(
+                        get: { store.state.suspectPhoneNumber },
+                        set: { store.send(.updateSuspectPhoneNumber($0)) }
+                    ),
                     crime: Binding(
                         get: { store.state.crime },
                         set: { store.send(.updateCrimeType($0)) }
@@ -85,6 +89,7 @@ struct CaseAddView: View {
                     nameField: .name,
                     numberField: .number,
                     suspectField: .suspect,
+                    phoneField: .phone,
                     crimeField: .crime
                 )
                 .scrollIndicators(.hidden)

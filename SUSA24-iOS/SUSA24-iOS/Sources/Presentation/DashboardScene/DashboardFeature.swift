@@ -262,7 +262,7 @@ extension Array<HourlyVisit> {
         guard let latestWeek = filter({ $0.count > 0 }).map(\.weekIndex).max() else {
             return ""
         }
-        
+
         let candidates = filter { $0.weekIndex == latestWeek && $0.count > 0 }
         guard let best = candidates.max(by: { $0.count < $1.count }) else { return "" }
         

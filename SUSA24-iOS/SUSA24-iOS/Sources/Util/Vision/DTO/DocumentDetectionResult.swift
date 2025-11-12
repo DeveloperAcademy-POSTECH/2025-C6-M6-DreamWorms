@@ -35,7 +35,7 @@ struct DocumentDetectionResult: Sendable {
         corners.map { point in
             CGPoint(
                 x: point.x * screenSize.width,
-                y: (1.0 - point.y) * screenSize.height  // Vision: 좌하단 → 좌상단
+                y: (1.0 - point.y) * screenSize.height // Vision: 좌하단 → 좌상단
             )
         }
     }

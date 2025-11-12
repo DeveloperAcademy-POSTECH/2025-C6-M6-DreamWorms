@@ -18,15 +18,15 @@ enum DocumentDetectionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .processorNotInitialized:
-            return "Vision 프로세서가 초기화되지 않았습니다"
+            "Vision 프로세서가 초기화되지 않았습니다"
         case .frameStreamUnavailable:
-            return "카메라 프레임 스트림을 사용할 수 없습니다"
-        case .visionProcessingFailed(let reason):
-            return "Vision 처리 실패: \(reason)"
+            "카메라 프레임 스트림을 사용할 수 없습니다"
+        case let .visionProcessingFailed(reason):
+            "Vision 처리 실패: \(reason)"
         case .documentNotDetected:
-            return "감지된 문서가 없습니다"
-        case .lensSmudgeCheckFailed(let reason):
-            return "렌즈 얼룩 감지 실패: \(reason)"
+            "감지된 문서가 없습니다"
+        case let .lensSmudgeCheckFailed(reason):
+            "렌즈 얼룩 감지 실패: \(reason)"
         }
     }
 }

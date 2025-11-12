@@ -9,7 +9,6 @@ import Foundation
 import Vision
 
 enum AddressExtractor {
-    
     /// 문서 테이블에서 모든 주소를 추출합니다.
     /// - Parameter tables: DocumentObservation 테이블들
     /// - Returns: 추출된 주소 배열
@@ -74,7 +73,7 @@ enum AddressExtractor {
         
         // 주소 컬럼이 발견되면 해당 컬럼의 모든 값 추출
         if let columnIndex = addressColumnIndex {
-            for row in table.rows.dropFirst() {  // 헤더 행 제외
+            for row in table.rows.dropFirst() { // 헤더 행 제외
                 // 행을 배열로 변환하여 인덱스 접근
                 let rowCells = Array(row)
                 if columnIndex < rowCells.count {
