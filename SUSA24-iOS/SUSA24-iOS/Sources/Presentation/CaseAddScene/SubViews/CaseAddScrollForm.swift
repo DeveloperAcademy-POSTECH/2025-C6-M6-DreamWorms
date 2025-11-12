@@ -13,6 +13,7 @@ struct CaseAddScrollForm<Field: Hashable>: View {
     @Binding var caseName: String
     @Binding var caseNumber: String
     @Binding var suspectName: String
+    @Binding var suspectPhoneNumber: String
     @Binding var crime: String
     
     let focus: FocusState<Field?>.Binding
@@ -20,6 +21,7 @@ struct CaseAddScrollForm<Field: Hashable>: View {
     let nameField: Field
     let numberField: Field
     let suspectField: Field
+    let phoneField: Field
     let crimeField: Field
     
     var body: some View {
@@ -76,8 +78,22 @@ struct CaseAddScrollForm<Field: Hashable>: View {
                     placeholder: String(localized: .placeholderCrime)
                 )
                 .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                .setupKeyboard(.default, submit: .done)
+                .setupKeyboard(.default, submit: .next) {
+                    focus.wrappedValue = phoneField
+                }
                 .id(crimeField)
+                
+                // 피의자 추적 텔레콤 전화번호 등록
+                DWTextField(
+                    text: $suspectPhoneNumber,
+                    field: phoneField,
+                    externalFocus: focus,
+                    title: String(localized: .caseAddSuspectPhoneNumber),
+                    placeholder: String(localized: .placeholderSuspectPhoneNumber)
+                )
+                .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
+                .setupKeyboard(.default, submit: .done)
+                .id(phoneField)
             }
             .padding(.horizontal, 20)
             .safeAreaPadding(.bottom, 20)

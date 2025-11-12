@@ -35,6 +35,17 @@ protocol LocationRepositoryProtocol: Sendable {
     ///   - caseId: 연결할 Case의 UUID (케이스당 suspect가 한 명이라는 가정)
     /// - Throws: CoreData 저장 에러 (Case 또는 Suspect를 찾을 수 없는 경우 포함)
     func createLocations(data: [Location], caseId: UUID) async throws
+    
+    /// AppIntent용 메서드
+    /// 메세지로부터 받아온 지역 데이터를 생성합니다.
+    /// - Parameters:
+    ///     - caseID : UUID
+    ///     - address: String,
+    ///     - latitude: Double,
+    ///     - longitude: Duble
+    func createLocationFromMessage(caseID: UUID, address: String, latitude: Double, longitude: Double) async throws
+    
+    func validateSuspectPhone(caseID: UUID, phoneNumber: String) async throws -> Bool
 }
 
 // MARK: - Repository Implementation
@@ -198,6 +209,55 @@ struct LocationRepository: LocationRepositoryProtocol {
         guard existingLocations.isEmpty else { return }
         try await LocationMockLoader.loadAndSaveToCoreData(caseId: caseId, context: context)
     }
+    
+    /// AppIntent에서 사용: 메시지로부터 Location 생성
+    func createLocationFromMessage(
+        caseID: UUID,
+        address: String,
+        latitude: Double,
+        longitude: Double
+    ) async throws {
+        let location = Location(
+            id: UUID(),
+            address: address,
+            title: nil,
+            note: nil,
+            pointLatitude: latitude,
+            pointLongitude: longitude,
+            boxMinLatitude: nil,
+            boxMinLongitude: nil,
+            boxMaxLatitude: nil,
+            boxMaxLongitude: nil,
+            locationType: 2, // 기지국
+            colorType: 0,
+            receivedAt: Date()
+        )
+        
+        try await createLocations(data: [location], caseId: caseID)
+    }
+    
+    /// AppIntent에서 사용: 용의자를 추적하기 위한 휴대폰 번호 검증
+    func validateSuspectPhone(
+        caseID: UUID,
+        phoneNumber: String
+    ) async throws -> Bool {
+        try await context.perform {
+            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+            request.predicate = NSPredicate(format: "id == %@", caseID as CVarArg)
+            
+            guard let caseEntity = try context.fetch(request).first,
+                  let suspects = caseEntity.suspects as? Set<SuspectEntity>,
+                  let suspect = suspects.first
+            else {
+                return false
+            }
+            
+            let cleanInput = phoneNumber.replacingOccurrences(of: "-", with: "")
+            let cleanStored = (suspect.phoneNumber ?? "").replacingOccurrences(of: "-", with: "")
+            
+            return cleanInput == cleanStored
+        }
+    }
 }
 
 struct MockLocationRepository: LocationRepositoryProtocol {
@@ -205,4 +265,7 @@ struct MockLocationRepository: LocationRepositoryProtocol {
     func fetchNoCellLocations(caseId _: UUID, locationType _: [Int]) async throws -> [Location] { [] }
     func deleteLocation(id _: UUID) async throws {}
     func createLocations(data _: [Location], caseId _: UUID) async throws {}
+    func createLocationFromMessage(caseID _: UUID, address _: String, latitude _: Double, longitude _: Double) async
+        throws {}
+    func validateSuspectPhone(caseID _: UUID, phoneNumber _: String) async throws -> Bool { false }
 }
