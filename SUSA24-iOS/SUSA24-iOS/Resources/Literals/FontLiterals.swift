@@ -45,6 +45,7 @@ extension Font {
 
     // MARK: - Number
 
+    static let numberSmall9: Font = .custom(FontName.pretendardSemiBold.rawValue, size: 9)
     static let numberMedium16: Font = .custom(FontName.pretendardMedium.rawValue, size: 16)
     static let numberMedium15: Font = .custom(FontName.pretendardMedium.rawValue, size: 15)
     static let numberRegular13: Font = .custom(FontName.pretendardRegular.rawValue, size: 13)
