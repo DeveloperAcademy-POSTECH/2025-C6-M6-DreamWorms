@@ -57,7 +57,6 @@ struct CaseListView: View {
             } else {
                 CaseListEmpty().padding(.bottom, 90)
             }
-
         }
         .overlay(alignment: .bottom) {
             CaseListBottomFade(
