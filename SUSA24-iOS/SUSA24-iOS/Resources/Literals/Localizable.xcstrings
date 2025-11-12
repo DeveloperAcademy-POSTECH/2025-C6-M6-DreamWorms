@@ -29,6 +29,9 @@
     "%lld개" : {
 
     },
+    "%lld주차" : {
+
+    },
     "analyze" : {
       "comment" : "탭바_대시보드 뷰 이름",
       "extractionState" : "manual",
@@ -570,6 +573,9 @@
           }
         }
       }
+    },
+    "Selected Hour" : {
+
     },
     "summary" : {
       "comment" : "탭바_원 페이지 뷰 이름",

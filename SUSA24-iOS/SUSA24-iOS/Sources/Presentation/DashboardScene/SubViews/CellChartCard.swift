@@ -10,8 +10,10 @@ import SwiftUI
 
 struct CellChartCard: View {
     @Binding var selectionWeekday: Weekday
-    let chart: CellChartData
+    @State private var selectedHour: Int? = nil
     
+    let chart: CellChartData
+
     private let tickHours = Array(stride(from: 0, through: 21, by: 3))
     private let weekStyleScale: KeyValuePairs<String, Color> = [
         "1주차": .primaryNormal,
@@ -19,36 +21,37 @@ struct CellChartCard: View {
         "3주차": .primaryStrong,
         "4주차": .primaryLight2,
     ]
-    
+
     private var series: [HourlyVisit] {
         chart.seriesByWeekday[selectionWeekday] ?? []
     }
-    
+
     private var summary: String {
         chart.summaryByWeekday[selectionWeekday] ?? ""
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             CellChartTitle(address: chart.address, summary: summary)
                 .padding(.bottom, 32)
-            
+
             CellChartLegend(
                 series: series,
                 weekStyleScale: weekStyleScale
             )
             .padding(.bottom, series.isEmpty ? 0 : 16)
             .opacity(series.isEmpty ? 0 : 1)
-            
+
             CellChartGraph(
                 series: series,
                 tickHours: tickHours,
-                weekStyleScale: weekStyleScale
+                weekStyleScale: weekStyleScale,
+                selectedHour: $selectedHour
             )
             .id(selectionWeekday)
             .frame(height: 142)
             .padding(.bottom, 18)
-            
+
             WeekdayPillPicker(selection: $selectionWeekday)
         }
         .padding(.vertical, 20)
