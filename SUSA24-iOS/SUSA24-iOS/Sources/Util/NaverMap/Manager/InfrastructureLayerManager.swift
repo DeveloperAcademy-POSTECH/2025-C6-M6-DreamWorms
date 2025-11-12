@@ -18,6 +18,8 @@ final class InfrastructureMarkerManager {
     
     /// 기지국 마커 저장소 (stationId -> NMFMarker)
     private var cellMarkers: [String: NMFMarker] = [:]
+    /// CCTV 마커 저장소 (cctvId -> NMFMarker)
+    private var cctvMarkers: [String: NMFMarker] = [:]
     
     // MARK: - Public Methods
     
@@ -28,7 +30,7 @@ final class InfrastructureMarkerManager {
     ///   - mapView: 네이버 지도 뷰
     ///   - isVisible: 마커 초기 표시 여부 (기본값: false)
     func updateCellStations(
-        _ cellStations: [CellStation],
+        _ cellStations: [CellMarker],
         on mapView: NMFMapView,
         isVisible: Bool = false
     ) {
@@ -54,6 +56,35 @@ final class InfrastructureMarkerManager {
         }
     }
     
+    /// CCTV 데이터를 업데이트하고 지도에 마커를 표시합니다.
+    /// - Parameters:
+    ///   - cctvMarkers: 표시할 CCTV 정보 배열
+    ///   - mapView: 네이버 지도 뷰
+    ///   - isVisible: 마커 초기 표시 여부
+    func updateCCTVs(
+        _ cctvMarkers: [CCTVMarker],
+        on mapView: NMFMapView,
+        isVisible: Bool
+    ) {
+        let currentIds = Set(cctvMarkers.map(\.id))
+        let existingIds = Set(self.cctvMarkers.keys)
+        
+        let idsToRemove = existingIds.subtracting(currentIds)
+        let idsToAdd = currentIds.subtracting(existingIds)
+        
+        for cctvId in idsToRemove {
+            self.cctvMarkers[cctvId]?.mapView = nil
+            self.cctvMarkers.removeValue(forKey: cctvId)
+        }
+        
+        Task {
+            for marker in cctvMarkers where idsToAdd.contains(marker.id) {
+                let overlay = await createCCTVMarker(for: marker, on: mapView, isVisible: isVisible)
+                self.cctvMarkers[marker.id] = overlay
+            }
+        }
+    }
+    
     /// 모든 기지국 마커의 표시/숨김을 전환합니다.
     /// - Parameter isVisible: true면 표시, false면 숨김
     func setCellVisibility(_ isVisible: Bool) {
@@ -62,12 +93,25 @@ final class InfrastructureMarkerManager {
         }
     }
     
-    /// 모든 기지국 마커를 지도에서 제거하고 메모리를 정리합니다.
+    /// 모든 CCTV 마커의 표시/숨김을 전환합니다.
+    /// - Parameter isVisible: true면 표시, false면 숨김
+    func setCCTVVisibility(_ isVisible: Bool) {
+        for marker in cctvMarkers.values {
+            marker.hidden = !isVisible
+        }
+    }
+    
+    /// 모든 마커를 지도에서 제거하고 메모리를 정리합니다.
     func clearAll() {
         for marker in cellMarkers.values {
             marker.mapView = nil
         }
         cellMarkers.removeAll()
+        
+        for marker in cctvMarkers.values {
+            marker.mapView = nil
+        }
+        cctvMarkers.removeAll()
     }
     
     // MARK: - Private Methods
@@ -79,13 +123,29 @@ final class InfrastructureMarkerManager {
     ///   - isVisible: 마커 초기 표시 여부
     /// - Returns: 생성된 NMFMarker
     private func createMarker(
-        for station: CellStation,
+        for station: CellMarker,
         on mapView: NMFMapView,
         isVisible: Bool
     ) async -> NMFMarker {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: station.latitude, lng: station.longitude)
         let markerImage = await MarkerImageCache.shared.image(for: station.markerType)
+        marker.iconImage = NMFOverlayImage(image: markerImage)
+        marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
+        marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        marker.hidden = !isVisible
+        marker.mapView = mapView
+        return marker
+    }
+    
+    private func createCCTVMarker(
+        for info: CCTVMarker,
+        on mapView: NMFMapView,
+        isVisible: Bool
+    ) async -> NMFMarker {
+        let marker = NMFMarker()
+        marker.position = NMGLatLng(lat: info.latitude, lng: info.longitude)
+        let markerImage = await MarkerImageCache.shared.image(for: .cctv)
         marker.iconImage = NMFOverlayImage(image: markerImage)
         marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
