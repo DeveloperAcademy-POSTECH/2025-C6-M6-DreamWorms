@@ -35,6 +35,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
     private lazy var mapDispatcher = MapDispatcher()
     private lazy var searchService = KakaoSearchAPIService()
     private lazy var cctvService = VWorldCCTVAPIService()
+    private lazy var infrastructureMarkerManager = InfrastructureMarkerManager()
     
     func makeCameraView(caseID: UUID) -> CameraView {
         // cameraModel 주입
@@ -115,12 +116,12 @@ final class ModuleFactory: ModuleFactoryProtocol {
     }
     
     func makeMapView(
-        caseID _: UUID,
+        caseID: UUID,
         context: NSManagedObjectContext
     ) -> MapView {
         let repository = LocationRepository(context: context)
         let store = DWStore(
-            initialState: MapFeature.State(),
+            initialState: MapFeature.State(caseId: caseID),
             reducer: MapFeature(
                 repository: repository,
                 searchService: searchService,
@@ -128,7 +129,11 @@ final class ModuleFactory: ModuleFactoryProtocol {
                 dispatcher: mapDispatcher
             )
         )
-        let view = MapView(store: store, dispatcher: mapDispatcher)
+        let view = MapView(
+            store: store,
+            dispatcher: mapDispatcher,
+            infrastructureManager: infrastructureMarkerManager
+        )
         return view
     }
     

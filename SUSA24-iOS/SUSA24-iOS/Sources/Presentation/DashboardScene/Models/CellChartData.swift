@@ -7,19 +7,31 @@
 
 import Foundation
 
-struct CellChartData: Identifiable, Equatable, Sendable {
+struct CellChartData: Identifiable, Equatable {
     let id = UUID()
     let address: String
-    
-    /// 현재 선택된 요일
-    var selectedWeekday: Weekday
-
-    /// 모든 주차 × 모든 요일 × 시간대 데이터
     let allSeries: [HourlyVisit]
 
-    /// 현재 선택된 요일에 대한 시리즈 (View에서 사용)
-    var series: [HourlyVisit]
+    let seriesByWeekday: [Weekday: [HourlyVisit]]
+    let summaryByWeekday: [Weekday: String]
 
-    /// 현재 선택된 요일 기준 summary
-    var summary: String
+    var selectedWeekday: Weekday
+
+    init(address: String, allSeries: [HourlyVisit], initialWeekday: Weekday) {
+        self.address = address
+        self.allSeries = allSeries
+        self.selectedWeekday = initialWeekday
+
+        var seriesDict: [Weekday: [HourlyVisit]] = [:]
+        var summaryDict: [Weekday: String] = [:]
+
+        for weekday in Weekday.allCases {
+            let filtered = allSeries.filter { $0.weekday == weekday }
+            seriesDict[weekday] = filtered
+            summaryDict[weekday] = filtered.makeHourlySummary()
+        }
+
+        self.seriesByWeekday = seriesDict
+        self.summaryByWeekday = summaryDict
+    }
 }
