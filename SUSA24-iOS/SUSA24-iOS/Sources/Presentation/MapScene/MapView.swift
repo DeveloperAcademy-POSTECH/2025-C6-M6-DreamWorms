@@ -54,6 +54,7 @@ struct MapView: View {
                 cellStations: store.state.cellStations,
                 isCellLayerEnabled: store.state.isBaseStationLayerEnabled,
                 locations: store.state.locations,
+                isVisitFrequencyEnabled: store.state.isVisitFrequencySelected,
                 cctvMarkers: store.state.cctvMarkers,
                 isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
                 infrastructureManager: infrastructureManager,
