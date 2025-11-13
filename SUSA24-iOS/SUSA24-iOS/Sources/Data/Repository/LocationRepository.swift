@@ -162,9 +162,18 @@ struct LocationRepository: LocationRepositoryProtocol {
     func deleteLocation(id: UUID) async throws {
         try await context.perform {
             let request = NSFetchRequest<LocationEntity>(entityName: "LocationEntity")
+            request.fetchLimit = 1
             request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-            guard let locationEntity = try context.fetch(request).first else { return }
-            context.delete(locationEntity)
+
+            guard let entity = try context.fetch(request).first else {
+                throw NSError(
+                    domain: "LocationRepository",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Location not found"]
+                )
+            }
+
+            context.delete(entity)
             try context.save()
         }
     }
