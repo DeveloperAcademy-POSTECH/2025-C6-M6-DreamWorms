@@ -1,3 +1,5 @@
+
+
 //
 //  MapFeature.swift
 //  SUSA24-iOS
@@ -19,10 +21,6 @@ struct MapFeature: DWReducer {
     private let cctvService: CCTVAPIService
     private let dispatcher: MapDispatcher
     
-    /// - Parameters:
-    ///   - repository: 위치 데이터를 로드하기 위한 저장소
-    ///   - searchAPIService: 검색 API 서비스
-    ///   - dispatcher: 외부 모듈에서 전달되는 지도 명령을 중계하는 객체
     init(
         repository: LocationRepositoryProtocol,
         searchService: SearchAPIService,
@@ -43,6 +41,8 @@ struct MapFeature: DWReducer {
         
         /// 표시할 위치 데이터 배열입니다.
         var locations: [Location] = []
+        /// 표시할 기지국 데이터 배열입니다.
+        var cellStations: [CellStation] = []
         /// 현재 선택된 케이스의 UUID입니다. `onAppear` 시 CoreData로부터 위치 데이터를 로드하는 데 사용됩니다.
         var caseId: UUID?
         
@@ -91,6 +91,9 @@ struct MapFeature: DWReducer {
         /// 위치 데이터를 로드하는 액션입니다.
         /// - Parameter locations: 로드할 위치 데이터 배열
         case loadLocations([Location])
+        /// 기지국 데이터를 로드하는 액션입니다.
+        /// - Parameter cellStations: 로드할 기지국 데이터 배열
+        case loadCellStations([CellStation])
         /// 필터를 선택/해제하는 액션입니다.
         /// - Parameter filter: 선택할 필터 타입
         case selectFilter(MapFilterType)
@@ -140,25 +143,46 @@ struct MapFeature: DWReducer {
         switch action {
         case .onAppear:
             guard let caseId = state.caseId else { return .none }
-            return .task { [repository] in
-                do {
-                    // NOTE: 테스트용 목데이터 저장 로직
-                    // 케이스 선택 시 해당 케이스의 빈 문자열("") suspect에 Location 목데이터 저장
-                    // 실제 데이터가 없을 경우를 대비한 테스트 데이터
-                    // 프로토콜에는 포함되지 않으므로 타입 캐스팅 사용
-                    if let locationRepository = repository as? LocationRepository {
-                        try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
+            // 초기 카메라 위치를 포항으로 설정 (포항시청 기준)
+            // TODO: 초기 위치 추가해야 함.(등록된 주소나 최근 문자온 주소 등)
+            state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
+            
+            // 병렬로 데이터 로드
+            return .merge(
+                .task { [repository] in
+                    do {
+                        // NOTE: 테스트용 목데이터 저장 로직
+                        // 케이스 선택 시 해당 케이스의 빈 문자열("") suspect에 Location 목데이터 저장
+                        // 실제 데이터가 없을 경우를 대비한 테스트 데이터
+                        // 프로토콜에는 포함되지 않으므로 타입 캐스팅 사용
+                        if let locationRepository = repository as? LocationRepository {
+                            try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
+                        }
+                        
+                        let locations = try await repository.fetchLocations(caseId: caseId)
+                        return .loadLocations(locations)
+                    } catch {
+                        return .loadLocations([])
                     }
-                    
-                    let locations = try await repository.fetchLocations(caseId: caseId)
-                    return .loadLocations(locations)
-                } catch {
-                    return .none
+                },
+                
+                // NOTE: API 붙으면 불러오는 로직 수정 필요.
+                .task {
+                    do {
+                        let cellStations = try await CellStationLoader.loadFromJSON()
+                        return .loadCellStations(cellStations)
+                    } catch {
+                        return .loadCellStations([])
+                    }
                 }
-            }
+            )
             
         case let .loadLocations(locations):
             state.locations = locations
+            return .none
+            
+        case let .loadCellStations(cellStations):
+            state.cellStations = cellStations
             return .none
             
         case let .selectFilter(filter):
@@ -252,16 +276,13 @@ struct MapFeature: DWReducer {
             return .none
         }
     }
-    
-    // MARK: - 위치정보 시트 관련 함수
-    
-    // TODO: 메서드 분리하기
-    
+}
+
+// MARK: - Private Extensions
+
+private extension MapFeature {
     /// 좌표를 기반으로 위치정보를 조회합니다.
-    /// - Parameter requestDTO: 조회할 좌표의 요청 DTO
-    /// - Returns: 조회된 위치정보 데이터
-    /// - Throws: API 호출 실패 시 에러를 던집니다.
-    private func fetchPlaceInfo(from requestDTO: KakaoCoordToLocationRequestDTO) async throws -> PlaceInfo {
+    func fetchPlaceInfo(from requestDTO: KakaoCoordToLocationRequestDTO) async throws -> PlaceInfo {
         // 1단계: 좌표로 주소 조회 (Kakao 좌표→주소 변환 API)
         let coordResponse = try await searchService.fetchLocationFromCoord(requestDTO)
         guard let document = coordResponse.documents.first else {

@@ -1,0 +1,96 @@
+//
+//  InfrastructureLayerManager.swift
+//  SUSA24-iOS
+//
+//  Created by Moo on 11/12/25.
+//
+
+import Foundation
+import NMapsGeometry
+import NMapsMap
+
+/// 인프라 레이어 (기지국, CCTV) 마커를 관리하는 매니저
+/// - 기지국 마커의 생성, 업데이트, 삭제 담당
+/// - Diff 알고리즘으로 변경된 부분만 처리하여 성능 최적화
+@MainActor
+final class InfrastructureMarkerManager {
+    // MARK: - Properties
+    
+    /// 기지국 마커 저장소 (stationId -> NMFMarker)
+    private var cellMarkers: [String: NMFMarker] = [:]
+    
+    // MARK: - Public Methods
+    
+    /// 기지국 데이터를 업데이트하고 지도에 마커를 표시합니다.
+    /// - Diff 알고리즘: 새로운 마커만 생성하고, 기존 마커는 재사용
+    /// - Parameters:
+    ///   - cellStations: 표시할 기지국 데이터 배열
+    ///   - mapView: 네이버 지도 뷰
+    ///   - isVisible: 마커 초기 표시 여부 (기본값: false)
+    func updateCellStations(
+        _ cellStations: [CellStation],
+        on mapView: NMFMapView,
+        isVisible: Bool = false
+    ) {
+        // 1. Diff 계산: 어떤 마커를 추가/삭제할지 결정
+        let currentStationIds = Set(cellStations.map(\.id))
+        let existingMarkerIds = Set(cellMarkers.keys)
+        
+        let idsToRemove = existingMarkerIds.subtracting(currentStationIds)
+        let idsToAdd = currentStationIds.subtracting(existingMarkerIds)
+        
+        // 2. 삭제할 마커 제거 (동기: 즉시 반영)
+        for stationId in idsToRemove {
+            cellMarkers[stationId]?.mapView = nil
+            cellMarkers.removeValue(forKey: stationId)
+        }
+        
+        // 3. 새로운 마커 추가 (비동기: UI 블로킹 방지)
+        Task {
+            for station in cellStations where idsToAdd.contains(station.id) {
+                let marker = await createMarker(for: station, on: mapView, isVisible: isVisible)
+                cellMarkers[station.id] = marker
+            }
+        }
+    }
+    
+    /// 모든 기지국 마커의 표시/숨김을 전환합니다.
+    /// - Parameter isVisible: true면 표시, false면 숨김
+    func setCellVisibility(_ isVisible: Bool) {
+        for marker in cellMarkers.values {
+            marker.hidden = !isVisible
+        }
+    }
+    
+    /// 모든 기지국 마커를 지도에서 제거하고 메모리를 정리합니다.
+    func clearAll() {
+        for marker in cellMarkers.values {
+            marker.mapView = nil
+        }
+        cellMarkers.removeAll()
+    }
+    
+    // MARK: - Private Methods
+    
+    /// 기지국 마커를 생성합니다.
+    /// - Parameters:
+    ///   - station: 기지국 데이터
+    ///   - mapView: 네이버 지도 뷰
+    ///   - isVisible: 마커 초기 표시 여부
+    /// - Returns: 생성된 NMFMarker
+    private func createMarker(
+        for station: CellStation,
+        on mapView: NMFMapView,
+        isVisible: Bool
+    ) async -> NMFMarker {
+        let marker = NMFMarker()
+        marker.position = NMGLatLng(lat: station.latitude, lng: station.longitude)
+        let markerImage = await MarkerImageCache.shared.image(for: station.markerType)
+        marker.iconImage = NMFOverlayImage(image: markerImage)
+        marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
+        marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        marker.hidden = !isVisible
+        marker.mapView = mapView
+        return marker
+    }
+}
