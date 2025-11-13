@@ -8,10 +8,6 @@
 import SwiftUI
 
 /// 문서 스캔 분석 화면
-///
-/// LoadingAnimationView를 표시하며 백그라운드에서 여러 이미지를 분석합니다.
-/// 분석 완료 후 자동으로 ScanListView로 이동합니다.
-/// 추출 실패 시 confirmationDialog로 재촬영 여부를 사용자에게 물어봅니다.
 struct ScanLoadView: View {
     // MARK: - Dependencies
     
@@ -25,7 +21,7 @@ struct ScanLoadView: View {
     
     // MARK: - State
     
-    @State private var showRetryDialog: Bool = false
+    @State private var showRetryAlert: Bool = false
     
     // MARK: - Initialization
     
@@ -71,17 +67,14 @@ struct ScanLoadView: View {
         .onChange(of: store.state.isCompleted) { _, isCompleted in
             guard isCompleted else { return }
             
-            // 추출 결과가 있을 때: 목록 뷰로 이동
             if !store.state.scanResults.isEmpty {
                 navigateToScanList()
-            }
-            // 추출 결과가 없거나 (빈 배열) 오류 메시지가 있을 때: 다이얼로그 표시
-            else if store.state.errorMessage != nil || store.state.scanResults.isEmpty {
-                showRetryDialog = true
+            } else if store.state.errorMessage != nil || store.state.scanResults.isEmpty {
+                showRetryAlert = true
             }
         }
         .dwAlert(
-            isPresented: $showRetryDialog,
+            isPresented: $showRetryAlert,
             title: "추출된 주소가 없습니다.",
             message: "다시 촬영하시겠습니까?",
             primaryButton: DWAlertButton(
@@ -122,9 +115,7 @@ private extension ScanLoadView {
         coordinator.pop()
     }
     
-    /// 취소 - MapView로
     func handleCancel() {
-        // ScanLoadView + CameraView 제거 → MapView로
         if coordinator.path.count >= 2 {
             coordinator.popToDepth(2)
         } else {
