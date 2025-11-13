@@ -46,17 +46,17 @@ struct CameraSampleView: View {
 
                 HStack(spacing: 12) {
                     // 토치 버튼
-                    DWCircleButton(image: Image(systemName: camera.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"), action: { Task { await camera.toggleTorch() } })
+                    DWGlassEffectCircleButton(image: Image(systemName: camera.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"), action: { Task { await camera.toggleTorch() } })
                     
                     Spacer()
                     // 촬영 버튼
-                    DWCircleButton(image: Image(.camera), action: capturePhoto)
+                    DWGlassEffectCircleButton(image: Image(.camera), action: capturePhoto)
                         .disabled(camera.photoCount >= 10 || camera.cameraStatus != .running)
                     
                     Spacer()
                     
                     // 초기화 버튼
-                    DWCircleButton(image: Image(.delete), action: camera.clearAllPhotos)
+                    DWGlassEffectCircleButton(image: Image(.delete), action: camera.clearAllPhotos)
                 }
                 .padding(16)
             }

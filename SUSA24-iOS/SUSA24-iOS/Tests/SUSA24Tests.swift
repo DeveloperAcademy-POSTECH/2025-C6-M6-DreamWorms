@@ -34,6 +34,52 @@ final class SUSA24Tests: XCTestCase {
         }
     }
     
+    // MARK: - CellStation Loader Tests
+    
+    func testCellStationLoader() async throws {
+        print("\n========================================")
+        print("🧪 CellStation Loader Test")
+        print("========================================")
+        
+        // When: JSON 로드
+        let cellStations = try await CellStationLoader.loadFromJSON()
+        
+        // Then: 기본 검증
+        XCTAssertFalse(cellStations.isEmpty, "기지국 데이터가 비어있으면 안됨")
+        let first = try XCTUnwrap(cellStations.first, "첫 번째 데이터가 존재해야 함")
+        
+        // JSON → CellStation 매핑 검증 (첫 항목)
+        let expected = CellStation(
+            permitNumber: 322_006_610_000_593,
+            location: "경북 포항시 북구 흥해읍 대련리",
+            purpose: "이동통신(IMT-2000)서비스 제공용(지상_기지국)",
+            latitude: 36.047064,
+            longitude: 129.316608
+        )
+        
+        XCTAssertEqual(first.permitNumber, expected.permitNumber, "허가번호가 일치해야 함")
+        XCTAssertEqual(first.location, expected.location, "설치 장소가 일치해야 함")
+        XCTAssertEqual(first.purpose, expected.purpose, "용도가 일치해야 함")
+        XCTAssertEqual(first.visitCount, expected.visitCount, "초기 방문 횟수는 0이어야 함")
+        XCTAssertEqual(first.markerType, expected.markerType, "방문 정보 기반 마커 타입이 일치해야 함")
+        XCTAssertEqual(first.id, expected.id, "ID(위도_경도 조합)가 일치해야 함")
+        XCTAssertEqual(first.latitude, expected.latitude, accuracy: 0.000_000_1, "위도(십진)가 정확해야 함")
+        XCTAssertEqual(first.longitude, expected.longitude, accuracy: 0.000_000_1, "경도(십진)가 정확해야 함")
+        
+        print("\n✅ 로딩 성공: \(cellStations.count)개")
+        print("\n📍 첫 번째 기지국 (모든 필드):")
+        print("  - ID: \(first.id)")
+        print("  - 허가번호: \(first.permitNumber)")
+        print("  - 설치장소: \(first.location)")
+        print("  - 용도: \(first.purpose)")
+        print("  - 위도: \(first.latitude)")
+        print("  - 경도: \(first.longitude)")
+        print("  - 방문횟수: \(first.visitCount)")
+        print("  - 방문여부: \(first.isVisited)")
+        print("  - MarkerType: \(first.markerType)")
+        print("========================================\n")
+    }
+    
     @MainActor func testJSONLoaderSync() throws {
         // Given: 테스트용 간단한 모델
         struct TestModel: Decodable {

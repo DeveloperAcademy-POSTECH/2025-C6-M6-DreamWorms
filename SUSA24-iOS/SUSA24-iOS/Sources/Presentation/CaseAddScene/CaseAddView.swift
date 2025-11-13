@@ -33,7 +33,7 @@ struct CaseAddView: View {
                 .ignoresSafeArea()
                 .onTapGesture { focus = nil }
             
-            VStack(spacing: 32) {
+            VStack(spacing: 0) {
                 // 상단 프로필 이미지
                 SuspectImageSelector(
                     image: $selectedImage,
@@ -77,13 +77,13 @@ struct CaseAddView: View {
                         get: { store.state.suspectName },
                         set: { store.send(.updateSuspectName($0)) }
                     ),
-                    suspectPhoneNumber: Binding(
-                        get: { store.state.suspectPhoneNumber },
-                        set: { store.send(.updateSuspectPhoneNumber($0)) }
-                    ),
                     crime: Binding(
                         get: { store.state.crime },
                         set: { store.send(.updateCrimeType($0)) }
+                    ),
+                    suspectPhoneNumber: Binding(
+                        get: { store.state.suspectPhoneNumber },
+                        set: { store.send(.updateSuspectPhoneNumber($0)) }
                     ),
                     focus: $focus,
                     nameField: .name,
@@ -93,6 +93,7 @@ struct CaseAddView: View {
                     crimeField: .crime
                 )
                 .scrollIndicators(.hidden)
+                .padding(.bottom, 20)
                 
                 // 추가하기 버튼
                 DWButton(

@@ -123,6 +123,13 @@ struct CameraFeature: DWReducer {
         case sceneDidBecomeActive
         case sceneDidEnterBackground
         
+        // MARK: Navigation Actions
+        
+        // PhotoDetails/Scan으로 갈 때
+        case pauseForNavigation
+        // 뒤로가기로 나갈 때
+        case stopForExit
+        
         // MARK: Camera Control Actions
         
         case setCameraStatus(CameraStatus)
@@ -190,26 +197,44 @@ struct CameraFeature: DWReducer {
                 return .setCameraStatus(status)
             }
             
+        // TODO: 처리
         case .viewDidAppear:
+            print("viewDidAppear")
             camera.resumeCamera()
             return .send(.syncPhotoState)
             
         case .viewDidDisappear:
-            camera.pauseCamera()
-            
+            print("viewDidDisappear")
             camera.stopVisionAnalysis()
-            
+            camera.pauseCamera()
             return .none
             
         case .sceneDidBecomeActive:
+            print("sceneDidBecomeActive")
             camera.resumeCamera()
             return .none
             
         case .sceneDidEnterBackground:
+            print("sceneDidEnterBackground")
             camera.pauseCamera()
-            // vision stop
             camera.stopVisionAnalysis()
             return .none
+            
+            // MARK: Navigation Contro
+            
+        case .pauseForNavigation:
+            // PhotoDetails/Scan으로 갈 때 - 일시정지
+            camera.pauseCamera()
+            camera.stopVisionAnalysis()
+            return .none
+            
+        case .stopForExit:
+            // 뒤로가기로 나갈 때 - 세션 중지
+            camera.stopVisionAnalysis()
+            return .task { [camera] in
+                await camera.stop()
+                return .setCameraStatus(.stopped)
+            }
             
             // MARK: Camera Control
             
@@ -341,7 +366,7 @@ struct CameraFeature: DWReducer {
             state.showToast = false
             return .none
             
-            // MARK: - 추가 기능 구현 (임시로 숨김)
+            // MARK: - Advanced Features
             
         case .toggleTorch:
             state.isTorchOn.toggle()
@@ -362,21 +387,16 @@ struct CameraFeature: DWReducer {
         case .toggleDocumentDetection:
             state.isDocumentDetectionEnabled.toggle()
             
+            // TODO: 이 로직 좀 더 손봐야함
             if state.isDocumentDetectionEnabled {
                 if !state.isVisionProcessorInitialized {
-                    return .task { [camera] in
-                        await camera.enableVisionAnalysis()
-                        
-                        Task {
-                            await camera.startVisionAnalysis()
-                        }
-                        
-                        return .visionProcessorInitialized
-                    }
-                } else {
-                    return .send(.startDocumentDetectionStream)
+                    camera.enableVisionAnalysis()
+                    state.isVisionProcessorInitialized = true
                 }
+                camera.getDocumentDetectionStream()
+                return .send(.startDocumentDetectionStream)
             } else {
+                camera.getDocumentDetectionStream()
                 state.documentDetection = nil
                 return .none
             }
@@ -384,42 +404,27 @@ struct CameraFeature: DWReducer {
         case .toggleLensSmudgeDetection:
             state.isLensSmudgeDetectionEnabled.toggle()
             
+            // TODO: 이 로직 좀 더 손봐야함
             if state.isLensSmudgeDetectionEnabled {
                 if !state.isVisionProcessorInitialized {
-                    return .task { [camera] in
-                        await camera.enableVisionAnalysis()
-                        
-                        Task {
-                            await camera.startVisionAnalysis()
-                        }
-                        
-                        return .visionProcessorInitialized
-                    }
-                } else {
-                    return .send(.startLensSmudgeStream)
+                    camera.enableVisionAnalysis()
+                    state.isVisionProcessorInitialized = true
                 }
+                camera.getLensSmudgeStream()
+                return .send(.startLensSmudgeStream)
             } else {
+                camera.getLensSmudgeStream()
                 state.lensSmudgeDetection = nil
                 return .none
             }
             
         case .visionProcessorInitialized:
             state.isVisionProcessorInitialized = true
-            
-            if state.isDocumentDetectionEnabled, state.isLensSmudgeDetectionEnabled {
-                return .send(.startDocumentDetectionStream)
-            } else if state.isDocumentDetectionEnabled {
-                return .send(.startDocumentDetectionStream)
-            } else if state.isLensSmudgeDetectionEnabled {
-                return .send(.startLensSmudgeStream)
-            }
-            
             return .none
             
-        // TODO: 비효율적이여보임.
         case .startDocumentDetectionStream:
             return .init { [camera] downstream in
-                Task {
+                _ = Task {
                     guard let stream = await camera.getDocumentDetectionStream() else {
                         return
                     }
@@ -430,10 +435,9 @@ struct CameraFeature: DWReducer {
                 }
             }
             
-        // TODO: 비효율적이여보임.
         case .startLensSmudgeStream:
             return .init { [camera] downstream in
-                Task {
+                _ = Task {
                     guard let stream = await camera.getLensSmudgeStream() else {
                         return
                     }
