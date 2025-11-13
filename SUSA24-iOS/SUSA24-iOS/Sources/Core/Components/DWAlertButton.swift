@@ -21,7 +21,7 @@ struct DWAlertButton {
             switch self {
             case .default: String(localized: .confirmDefault)
             case .destructive: String(localized: .buttonDelete)
-            case .cancel: "취소"
+            case .cancel: String(localized: .cancelDefault)
             }
         }
     }

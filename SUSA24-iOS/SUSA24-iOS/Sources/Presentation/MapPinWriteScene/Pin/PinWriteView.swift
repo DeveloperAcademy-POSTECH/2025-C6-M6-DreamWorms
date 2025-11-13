@@ -154,7 +154,7 @@ struct PinNameInputSection: View {
                     Text("\(characterCount)")
                         .font(.captionRegular12)
                         .foregroundStyle(.labelNormal)
-                    Text(String(localized: .pinWritePlaceHolder))
+                    Text(String(localized: .pinWirteLimitLength))
                         .font(.captionRegular12)
                         .foregroundStyle(.labelAlternative)
                 }
