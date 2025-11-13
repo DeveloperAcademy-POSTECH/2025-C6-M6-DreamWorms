@@ -25,15 +25,8 @@ struct PhotoDetailsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            PhotoDetailsHeader(
-                currentIndex: store.state.currentIndex + 1,
-                totalCount: store.state.photos.count,
-                onBackTapped: { coordinator.pop() },
-                onDeleteTapped: handleDelete
-            )
-            .padding(.top, 6)
-            .padding(.bottom, 54)
+        ZStack(alignment: .top) {
+            Color.white.ignoresSafeArea()
             
             TabView(selection: Binding(
                 get: {
@@ -51,10 +44,20 @@ struct PhotoDetailsView: View {
             )) {
                 ForEach(store.state.photos, id: \.id) { photo in
                     PhotoImageView(photo: photo, zoomState: zoomStateBinding(for: photo.id))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .tag(photo.id as UUID?)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            
+            PhotoDetailsHeader(
+                currentIndex: store.state.currentIndex + 1,
+                totalCount: store.state.photos.count,
+                onBackTapped: { coordinator.pop() },
+                onDeleteTapped: handleDelete
+            )
+            .padding(.top, 6)
+            .padding(.bottom, 54)
         }
         .navigationBarHidden(true)
         .onChange(of: store.state.shouldDismiss) { _, shouldDismiss in

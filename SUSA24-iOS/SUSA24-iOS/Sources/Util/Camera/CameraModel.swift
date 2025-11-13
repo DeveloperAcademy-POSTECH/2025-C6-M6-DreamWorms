@@ -110,11 +110,16 @@ extension CameraModel {
     /// 카메라를 일시정지합니다.
     func pauseCamera() {
         isCameraPaused = true
+        Task { await captureSession.pause() }
     }
     
     /// 카메라를 재개합니다.
     func resumeCamera() {
         isCameraPaused = false
+        
+        Task {
+            await captureSession.resume()
+        }
     }
     
     /// 카메라를 중지합니다.
