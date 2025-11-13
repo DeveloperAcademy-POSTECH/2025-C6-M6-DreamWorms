@@ -717,6 +717,17 @@
         }
       }
     },
+    "memo_write_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "형사 노트 작성하기"
+          }
+        }
+      }
+    },
     "memo_write_placeHolder" : {
       "comment" : "메모 노트 작성 시 placeholder",
       "extractionState" : "manual",
