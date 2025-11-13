@@ -128,6 +128,42 @@
         }
       }
     },
+    "camera_back_sheet_action_cancel" : {
+      "comment" : "카메라 나가기_액션시트_취소",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "camera_back_sheet_action_confirm" : {
+      "comment" : "카메라 나가기_액션시트_모두 삭제",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 자료 삭제"
+          }
+        }
+      }
+    },
+    "camera_back_sheet_title" : {
+      "comment" : "카메라 나가기_액션시트_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "촬영한 모든 자료를 삭제합니다."
+          }
+        }
+      }
+    },
     "camera_ExitAlertContent" : {
       "comment" : "카메라 나가기_스캔 중단 안내 컨텐츠",
       "extractionState" : "manual",
@@ -176,6 +212,18 @@
         }
       }
     },
+    "camera_lensSmudgeMessage" : {
+      "comment" : "카메라 토스트_렌즈 얼룩 알림 메세지",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정확도를 위해 카메라 렌즈를 닦아주세요"
+          }
+        }
+      }
+    },
     "camera_PhotolimitMessage" : {
       "comment" : "카메라 토스트_사진 장수 제한 메세지",
       "extractionState" : "manual",
@@ -184,6 +232,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최대 10장까지 업로드할 수 있습니다."
+          }
+        }
+      }
+    },
+    "camera_stabilizationModeMessage" : {
+      "comment" : "카메라 토스트_흔들림 알림 메세지",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "흔들린 사진은 인식할 수 없습니다."
           }
         }
       }
@@ -513,6 +573,18 @@
         }
       }
     },
+    "mapview_pin_create_done" : {
+      "comment" : "스캔 목록_핀 추가 완료 시_맵뷰 토스트",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 추가가 완료되었습니다."
+          }
+        }
+      }
+    },
     "mapview_placeInfo_basic_Info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -671,6 +743,114 @@
         }
       }
     },
+    "scanList_card_Count" : {
+      "comment" : "스캔 목록_감지 주소 중복 횟수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld회 인식"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_button_cancel" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_취소",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_button_confirm" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_덮어쓰기",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "덮어쓰기"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_content" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기존에 ‘%@'에 저장된 핀이 있습니다. 기존 내용을 지우고 덮어쓸까요?"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_title" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 덮어쓰기"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_button_cancel" : {
+      "comment" : "스캔 목록_핀 추가 취소 알람_취소안함",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속 추가"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_button_confirm" : {
+      "comment" : "스캔 목록_핀 추가 취소 알람_삭제함",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제하기"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_contents" : {
+      "comment" : "핀 삭제 Alert_내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "촬영한 자료를 모두 지우고 지도 화면으로 돌아갑니다. 추가 중인 핀을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_title" : {
+      "comment" : "핀 삭제 Alert_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 삭제"
+          }
+        }
+      }
+    },
     "scanList_title" : {
       "comment" : "스캔 목록_타이틀",
       "extractionState" : "manual",
@@ -678,13 +858,10 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "지도에 표시할 주소를\\n모두 선택해주세요"
+            "value" : "지도에 표시할 주소를\n모두 선택해주세요"
           }
         }
       }
-    },
-    "ScanLoad" : {
-
     },
     "scanLoad_subTitle" : {
       "comment" : "스캔 로딩_서브타이틀",
@@ -899,9 +1076,6 @@
     "Visits" : {
 
     },
-    "Week" : {
-
-    },
     "기지국 위치정보 저장하기" : {
 
     },
@@ -912,12 +1086,23 @@
 
     },
     "본문: ${messageBody}" : {
-
     },
     "사진" : {
 
     },
+    "선택한 주소가 지도에 추가되었습니다." : {
+
+    },
+    "저장 실패" : {
+
+    },
+    "저장 완료" : {
+
+    },
     "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
+
+    },
+    "확인" : {
 
     }
   },

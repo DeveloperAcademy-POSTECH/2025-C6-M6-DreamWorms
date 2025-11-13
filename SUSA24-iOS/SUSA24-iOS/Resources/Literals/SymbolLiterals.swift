@@ -27,6 +27,7 @@ enum SymbolLiterals: String {
     case mapLayerDefault = "square.2.layers.3d"
     case mapLayerFill = "square.2.layers.3d.fill"
     case checkmark
+    case checkmarkFill = "checkmark.square.fill"
     case rightArrow = "chevron.right"
 }
 

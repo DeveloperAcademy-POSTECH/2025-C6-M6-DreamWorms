@@ -17,7 +17,7 @@ struct PhotoDetailsHeader: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                DWCircleButton(
+                DWGlassEffectCircleButton(
                     image: Image(.back),
                     action: onBackTapped
                 )
@@ -29,7 +29,7 @@ struct PhotoDetailsHeader: View {
                 
                 Spacer()
                 
-                DWCircleButton(
+                DWGlassEffectCircleButton(
                     image: Image(.delete),
                     action: onDeleteTapped
                 )

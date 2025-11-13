@@ -24,8 +24,9 @@ protocol ModuleFactoryProtocol {
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
     func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
-    func makeScanLoadView() -> ScanLoadView
     func makePhotoDetailsView(photos: [CapturedPhoto], camera: CameraModel) -> PhotoDetailsView
+    func makeScanLoadView(caseID: UUID, photos: [CapturedPhoto]) -> ScanLoadView
+    func makeScanListView(caseID: UUID, scanResults: [ScanResult], context: NSManagedObjectContext) -> ScanListView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
@@ -204,8 +205,34 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return PhotoDetailsView(store: store)
     }
     
-    func makeScanLoadView() -> ScanLoadView {
-        let view = ScanLoadView()
-        return view
+    func makeScanLoadView(
+        caseID: UUID,
+        photos: [CapturedPhoto]
+    ) -> ScanLoadView {
+        let batchAnalyzer = BatchAddressAnalyzer()
+        let feature = ScanLoadFeature(batchAnalyzer: batchAnalyzer)
+        let store = DWStore(
+            initialState: ScanLoadFeature.State(),
+            reducer: feature
+        )
+        return ScanLoadView(
+            caseID: caseID,
+            photos: photos,
+            store: store
+        )
+    }
+    
+    func makeScanListView(
+        caseID: UUID,
+        scanResults: [ScanResult],
+        context: NSManagedObjectContext
+    ) -> ScanListView {
+        let repository = LocationRepository(context: context)
+        let feature = ScanListFeature(repository: repository)
+        let store = DWStore(
+            initialState: ScanListFeature.State(scanResults: scanResults),
+            reducer: feature
+        )
+        return ScanListView(caseID: caseID, store: store)
     }
 }
