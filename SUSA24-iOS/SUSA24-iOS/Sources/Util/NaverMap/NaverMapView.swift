@@ -4,13 +4,11 @@
 //
 //  Updated by Moo on 11/08/25.
 //
-//
 
 import NMapsMap
 import SwiftUI
 
-/// SwiftUI에서 네이버 지도 SDK(`NMFMapView`)를 사용하기 위한 래퍼 뷰입니다.
-/// 외부에서 전달된 좌표 명령을 적용하고, 지도 터치 이벤트를 다시 SwiftUI로 전달합니다.
+/// SwiftUI에서 네이버 지도 SDK를 사용하기 위한 래퍼 뷰
 struct NaverMapView: UIViewRepresentable {
     // MARK: 카메라 이동 명령
     
@@ -30,18 +28,34 @@ struct NaverMapView: UIViewRepresentable {
     
     /// 지도 터치 이벤트를 상위 모듈로 전달하는 콜백입니다.
     var onMapTapped: ((NMGLatLng) -> Void)?
+    /// 카메라 이동이 멈췄을 때 호출되는 콜백입니다.
+    var onCameraIdle: ((MapBounds, Double) -> Void)?
+    /// 기지국 데이터
+    var cellStations: [CellMarker] = []
+    /// 기지국 레이어 표시 여부
+    var isCellLayerEnabled: Bool = false
+    /// CCTV 데이터
+    var cctvMarkers: [CCTVMarker] = []
+    /// CCTV 레이어 표시 여부
+    var isCCTVLayerEnabled: Bool = false
+    
+    // MARK: - Dependencies
+    
+    /// 인프라 마커 관리자
+    let infrastructureManager: InfrastructureMarkerManager
     
     // MARK: - UIViewRepresentable
     
     /// 네이버 지도 컨트롤을 관리할 코디네이터를 생성합니다.
     func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
+        Coordinator(parent: self, infrastructureManager: infrastructureManager)
     }
     
     /// 네이버 지도 뷰를 생성하고 초기 설정을 수행합니다.
     func makeUIView(context: Context) -> NMFMapView {
         let mapView = NMFMapView()
         mapView.touchDelegate = context.coordinator
+        mapView.addCameraDelegate(delegate: context.coordinator)
         mapView.positionMode = .normal
         mapView.locationOverlay.hidden = false
         context.coordinator.mapView = mapView
@@ -70,29 +84,37 @@ struct NaverMapView: UIViewRepresentable {
                 onMyLocationFocusConsumed?()
             }
         }
+        
+        // 3) 레이어 업데이트
+        context.coordinator.updateCellLayer(
+            cellMarkers: cellStations,
+            isVisible: isCellLayerEnabled,
+            on: uiView
+        )
+        context.coordinator.updateCCTVLayer(
+            cctvMarkers: cctvMarkers,
+            isVisible: isCCTVLayerEnabled,
+            on: uiView
+        )
     }
     
-    /// 네이버 지도와 SwiftUI 사이의 이벤트를 중계하는 객체입니다.
-    class Coordinator: NSObject, NMFMapViewTouchDelegate {
-        // MARK: - References
-        
+    // MARK: - Coordinator
+    
+    class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
         /// 네이버 지도 뷰 인스턴스에 대한 약한 참조입니다.
-        var mapView: NMFMapView?
-        /// SwiftUI `UIViewRepresentable` 래퍼의 참조입니다.
+        weak var mapView: NMFMapView?
         let parent: NaverMapView
         
-        // MARK: - Command State Caches
-        
-        /// 가장 최근에 적용한 카메라 목표 좌표입니다. 동일한 명령이 반복 적용되는 것을 방지합니다.
         var lastCameraTarget: MapCoordinate?
-
-        // MARK: - Map Configuration
-        
-        /// 지도 카메라의 기본 줌 레벨입니다.
         var defaultZoomLevel: Double = 15
+        
+        private let infrastructureManager: InfrastructureMarkerManager
+        private var lastCellStationsHash: Int?
+        private var lastCCTVMarkersHash: Int?
 
-        init(parent: NaverMapView) {
+        init(parent: NaverMapView, infrastructureManager: InfrastructureMarkerManager) {
             self.parent = parent
+            self.infrastructureManager = infrastructureManager
         }
         
         /// 지도 터치 이벤트를 SwiftUI 상위 모듈로 전달합니다.
@@ -123,19 +145,49 @@ struct NaverMapView: UIViewRepresentable {
             moveCamera(to: coordinate)
             return true
         }
-    }
-}
-
-extension NMGLatLng {
-    /// 네이버 지도 좌표를 카카오 API 요청 DTO로 변환합니다.
-    /// - Note: 네이버 지도는 (위도, 경도) 순서이지만, 카카오 API는 (경도, 위도) 순서를 사용합니다.
-    /// - Parameter inputCoord: 입력 좌표계 (기본값: WGS84)
-    /// - Returns: 카카오 API 요청 DTO
-    func toKakaoRequestDTO(inputCoord: String? = "WGS84") -> KakaoCoordToLocationRequestDTO {
-        KakaoCoordToLocationRequestDTO(
-            x: String(lng), // 경도 (네이버 lng → 카카오 x)
-            y: String(lat), // 위도 (네이버 lat → 카카오 y)
-            inputCoord: inputCoord
-        )
+        
+        func mapViewCameraIdle(_ mapView: NMFMapView) {
+            guard let bounds = MapBounds(naverBounds: mapView.contentBounds) else { return }
+            let zoomLevel = mapView.zoomLevel
+            Task { @MainActor in
+                parent.onCameraIdle?(bounds, zoomLevel)
+            }
+        }
+        
+        @MainActor
+        func updateCellLayer(
+            cellMarkers: [CellMarker],
+            isVisible: Bool,
+            on mapView: NMFMapView
+        ) {
+            let newHash = cellMarkers.map(\.id).hashValue
+            
+            if lastCellStationsHash != newHash {
+                infrastructureManager.updateCellStations(
+                    cellMarkers,
+                    on: mapView,
+                    isVisible: isVisible
+                )
+                lastCellStationsHash = newHash
+            } else { infrastructureManager.setCellVisibility(isVisible) }
+        }
+        
+        @MainActor
+        func updateCCTVLayer(
+            cctvMarkers: [CCTVMarker],
+            isVisible: Bool,
+            on mapView: NMFMapView
+        ) {
+            let newHash = cctvMarkers.map(\.id).hashValue
+            
+            if lastCCTVMarkersHash != newHash {
+                infrastructureManager.updateCCTVs(
+                    cctvMarkers,
+                    on: mapView,
+                    isVisible: isVisible
+                )
+                lastCCTVMarkersHash = newHash
+            } else { infrastructureManager.setCCTVVisibility(isVisible) }
+        }
     }
 }

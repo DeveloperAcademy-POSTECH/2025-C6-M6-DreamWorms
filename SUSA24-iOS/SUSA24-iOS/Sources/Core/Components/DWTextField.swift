@@ -65,18 +65,19 @@ struct DWTextField<Field: Hashable>: View {
     /// 텍스트 필드의 배경색입니다.
     var backgroundColor: Color = .mainAlternative
     
+    // 에러 메시지 관리용 상태 (최초 진입 때는 텍스트필드 밑에 에러 메시지를 보이지 않게 한다.)
+    @State private var isValidationActive: Bool = false
+
     private var focus: FocusState<Field?>.Binding {
         externalFocus ?? $internalFocus
     }
-    
-    /// 현재 포커스 여부를 반환합니다.
+
     private var isFocused: Bool {
         focus.wrappedValue == field
     }
-    
-    /// 현재 상태(`normal` 또는 `error`)를 계산합니다.
+
     private var currentState: DWTextFieldState {
-        if let errorMessage, isFocused, text.isEmpty {
+        if let errorMessage, isValidationActive, text.isEmpty {
             return .error(errorMessage)
         }
         return .normal
@@ -112,7 +113,14 @@ struct DWTextField<Field: Hashable>: View {
                     .autocorrectionDisabled()
                     .keyboardType(keyboard)
                     .submitLabel(submitLabel)
-                    .onSubmit { onSubmit?() }
+                    .onSubmit {
+                        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimmed.isEmpty {
+                            isValidationActive = true
+                        } else {
+                            onSubmit?()
+                        }
+                    }
                     
                     if isFocused, !text.isEmpty {
                         Button {
@@ -150,6 +158,11 @@ struct DWTextField<Field: Hashable>: View {
         .frame(height: height ?? (currentState.isError ? 104 : 82))
         .animation(.snappy(duration: 0.2), value: currentState.isError)
         .animation(.snappy(duration: 0.2), value: text)
+        .onChange(of: text) { oldValue, newValue in
+            if !isValidationActive, oldValue != newValue {
+                isValidationActive = true
+            }
+        }
     }
 }
 

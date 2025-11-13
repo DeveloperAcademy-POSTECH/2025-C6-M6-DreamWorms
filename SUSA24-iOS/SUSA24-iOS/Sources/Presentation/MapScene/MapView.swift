@@ -17,14 +17,18 @@ struct MapView: View {
     
     @State private var store: DWStore<MapFeature>
     @Bindable private var dispatcher: MapDispatcher
-    
-    // MARK: - Properties
+    private let infrastructureManager: InfrastructureMarkerManager
     
     // MARK: - Initializer
     
-    init(store: DWStore<MapFeature>, dispatcher: MapDispatcher) {
+    init(
+        store: DWStore<MapFeature>,
+        dispatcher: MapDispatcher,
+        infrastructureManager: InfrastructureMarkerManager
+    ) {
         self._store = State(initialValue: store)
         self._dispatcher = Bindable(dispatcher)
+        self.infrastructureManager = infrastructureManager
     }
     
     // MARK: - View
@@ -35,13 +39,20 @@ struct MapView: View {
                 cameraTargetCoordinate: store.state.cameraTargetCoordinate,
                 shouldFocusMyLocation: store.state.shouldFocusMyLocation,
                 onCameraMoveConsumed: {
-                    // 지도 카메라 이동이 완료되었으므로 상태의 명령을 초기화합니다.
                     store.send(.clearCameraTarget)
                 },
                 onMyLocationFocusConsumed: {
                     store.send(.clearFocusMyLocationFlag)
                 },
-                onMapTapped: { latlng in store.send(.mapTapped(latlng)) }
+                onMapTapped: { latlng in store.send(.mapTapped(latlng)) },
+                onCameraIdle: { bounds, zoomLevel in
+                    store.send(.cameraIdle(bounds: bounds, zoomLevel: zoomLevel))
+                },
+                cellStations: store.state.cellStations,
+                isCellLayerEnabled: store.state.isBaseStationLayerEnabled,
+                cctvMarkers: store.state.cctvMarkers,
+                isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
+                infrastructureManager: infrastructureManager
             )
             .ignoresSafeArea()
             

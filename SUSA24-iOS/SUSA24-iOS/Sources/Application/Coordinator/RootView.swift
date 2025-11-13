@@ -57,12 +57,14 @@ struct RootView: View {
                             moduleFactory.makeSelectLocationView()
                         case .settingScene:
                             moduleFactory.makeSettingView()
-                            //                    case .timeLineScene:
-                            //                        moduleFactory.makeTimeLineView()
+                        //                    case .timeLineScene:
+                        //                        moduleFactory.makeTimeLineView()
                         case let .photoDetailsScene(photos, camera):
                             moduleFactory.makePhotoDetailsView(photos: photos, camera: camera)
-                        case .scanLoadScene:
-                            moduleFactory.makeScanLoadView()
+                        case let .scanLoadScene(caseID, photos):
+                            moduleFactory.makeScanLoadView(caseID: caseID, photos: photos)
+                        case let .scanListScene(caseID, scanResults):
+                            moduleFactory.makeScanListView(caseID: caseID, scanResults: scanResults, context: context)
                         }
                     }
                     .onChange(of: coordinator.currentRoute) {

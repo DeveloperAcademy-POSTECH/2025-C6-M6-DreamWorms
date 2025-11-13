@@ -46,7 +46,6 @@ actor CameraCaptureSession {
         newSession.addOutput(output)
         
         // 세션 프리셋 설정 (1920x1080)
-        // TODO: 문서 분석시 고화질이 효과가 좋은지 성능 테스트 해봐야할 듯 함
         if newSession.canSetSessionPreset(.hd1920x1080) {
             newSession.sessionPreset = .hd1920x1080
         }
@@ -75,6 +74,16 @@ actor CameraCaptureSession {
     func stopAndClean() {
         session?.stopRunning()
         session = nil
+    }
+    
+    /// 세션 일시정지 (입력 초기화 X)
+    func pause() {
+        session?.stopRunning()
+    }
+    
+    /// 세션 재개 (세션이 살아있을 때만)
+    func resume() {
+        session?.startRunning()
     }
     
     /// 세션이 실행 중인지 확인합니다.
