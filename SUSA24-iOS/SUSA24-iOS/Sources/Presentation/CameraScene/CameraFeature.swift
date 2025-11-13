@@ -199,19 +199,23 @@ struct CameraFeature: DWReducer {
             
         // TODO: 처리
         case .viewDidAppear:
+            print("viewDidAppear")
             camera.resumeCamera()
             return .send(.syncPhotoState)
             
         case .viewDidDisappear:
+            print("viewDidDisappear")
             camera.stopVisionAnalysis()
             camera.pauseCamera()
             return .none
             
         case .sceneDidBecomeActive:
+            print("sceneDidBecomeActive")
             camera.resumeCamera()
             return .none
             
         case .sceneDidEnterBackground:
+            print("sceneDidEnterBackground")
             camera.pauseCamera()
             camera.stopVisionAnalysis()
             return .none
