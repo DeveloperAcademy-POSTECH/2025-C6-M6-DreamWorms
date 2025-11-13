@@ -8,6 +8,16 @@
 import CoreData
 import SwiftUI
 
+enum CaseListPickerTab: CaseIterable {
+    case allCase, shareCase
+    var title: String {
+        switch self {
+        case .allCase: String(localized: .caseListAllCasePicker)
+        case .shareCase: String(localized: .caseListShareCasePicker)
+        }
+    }
+}
+
 struct CaseListFeature: DWReducer {
     private let repository: CaseRepositoryProtocol
     init(repository: CaseRepositoryProtocol) { self.repository = repository }
@@ -15,7 +25,11 @@ struct CaseListFeature: DWReducer {
     // MARK: - State
     
     struct State: DWState {
+        var selectedTab: CaseListPickerTab = .allCase
         var cases: [Case] = []
+        
+        // TODO: 지금 로직에서는 해당 부분 적용 x, 추후 공유 기능 추가되면 수정
+        var shareCases: [Case] = []
     }
     
     // MARK: - Action
@@ -23,6 +37,7 @@ struct CaseListFeature: DWReducer {
     enum Action: DWAction {
         case onAppear
         case loadCases([Case])
+        case setTab(CaseListPickerTab)
         case deleteTapped(item: Case)
     }
     
@@ -44,6 +59,10 @@ struct CaseListFeature: DWReducer {
             state.cases = cases
             return .none
             
+        case let .setTab(tab):
+            state.selectedTab = tab
+            return .none
+        
         case let .deleteTapped(item):
             return .task { [repository] in
                 do {

@@ -26,9 +26,9 @@ enum AppRoute: Hashable {
 extension AppRoute {
     var useTabBar: Bool {
         switch self {
-            // 보여주지 않을 화면들만 표시
+        // 보여주지 않을 화면들만 표시
         case .cameraScene, .photoDetailsScene,
-                .scanLoadScene, .searchScene:
+             .scanLoadScene, .searchScene:
             false
         default:
             true
