@@ -29,9 +29,6 @@
     "%lld개" : {
 
     },
-    "%lld회 인식" : {
-
-    },
     "analyze" : {
       "comment" : "탭바_대시보드 뷰 이름",
       "extractionState" : "manual",
@@ -686,6 +683,18 @@
         }
       }
     },
+    "scanList_card_Count" : {
+      "comment" : "스캔 목록_감지 주소 중복 횟수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld회 인식"
+          }
+        }
+      }
+    },
     "scanList_pin_add_duplicate_alert_button_cancel" : {
       "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_취소",
       "extractionState" : "manual",
@@ -974,9 +983,6 @@
         }
       }
     },
-    "Vision 기능" : {
-
-    },
     "visitDuration" : {
       "comment" : "대시보드_체류시간",
       "extractionState" : "manual",
@@ -1004,22 +1010,10 @@
     "Visits" : {
 
     },
-    "기본 설정" : {
-
-    },
-    "기본 스타일" : {
-
-    },
     "기지국 위치정보 저장하기" : {
 
     },
-    "렌즈 얼룩 감지" : {
-
-    },
     "메시지 본문" : {
-
-    },
-    "문서 인식" : {
 
     },
     "발신자 번호" : {
@@ -1037,15 +1031,6 @@
     "선택한 주소가 지도에 추가되었습니다." : {
 
     },
-    "신뢰도: %lld%%" : {
-
-    },
-    "실제 사용 예시" : {
-
-    },
-    "자동 포커스" : {
-
-    },
     "저장 실패" : {
 
     },
@@ -1056,18 +1041,6 @@
 
     },
     "주차" : {
-
-    },
-    "커스텀: 빨강" : {
-
-    },
-    "커스텀: 초록" : {
-
-    },
-    "커스텀: 파랑" : {
-
-    },
-    "플래시" : {
 
     },
     "확인" : {

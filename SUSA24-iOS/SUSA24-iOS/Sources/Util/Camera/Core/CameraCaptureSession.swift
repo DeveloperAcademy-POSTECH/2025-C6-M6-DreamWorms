@@ -91,14 +91,6 @@ actor CameraCaptureSession {
         session?.isRunning ?? false
     }
     
-    func pause() {
-        session?.stopRunning()
-    }
-
-    func resume() {
-        session?.startRunning()
-    }
-    
     /// 사진 촬영 출력을 세션에 추가합니다.
     /// - Parameter photoOutput: 추가할 AVCapturePhotoOutput
     /// - Throws: 추가 실패 시 에러
