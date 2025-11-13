@@ -9,12 +9,13 @@ import SwiftUI
 
 struct CaseAddScrollForm<Field: Hashable>: View {
     @State private var scrollID: Field?
+    @State private var visibleCount: Int = 1
 
     @Binding var caseName: String
     @Binding var caseNumber: String
     @Binding var suspectName: String
-    @Binding var suspectPhoneNumber: String
     @Binding var crime: String
+    @Binding var suspectPhoneNumber: String
     
     let focus: FocusState<Field?>.Binding
     
@@ -24,79 +25,117 @@ struct CaseAddScrollForm<Field: Hashable>: View {
     let phoneField: Field
     let crimeField: Field
     
+    /// 아래에서부터 위로 쌓이는 순서
+    private var orderedFields: [Field] {
+        [nameField, numberField, suspectField, crimeField, phoneField]
+    }
+    
+    /// 해당 필드를 현재 visibleCount에서 노출할지 여부
+    private func isVisible(_ field: Field) -> Bool {
+        guard let index = orderedFields.firstIndex(of: field) else { return false }
+        return index < visibleCount
+    }
+    
+    /// current 이후의 다음 필드를 1개 노출 + 포커스 + 스크롤
+    private func revealNext(after current: Field) {
+        guard
+            let index = orderedFields.firstIndex(of: current),
+            index + 1 < orderedFields.count
+        else { return }
+        
+        guard visibleCount == index + 1 else { return }
+        
+        let next = orderedFields[index + 1]
+        
+        withAnimation(.snappy(duration: 0.25)) {
+            visibleCount = index + 2
+            scrollID = next
+            focus.wrappedValue = next
+        }
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // 사건명
-                DWTextField(
-                    text: $caseName,
-                    field: nameField,
-                    externalFocus: focus,
-                    title: String(localized: .caseAddCaseName),
-                    placeholder: String(localized: .placeholderCaseName)
-                )
-                .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                .setupKeyboard(.default, submit: .next) {
-                    focus.wrappedValue = numberField
+                if isVisible(phoneField) {
+                    DWTextField(
+                        text: $suspectPhoneNumber,
+                        field: phoneField,
+                        externalFocus: focus,
+                        title: String(localized: .caseAddSuspectPhoneNumber),
+                        placeholder: String(localized: .placeholderSuspectPhoneNumber)
+                    )
+                    .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
+                    .setupKeyboard(.phonePad, submit: .done)
+                    .id(phoneField)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .id(nameField)
                 
-                // 사건번호
-                DWTextField(
-                    text: $caseNumber,
-                    field: numberField,
-                    externalFocus: focus,
-                    title: String(localized: .caseAddCaseNumber),
-                    placeholder: String(localized: .placeholderCaseNumber)
-                )
-                .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                .setupKeyboard(.default, submit: .next) {
-                    focus.wrappedValue = suspectField
+                if isVisible(crimeField) {
+                    DWTextField(
+                        text: $crime,
+                        field: crimeField,
+                        externalFocus: focus,
+                        title: String(localized: .caseAddCrime),
+                        placeholder: String(localized: .placeholderCrime)
+                    )
+                    .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
+                    .setupKeyboard(.default, submit: .next) {
+                        revealNext(after: crimeField)
+                    }
+                    .id(crimeField)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .id(numberField)
                 
-                // 피의자명
-                DWTextField(
-                    text: $suspectName,
-                    field: suspectField,
-                    externalFocus: focus,
-                    title: String(localized: .caseAddSuspectName),
-                    placeholder: String(localized: .placeholderSuspectName)
-                )
-                .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                .setupKeyboard(.default, submit: .next) {
-                    focus.wrappedValue = crimeField
+                if isVisible(suspectField) {
+                    DWTextField(
+                        text: $suspectName,
+                        field: suspectField,
+                        externalFocus: focus,
+                        title: String(localized: .caseAddSuspectName),
+                        placeholder: String(localized: .placeholderSuspectName)
+                    )
+                    .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
+                    .setupKeyboard(.default, submit: .next) {
+                        revealNext(after: suspectField)
+                    }
+                    .id(suspectField)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .id(suspectField)
                 
-                // 범죄유형
-                DWTextField(
-                    text: $crime,
-                    field: crimeField,
-                    externalFocus: focus,
-                    title: String(localized: .caseAddCrime),
-                    placeholder: String(localized: .placeholderCrime)
-                )
-                .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                .setupKeyboard(.default, submit: .next) {
-                    focus.wrappedValue = phoneField
+                if isVisible(numberField) {
+                    DWTextField(
+                        text: $caseNumber,
+                        field: numberField,
+                        externalFocus: focus,
+                        title: String(localized: .caseAddCaseNumber),
+                        placeholder: String(localized: .placeholderCaseNumber)
+                    )
+                    .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
+                    .setupKeyboard(.default, submit: .next) {
+                        revealNext(after: numberField)
+                    }
+                    .id(numberField)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .id(crimeField)
                 
-                // 피의자 추적 텔레콤 전화번호 등록
-                DWTextField(
-                    text: $suspectPhoneNumber,
-                    field: phoneField,
-                    externalFocus: focus,
-                    title: String(localized: .caseAddSuspectPhoneNumber),
-                    placeholder: String(localized: .placeholderSuspectPhoneNumber)
-                )
-                .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
-                .setupKeyboard(.default, submit: .done)
-                .id(phoneField)
+                if isVisible(nameField) {
+                    DWTextField(
+                        text: $caseName,
+                        field: nameField,
+                        externalFocus: focus,
+                        title: String(localized: .caseAddCaseName),
+                        placeholder: String(localized: .placeholderCaseName)
+                    )
+                    .setupErrorMessage(String(localized: .textFieldEmptyErrorMessage))
+                    .setupKeyboard(.default, submit: .next) {
+                        revealNext(after: nameField)
+                    }
+                    .id(nameField)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
             .padding(.horizontal, 20)
-            .safeAreaPadding(.bottom, 20)
         }
         .scrollPosition(id: $scrollID)
         .scrollDisabled(true)
@@ -107,6 +146,13 @@ struct CaseAddScrollForm<Field: Hashable>: View {
                 withAnimation(.snappy(duration: 0.25)) {
                     scrollID = newFocus
                 }
+            }
+        }
+        .task {
+            try? await Task.sleep(for: .milliseconds(120))
+            withAnimation(.snappy(duration: 0.25)) {
+                scrollID = nameField
+                focus.wrappedValue = nameField
             }
         }
     }
