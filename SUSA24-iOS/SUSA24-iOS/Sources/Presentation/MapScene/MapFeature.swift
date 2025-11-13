@@ -226,7 +226,7 @@ struct MapFeature: DWReducer {
             case .visitFrequency:
                 state.isVisitFrequencySelected.toggle()
             case .recentBaseStation:
-                state.isRecentBaseStationSelected.toggle()
+                focusRecentBaseStation(&state)
             }
             return .none
             
@@ -358,6 +358,34 @@ struct MapFeature: DWReducer {
 // MARK: - Private Extensions
 
 private extension MapFeature {
+    // MARK: - Case Location Helpers
+
+    func focusRecentBaseStation(_ state: inout State) {
+        let wasSelected = state.isRecentBaseStationSelected
+        state.isRecentBaseStationSelected = false
+        // TODO: 버튼으로 전환하여 토글 상태를 유지하지 않도록 설계 변경 필요
+        if !wasSelected {
+            focusLatestCellLocation(&state)
+        }
+    }
+
+    func focusLatestCellLocation(_ state: inout State) {
+        guard let latestCell = state.locations
+            .filter({ LocationType($0.locationType) == .cell })
+            .max(by: { lhs, rhs in
+                let lhsDate = lhs.receivedAt ?? .distantPast
+                let rhsDate = rhs.receivedAt ?? .distantPast
+                return lhsDate < rhsDate
+            }),
+            latestCell.pointLatitude != 0,
+            latestCell.pointLongitude != 0 else { return }
+
+        state.cameraTargetCoordinate = MapCoordinate(
+            latitude: latestCell.pointLatitude,
+            longitude: latestCell.pointLongitude
+        )
+    }
+
     // MARK: - Kakao Place Helpers
     
     /// 좌표를 기반으로 카카오 API에서 위치 정보를 조회합니다.
