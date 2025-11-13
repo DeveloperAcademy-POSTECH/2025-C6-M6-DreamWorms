@@ -97,7 +97,7 @@ struct DWAlertModifier: ViewModifier {
                                 .padding(.trailing, 2)
                         }
                         alertButton(primaryButton, isPrimary: true)
-                     }
+                    }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)

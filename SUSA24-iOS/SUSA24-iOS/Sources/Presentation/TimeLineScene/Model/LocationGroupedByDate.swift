@@ -70,7 +70,7 @@ extension LocationGroupedByDate {
         let top3Addresses = addressVisitCounts
             .sorted { $0.value > $1.value }
             .prefix(3)
-            .map { $0.key }
+            .map(\.key)
 
         // 4. 주소에 따른 state 결정 함수
         func determineState(for address: String) -> TimeLineColorStickState {
@@ -110,7 +110,7 @@ extension LocationGroupedByDate {
         return result.sorted { $0.date > $1.date }
     }
     
-    //MARK: - 연속 그룹 생성
+    // MARK: - 연속 그룹 생성
 
     private static func makeConsecutiveGroups(
         _ locations: [Location],

@@ -31,7 +31,7 @@ private nonisolated struct WeeklyCellLocationDTO: Decodable, Sendable {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")  // 한국 시간으로 해석
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul") // 한국 시간으로 해석
         guard let date = formatter.date(from: dateString) else {
             throw DecodingError.dataCorruptedError(
                 forKey: .receivedAt,

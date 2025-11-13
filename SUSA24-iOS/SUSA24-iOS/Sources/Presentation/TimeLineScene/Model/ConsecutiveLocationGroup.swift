@@ -38,7 +38,8 @@ struct ConsecutiveLocationGroup: Identifiable, Sendable, Hashable {
         return endTime.timeIntervalSince(startTime)
     }
 
-    //MARK: - initalization
+    // MARK: - initalization
+
     init(
         address: String,
         locations: [Location],
@@ -54,5 +55,3 @@ struct ConsecutiveLocationGroup: Identifiable, Sendable, Hashable {
         self.endTime = endTime
     }
 }
-
-

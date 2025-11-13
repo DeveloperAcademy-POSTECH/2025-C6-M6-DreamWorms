@@ -172,7 +172,7 @@ struct TimeLineDetail: View {
 //
 //    var body: some View {
 //        ScrollView {
-//            LazyVStack(spacing: 0) {  // ⭐️ LazyVStack 사용
+//            LazyVStack(spacing: 0) {  // LazyVStack 사용
 //                ForEach(mockData.indices, id: \.self) { index in
 //                    let data = mockData[index]
 //
