@@ -127,17 +127,21 @@ struct CameraView: View {
                 break
             }
         }
-        .confirmationDialog("", isPresented: $showExitConfirmation) {
-            Button(
-                String(localized: .cameraExitConfirm),
-                role: .destructive
+        .dwAlert(
+            isPresented: $showExitConfirmation,
+            title: String(localized: .cameraExitAlertTitle),
+            message: String(localized: .cameraExitAlertContent),
+            primaryButton: DWAlertButton(
+                title: String(localized: .cameraExitConfirm),
+                style: .default
             ) {
                 coordinator.pop()
-            }
-            Button(String(localized: .cameraExitCancel)) {}
-        } message: {
-            Text(String(localized: .cameraExitAlertContent))
-        }
+            },
+            secondaryButton: DWAlertButton(
+                title: String(localized: .cameraExitCancel),
+                style: .cancel
+            )
+        )
     }
 }
 
