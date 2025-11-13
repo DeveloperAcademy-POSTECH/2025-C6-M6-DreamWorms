@@ -18,6 +18,7 @@ enum SymbolLiterals: String {
     case share = "square.and.arrow.up"
     case delete = "trash"
     case xmark
+    case xmarkFill = "xmark.circle.fill"
     case warningCircle = "exclamationmark.circle.fill"
     case camera = "camera.fill"
     case back = "chevron.left"
@@ -32,6 +33,8 @@ enum SymbolLiterals: String {
     case pin
     case pinFill = "pin.fill"
     case ellipsis
+    case radioSelected = "button.programmable"
+    case radioDeselected = "circle"
 }
 
 extension Image {
