@@ -28,6 +28,9 @@ enum SymbolLiterals: String {
     case mapLayerFill = "square.2.layers.3d.fill"
     case checkmark
     case rightArrow = "chevron.right"
+    case pin
+    case pinFill = "pin.fill"
+    case ellipsis
 }
 
 extension Image {
