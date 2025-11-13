@@ -1,5 +1,5 @@
 //
-//  CellStation.swift
+//  CellMarker.swift
 //  SUSA24-iOS
 //
 //  Created by Moo on 11/12/25.
@@ -8,7 +8,7 @@
 import Foundation
 
 /// 기지국 데이터 모델
-struct CellStation: Identifiable, Equatable, Sendable {
+struct CellMarker: Identifiable, Equatable, Sendable {
     /// 고유 식별자 (위도_경도 조합)
     let id: String
     
@@ -64,7 +64,7 @@ struct CellStation: Identifiable, Equatable, Sendable {
 
 // MARK: - DTO Conversion
 
-extension CellStation {
+extension CellMarker {
     /// DTO로부터 도메인 모델 생성
     init(from dto: CellStationDTO) {
         self.init(

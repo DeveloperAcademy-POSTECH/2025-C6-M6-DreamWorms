@@ -28,10 +28,16 @@ struct NaverMapView: UIViewRepresentable {
     
     /// 지도 터치 이벤트를 상위 모듈로 전달하는 콜백입니다.
     var onMapTapped: ((NMGLatLng) -> Void)?
+    /// 카메라 이동이 멈췄을 때 호출되는 콜백입니다.
+    var onCameraIdle: ((MapBounds, Double) -> Void)?
     /// 기지국 데이터
-    var cellStations: [CellStation] = []
+    var cellStations: [CellMarker] = []
     /// 기지국 레이어 표시 여부
     var isCellLayerEnabled: Bool = false
+    /// CCTV 데이터
+    var cctvMarkers: [CCTVMarker] = []
+    /// CCTV 레이어 표시 여부
+    var isCCTVLayerEnabled: Bool = false
     
     // MARK: - Dependencies
     
@@ -49,6 +55,7 @@ struct NaverMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> NMFMapView {
         let mapView = NMFMapView()
         mapView.touchDelegate = context.coordinator
+        mapView.addCameraDelegate(delegate: context.coordinator)
         mapView.positionMode = .normal
         mapView.locationOverlay.hidden = false
         context.coordinator.mapView = mapView
@@ -80,15 +87,20 @@ struct NaverMapView: UIViewRepresentable {
         
         // 3) 레이어 업데이트
         context.coordinator.updateCellLayer(
-            cellStations: cellStations,
+            cellMarkers: cellStations,
             isVisible: isCellLayerEnabled,
+            on: uiView
+        )
+        context.coordinator.updateCCTVLayer(
+            cctvMarkers: cctvMarkers,
+            isVisible: isCCTVLayerEnabled,
             on: uiView
         )
     }
     
     // MARK: - Coordinator
     
-    class Coordinator: NSObject, NMFMapViewTouchDelegate {
+    class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
         /// 네이버 지도 뷰 인스턴스에 대한 약한 참조입니다.
         weak var mapView: NMFMapView?
         let parent: NaverMapView
@@ -98,6 +110,7 @@ struct NaverMapView: UIViewRepresentable {
         
         private let infrastructureManager: InfrastructureMarkerManager
         private var lastCellStationsHash: Int?
+        private var lastCCTVMarkersHash: Int?
 
         init(parent: NaverMapView, infrastructureManager: InfrastructureMarkerManager) {
             self.parent = parent
@@ -133,40 +146,48 @@ struct NaverMapView: UIViewRepresentable {
             return true
         }
         
+        func mapViewCameraIdle(_ mapView: NMFMapView) {
+            guard let bounds = MapBounds(naverBounds: mapView.contentBounds) else { return }
+            let zoomLevel = mapView.zoomLevel
+            Task { @MainActor in
+                parent.onCameraIdle?(bounds, zoomLevel)
+            }
+        }
+        
         @MainActor
         func updateCellLayer(
-            cellStations: [CellStation],
+            cellMarkers: [CellMarker],
             isVisible: Bool,
             on mapView: NMFMapView
         ) {
-            let newHash = cellStations.map(\.id).hashValue
+            let newHash = cellMarkers.map(\.id).hashValue
             
             if lastCellStationsHash != newHash {
                 infrastructureManager.updateCellStations(
-                    cellStations,
+                    cellMarkers,
                     on: mapView,
                     isVisible: isVisible
                 )
                 lastCellStationsHash = newHash
-            } else {
-                infrastructureManager.setCellVisibility(isVisible)
-            }
+            } else { infrastructureManager.setCellVisibility(isVisible) }
         }
-    }
-}
-
-// MARK: - NMGLatLng Extension
-
-extension NMGLatLng {
-    /// 네이버 지도 좌표를 카카오 API 요청 DTO로 변환합니다.
-    /// - Note: 네이버 지도는 (위도, 경도) 순서이지만, 카카오 API는 (경도, 위도) 순서를 사용합니다.
-    /// - Parameter inputCoord: 입력 좌표계 (기본값: WGS84)
-    /// - Returns: 카카오 API 요청 DTO
-    func toKakaoRequestDTO(inputCoord: String? = "WGS84") -> KakaoCoordToLocationRequestDTO {
-        KakaoCoordToLocationRequestDTO(
-            x: String(lng), // 경도 (네이버 lng → 카카오 x)
-            y: String(lat), // 위도 (네이버 lat → 카카오 y)
-            inputCoord: inputCoord
-        )
+        
+        @MainActor
+        func updateCCTVLayer(
+            cctvMarkers: [CCTVMarker],
+            isVisible: Bool,
+            on mapView: NMFMapView
+        ) {
+            let newHash = cctvMarkers.map(\.id).hashValue
+            
+            if lastCCTVMarkersHash != newHash {
+                infrastructureManager.updateCCTVs(
+                    cctvMarkers,
+                    on: mapView,
+                    isVisible: isVisible
+                )
+                lastCCTVMarkersHash = newHash
+            } else { infrastructureManager.setCCTVVisibility(isVisible) }
+        }
     }
 }

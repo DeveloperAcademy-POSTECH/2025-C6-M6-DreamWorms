@@ -13,8 +13,8 @@ enum CellStationLoader {
     /// - Parameter filename: JSON 파일명 (기본값: pohang_cell_station_data.json)
     /// - Returns: CellStation 도메인 모델 배열
     /// - Throws: JSONLoaderError
-    static func loadFromJSON(filename: String = "pohang_cell_station_data.json") async throws -> [CellStation] {
+    static func loadFromJSON(filename: String = "pohang_cell_station_data.json") async throws -> [CellMarker] {
         let root = try JSONLoader.load(filename, as: CellStationRoot.self)
-        return root.sheet1.map { CellStation(from: $0) }
+        return root.sheet1.map { CellMarker(from: $0) }
     }
 }
