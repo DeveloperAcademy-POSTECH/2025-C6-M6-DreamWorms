@@ -19,18 +19,29 @@ struct LocationOverviewView: View {
     
     let caseID: UUID
     let baseAddress: String
+    let initialCoordinate: MapCoordinate?
+
+    // 지도 제어 상태
+    @State private var cameraTarget: MapCoordinate? = nil
+    @State private var focusMyLocation = false
 
     // MARK: - View
 
     var body: some View {
         VStack(spacing: 0) {
             // TODO: - 지도화면 연결 이후 수정
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.mainAlternative)
-                .frame(height: 206)
-                .padding(.top, 26)
-                .padding(.bottom, 24)
-                .padding(.horizontal, 16)
+            NaverMapView(
+                cameraTargetCoordinate: cameraTarget,
+                shouldFocusMyLocation: focusMyLocation,
+                onCameraMoveConsumed: { cameraTarget = nil }, // 한 번만 이동
+                onMyLocationFocusConsumed: { focusMyLocation = false }, // 한 번만 포커스
+                onMapTapped: { _ in /* TODO: 상세 지도 화면 이동 등 */ }
+            )
+            .frame(height: 206)
+            .padding(.top, 26)
+            .padding(.bottom, 24)
+            .padding(.horizontal, 16)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
             
             LocationOverviewListHeader(
                 selection: store.state.selection,
@@ -89,7 +100,8 @@ private extension LocationOverviewView {}
 //        LocationOverviewView(
 //            store: dummyStore,
 //            caseID: UUID(),
-//            baseAddress: "기지국주소"
+//            baseAddress: "기지국주소",
+//            initialCoordinate: nil
 //        )
 //        .environment(AppCoordinator())
 //    }

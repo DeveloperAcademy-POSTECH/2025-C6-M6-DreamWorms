@@ -16,6 +16,7 @@ protocol ModuleFactoryProtocol {
     func makeLocationOverviewView(
         caseID: UUID,
         baseAddress: String,
+        initialCoordinate: MapCoordinate?,
         context: NSManagedObjectContext
     ) -> LocationOverviewView
     func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<
@@ -87,6 +88,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeLocationOverviewView(
         caseID: UUID,
         baseAddress: String,
+        initialCoordinate: MapCoordinate?,
         context: NSManagedObjectContext
     ) -> LocationOverviewView {
         let repository = LocationRepository(context: context)
@@ -97,7 +99,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let view = LocationOverviewView(
             store: store,
             caseID: caseID,
-            baseAddress: baseAddress
+            baseAddress: baseAddress,
+            initialCoordinate: initialCoordinate
         )
         return view
     }
