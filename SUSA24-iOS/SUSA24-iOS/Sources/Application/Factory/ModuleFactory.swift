@@ -36,6 +36,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
     private lazy var searchService = KakaoSearchAPIService()
     private lazy var cctvService = VWorldCCTVAPIService()
     private lazy var infrastructureMarkerManager = InfrastructureMarkerManager()
+    private lazy var caseLocationMarkerManager = CaseLocationMarkerManager()
     
     func makeCameraView(caseID: UUID) -> CameraView {
         // cameraModel 주입
@@ -132,7 +133,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let view = MapView(
             store: store,
             dispatcher: mapDispatcher,
-            infrastructureManager: infrastructureMarkerManager
+            infrastructureManager: infrastructureMarkerManager,
+            caseLocationMarkerManager: caseLocationMarkerManager
         )
         return view
     }
