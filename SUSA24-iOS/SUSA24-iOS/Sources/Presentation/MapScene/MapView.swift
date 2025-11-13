@@ -205,7 +205,7 @@ struct MapView: View {
                             title: String(localized: .buttonDelete),
                             systemImage: "trash",
                             role: .destructive,
-                            action: { showDeleteConfirmation() }
+                            action: { store.send(.showDeleteAlert) }
                         ),
                     ]
                 )
@@ -224,7 +224,7 @@ struct MapView: View {
                     image: Image(.ellipsis),
                     items: [
                         DWBottomToolbarItem.MenuItem(
-                            title: "공유하기",
+                            title: String(localized: .buttonShare),
                             systemImage: "square.and.arrow.up",
                             role: nil,
                             action: {}
@@ -233,26 +233,6 @@ struct MapView: View {
                 )
                 .iconSize(16),
             ]
-        }
-    }
-    
-    private func showDeleteConfirmation() {
-        let alert = UIAlertController(
-            title: "핀 삭제하기",
-            message: "사건을 공유하고 있는 다른 사용자의 화면에서도 지워집니다. 이 핀을 삭제할까요?",
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        
-        alert.addAction(UIAlertAction(title: "삭제하기", style: .destructive) { _ in
-            store.send(.confirmDeletePin)
-        })
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController
-        {
-            rootVC.present(alert, animated: true)
         }
     }
 }

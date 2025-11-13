@@ -99,14 +99,15 @@ struct MapFeature: DWReducer {
         var existingLocation: Location?
         
         // MARK: - Pin Add/Edit
-        
+
+        var isDeleteAlertPresented: Bool = false
         /// 핀 추가/수정 화면 표시 여부
         var isPinWritePresented: Bool = false
         /// 수정 모드 여부 (true: 수정, false: 추가)
         var isEditMode: Bool = false
         
         // MARK: - Memo Edit
-        
+
         /// 형사 노트 작성/수정 화면 표시 여부
         var isMemoEditPresented: Bool = false
         
@@ -195,9 +196,17 @@ struct MapFeature: DWReducer {
         case addPinTapped
         /// 핀 수정 버튼 탭
         case editPinTapped
+        
         /// 핀 삭제 버튼 탭
         case deletePinTapped
+        
+        /// 삭제 Alert
+        case showDeleteAlert
+        case hideDeleteAlert
+        
         case confirmDeletePin
+        case deletePinCompleted
+        
         /// 핀 저장 (추가/수정)
         case savePin(Location)
         case savePinCompleted(Location)
@@ -458,17 +467,35 @@ struct MapFeature: DWReducer {
         case .deletePinTapped:
             return .send(.confirmDeletePin)
             
+        case .showDeleteAlert:
+            state.isDeleteAlertPresented = true
+            return .none
+
+        case .hideDeleteAlert:
+            state.isDeleteAlertPresented = false
+            return .none
+
         case .confirmDeletePin:
             guard let locationId = state.existingLocation?.id else { return .none }
-            
+
             return .task { [repository] in
                 do {
                     try await repository.deleteLocation(id: locationId)
-                    return .hidePlaceInfo
+                    return .deletePinCompleted
                 } catch {
                     return .none
                 }
             }
+
+        case .deletePinCompleted:
+            guard let deleteId = state.existingLocation?.id else { return .none }
+
+            state.locations.removeAll { $0.id == deleteId }
+            state.existingLocation = nil
+            state.isPlaceInfoSheetPresented = false
+            state.selectedPlaceInfo = nil
+
+            return .none
             
         case let .savePin(location):
             return .task { [repository, caseId = state.caseId] in
@@ -532,10 +559,8 @@ struct MapFeature: DWReducer {
             return .task { [repository] in
                 do {
                     try await repository.updateLocation(updatedLocation)
-                    print("updateLocation")
                     return .memoSaveCompleted(updatedLocation)
                 } catch {
-                    print("????")
                     return .none
                 }
             }
