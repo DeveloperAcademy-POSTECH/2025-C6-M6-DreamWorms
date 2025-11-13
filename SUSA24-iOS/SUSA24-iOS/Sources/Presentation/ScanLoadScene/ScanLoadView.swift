@@ -14,21 +14,21 @@ import SwiftUI
 /// 추출 실패 시 confirmationDialog로 재촬영 여부를 사용자에게 물어봅니다.
 struct ScanLoadView: View {
     // MARK: - Dependencies
-
+    
     @Environment(AppCoordinator.self)
     private var coordinator
-
+    
     @State private var store: DWStore<ScanLoadFeature>
-
+    
     private let caseID: UUID
     private let photos: [CapturedPhoto]
-
+    
     // MARK: - State
-
+    
     @State private var showRetryDialog: Bool = false
-
+    
     // MARK: - Initialization
-
+    
     init(
         caseID: UUID,
         photos: [CapturedPhoto],
@@ -38,27 +38,27 @@ struct ScanLoadView: View {
         self.photos = photos
         _store = State(initialValue: store)
     }
-
+    
     // MARK: - Body
-
+    
     var body: some View {
         ZStack {
             VStack(spacing: 32) {
                 Spacer()
-
+                
                 LoadingAnimationView()
                     .animation(.spring(response: 0.6, dampingFraction: 0.7), value: store.state.isScanning)
-
+                
                 VStack(spacing: 8) {
                     Text(.scanLoadTitle)
                         .font(.titleSemiBold18)
                         .foregroundColor(.labelNeutral)
-
+                    
                     Text(.scanLoadSubTitle)
                         .font(.bodyMedium14)
                         .foregroundStyle(.labelAssistive)
                 }
-
+                
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -70,7 +70,7 @@ struct ScanLoadView: View {
         }
         .onChange(of: store.state.isCompleted) { _, isCompleted in
             guard isCompleted else { return }
-
+            
             // 추출 결과가 있을 때: 목록 뷰로 이동
             if !store.state.scanResults.isEmpty {
                 navigateToScanList()
@@ -107,28 +107,24 @@ private extension ScanLoadView {
     func navigateToScanList() {
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(0.5))
-
+            
             // TODO: ScanListView 연결부분
-//            coordinator.replaceLast(
-//                .scanListScene(
-//                    caseID: caseID,
-//                    scanResults: store.state.scanResults
-//                )
-//            )
+            //            coordinator.replaceLast(
+            //                .scanListScene(
+            //                    caseID: caseID,
+            //                    scanResults: store.state.scanResults
+            //                )
+            //            )
         }
     }
-
+    
     func handleRetry() {
-        // MapView로 돌아간 후 새로운 CameraView push (photos 초기화됨)
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(0.3)) // 애니메이션 지연
-            coordinator.push(.cameraScene(caseID: caseID))
-        }
+        coordinator.pop()
     }
-
+    
     /// 취소 - MapView로
     func handleCancel() {
-        // 2단계 back: ScanLoadView, CameraView 제거
+        // ScanLoadView + CameraView 제거 → MapView로
         if coordinator.path.count >= 2 {
             coordinator.popToDepth(2)
         } else {
@@ -139,7 +135,7 @@ private extension ScanLoadView {
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    let mockPhotos: [CapturedPhoto] = []
 //
 //    let store = DWStore(
@@ -153,4 +149,4 @@ private extension ScanLoadView {
 //        store: store
 //    )
 //    .environment(AppCoordinator())
-//}
+// }
