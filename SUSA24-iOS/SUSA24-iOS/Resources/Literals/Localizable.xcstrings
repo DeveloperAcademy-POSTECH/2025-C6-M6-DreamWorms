@@ -29,6 +29,9 @@
     "%lld개" : {
 
     },
+    "%lld주차" : {
+
+    },
     "analyze" : {
       "comment" : "탭바_대시보드 뷰 이름",
       "extractionState" : "manual",
@@ -281,6 +284,42 @@
         }
       }
     },
+    "caseList_allCasePicker" : {
+      "comment" : "케이스 리스트_피커_전체 사건",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체 사건"
+          }
+        }
+      }
+    },
+    "caseList_emptyDescription" : {
+      "comment" : "케이스 리스트_엠티 설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건추가 버튼으로 사건을 등록해보세요."
+          }
+        }
+      }
+    },
+    "caseList_emptyTitle" : {
+      "comment" : "케이스 리스트_엠티 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추가된 사건이 없어요"
+          }
+        }
+      }
+    },
     "caseList_navigationTitle" : {
       "comment" : "케이스 리스트_네비게이션 타이틀",
       "extractionState" : "manual",
@@ -289,6 +328,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사건을 추가하거나\n확인할 사건을 선택하세요."
+          }
+        }
+      }
+    },
+    "caseList_shareCasePicker" : {
+      "comment" : "케이스 리스트_피커_공유 받은 사건",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공유 받은 사건"
           }
         }
       }
@@ -411,6 +462,9 @@
         }
       }
     },
+    "from" : {
+
+    },
     "Hour" : {
 
     },
@@ -503,6 +557,12 @@
         }
       }
     },
+    "max" : {
+
+    },
+    "min" : {
+
+    },
     "photoDetails_currentIndex" : {
       "comment" : "이미지 상세_현재이미지/총 이미지 수",
       "extractionState" : "manual",
@@ -582,7 +642,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "010-1234-5678"
+            "value" : "셀 번호를 받을 번호를 입력해 주세요."
           }
         }
       }
@@ -649,6 +709,9 @@
           }
         }
       }
+    },
+    "Selected Hour" : {
+
     },
     "summary" : {
       "comment" : "탭바_원 페이지 뷰 이름",
@@ -794,6 +857,9 @@
         }
       }
     },
+    "to" : {
+
+    },
     "us_ver" : {
       "comment" : "미국_버전",
       "extractionState" : "manual",
@@ -830,6 +896,12 @@
         }
       }
     },
+    "Visits" : {
+
+    },
+    "Week" : {
+
+    },
     "기지국 위치정보 저장하기" : {
 
     },
@@ -840,18 +912,12 @@
 
     },
     "본문: ${messageBody}" : {
-   
-    },
-    "Visits" : {
 
     },
     "사진" : {
 
     },
     "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
-    
-    } ,
-    "주차" : {
 
     }
   },

@@ -42,7 +42,7 @@ struct DashboardView: View {
                                 
                 DashboardChartSection(
                     cellCharts: store.state.cellCharts,
-                    send: { store.send($0) }
+                    send: { action in store.send(action) }
                 )
                 .padding(.bottom, 54)
                 .background(.mainAlternative)
