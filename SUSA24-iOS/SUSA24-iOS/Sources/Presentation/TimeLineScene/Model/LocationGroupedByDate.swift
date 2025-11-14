@@ -121,15 +121,15 @@ extension LocationGroupedByDate {
         var groups: [ConsecutiveLocationGroup] = []
         var batch: [Location] = [locations[0]]
         var addr = locations[0].address
-        var previousStartTime: Date?
 
         for loc in locations.dropFirst() {
             if loc.address == addr {
                 batch.append(loc)
             } else {
-                // 현재 배치의 시작 시간
+                // 현재 배치의 시간 범위
                 let receivedTimes = batch.compactMap(\.receivedAt)
                 let startTime = receivedTimes.min() ?? Date()
+                let endTime = batch.count > 1 ? receivedTimes.max() : nil
 
                 // 그룹 생성
                 let state = stateResolver(addr)
@@ -138,11 +138,8 @@ extension LocationGroupedByDate {
                     locations: batch,
                     state: state,
                     startTime: startTime,
-                    endTime: previousStartTime
+                    endTime: endTime
                 ))
-
-                // 다음을 위해 저장
-                previousStartTime = startTime
 
                 // 새 배치 시작
                 batch = [loc]
@@ -153,6 +150,7 @@ extension LocationGroupedByDate {
         // 마지막 배치 처리
         let receivedTimes = batch.compactMap(\.receivedAt)
         let startTime = receivedTimes.min() ?? Date()
+        let endTime = batch.count > 1 ? receivedTimes.max() : nil
         let state = stateResolver(addr)
 
         groups.append(ConsecutiveLocationGroup(
@@ -160,7 +158,7 @@ extension LocationGroupedByDate {
             locations: batch,
             state: state,
             startTime: startTime,
-            endTime: previousStartTime
+            endTime: endTime
         ))
 
         return groups
