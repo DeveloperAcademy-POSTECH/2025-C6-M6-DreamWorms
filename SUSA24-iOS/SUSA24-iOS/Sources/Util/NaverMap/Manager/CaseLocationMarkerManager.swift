@@ -78,6 +78,14 @@ final class CaseLocationMarkerManager {
             }
         }
     }
+
+    /// 모든 케이스 위치 마커의 표시/숨김을 전환합니다.
+    /// - Parameter isVisible: true면 표시, false면 숨김
+    func setVisibility(_ isVisible: Bool) {
+        for marker in markers.values {
+            marker.hidden = !isVisible
+        }
+    }
     
     private struct MarkerModel {
         let id: String
