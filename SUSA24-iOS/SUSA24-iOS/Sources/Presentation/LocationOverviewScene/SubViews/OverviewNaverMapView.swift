@@ -20,6 +20,8 @@ import SwiftUI
 struct OverviewNaverMapView: UIViewRepresentable {
     /// 지도에서 중심이 될 좌표입니다. (기지국 위치)
     let centerCoordinate: MapCoordinate
+    /// 범위 안에 포함된 Location 목록 (이미 Feature에서 필터링된 값)
+    let locations: [Location]
     
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -42,6 +44,11 @@ struct OverviewNaverMapView: UIViewRepresentable {
             radius: 500,
             on: mapView
         )
+        // Location 마커 초기 렌더링
+        context.coordinator.updateLocationMarkers(
+            locations,
+            on: mapView
+        )
         
         return mapView
     }
@@ -52,23 +59,31 @@ struct OverviewNaverMapView: UIViewRepresentable {
             radius: 500,
             on: uiView
         )
+        context.coordinator.updateLocationMarkers(
+            locations,
+            on: uiView
+        )
     }
     
     // MARK: - Coordinator
-
-    class Coordinator: NSObject {
+    
+    final class Coordinator: NSObject {
         weak var mapView: NMFMapView?
         let parent: OverviewNaverMapView
         
+        /// 기준 기지국 마커
         private var centerMarker: NMFMarker?
+        /// 커버리지 오버레이
         private var coverageOverlay: NMFGroundOverlay?
+        /// Location 위치 마커들 (id -> marker)
+        private var locationMarkers: [UUID: NMFMarker] = [:]
         
         init(parent: OverviewNaverMapView) {
             self.parent = parent
         }
         
         // MARK: - Camera
-
+        
         func configureInitialCamera(on mapView: NMFMapView) {
             let center = parent.centerCoordinate
             let latlng = NMGLatLng(lat: center.latitude, lng: center.longitude)
@@ -79,7 +94,7 @@ struct OverviewNaverMapView: UIViewRepresentable {
         }
         
         // MARK: - Marker + Coverage
-
+        
         func updateCenterMarkerAndCoverage(
             _ center: MapCoordinate,
             radius: CLLocationDistance,
@@ -87,7 +102,21 @@ struct OverviewNaverMapView: UIViewRepresentable {
         ) {
             let latlng = NMGLatLng(lat: center.latitude, lng: center.longitude)
             
-            // 1) 마커 갱신
+            updateCenterMarker(at: latlng, on: mapView)
+            updateCoverageOverlay(
+                center: center,
+                radius: radius,
+                cameraLatLng: latlng,
+                on: mapView
+            )
+        }
+        
+        // MARK: Center Marker
+        
+        private func updateCenterMarker(
+            at latlng: NMGLatLng,
+            on mapView: NMFMapView
+        ) {
             if let marker = centerMarker {
                 marker.position = latlng
             } else {
@@ -102,46 +131,135 @@ struct OverviewNaverMapView: UIViewRepresentable {
                     marker.iconImage = NMFOverlayImage(image: icon)
                 }
             }
-            
-            // 2) bounds 계산
-            let sw = NMGLatLng(
+        }
+        
+        // MARK: Coverage Overlay
+        
+        private func updateCoverageOverlay(
+            center: MapCoordinate,
+            radius: CLLocationDistance,
+            cameraLatLng: NMGLatLng,
+            on mapView: NMFMapView
+        ) {
+            // bounds 계산
+            let southWest = NMGLatLng(
                 lat: center.latitude - metersToDegrees(radius),
                 lng: center.longitude - metersToDegreesLongitude(radius, at: center.latitude)
             )
-            
-            let ne = NMGLatLng(
+            let northEast = NMGLatLng(
                 lat: center.latitude + metersToDegrees(radius),
                 lng: center.longitude + metersToDegreesLongitude(radius, at: center.latitude)
             )
+            let bounds = NMGLatLngBounds(southWest: southWest, northEast: northEast)
             
-            let bounds = NMGLatLngBounds(southWest: sw, northEast: ne)
-            
-            // 3) coverage overlay 적용
+            // coverage overlay 적용
             Task { @MainActor in
                 let overlayImage = await RangeOverlayImageCache.shared.image(for: .half)
                 
                 if let coverage = coverageOverlay {
                     coverage.bounds = bounds
                 } else {
-                    let coverage = NMFGroundOverlay(bounds: bounds, image: NMFOverlayImage(image: overlayImage))
+                    let coverage = NMFGroundOverlay(
+                        bounds: bounds,
+                        image: NMFOverlayImage(image: overlayImage)
+                    )
                     coverage.alpha = 0.55
                     coverage.mapView = mapView
                     coverageOverlay = coverage
                 }
                 
-                // 4) overlay 적용 후 카메라를 다시 정확한 중심으로 이동
+                // overlay 적용 후 카메라를 다시 정확한 중심으로 이동
                 DispatchQueue.main.async {
-                    let update = NMFCameraUpdate(position: NMFCameraPosition(latlng, zoom: 13.5))
+                    let update = NMFCameraUpdate(
+                        position: NMFCameraPosition(cameraLatLng, zoom: 13.5)
+                    )
                     update.animation = .none
                     mapView.moveCamera(update)
                 }
             }
         }
         
+        /// Overview 범위 안의 Location들을 타입에 맞는 마커로 렌더링합니다.
+        /// - Parameter locations: 이미 Feature에서 반경 + 타입 필터링이 끝난 Location 배열
+        func updateLocationMarkers(
+            _ locations: [Location],
+            on mapView: NMFMapView
+        ) {
+            // Location -> MarkerModel 매핑
+            struct MarkerModel {
+                let id: UUID
+                let coordinate: MapCoordinate
+                let markerType: MarkerType
+            }
+            
+            var models: [UUID: MarkerModel] = [:]
+            
+            for loc in locations {
+                let lat = loc.pointLatitude
+                let lon = loc.pointLongitude
+                guard lat != 0, lon != 0 else { continue }
+                
+                // LocationType -> MarkerType 매핑
+                let markerType: MarkerType
+                switch LocationType(loc.locationType) {
+                case .home: markerType = .home
+                case .work: markerType = .work
+                case .custom: markerType = .custom
+                case .cell: continue
+                }
+                
+                let coord = MapCoordinate(latitude: lat, longitude: lon)
+                models[loc.id] = MarkerModel(
+                    id: loc.id,
+                    coordinate: coord,
+                    markerType: markerType
+                )
+            }
+            
+            let newIds = Set(models.keys)
+            let oldIds = Set(locationMarkers.keys)
+            
+            // 사라진 마커 제거
+            let idsToRemove = oldIds.subtracting(newIds)
+            for id in idsToRemove {
+                locationMarkers[id]?.mapView = nil
+                locationMarkers.removeValue(forKey: id)
+            }
+            
+            // 새/변경된 마커 적용
+            Task { @MainActor in
+                for model in models.values {
+                    let position = NMGLatLng(
+                        lat: model.coordinate.latitude,
+                        lng: model.coordinate.longitude
+                    )
+                    
+                    if let marker = locationMarkers[model.id] {
+                        marker.position = position
+                        if marker.mapView == nil {
+                            marker.mapView = mapView
+                        }
+                    } else {
+                        let marker = NMFMarker()
+                        marker.position = position
+                        marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
+                        marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+                        marker.anchor = CGPoint(x: 0.5, y: 1.0)
+                        
+                        let icon = await MarkerImageCache.shared.image(for: model.markerType)
+                        marker.iconImage = NMFOverlayImage(image: icon)
+                        marker.mapView = mapView
+                        
+                        locationMarkers[model.id] = marker
+                    }
+                }
+            }
+        }
+        
         // MARK: - Utility: meters → degrees
-
+        
         private func metersToDegrees(_ meters: CLLocationDistance) -> Double {
-            meters / 111_320.0 // 경도/위도 환산
+            meters / 111_320.0
         }
         
         private func metersToDegreesLongitude(_ meters: CLLocationDistance, at latitude: Double) -> Double {
