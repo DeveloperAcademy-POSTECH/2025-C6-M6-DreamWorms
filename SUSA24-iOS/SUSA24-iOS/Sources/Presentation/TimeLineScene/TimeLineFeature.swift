@@ -14,13 +14,19 @@ import SwiftUI
 struct ScrollTarget: Equatable {
     let dateID: String // "2025-01-06" 형식
     let triggerID = UUID() // 같은 날짜를 여러 번 탭해도 스크롤되도록
-    
+
     static func == (lhs: ScrollTarget, rhs: ScrollTarget) -> Bool {
         lhs.triggerID == rhs.triggerID
     }
 }
 
 struct TimeLineFeature: DWReducer {
+    private let dispatcher: MapDispatcher
+
+    init(dispatcher: MapDispatcher) {
+        self.dispatcher = dispatcher
+    }
+
     // MARK: - State
     
     struct State: DWState {
@@ -106,8 +112,13 @@ struct TimeLineFeature: DWReducer {
             
             return .none
             
-        case .locationTapped:
-            // TODO: Location 상세 화면으로 이동 또는 지도에서 선택된 위치 표시
+        case let .locationTapped(location):
+            // Timeline 셀 탭 시 맵으로 카메라 이동
+            let coordinate = MapCoordinate(
+                latitude: location.pointLatitude,
+                longitude: location.pointLongitude
+            )
+            dispatcher.send(.moveToLocation(coordinate: coordinate))
             return .none
             
         case let .scrollToDate(date):
