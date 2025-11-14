@@ -248,6 +248,17 @@
         }
       }
     },
+    "cancel_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
     "caseAdd_caseName" : {
       "comment" : "케이스 추가_텍스트필드 타이틀_사건명",
       "extractionState" : "manual",
@@ -450,6 +461,17 @@
         }
       }
     },
+    "confirm_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인"
+          }
+        }
+      }
+    },
     "dashboard_emptyChartMessage" : {
       "comment" : "대시보드_엠티 차트_타이틀",
       "extractionState" : "manual",
@@ -522,11 +544,25 @@
         }
       }
     },
+    "delete_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
     "from" : {
 
     },
     "Hour" : {
 
+    },
+    "Key" : {
+      "extractionState" : "manual"
     },
     "layer_setting_coverage_title" : {
       "extractionState" : "manual",
@@ -569,6 +605,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지도 설정"
+          }
+        }
+      }
+    },
+    "mapview_pin_create_button" : {
+      "comment" : "스캔 목로_핀 추가 시트_완료 버튼",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
           }
         }
       }
@@ -632,6 +680,89 @@
     "max" : {
 
     },
+    "memo_delete_cancel" : {
+      "comment" : "메모 삭제 취소",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "memo_delete_confirm" : {
+      "comment" : "메모 삭제",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영구 삭제"
+          }
+        }
+      }
+    },
+    "memo_delete_message" : {
+      "comment" : "메모 노트 삭제 시 Alert message",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "작성한 노트를 영구적으로 삭제하시겠습니까?"
+          }
+        }
+      }
+    },
+    "memo_delete_title" : {
+      "comment" : "메모 노트 삭제 시 Alert 제목",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노트 삭제"
+          }
+        }
+      }
+    },
+    "memo_write_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "형사 노트 작성하기"
+          }
+        }
+      }
+    },
+    "memo_write_placeHolder" : {
+      "comment" : "메모 노트 작성 시 placeholder",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "장소에 대한 상세정보를 메모하세요."
+          }
+        }
+      }
+    },
+    "memo_write_title" : {
+      "comment" : "메모 노트 작성 화면 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "형사노트"
+          }
+        }
+      }
+    },
     "min" : {
 
     },
@@ -643,6 +774,90 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d/%d"
+          }
+        }
+      }
+    },
+    "pin_add" : {
+      "comment" : "핀 추가_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 추가"
+          }
+        }
+      }
+    },
+    "pin_delete_alert_content" : {
+      "comment" : "핀 삭제_설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건을 공유하고 있는 다른 사용자의 화면에서도 지워집니다. 이 핀을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "pin_modify" : {
+      "comment" : "핀 수정_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 수정"
+          }
+        }
+      }
+    },
+    "pin_wirte_limit_length" : {
+      "comment" : "핀 추가 시 최대 글자수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/20"
+          }
+        }
+      }
+    },
+    "pin_write_color_select" : {
+      "comment" : "핀 추가_색상 선택_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 색상 선택"
+          }
+        }
+      }
+    },
+    "pin_write_icon_select" : {
+      "comment" : "핀 추가_아이콘 선택_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 아이콘 선택"
+          }
+        }
+      }
+    },
+    "pin_write_placeHolder" : {
+      "comment" : "핀 추가_플레이스홀더",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도에 표시될 핀 이름을 작성해주세요."
           }
         }
       }
