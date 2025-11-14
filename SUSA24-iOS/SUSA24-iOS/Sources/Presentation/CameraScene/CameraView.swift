@@ -25,81 +25,87 @@ struct CameraView: View {
     }
     
     var body: some View {
-        ZStack {
-            // MARK: - 카메라 프리뷰
-
-            CameraPreview(source: store.state.previewSource)
-                .ignoresSafeArea()
-            
-            // MARK: - 문서 감지 오버레이
-
-            if store.state.isDocumentDetectionEnabled,
-               let detection = store.state.documentDetection
-            {
-                // TODO: UIScreen 제거
-                DocumentDetectionOverlayView(
-                    documentDetection: detection,
-                    screenSize: UIScreen.main.bounds.size
-                )
-                .ignoresSafeArea()
-                .id(detection.timestamp)
-            }
-            
-            // MARK: - 렌즈 얼룩 표시
-
-            if store.state.isLensSmudgeDetectionEnabled,
-               let smudge = store.state.lensSmudgeDetection
-            {
-                LensSmudgeOverlay(smudge: smudge)
-            }
-            
-            // MARK: - 헤더
-
-            VStack(spacing: 0) {
-                CameraHeader(
-                    onBackTapped: handleBackTapped,
-                    onScanTapped: {
-                        coordinator.push(
-                            .scanLoadScene(
-                                caseID: store.state.caseID,
-                                photos: store.state.allPhotos
-                            )
-                        )
-                    },
-                    showScanButton: store.state.photoCount > 0
-                )
+        GeometryReader { geometry in
+            ZStack {
+                // MARK: - 카메라 프리뷰
                 
-                Spacer()
-                    .allowsHitTesting(false)
-            }
-            
-            // MARK: - 컨트롤러
-
-            VStack(spacing: 0) {
-                Spacer()
-                    .allowsHitTesting(false)
+                CameraPreview(source: store.state.previewSource)
+                    .ignoresSafeArea()
                 
-                CameraController(
-                    count: store.state.photoCount,
-                    uiImage: store.state.lastThumbnail,
-                    isCapturing: store.state.isCapturing,
-                    onDetailsTapped: {
-                        coordinator.push(
-                            .photoDetailsScene(
-                                photos: store.state.allPhotos,
-                                camera: camera
-                            )
-                        )
-                    },
-                    onPhotoCaptureTapped: {
-                        store.send(.captureButtonTapped)
+                // MARK: - 문서 감지 오버레이
+                
+                if store.state.isDocumentDetectionEnabled,
+                   let detection = store.state.documentDetection
+                {
+                    DocumentDetectionOverlayView(
+                        documentDetection: detection,
+                        screenSize: geometry.size
+                    )
+                    .ignoresSafeArea()
+                    .id(detection.timestamp)
+                    .onTapGesture {
+                        store.send(.documentOverlayTapped)
                     }
-                )
+                }
+                
+                // MARK: - 렌즈 얼룩 표시
+                
+                if store.state.isLensSmudgeDetectionEnabled,
+                   let smudge = store.state.lensSmudgeDetection
+                {
+                    LensSmudgeOverlay(smudge: smudge)
+                }
+                
+                // MARK: - 헤더
+                
+                VStack(spacing: 0) {
+                    CameraHeader(
+                        onBackTapped: handleBackTapped,
+                        onScanTapped: {
+                            coordinator.push(
+                                .scanLoadScene(
+                                    caseID: store.state.caseID,
+                                    photos: store.state.allPhotos
+                                )
+                            )
+                        },
+                        showScanButton: store.state.photoCount > 0
+                    )
+                    
+                    Spacer()
+                        .allowsHitTesting(false)
+                }
+                
+                // MARK: - 컨트롤러
+                
+                VStack(spacing: 0) {
+                    Spacer()
+                        .allowsHitTesting(false)
+                    
+                    CameraController(
+                        count: store.state.photoCount,
+                        uiImage: store.state.lastThumbnail,
+                        isCapturing: store.state.isCapturing,
+                        onDetailsTapped: {
+                            coordinator.push(
+                                .photoDetailsScene(
+                                    photos: store.state.allPhotos,
+                                    camera: camera
+                                )
+                            )
+                        },
+                        onPhotoCaptureTapped: {
+                            store.send(.captureButtonTapped)
+                        }
+                    )
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(pinchGesture)
+            .onTapGesture { location in
+                handleTapGesture(location, in: geometry)
             }
         }
-        .contentShape(Rectangle())
-        .gesture(pinchGesture)
-        .onTapGesture(perform: handleTapGesture)
         .navigationBarBackButtonHidden()
         .task {
             store.send(.onAppear)
@@ -109,7 +115,7 @@ struct CameraView: View {
                 get: { store.state.showToast },
                 set: { if !$0 { store.send(.hideToast) } }
             ),
-            message: String(localized: .cameraPhotolimitMessage)
+            message: store.state.toastMessage
         )
         .onAppear {
             store.send(.viewDidAppear)
@@ -129,16 +135,20 @@ struct CameraView: View {
         }
         .dwAlert(
             isPresented: $showExitConfirmation,
-            title: String(localized: .cameraExitAlertTitle),
-            message: String(localized: .cameraExitAlertContent),
+            title: String(localized: .cameraBackSheetTitle),
+            message: nil,
             primaryButton: DWAlertButton(
-                title: String(localized: .cameraExitConfirm),
-                style: .default
+                title: String(localized: .cameraBackSheetActionConfirm),
+                style: .destructive
             ) {
+                // 사진 모두 삭제 후 나가기
+                Task {
+                    camera.clearAllPhotos()
+                }
                 coordinator.pop()
             },
             secondaryButton: DWAlertButton(
-                title: String(localized: .cameraExitCancel),
+                title: String(localized: .cameraBackSheetActionCancel),
                 style: .cancel
             )
         )
@@ -164,14 +174,18 @@ private extension CameraView {
             }
     }
     
-    func handleTapGesture(_ location: CGPoint) {
-        guard let window = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
-            .first?.windows
-            .first(where: \.isKeyWindow)
-        else { return }
+    func handleTapGesture(_ location: CGPoint, in geometry: GeometryProxy) {
+        if store.state.isDocumentDetectionEnabled,
+           store.state.documentDetection != nil
+        {
+            return
+        }
         
-        let viewLocation = window.convert(location, to: nil)
-        store.send(.tapToFocus(viewLocation))
+        // 일반 탭 → 포커스
+        let normalizedPoint = CGPoint(
+            x: location.x / geometry.size.width,
+            y: location.y / geometry.size.height
+        )
+        store.send(.tapToFocus(normalizedPoint))
     }
 }
