@@ -66,6 +66,8 @@ struct MapFeature: DWReducer {
         var cameraTargetCoordinate: MapCoordinate?
         /// 현위치를 포커싱해야 하는지 여부입니다.
         var shouldFocusMyLocation: Bool = false
+        /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
+        var didSetInitialCamera: Bool = false
         
         // MARK: 지도 레이어/필터 UI 상태
         
@@ -174,7 +176,7 @@ struct MapFeature: DWReducer {
         /// CCTV 데이터 조회가 실패했을 때 호출되는 액션입니다.
         /// - Parameter message: 오류 메시지
         case cctvFetchFailed(String)
-        
+
         // MARK: 카메라 명령
         
         /// 검색 결과를 선택했을 때 지도 카메라를 해당 좌표로 이동시키고,
@@ -233,10 +235,14 @@ struct MapFeature: DWReducer {
         switch action {
         case .onAppear:
             guard let caseId = state.caseId else { return .none }
-            // 초기 카메라 위치를 포항으로 설정 (포항시청 기준)
-            // TODO: 초기 위치 추가해야 함.(등록된 주소나 최근 문자온 주소 등)
-            state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
-            
+            if state.didSetInitialCamera == false {
+                focusLatestCellLocation(&state)
+                if state.cameraTargetCoordinate == nil {
+                    state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
+                }
+                state.didSetInitialCamera = true
+            }
+
             // 병렬로 데이터 로드
             return .merge(
                 .task { [repository] in
@@ -269,6 +275,16 @@ struct MapFeature: DWReducer {
             
         case let .loadLocations(locations):
             state.locations = locations
+            
+            if state.didSetInitialCamera == false {
+                focusLatestCellLocation(&state)
+                
+                if state.cameraTargetCoordinate == nil {
+                    state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
+                }
+                
+                state.didSetInitialCamera = true
+            }
             return .none
             
         case let .loadCellMarkers(cellStations):
@@ -308,7 +324,7 @@ struct MapFeature: DWReducer {
             state.isBaseStationLayerEnabled = isEnabled
             return .none
             
-            // MARK: - 위치정보 시트 관련 액션 처리
+        // MARK: - 위치정보 시트 관련 액션 처리
             
         case let .mapTapped(latlng):
             // 위치정보 시트 표시 및 로딩 상태 설정
@@ -400,7 +416,7 @@ struct MapFeature: DWReducer {
                     size: NMConstants.defaultCCTVFetchSize,
                     page: 1
                 )
-                
+                    
                 do {
                     let response = try await cctvService.fetchCCTVByBox(requestDTO)
                     let markers = await MainActor.run {
