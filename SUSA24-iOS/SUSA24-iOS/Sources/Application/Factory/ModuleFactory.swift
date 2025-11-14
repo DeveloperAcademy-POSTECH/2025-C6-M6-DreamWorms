@@ -86,10 +86,14 @@ final class ModuleFactory: ModuleFactoryProtocol {
         context: NSManagedObjectContext
     ) -> MainTabView<MapView, DashboardView, OnePageView> {
         let caseRepository = CaseRepository(context: context)
-        
+        let locationRepository = LocationRepository(context: context)
+
         let store = DWStore(
             initialState: MainTabFeature.State(selectedCurrentCaseId: caseID),
-            reducer: MainTabFeature(caseRepository: caseRepository)
+            reducer: MainTabFeature(
+                caseRepository: caseRepository,
+                locationRepository: locationRepository
+            )
         )
         
         let mapView = makeMapView(caseID: caseID, context: context)

@@ -44,8 +44,11 @@ protocol LocationRepositoryProtocol: Sendable {
     ///     - latitude: Double,
     ///     - longitude: Duble
     func createLocationFromMessage(caseID: UUID, address: String, latitude: Double, longitude: Double) async throws
-    
-    func validateSuspectPhone(caseID: UUID, phoneNumber: String) async throws -> Bool
+
+    /// 특정 Case의 Location 변경사항을 실시간으로 감지합니다.
+    /// - Parameter caseId: 감지할 Case의 UUID
+    /// - Returns: Location 배열 AsyncStream (CoreData 변경 시마다 emit)
+    func watchLocations(caseId: UUID) -> AsyncStream<[Location]>
 }
 
 // MARK: - Repository Implementation
@@ -217,6 +220,7 @@ struct LocationRepository: LocationRepositoryProtocol {
         latitude: Double,
         longitude: Double
     ) async throws {
+        // 새 Location 생성 (중복 체크 없이 무조건 생성)
         let location = Location(
             id: UUID(),
             address: address,
@@ -232,30 +236,30 @@ struct LocationRepository: LocationRepositoryProtocol {
             colorType: 0,
             receivedAt: Date()
         )
-        
+
+        print("✅ [LocationRepository] 새 Location 생성: \(address)")
         try await createLocations(data: [location], caseId: caseID)
     }
     
-    /// AppIntent에서 사용: 용의자를 추적하기 위한 휴대폰 번호 검증
-    func validateSuspectPhone(
-        caseID: UUID,
-        phoneNumber: String
-    ) async throws -> Bool {
-        try await context.perform {
-            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-            request.predicate = NSPredicate(format: "id == %@", caseID as CVarArg)
-            
-            guard let caseEntity = try context.fetch(request).first,
-                  let suspects = caseEntity.suspects as? Set<SuspectEntity>,
-                  let suspect = suspects.first
-            else {
-                return false
+    /// 특정 Case의 Location 변경사항을 실시간으로 감지합니다.
+    func watchLocations(caseId: UUID) -> AsyncStream<[Location]> {
+        AsyncStream { continuation in
+            Task {
+                // 초기 데이터 전송
+                if let initialLocations = try? await fetchLocations(caseId: caseId) {
+                    continuation.yield(initialLocations)
+                }
+
+                // CoreData 변경사항 감지 (AsyncSequence 사용)
+                for await _ in NotificationCenter.default.notifications(
+                    named: .NSManagedObjectContextObjectsDidChange,
+                    object: context
+                ) {
+                    if let locations = try? await fetchLocations(caseId: caseId) {
+                        continuation.yield(locations)
+                    }
+                }
             }
-            
-            let cleanInput = phoneNumber.replacingOccurrences(of: "-", with: "")
-            let cleanStored = (suspect.phoneNumber ?? "").replacingOccurrences(of: "-", with: "")
-            
-            return cleanInput == cleanStored
         }
     }
 }
@@ -267,5 +271,7 @@ struct MockLocationRepository: LocationRepositoryProtocol {
     func createLocations(data _: [Location], caseId _: UUID) async throws {}
     func createLocationFromMessage(caseID _: UUID, address _: String, latitude _: Double, longitude _: Double) async
         throws {}
-    func validateSuspectPhone(caseID _: UUID, phoneNumber _: String) async throws -> Bool { false }
+    func watchLocations(caseId _: UUID) -> AsyncStream<[Location]> {
+        AsyncStream { _ in }
+    }
 }
