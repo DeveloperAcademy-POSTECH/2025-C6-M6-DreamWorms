@@ -15,7 +15,7 @@ struct ZoomableImageView: View {
         GeometryReader { geometry in
             Image(uiImage: image)
                 .resizable()
-            // TODO: 촬영 session 비율 조정 문제 검토
+                // TODO: 촬영 session 비율 조정 문제 검토
                 .scaleEffect(zoomState.scale, anchor: zoomState.anchor)
                 .offset(zoomState.offset)
                 .applyZoomGestures(
@@ -49,13 +49,13 @@ struct ZoomGestureModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-        // Magnification은 항상 적용
+            // Magnification은 항상 적용
             .gesture(
                 MagnificationGesture()
                     .onChanged { handleMagnificationChanged($0) }
                     .onEnded { handleMagnificationEnded($0) }
             )
-        // DragGesture는 scale > 1일 때만 highPriorityGesture로 적용
+            // DragGesture는 scale > 1일 때만 highPriorityGesture로 적용
             .highPriorityGesture(
                 DragGesture()
                     .onChanged { handleDragForPan($0) }

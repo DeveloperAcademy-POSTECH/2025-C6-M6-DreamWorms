@@ -3,6 +3,7 @@
 //  SUSA24-iOS
 //
 //  Updated by Moo on 11/08/25.
+//  Updated by taeni on 11/13/25.
 //
 
 import NMapsMap
@@ -18,21 +19,48 @@ struct MapView: View {
     @State private var store: DWStore<MapFeature>
     @Bindable private var dispatcher: MapDispatcher
     private let infrastructureManager: InfrastructureMarkerManager
+    private let caseLocationMarkerManager: CaseLocationMarkerManager
+    
+    // MARK: - Active Sheet
+    
+    /// MapView 에서 사용하는 Sheet 종류
+    private enum ActiveSheet: Identifiable, Equatable {
+        case mapLayer(id: UUID)
+        case placeInfo(id: UUID)
+        case pinWrite(id: UUID)
+        case memoEdit(id: UUID)
+        
+        var id: UUID {
+            switch self {
+            case let .mapLayer(id),
+                 let .placeInfo(id),
+                 let .pinWrite(id),
+                 let .memoEdit(id):
+                id
+            }
+        }
+        
+        static func == (lhs: ActiveSheet, rhs: ActiveSheet) -> Bool {
+            lhs.id == rhs.id
+        }
+    }
     
     // MARK: - Initializer
     
     init(
         store: DWStore<MapFeature>,
         dispatcher: MapDispatcher,
-        infrastructureManager: InfrastructureMarkerManager
+        infrastructureManager: InfrastructureMarkerManager,
+        caseLocationMarkerManager: CaseLocationMarkerManager
     ) {
         self._store = State(initialValue: store)
         self._dispatcher = Bindable(dispatcher)
         self.infrastructureManager = infrastructureManager
+        self.caseLocationMarkerManager = caseLocationMarkerManager
     }
     
     // MARK: - View
-
+    
     var body: some View {
         ZStack {
             NaverMapView(
@@ -44,15 +72,20 @@ struct MapView: View {
                 onMyLocationFocusConsumed: {
                     store.send(.clearFocusMyLocationFlag)
                 },
-                onMapTapped: { latlng in store.send(.mapTapped(latlng)) },
+                onMapTapped: { latlng in
+                    store.send(.mapTapped(latlng))
+                },
                 onCameraIdle: { bounds, zoomLevel in
                     store.send(.cameraIdle(bounds: bounds, zoomLevel: zoomLevel))
                 },
                 cellStations: store.state.cellStations,
                 isCellLayerEnabled: store.state.isBaseStationLayerEnabled,
+                locations: store.state.locations,
+                isVisitFrequencyEnabled: store.state.isVisitFrequencySelected,
                 cctvMarkers: store.state.cctvMarkers,
                 isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
-                infrastructureManager: infrastructureManager
+                infrastructureManager: infrastructureManager,
+                caseLocationMarkerManager: caseLocationMarkerManager
             )
             .ignoresSafeArea()
             
@@ -112,7 +145,6 @@ struct MapView: View {
                         
                         DWGlassEffectCircleButton(
                             image: Image(.scan),
-                            // TODO: 작업이 안되어있어서 임시로 UUID 생성해서 넣음
                             action: {
                                 if let caseId = store.state.caseId {
                                     coordinator.push(.cameraScene(caseID: caseId))
@@ -136,66 +168,77 @@ struct MapView: View {
         }
         .onChange(of: dispatcher.request) { _, request in
             guard let request else { return }
-            // 명령 디스패처가 발행한 지도 명령을 Reducer 흐름으로 전달합니다.
             switch request {
             case let .moveToSearchResult(coordinate, placeInfo):
                 store.send(.moveToSearchResult(coordinate, placeInfo))
             }
         }
-        .sheet(isPresented: Binding(
-            get: { store.state.isMapLayerSheetPresented },
-            set: { store.send(.setMapLayerSheetPresented($0)) }
-        )) {
-            MapLayerSettingSheet(
-                selectedRange: Binding(
-                    get: { store.state.mapLayerCoverageRange },
-                    set: { store.send(.setMapLayerCoverage($0)) }
-                ),
-                isCCTVEnabled: Binding(
-                    get: { store.state.isCCTVLayerEnabled },
-                    set: { store.send(.setCCTVLayerEnabled($0)) }
-                ),
-                isBaseStationEnabled: Binding(
-                    get: { store.state.isBaseStationLayerEnabled },
-                    set: { store.send(.setBaseStationLayerEnabled($0)) }
-                ),
-                onClose: { store.send(.setMapLayerSheetPresented(false)) }
+
+        // MARK: - sheet(item:)로 통합
+
+        .overlay {
+            MapSheetContainer(
+                state: store.state,
+                send: store.send,
+                createToolbarItems: { createToolbarItems() }
             )
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.hidden)
         }
-        .sheet(isPresented: Binding(
-            get: { store.state.isPlaceInfoSheetPresented },
-            set: { _ in store.send(.hidePlaceInfo) }
-        )) {
-            PlaceInfoSheet(
-                placeInfo: store.state.selectedPlaceInfo ?? PlaceInfo(
-                    title: "",
-                    jibunAddress: "",
-                    roadAddress: "",
-                    phoneNumber: ""
-                ),
-                isLoading: store.state.isPlaceInfoLoading,
-                onClose: { store.send(.hidePlaceInfo) }
-            )
-            .presentationDetents([.fraction(0.4)])
-            .presentationBackgroundInteraction(.enabled)
-            .presentationDragIndicator(.hidden)
+    }
+    
+    // MARK: - Private Methods
+    
+    // TODO: 로직 더 효율있게 바꿀 것. 버튼의 상태 값에 따라 구분하도록 수정해야함.
+    private func createToolbarItems() -> [DWBottomToolbarItem] {
+        if store.state.hasExistingPin {
+            // 핀이 있는 경우: pin.fill + ellipsis (메뉴)
+            [
+                .button(image: Image(systemName: "pin.fill"), action: {
+                    // 핀이 이미 있으므로 아무 동작 안함
+                })
+                .iconSize(16)
+                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3),
+                
+                .menu(
+                    image: Image(systemName: "ellipsis"),
+                    items: [
+                        DWBottomToolbarItem.MenuItem(
+                            title: String(localized: .buttonEdit),
+                            systemImage: "pencil",
+                            role: nil,
+                            action: { store.send(.editPinTapped) }
+                        ),
+                        DWBottomToolbarItem.MenuItem(
+                            title: String(localized: .buttonDelete),
+                            systemImage: "trash",
+                            role: .destructive,
+                            action: { store.send(.showDeleteAlert) }
+                        ),
+                    ]
+                )
+                .iconSize(16)
+                .setupPadding(top: 4, leading: 3, bottom: 4, trailing: 6),
+            ]
+        } else {
+            // 핀이 없는 경우: pin만 표시
+            [
+                .button(image: Image(.pin), action: {
+                    store.send(.addPinTapped)
+                })
+                .iconSize(16)
+                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3),
+                .menu(
+                    image: Image(.ellipsis),
+                    items: [
+                        DWBottomToolbarItem.MenuItem(
+                            title: String(localized: .buttonShare),
+                            systemImage: "square.and.arrow.up",
+                            role: nil,
+                            action: {}
+                        ),
+                    ]
+                )
+                .iconSize(16),
+            ]
         }
     }
 }
-
-// MARK: - Preview
-
-// #Preview {
-//    let repository = MockLocationRepository()
-//    let store = DWStore(
-//        initialState: MapFeature.State(caseId: UUID()),
-//        reducer: MapFeature(repository: repository, dispatcher: MapDispatcher())
-//    )
-//    return MapView(
-//        store: store,
-//        dispatcher: MapDispatcher()
-//    )
-//        .environment(AppCoordinator())
-// }
