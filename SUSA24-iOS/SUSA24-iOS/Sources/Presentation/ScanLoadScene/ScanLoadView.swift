@@ -75,10 +75,10 @@ struct ScanLoadView: View {
         }
         .dwAlert(
             isPresented: $showRetryAlert,
-            title: "추출된 주소가 없습니다.",
-            message: "다시 촬영하시겠습니까?",
+            title: String(localized: .scanLoadFailedTitle),
+            message: String(localized: .scanLoadFailedContent),
             primaryButton: DWAlertButton(
-                title: "다시 촬영",
+                title: String(localized: .scanLoadTry),
                 style: .default
             ) {
                 handleRetry()
@@ -100,14 +100,12 @@ private extension ScanLoadView {
     func navigateToScanList() {
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(0.5))
-            
-            // TODO: ScanListView 연결부분
-            //            coordinator.replaceLast(
-            //                .scanListScene(
-            //                    caseID: caseID,
-            //                    scanResults: store.state.scanResults
-            //                )
-            //            )
+            coordinator.replaceLast(
+                .scanListScene(
+                    caseID: caseID,
+                    scanResults: store.state.scanResults
+                )
+            )
         }
     }
     
