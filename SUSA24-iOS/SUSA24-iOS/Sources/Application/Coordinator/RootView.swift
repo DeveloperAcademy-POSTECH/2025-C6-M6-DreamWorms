@@ -61,19 +61,20 @@ struct RootView: View {
                         //                        moduleFactory.makeTimeLineView()
                         case let .photoDetailsScene(photos, camera):
                             moduleFactory.makePhotoDetailsView(photos: photos, camera: camera)
-                        case .scanLoadScene:
-                            moduleFactory.makeScanLoadView()
+                        case let .scanLoadScene(caseID, photos):
+                            moduleFactory.makeScanLoadView(caseID: caseID, photos: photos)
+                        case let .scanListScene(caseID, scanResults):
+                            moduleFactory.makeScanListView(caseID: caseID, scanResults: scanResults, context: context)
                         case let .locationOverviewScene(caseID, address, coordinate):
                             moduleFactory.makeLocationOverviewView(caseID: caseID, baseAddress: address, initialCoordinate: coordinate, context: context)
                         }
                     }
-                    .onChange(of: coordinator.currentRoute) {
-                        guard let route = coordinator.currentRoute else {
+                    .onChange(of: coordinator.currentRoute) { _, newRoute in
+                        guard let newRoute else {
                             tabBarVisibility.hide()
                             return
                         }
-
-                        if route.useTabBar {
+                        if newRoute.useTabBar {
                             tabBarVisibility.show()
                         } else {
                             tabBarVisibility.hide()

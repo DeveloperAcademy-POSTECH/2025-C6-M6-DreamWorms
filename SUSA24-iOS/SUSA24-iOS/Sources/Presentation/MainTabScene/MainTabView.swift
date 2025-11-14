@@ -21,8 +21,8 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     
     // MARK: - Properties
     
-    @State private var selectedDetent: PresentationDetent = PresentationDetent.height(66)
-    
+    @State private var selectedDetent: PresentationDetent
+
     private let mapShortDetent = PresentationDetent.height(73)
     private let mapMidDetnet = PresentationDetent.fraction(0.4)
     private let mapLargeDetent = PresentationDetent.large
@@ -54,6 +54,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         self.mapView = mapView
         self.dashboardView = dashboardView
         self.onePageView = onePageView
+        self.selectedDetent = mapMidDetnet
     }
     
     // MARK: - View
@@ -86,22 +87,47 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                 selection: $selectedDetent
             )
             .presentationBackgroundInteraction(.enabled)
+            .presentationContentInteraction(.scrolls)
             .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
             .interactiveDismissDisabled(true)
         }
         .navigationBarBackButtonHidden(true)
-        .task { store.send(.onAppear) }
+        .task {
+            // MainTabView 진입 시 TabBar 표시
+            tabBarVisibility.show()
+            store.send(.onAppear)
+        }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
+            print("📍 [MainTabView] caseInfo changed: \(newCaseInfo?.name ?? "nil"), locations count: \(store.state.locations.count)")
             guard let caseInfo = newCaseInfo else { return }
+            // caseInfo 로드 시점에 locations도 함께 업데이트 (초기 바인딩 포함)
             timeLineStore.send(.updateData(
                 caseInfo: caseInfo,
                 locations: store.state.locations
             ))
         }
-        
+        .onChange(of: store.state.locations) { _, newLocations in
+            print("📍 [MainTabView] locations changed: count=\(newLocations.count), caseInfo: \(store.state.caseInfo?.name ?? "nil")")
+            guard let caseInfo = store.state.caseInfo else { return }
+            timeLineStore.send(.updateData(
+                caseInfo: caseInfo,
+                locations: newLocations
+            ))
+        }
         .onChange(of: selectedDetent) { _, newDetent in
             let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
             timeLineStore.send(.setMinimized(isMinimized))
+        }
+        .onChange(of: store.state.selectedTab) { _, newTab in
+            if newTab == .map {
+                // Map 탭으로 복귀 시 중간 detent로 설정
+                selectedDetent = mapMidDetnet
+            } else {
+                selectedDetent = otherDetent
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
+            selectedDetent = mapMidDetnet
         }
     }
 }

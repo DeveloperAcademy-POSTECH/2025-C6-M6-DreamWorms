@@ -8,25 +8,28 @@
 import Foundation
 import Vision
 
-/// 문서 분석 결과를 나타내는 모델
-struct DocumentAnalysisResult {
+/// Vision 문서 분석 결과
+struct DocumentAnalysisResult: Sendable {
     /// 인식된 테이블들
-    var tables: [DocumentObservation.Container.Table]?
-    
-    /// 인식된 문서 (테이블 + 텍스트 포함)
-    var document: DocumentObservation.Container?
-    
-    /// 인식된 전체 텍스트
+    var tables: [DocumentObservation.Container.Table] = []
+
+    /// 인식된 리스트 블록들
+    var lists: [DocumentObservation.Container.List] = []
+
+    /// 전체 인식 텍스트
     var recognizedText: String = ""
-    
+
+    /// 원본 Document Container
+    var document: DocumentObservation.Container?
+
     /// 분석 시각
     var analyzedAt: Date = Date()
-    
-    /// 원본 이미지 데이터
+
+    /// 원본 이미지 (옵션)
     var imageData: Data?
-    
-    /// 결과가 비어있는지 확인
+
+    /// 결과 존재 여부
     var isEmpty: Bool {
-        recognizedText.isEmpty && tables?.isEmpty != false
+        tables.isEmpty && lists.isEmpty && recognizedText.isEmpty
     }
 }

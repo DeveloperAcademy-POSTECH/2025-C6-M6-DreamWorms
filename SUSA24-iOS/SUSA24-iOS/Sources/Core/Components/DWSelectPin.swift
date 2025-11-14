@@ -50,38 +50,57 @@ import SwiftUI
 /// ```
 struct DWSelectPin: View {
     // MARK: - Properties
-    
+
     let text: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     // 선택 상태 색상
     var selectedBg: Color = .primaryLight2
     var selectedText: Color = .primaryNormal
     var selectedBorder: Color = .clear
-    
+
     // 기본 상태 색상
     var normalBg: Color = .mainBackground
     var normalText: Color = .labelNeutral
     var normalBorder: Color = .labelCoolNormal
-    
+
     // 레이아웃
     var contentPadding: EdgeInsets = .init(top: 8, leading: 12, bottom: 8, trailing: 12)
-    
+
+    // 아이콘 유무
+    var icon: Image?
+
+    // 아이콘 사이즈
+    var iconWidth: CGFloat = 20
+    var iconHeight: CGFloat = 20
+
+    // font 스타일 커스텀
+    var textFont: Font = .numberMedium16
+
     // MARK: - Body
-    
+
     var body: some View {
         Button(action: action) {
-            Text(text)
-                .font(.numberMedium16)
-                .foregroundStyle(isSelected ? selectedText : normalText)
-                .padding(contentPadding)
-                .background(isSelected ? selectedBg : normalBg)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(isSelected ? selectedBorder : normalBorder, lineWidth: 1)
-                )
+            HStack {
+                if let icon {
+                    icon
+                        .renderingMode(.template)
+                        .frame(width: iconWidth, height: iconHeight)
+                        .foregroundColor(isSelected ? selectedText : normalText)
+                        .padding(.leading, 3)
+                }
+                Text(text)
+                    .font(textFont)
+                    .foregroundStyle(isSelected ? selectedText : normalText)
+            }
+            .padding(contentPadding)
+            .background(isSelected ? selectedBg : normalBg)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? selectedBorder : normalBorder, lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
         .animation(.snappy(duration: 0.2), value: isSelected)
@@ -92,7 +111,7 @@ struct DWSelectPin: View {
 
 extension DWSelectPin {
     // MARK: - 선택 상태 (Selected State)
-    
+
     /// 선택 시 배경색을 설정합니다.
     @discardableResult
     func selectedBackground(_ color: Color) -> Self {
@@ -100,7 +119,7 @@ extension DWSelectPin {
         v.selectedBg = color
         return v
     }
-    
+
     /// 선택 시 텍스트 색상을 설정합니다.
     @discardableResult
     func selectedText(_ color: Color) -> Self {
@@ -108,7 +127,7 @@ extension DWSelectPin {
         v.selectedText = color
         return v
     }
-    
+
     /// 선택 시 테두리 색상을 설정합니다.
     @discardableResult
     func selectedBorder(_ color: Color) -> Self {
@@ -116,9 +135,9 @@ extension DWSelectPin {
         v.selectedBorder = color
         return v
     }
-    
+
     // MARK: - 기본 상태 (Normal State)
-    
+
     /// 기본 상태 배경색을 설정합니다.
     @discardableResult
     func normalBackground(_ color: Color) -> Self {
@@ -126,7 +145,7 @@ extension DWSelectPin {
         v.normalBg = color
         return v
     }
-    
+
     /// 기본 상태 텍스트 색상을 설정합니다.
     @discardableResult
     func normalText(_ color: Color) -> Self {
@@ -134,7 +153,7 @@ extension DWSelectPin {
         v.normalText = color
         return v
     }
-    
+
     /// 기본 상태 테두리 색상을 설정합니다.
     @discardableResult
     func normalBorder(_ color: Color) -> Self {
@@ -142,9 +161,17 @@ extension DWSelectPin {
         v.normalBorder = color
         return v
     }
-    
+
+    /// 텍스트 폰트 설정
+    @discardableResult
+    func setFont(_ font: Font) -> Self {
+        var v = self
+        v.textFont = font
+        return v
+    }
+
     // MARK: - 한 번에 설정 (Batch Setup)
-    
+
     /// 모든 색상을 한 번에 설정합니다.
     ///
     /// - Parameters:
@@ -164,9 +191,9 @@ extension DWSelectPin {
         v.normalBorder = normal.border
         return v
     }
-    
+
     // MARK: - 레이아웃 (Layout)
-    
+
     /// 칩 내부의 패딩을 설정합니다.
     @discardableResult
     func padding(_ insets: EdgeInsets) -> Self {
@@ -174,9 +201,27 @@ extension DWSelectPin {
         v.contentPadding = insets
         return v
     }
+
+    // MARK: - 아이콘 추가 (addIcon)
+
+    @discardableResult
+    func setIcon(_ icon: Image) -> Self {
+        var v = self
+        v.icon = icon
+        return v
+    }
+
+    @discardableResult
+    func setIconSize(width: CGFloat, height: CGFloat) -> Self {
+        var v = self
+        v.iconWidth = width
+        v.iconHeight = height
+        return v
+    }
 }
 
-//// MARK: - Preview
+// MARK: - Preview
+
 //
 // #Preview("Select Pin - Default") {
 //    DWSelectPinDefaultPreview()
@@ -188,6 +233,10 @@ extension DWSelectPin {
 //
 // #Preview("Select Pin - Real Use Case") {
 //    DWSelectPinRealUseCasePreview()
+// }
+//
+// #Preview("Select icon Pin - Real Use Case") {
+//    DWSelectPinRealIconUseCasePreview()
 // }
 //
 //// MARK: - Preview Helpers
@@ -301,6 +350,39 @@ extension DWSelectPin {
 //                            isSelected: selectedCategory == category,
 //                            action: { selectedCategory = category }
 //                        )
+//                    }
+//                }
+//                .padding(.horizontal, 16)
+//            }
+//        }
+//        .padding()
+//    }
+// }
+//
+// private struct DWSelectPinRealIconUseCasePreview: View {
+//    @State private var selectedCategory = "거주지"
+//
+//    var body: some View {
+//        VStack(spacing: 16) {
+//            Text("실제 사용 예시")
+//                .font(.caption)
+//                .bold()
+//
+//            ScrollView(.horizontal, showsIndicators: false) {
+//                HStack(spacing: 12) {
+//                    ForEach(PinCategoryType.allCases, id: \.self) { type in
+//                        let isSelectedPin = (PinCategoryType.allCases.first) == type
+//                        DWSelectPin(
+//                            text: type.text,
+//                            isSelected: isSelectedPin,
+//                            action: {}
+//                        )
+//                        .colors(
+//                            selected: (bg: .primaryNormal, text: .white, border: .clear),
+//                            normal: (bg: .white, text: .labelAlternative, border: .clear)
+//                        )
+//                        .setIcon(type.icon)
+//                        .setIconSize(width: type.iconWidth, height: type.iconHeight)
 //                    }
 //                }
 //                .padding(.horizontal, 16)

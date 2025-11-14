@@ -15,9 +15,7 @@ struct ZoomableImageView: View {
         GeometryReader { geometry in
             Image(uiImage: image)
                 .resizable()
-                .scaledToFit()
-                // TODO: 촬영된 이미지가 디바이스 전체 사이즈 크기다보니, width값에 맞추면 뷰에서 hifi 뷰 처럼 보기가 어려운 문제가 있음. -> 검토 필요
-                .frame(width: geometry.size.width)
+                // TODO: 촬영 session 비율 조정 문제 검토
                 .scaleEffect(zoomState.scale, anchor: zoomState.anchor)
                 .offset(zoomState.offset)
                 .applyZoomGestures(
@@ -45,10 +43,10 @@ extension View {
 struct ZoomGestureModifier: ViewModifier {
     @Binding var zoomState: ZoomState
     let containerSize: CGSize
-
+    
     @State private var isPinching: Bool = false
     @State private var initialPinchScale: CGFloat = 1.0
-
+    
     func body(content: Content) -> some View {
         content
             // Magnification은 항상 적용
@@ -65,7 +63,7 @@ struct ZoomGestureModifier: ViewModifier {
                 including: zoomState.scale > 1.0 ? .all : .subviews
             )
     }
-
+    
     private func handleMagnificationChanged(_ value: CGFloat) {
         if !isPinching {
             initialPinchScale = value
@@ -76,12 +74,12 @@ struct ZoomGestureModifier: ViewModifier {
             zoomState.scale = zoomState.lastScale * value
         }
     }
-
+    
     private func handleMagnificationEnded(_: CGFloat) {
         if isPinching {
             zoomState.scale = min(max(zoomState.scale, 1.0), 5.0)
             zoomState.lastScale = zoomState.scale
-
+            
             if zoomState.scale == 1.0 {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     zoomState.offset = .zero
@@ -93,16 +91,16 @@ struct ZoomGestureModifier: ViewModifier {
         isPinching = false
         initialPinchScale = 1.0
     }
-
+    
     private func handleDragForPan(_ value: DragGesture.Value) {
         guard zoomState.scale > 1.0 else { return }
-
+        
         zoomState.offset = CGSize(
             width: zoomState.lastOffset.width + value.translation.width,
             height: zoomState.lastOffset.height + value.translation.height
         )
     }
-
+    
     private func handleDragEnded(_: DragGesture.Value) {
         zoomState.lastOffset = zoomState.offset
     }

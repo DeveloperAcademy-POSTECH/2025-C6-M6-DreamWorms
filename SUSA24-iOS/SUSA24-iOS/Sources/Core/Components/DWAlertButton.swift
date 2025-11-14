@@ -19,9 +19,9 @@ struct DWAlertButton {
 
         var defaultTitle: String {
             switch self {
-            case .default: "확인"
-            case .destructive: "삭제"
-            case .cancel: "취소"
+            case .default: String(localized: .confirmDefault)
+            case .destructive: String(localized: .buttonDelete)
+            case .cancel: String(localized: .cancelDefault)
             }
         }
     }
@@ -97,7 +97,7 @@ struct DWAlertModifier: ViewModifier {
                                 .padding(.trailing, 2)
                         }
                         alertButton(primaryButton, isPrimary: true)
-                     }
+                    }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)

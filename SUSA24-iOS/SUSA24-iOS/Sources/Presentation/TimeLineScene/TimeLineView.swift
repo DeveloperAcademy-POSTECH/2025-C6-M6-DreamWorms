@@ -57,7 +57,7 @@ struct TimeLineView: View {
                 .setupBackground(.mainBackground)
                 .padding(.horizontal, 16)
                 .padding(16)
-                .opacity(0.5)
+                .opacity(store.state.isMinimized ? 0 : 0.5)
             } else {
                 TimeLineScrollContentView(
                     groupedLocations: store.state.groupedLocations,
@@ -66,6 +66,7 @@ struct TimeLineView: View {
                         store.send(.locationTapped(location))
                     }
                 )
+                .opacity(store.state.isMinimized ? 0 : 1)
             }
         }
         .task { store.send(.onAppear) }
