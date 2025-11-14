@@ -110,8 +110,7 @@ private extension Array<Location> {
         topK: Int = 3
     ) -> [StayAddress] {
         // [주소: (count, latSum, lonSum)]
-        let bucket = locations
-            .filter { $0.locationType == 2 } // Int16이라도 2와 비교 가능
+        let bucket = filter { $0.locationType == 2 } // Int16이라도 2와 비교 가능
             .reduce(into: [String: (count: Int, latSum: Double, lonSum: Double)]()) { result, location in
                 let key = location.address.isEmpty ? "기지국 주소" : location.address
 
