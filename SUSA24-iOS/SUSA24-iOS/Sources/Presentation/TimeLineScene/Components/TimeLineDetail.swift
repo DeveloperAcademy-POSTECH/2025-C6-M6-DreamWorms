@@ -31,10 +31,10 @@ struct TimeLineDetail: View {
     let state: TimeLineColorStickState
     let caseTitle: String
     let startTime: Date
-    let endTime: Date
+    let endTime: Date?
     let isLast: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 6) {
@@ -43,7 +43,7 @@ struct TimeLineDetail: View {
                     state: state,
                     isLast: isLast
                 )
-                
+
                 // 오른쪽: 위치 정보
                 TimeLineCellLocationDetail(
                     caseTitle: caseTitle,
@@ -172,7 +172,7 @@ struct TimeLineDetail: View {
 //
 //    var body: some View {
 //        ScrollView {
-//            LazyVStack(spacing: 0) {  // ⭐️ LazyVStack 사용
+//            LazyVStack(spacing: 0) {  // LazyVStack 사용
 //                ForEach(mockData.indices, id: \.self) { index in
 //                    let data = mockData[index]
 //
