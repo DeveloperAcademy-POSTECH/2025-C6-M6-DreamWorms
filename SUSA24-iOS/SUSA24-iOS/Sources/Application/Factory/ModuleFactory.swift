@@ -107,7 +107,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
                 caseInfo: nil,
                 locations: []
             ),
-            reducer: TimeLineFeature()
+            reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
         
         let view = MainTabView(
@@ -191,9 +191,9 @@ final class ModuleFactory: ModuleFactoryProtocol {
                 caseInfo: caseInfo,
                 locations: locations
             ),
-            reducer: TimeLineFeature()
+            reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
-        
+
         let view = TimeLineView(store: store)
         return view
     }
