@@ -1,5 +1,5 @@
 //
-//  ScanListView.swift (UPDATED)
+//  ScanListView.swift
 //  SUSA24-iOS
 //
 //  Created by taeni on 11/9/25.
@@ -10,8 +10,8 @@ import SwiftUI
 
 /// 스캔 결과 목록 화면
 ///
-/// - caseID 통일 (caseId → caseID)
 /// - PinCategoryType 아이콘 및 텍스트 표시
+/// - 중복 주소 감지 시 덮어쓰기 Alert 표시
 struct ScanListView: View {
     // MARK: - Dependencies
 
@@ -54,8 +54,8 @@ struct ScanListView: View {
 
             VStack {
                 DWButton(
-                    isEnabled: .constant(store.state.canAddPin && !store.state.isSaving),
-                    title: store.state.isSaving ? "저장 중..." : "핀 추가하기"
+                    isEnabled: isButtonEnabled,
+                    title: String(localized: .scanListAddPin)
                 ) {
                     store.send(.saveButtonTapped(caseID: caseID))
                 }
@@ -64,20 +64,77 @@ struct ScanListView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .alert("저장 실패", isPresented: .constant(store.state.errorMessage != nil)) {
-            Button("확인", role: .cancel) {
-                store.send(.saveFailed(NSError(domain: "", code: 0)))
+        .dwAlert(
+            isPresented: errorAlertPresented,
+            title: String(localized: .saveFailButton),
+            message: store.state.errorMessage ?? "",
+            primaryButton: DWAlertButton(
+                title: "확인",
+                style: .cancel
+            ) {
+                store.send(.dismissErrorAlert)
             }
-        } message: {
-            if let errorMessage = store.state.errorMessage {
-                Text(errorMessage)
+        )
+        .dwAlert(
+            isPresented: saveCompletedAlertPresented,
+            title: String(localized: .saveSuccessButton),
+            message: String(localized: .saveCompletedMessage),
+            primaryButton: DWAlertButton(
+                title: "확인",
+                style: .default
+            ) {
+                store.send(.dismissSaveCompletedAlert)
+                // MapView로 이동: CameraView와 ScanListView를 pop
+                coordinator.popToDepth(2)
             }
-        }
-        .alert("저장 완료", isPresented: .constant(store.state.isSaveCompleted)) {
-            Button("확인") { coordinator.popToRoot() }
-        } message: {
-            Text("선택한 주소가 지도에 추가되었습니다.")
-        }
+        )
+        .dwAlert(
+            isPresented: duplicateAlertPresented,
+            title: String(localized: .scanListPinAddDuplicateAlertTitle),
+            message: String(format: NSLocalizedString("scanList_pin_add_duplicate_alert_content", comment: ""), store.state.duplicateAddress ?? ""),
+            primaryButton: DWAlertButton(
+                title: String(localized: .scanListPinAddDuplicateAlertButtonConfirm),
+                style: .destructive
+            ) {
+                store.send(.confirmOverwrite)
+            },
+            secondaryButton: DWAlertButton(
+                title: String(localized: .scanListPinAddDuplicateAlertButtonCancel),
+                style: .cancel
+            ) {
+                store.send(.cancelOverwrite)
+            }
+        )
+    }
+
+    // MARK: - Computed Properties
+
+    private var isButtonEnabled: Binding<Bool> {
+        Binding(
+            get: { store.state.canAddPin && !store.state.isSaving },
+            set: { _ in }
+        )
+    }
+
+    private var errorAlertPresented: Binding<Bool> {
+        Binding(
+            get: { store.state.errorMessage != nil },
+            set: { if !$0 { store.send(.dismissErrorAlert) } }
+        )
+    }
+
+    private var saveCompletedAlertPresented: Binding<Bool> {
+        Binding(
+            get: { store.state.isSaveCompleted },
+            set: { if !$0 { store.send(.dismissSaveCompletedAlert) } }
+        )
+    }
+
+    private var duplicateAlertPresented: Binding<Bool> {
+        Binding(
+            get: { store.state.showDuplicateAlert },
+            set: { if !$0 { store.send(.cancelOverwrite) } }
+        )
     }
 }
 
@@ -85,12 +142,8 @@ struct ScanListView: View {
 
 private extension ScanListView {
     var emptyView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "doc.text.magnifyingglass")
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
-
-            Text("분석 결과가 없습니다")
+        VStack {
+            Text(String(localized: .scanResultFailedContent))
                 .font(.headline)
                 .foregroundColor(.gray)
         }
@@ -123,29 +176,30 @@ private extension ScanListView {
 
 // MARK: - Preview
 
-#Preview {
-    let context = PersistenceController.preview.container.viewContext
-    let repository = LocationRepository(context: context)
-    let feature = ScanListFeature(repository: repository)
-
-    let mockResults = [
-        ScanResult(
-            address: "서울특별시 강남구 테헤란로 123",
-            duplicateCount: 3,
-            sourcePhotoIds: [UUID(), UUID(), UUID()]
-        ),
-        ScanResult(
-            address: "서울특별시 서초구 반포대로 45",
-            duplicateCount: 1,
-            sourcePhotoIds: [UUID()]
-        ),
-    ]
-
-    let store = DWStore(
-        initialState: ScanListFeature.State(scanResults: mockResults),
-        reducer: feature
-    )
-
-    return ScanListView(caseID: UUID(), store: store)
-        .environment(AppCoordinator())
-}
+//
+// #Preview {
+//    let context = PersistenceController.preview.container.viewContext
+//    let repository = LocationRepository(context: context)
+//    let feature = ScanListFeature(repository: repository)
+//
+//    let mockResults = [
+//        ScanResult(
+//            address: "서울특별시 강남구 테헤란로 123",
+//            duplicateCount: 3,
+//            sourcePhotoIds: [UUID(), UUID(), UUID()]
+//        ),
+//        ScanResult(
+//            address: "서울특별시 서초구 반포대로 45",
+//            duplicateCount: 1,
+//            sourcePhotoIds: [UUID()]
+//        ),
+//    ]
+//
+//    let store = DWStore(
+//        initialState: ScanListFeature.State(scanResults: mockResults),
+//        reducer: feature
+//    )
+//
+//    return ScanListView(caseID: UUID(), store: store)
+//        .environment(AppCoordinator())
+// }

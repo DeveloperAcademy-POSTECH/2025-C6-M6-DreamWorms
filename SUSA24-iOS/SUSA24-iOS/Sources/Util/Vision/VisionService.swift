@@ -9,163 +9,150 @@ import CoreVideo
 import Foundation
 import Vision
 
-/// Vision Framework 기능을 제공하는 서비스
 final class VisionService: VisionServiceProtocol, Sendable {
     // MARK: - Dependencies
-    
+
     private let documentDetector: DocumentDetectionProcessor
-    
-    // MARK: - Initialization
-    
+
+    // MARK: - Init
+
     init(documentDetector: DocumentDetectionProcessor = DocumentDetectionProcessor()) {
         self.documentDetector = documentDetector
     }
-    
-    // MARK: - 실시간 감지
-    
+
+    // MARK: - Realtime Detection
+
     func startDocumentDetection(
         frameStream _: AsyncStream<CVImageBuffer>
     ) async -> AsyncStream<DocumentDetectionResult> {
         documentDetector.getResultStream()
     }
-    
+
     func startLensSmudgeDetection(
         frameStream _: AsyncStream<CVImageBuffer>
     ) async -> AsyncStream<LensSmudgeDetectionResult> {
         documentDetector.getSmudgeStream()
     }
-    
-    // MARK: - 주소 추출
-    
-    func extractAddresses(
-        from imageData: Data
-    ) async throws -> AddressExtractionResult {
-        // 1. 문서 분석 (테이블 + 텍스트)
-        let analysisResult = try await DocumentAnalyzer.analyzeDocument(from: imageData)
-            
-        var allAddresses: [String] = []
-        var tableAddresses: [String] = []
-        var textAddresses: [String] = []
-        var extractionSource: AddressExtractionSource = .text
-            
-        // 2. 테이블이 있으면 테이블에서만 추출
-        if let tables = analysisResult.tables, !tables.isEmpty {
-            tableAddresses = await extractAddressFromTables(tables)
-            allAddresses = tableAddresses
-            extractionSource = .table
-        } else {
-            // 3. 테이블이 없으면 텍스트에서 추출
-            textAddresses = await extractAddressFromText(analysisResult.recognizedText)
-            allAddresses = textAddresses
-            extractionSource = .text
+
+    // MARK: - Address Extraction (Single)
+
+    func extractAddresses(from imageData: Data) async throws -> AddressExtractionResult {
+        let analysis = try await DocumentAnalyzer.analyzeDocument(from: imageData)
+
+        // 1) 테이블 우선
+        if !analysis.tables.isEmpty {
+            return await extractFromTables(analysis)
         }
-            
-        // 4. 중복 카운팅
-        let countedAddresses = DuplicateCounter.countDuplicates(allAddresses)
-            
-        // 5. 결과 반환
+
+        // 2) 리스트
+        if !analysis.lists.isEmpty {
+            return await extractFromLists(analysis)
+        }
+
+        // 3) 텍스트
+        return await extractFromText(analysis)
+    }
+
+    private func extractFromTables(_ analysis: DocumentAnalysisResult) async -> AddressExtractionResult {
+        var tableCells: [String] = []
+
+        for table in analysis.tables {
+            let col = await AddressExtractor.extractAddressColumnFromTable(table)
+            tableCells.append(contentsOf: col)
+        }
+
+        let normalized = await AddressExtractor.extractAddressesFromText(
+            tableCells.joined(separator: " ")
+        )
+        let counted = DuplicateCounter.countDuplicates(normalized)
+
         return AddressExtractionResult(
-            addresses: countedAddresses,
-            tableAddresses: tableAddresses,
-            textAddresses: textAddresses,
-            extractionSource: extractionSource,
-            tables: analysisResult.tables,
-            document: analysisResult.document,
+            addresses: counted,
+            tableAddresses: tableCells,
+            listAddresses: [],
+            textAddresses: [],
+            source: .table,
+            document: analysis.document,
+            tables: analysis.tables,
+            lists: analysis.lists,
             extractedAt: Date()
         )
     }
-    
+
+    private func extractFromLists(_ analysis: DocumentAnalysisResult) async -> AddressExtractionResult {
+        var rawListAddresses: [String] = []
+
+        for list in analysis.lists {
+            for item in list.items {
+                let text = item.itemString
+                let found = KoreanAddressPattern.extractAddresses(from: text)
+                rawListAddresses.append(contentsOf: found)
+            }
+        }
+
+        let normalized = await AddressExtractor.extractAddressesFromText(
+            rawListAddresses.joined(separator: " ")
+        )
+        let counted = DuplicateCounter.countDuplicates(normalized)
+
+        return AddressExtractionResult(
+            addresses: counted,
+            tableAddresses: [],
+            listAddresses: normalized,
+            textAddresses: [],
+            source: .list,
+            document: analysis.document,
+            tables: analysis.tables,
+            lists: analysis.lists,
+            extractedAt: Date()
+        )
+    }
+
+    private func extractFromText(_ analysis: DocumentAnalysisResult) async -> AddressExtractionResult {
+        let normalized = await AddressExtractor.extractAddressesFromText(analysis.recognizedText)
+        let counted = DuplicateCounter.countDuplicates(normalized)
+
+        return AddressExtractionResult(
+            addresses: counted,
+            tableAddresses: [],
+            listAddresses: [],
+            textAddresses: normalized,
+            source: .text,
+            document: analysis.document,
+            tables: analysis.tables,
+            lists: analysis.lists,
+            extractedAt: Date()
+        )
+    }
+
+    // MARK: - Address Extraction (Batch)
+
+    func extractAddressesBatch(from photos: [Data]) async throws -> [String: Int] {
+        try await extractAddressesBatchWithProgress(from: photos) { _, _ in }
+    }
+
     func extractAddressesBatchWithProgress(
         from photos: [Data],
         progressHandler: @Sendable @escaping (Int, Int) async -> Void
     ) async throws -> [String: Int] {
-        var allAddresses: [String] = []
-        let total = photos.count
-            
-        // TaskGroup으로 병렬 처리
-        await withTaskGroup(of: (Int, [String]).self) { group in
-            for (index, photoData) in photos.enumerated() {
-                group.addTask {
-                    do {
-                        let result = try await DocumentAnalyzer.analyzeDocument(from: photoData)
-                        let addresses = await self.extractAddressesFromAnalysisResult(result)
-                            
-                        // 진행률 업데이트
-                        await progressHandler(index + 1, total)
-                            
-                        return (index, addresses)
-                    } catch {
-                        print("⚠️ 이미지 \(index) 분석 실패: \(error.localizedDescription)")
-                        await progressHandler(index + 1, total)
-                        return (index, [])
-                    }
-                }
-            }
-                
-            // 결과 수집 (순서 유지)
-            var results: [(Int, [String])] = []
-            for await result in group {
-                results.append(result)
-            }
-                
-            // 순서대로 정렬하여 주소 병합
-            for (_, addresses) in results.sorted(by: { $0.0 < $1.0 }) {
-                allAddresses.append(contentsOf: addresses)
+        var merged: [String: Int] = [:]
+
+        for (index, data) in photos.enumerated() {
+            await progressHandler(index + 1, photos.count)
+
+            do {
+                let result = try await extractAddresses(from: data)
+                merged = DuplicateCounter.mergeDictionaries(merged, result.addresses)
+            } catch {
+                continue
             }
         }
-            
-        // 중복 카운팅
-        return DuplicateCounter.countDuplicates(allAddresses)
+
+        return merged
     }
-    
-    // MARK: - Private Helper Methods
-    
-    /// 테이블에서 주소를 추출합니다.
-    private func extractAddressFromTables(
-        _ tables: [DocumentObservation.Container.Table]
-    ) async -> [String] {
-        var allAddresses: [String] = []
-            
-        for table in tables {
-            // "주소" 컬럼 찾기
-            let columnAddresses = await AddressExtractor.extractAddressColumnFromTable(table)
-                
-            // 주소 패턴 추출
-            let addresses = await AddressExtractor.extractAddressesFromText(
-                columnAddresses.joined(separator: " ")
-            )
-                
-            allAddresses.append(contentsOf: addresses)
-        }
-            
-        return allAddresses
-    }
-    
-    /// 텍스트에서 주소를 추출합니다.
-    private func extractAddressFromText(_ text: String) async -> [String] {
-        await AddressExtractor.extractAddressesFromText(text)
-    }
-    
-    /// DocumentAnalysisResult에서 주소를 추출합니다 (병렬 처리용)
-    private func extractAddressesFromAnalysisResult(
-        _ result: DocumentAnalysisResult
-    ) async -> [String] {
-        var addresses: [String] = []
-            
-        if let tables = result.tables, !tables.isEmpty {
-            // 테이블에서 추출
-            addresses = await extractAddressFromTables(tables)
-        } else {
-            // 텍스트에서 추출
-            addresses = await extractAddressFromText(result.recognizedText)
-        }
-            
-        return addresses
-    }
-    
+
     // MARK: - Cleanup
-    
-    /// 리소스를 정리합니다.
+
     func cleanup() async {
         await documentDetector.cleanup()
     }

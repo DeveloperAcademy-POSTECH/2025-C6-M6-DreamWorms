@@ -8,77 +8,59 @@
 import UIKit
 import Vision
 
-/// Vision Framework를 사용하여 문서를 분석하는 유틸리티
-/// Stateless 구조체로 static 메서드만 제공합니다.
+/// Vision Framework 기반 문서 분석 유틸리티
+/// - 테이블, 리스트, 텍스트를 모두 분석하는 가장 핵심적인 Analyzer
+/// - 모든 VisionService 및 BatchAddressAnalyzer가 이 결과를 기반으로 동작한다.
 struct DocumentAnalyzer: Sendable {
-    /// 이미지 데이터에서 문서를 인식하고 분석합니다.
-    /// - Parameter imageData: 분석할 이미지 데이터
+    /// 이미지 데이터에서 문서(테이블 + 리스트 + 텍스트)를 분석한다.
+    /// - Parameter imageData: 분석할 JPEG/PNG 데이터
     /// - Returns: DocumentAnalysisResult
-    /// - Throws: 분석 실패 시 VisionAnalysisError
     static func analyzeDocument(from imageData: Data) async throws -> DocumentAnalysisResult {
         let request = RecognizeDocumentsRequest()
         
-        // Vision 요청 실행 (async/await)
+        // MARK: Vision 요청 수행
+
         let observations = try await request.perform(on: imageData)
         
-        // 첫 번째 문서 관찰 객체 추출
-        guard let document = observations.first?.document else {
-            throw VisionAnalysisError.documentDetectionFailed("문서를 감지하지 못했습니다")
+        guard let container = observations.first?.document else {
+            throw VisionAnalysisError.documentDetectionFailed("문서를 감지하지 못했습니다.")
         }
-        
-        // 테이블과 텍스트 추출
-        let tables = document.tables
-        let recognizedText = document.text.transcript
-        
+
+        // MARK: - 요소 추출
+
+        let tables = container.tables
+        let lists = container.lists
+        let text = container.text.transcript
+
         return DocumentAnalysisResult(
-            tables: tables.isEmpty ? nil : tables,
-            recognizedText: recognizedText,
+            tables: tables.isEmpty ? [] : tables,
+            lists: lists.isEmpty ? [] : lists,
+            recognizedText: text,
+            document: container,
             analyzedAt: Date(),
             imageData: imageData
         )
     }
-    
-    /// 이미지에서 테이블 정보만 추출합니다.
-    /// - Parameter imageData: 분석할 이미지 데이터
-    /// - Returns: 발견된 테이블들
-    /// - Throws: 분석 실패 시 VisionAnalysisError
+
+    /// 테이블만 추출
     static func extractTables(from imageData: Data) async throws -> [DocumentObservation.Container.Table] {
-        let request = RecognizeDocumentsRequest()
-        
-        // Vision 요청 실행
-        let observations = try await request.perform(on: imageData)
-        
-        guard let document = observations.first?.document else {
-            throw VisionAnalysisError.documentDetectionFailed("문서를 감지하지 못했습니다")
-        }
-        
-        guard !document.tables.isEmpty else {
+        let result = try await analyzeDocument(from: imageData)
+
+        if result.tables.isEmpty {
             throw VisionAnalysisError.noTablesFound
         }
-        
-        return document.tables
+        return result.tables
     }
     
-    /// 이미지에서 텍스트만 추출합니다.
-    /// - Parameter imageData: 분석할 이미지 데이터
-    /// - Returns: 인식된 텍스트
-    /// - Throws: 분석 실패 시 VisionAnalysisError
+    /// 텍스트만 추출
     static func extractText(from imageData: Data) async throws -> String {
-        let request = RecognizeDocumentsRequest()
-        
-        // Vision 요청 실행
-        let observations = try await request.perform(on: imageData)
-        
-        guard let document = observations.first?.document else {
-            throw VisionAnalysisError.documentDetectionFailed("문서를 감지하지 못했습니다")
-        }
-        
-        let text = document.text.transcript
-        
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        let result = try await analyzeDocument(from: imageData)
+
+        let text = result.recognizedText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if text.isEmpty {
             throw VisionAnalysisError.noTextFound
         }
-        
         return text
     }
 }

@@ -11,7 +11,7 @@ import UIKit
 /// - 카메라 생명주기 관리 (start/stop)
 /// - 사진 촬영 및 관리 (최대 10장 제한)
 /// - 줌 및 포커스 제어
-/// - 고급 기능: Torch, 자동 포커스, 문서 인식, 렌즈 얼룩 감지
+/// - 고급 기능: Torch, 자동 포커스, 문서 인식, 렌즈 얼룩 감지, 흔들림 감지
 struct CameraFeature: DWReducer {
     // MARK: - Dependency Injection
     
@@ -90,10 +90,10 @@ struct CameraFeature: DWReducer {
         var isAutoFocusEnabled: Bool = true
         
         /// 문서 인식 활성화 여부
-        var isDocumentDetectionEnabled: Bool = false
+        var isDocumentDetectionEnabled: Bool = true
         
         /// 렌즈 얼룩 감지 활성화 여부
-        var isLensSmudgeDetectionEnabled: Bool = false
+        var isLensSmudgeDetectionEnabled: Bool = true
         
         /// Vision 프로세서 초기화 완료 여부
         var isVisionProcessorInitialized: Bool = false
@@ -103,6 +103,9 @@ struct CameraFeature: DWReducer {
         
         /// 렌즈 얼룩 감지 결과
         var lensSmudgeDetection: LensSmudgeDetectionResult?
+        
+        /// 렌즈 얼룩 Toast가 표시되었는지 (중복 방지)
+        var hasShownLensSmudgeToast: Bool = false
         
         // MARK: - Initialization
         
@@ -125,9 +128,7 @@ struct CameraFeature: DWReducer {
         
         // MARK: Navigation Actions
         
-        // PhotoDetails/Scan으로 갈 때
         case pauseForNavigation
-        // 뒤로가기로 나갈 때
         case stopForExit
         
         // MARK: Camera Control Actions
@@ -138,6 +139,7 @@ struct CameraFeature: DWReducer {
         // MARK: Photo Capture Actions
         
         case captureButtonTapped
+        case capturePhotoCompleted(Result<CapturedPhoto, Error>)
         case syncPhotoState
         case updatePhotoCount(Int)
         case updateThumbnail(UIImage?)
@@ -157,9 +159,13 @@ struct CameraFeature: DWReducer {
         case tapToFocus(CGPoint)
         case updateZoomFactor(CGFloat)
         
+        // MARK: Document Overlay Actions
+        
+        case documentOverlayTapped
+        
         // MARK: Toast Actions
         
-        case showToast
+        case showToast(String)
         case hideToast
         
         // MARK: - Advanced Camera Features Actions
@@ -186,6 +192,7 @@ struct CameraFeature: DWReducer {
                 await camera.start()
                 let status = await camera.cameraStatus
                 
+                // Vision 분석 시작
                 await MainActor.run {
                     camera.enableVisionAnalysis()
                 }
@@ -197,39 +204,36 @@ struct CameraFeature: DWReducer {
                 return .setCameraStatus(status)
             }
             
-        // TODO: 처리
         case .viewDidAppear:
-            print("viewDidAppear")
             camera.resumeCamera()
-            return .send(.syncPhotoState)
+            return .merge(
+                .send(.syncPhotoState),
+                .send(.startDocumentDetectionStream),
+                .send(.startLensSmudgeStream)
+            )
             
         case .viewDidDisappear:
-            print("viewDidDisappear")
             camera.stopVisionAnalysis()
             camera.pauseCamera()
             return .none
             
         case .sceneDidBecomeActive:
-            print("sceneDidBecomeActive")
             camera.resumeCamera()
             return .none
             
         case .sceneDidEnterBackground:
-            print("sceneDidEnterBackground")
             camera.pauseCamera()
             camera.stopVisionAnalysis()
             return .none
             
-            // MARK: Navigation Contro
+            // MARK: Navigation Control
             
         case .pauseForNavigation:
-            // PhotoDetails/Scan으로 갈 때 - 일시정지
             camera.pauseCamera()
             camera.stopVisionAnalysis()
             return .none
             
         case .stopForExit:
-            // 뒤로가기로 나갈 때 - 세션 중지
             camera.stopVisionAnalysis()
             return .task { [camera] in
                 await camera.stop()
@@ -257,7 +261,7 @@ struct CameraFeature: DWReducer {
             
         case .captureButtonTapped:
             if state.photoCount >= 10 {
-                return .send(.showToast)
+                return .send(.showToast(String(localized: .cameraPhotolimitMessage)))
             }
             
             guard state.isCaptureAvailable, !state.isCapturing else {
@@ -268,11 +272,28 @@ struct CameraFeature: DWReducer {
             
             return .task { [camera] in
                 do {
-                    _ = try await camera.capturePhoto()
-                    return .syncPhotoState
+                    let photo = try await camera.capturePhoto()
+                    return .capturePhotoCompleted(.success(photo))
                 } catch {
-                    return .syncPhotoState
+                    return .capturePhotoCompleted(.failure(error))
                 }
+            }
+            
+        case let .capturePhotoCompleted(result):
+            switch result {
+            case let .success(photo):
+                // 흔들림 감지 (간단한 구현)
+                // 또는 Vision Framework의 VNDetectBlurRequest 사용
+                if photo.isBlurred {
+                    return .merge(
+                        .send(.syncPhotoState),
+                        .send(.showToast(String(localized: .cameraStabilizationModeMessage)))
+                    )
+                }
+                return .send(.syncPhotoState)
+                
+            case .failure:
+                return .send(.syncPhotoState)
             }
             
         case .syncPhotoState:
@@ -332,6 +353,12 @@ struct CameraFeature: DWReducer {
             
         case let .pinchZoomChanged(scale):
             let delta = scale / state.lastZoomScale
+            
+            // 5% 이하 변화는 무시 (TabView swipe 충돌 방지)
+            guard abs(delta - 1.0) > 0.05 else {
+                return .none
+            }
+            
             state.lastZoomScale = scale
             
             return .task { [camera] in
@@ -349,7 +376,7 @@ struct CameraFeature: DWReducer {
             return .none
             
         case let .tapToFocus(focusPoint):
-            guard !state.isAutoFocusEnabled else {
+            guard state.isAutoFocusEnabled else {
                 return .none
             }
             
@@ -358,8 +385,23 @@ struct CameraFeature: DWReducer {
                 return .none
             }
             
-        case .showToast:
+            // MARK: Document Overlay
+            
+        case .documentOverlayTapped:
+            // 오버레이 탭 시 해당 범위만 촬영
+            guard state.documentDetection != nil else {
+                return .none
+            }
+            
+            // TODO: 문서 범위만 크롭하여 촬영하는 로직
+            // 현재는 일반 촬영과 동일
+            return .send(.captureButtonTapped)
+            
+            // MARK: Toast
+            
+        case let .showToast(message):
             state.showToast = true
+            state.toastMessage = message
             return .none
             
         case .hideToast:
@@ -387,16 +429,13 @@ struct CameraFeature: DWReducer {
         case .toggleDocumentDetection:
             state.isDocumentDetectionEnabled.toggle()
             
-            // TODO: 이 로직 좀 더 손봐야함
             if state.isDocumentDetectionEnabled {
                 if !state.isVisionProcessorInitialized {
                     camera.enableVisionAnalysis()
                     state.isVisionProcessorInitialized = true
                 }
-                camera.getDocumentDetectionStream()
                 return .send(.startDocumentDetectionStream)
             } else {
-                camera.getDocumentDetectionStream()
                 state.documentDetection = nil
                 return .none
             }
@@ -404,17 +443,15 @@ struct CameraFeature: DWReducer {
         case .toggleLensSmudgeDetection:
             state.isLensSmudgeDetectionEnabled.toggle()
             
-            // TODO: 이 로직 좀 더 손봐야함
             if state.isLensSmudgeDetectionEnabled {
                 if !state.isVisionProcessorInitialized {
                     camera.enableVisionAnalysis()
                     state.isVisionProcessorInitialized = true
                 }
-                camera.getLensSmudgeStream()
                 return .send(.startLensSmudgeStream)
             } else {
-                camera.getLensSmudgeStream()
                 state.lensSmudgeDetection = nil
+                state.hasShownLensSmudgeToast = false
                 return .none
             }
             
@@ -454,7 +491,37 @@ struct CameraFeature: DWReducer {
             
         case let .updateLensSmudgeDetection(result):
             state.lensSmudgeDetection = result
+            
+            if let smudge = result,
+               smudge.isSmudged,
+               !state.hasShownLensSmudgeToast
+            {
+                state.hasShownLensSmudgeToast = true
+                return .send(.showToast(String(localized: .cameraLensSmudgeMessage)))
+            }
+            
+            // 얼룩이 사라지면 플래그 리셋
+            if result == nil || !(result?.isSmudged ?? false) {
+                state.hasShownLensSmudgeToast = false
+            }
+            
             return .none
         }
+    }
+}
+
+// MARK: - CapturedPhoto Extension (흔들림 감지)
+
+extension CapturedPhoto {
+    /// 사진이 흔들렸는지 여부
+    /// - Note: 실제 구현 시 AVCapturePhoto의 metadata 또는 Vision Framework 사용
+    var isBlurred: Bool {
+        // TODO: 실제 흔들림 감지 로직
+        // 1. AVCapturePhoto의 metadata에서 exposureTime, ISO 확인
+        // 2. Vision Framework의 VNDetectBlurRequest 사용
+        // 3. CoreImage의 CIBlurredImage 사용
+        
+        // 현재는 false 반환 (항상 선명)
+        false
     }
 }
