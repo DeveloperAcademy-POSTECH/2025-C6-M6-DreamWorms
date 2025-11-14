@@ -731,6 +731,83 @@
         }
       }
     },
+    "save_completed_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 주소가 지도에 추가되었습니다."
+          }
+        }
+      }
+    },
+    "save_fail_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 실패"
+          }
+        }
+      }
+    },
+    "save_success_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 완료"
+          }
+        }
+      }
+    },
+    "scan_load_failed_content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영하시겠습니까?"
+          }
+        }
+      }
+    },
+    "scan_load_failed_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추출된 주소가 없습니다."
+          }
+        }
+      }
+    },
+    "scan_load_try" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영"
+          }
+        }
+      }
+    },
+    "scan_result_failed_content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "분석 결과가 없습니다."
+          }
+        }
+      }
+    },
     "scanList_addPin" : {
       "comment" : "스캔 목록_핀 추가",
       "extractionState" : "manual",
@@ -1076,6 +1153,9 @@
     "Visits" : {
 
     },
+    "Week" : {
+
+    },
     "기지국 위치정보 저장하기" : {
 
     },
@@ -1086,23 +1166,12 @@
 
     },
     "본문: ${messageBody}" : {
+
     },
     "사진" : {
 
     },
-    "선택한 주소가 지도에 추가되었습니다." : {
-
-    },
-    "저장 실패" : {
-
-    },
-    "저장 완료" : {
-
-    },
     "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
-
-    },
-    "확인" : {
 
     }
   },
