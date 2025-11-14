@@ -12,7 +12,7 @@ enum AppRoute: Hashable {
     case caseAddScene
     case caseListScene
     case dashboardScene(caseID: UUID)
-    case locationOverviewScene(caseID: UUID, address: String, initialCoordinate: MapCoordinate?)
+    case locationOverviewScene(caseID: UUID, address: String, initialCoordinate: MapCoordinate)
     case mainTabScene(caseID: UUID)
     case mapScene(caseID: UUID)
     case onePageScene(caseID: UUID)

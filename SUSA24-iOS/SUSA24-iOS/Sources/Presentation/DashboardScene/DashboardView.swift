@@ -38,11 +38,10 @@ struct DashboardView: View {
                     topLocations: store.state.topVisitDurationLocations,
                     onCardTap: {
                         coordinator.push(
-                            // TODO: - Coordinate 값 전달 받도록 수정!!!!!!!!
                             .locationOverviewScene(
                                 caseID: currentCaseID,
                                 address: $0.address,
-                                initialCoordinate: nil
+                                initialCoordinate: MapCoordinate(latitude: $0.latitude, longitude: $0.longitude)
                             )
                         )
                     }

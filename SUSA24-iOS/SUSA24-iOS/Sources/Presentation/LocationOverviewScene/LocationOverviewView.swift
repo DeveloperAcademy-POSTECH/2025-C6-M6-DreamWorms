@@ -19,11 +19,12 @@ struct LocationOverviewView: View {
     
     let caseID: UUID
     let baseAddress: String
-    let initialCoordinate: MapCoordinate?
+    let initialCoordinate: MapCoordinate
 
     // 지도 제어 상태
     @State private var cameraTarget: MapCoordinate? = nil
     @State private var focusMyLocation = false
+    @State private var hasAppliedInitialCamera = false
 
     // MARK: - View
 
@@ -69,6 +70,11 @@ struct LocationOverviewView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             store.send(.onAppear(caseID: caseID, baseAddress: baseAddress))
+            
+            if !hasAppliedInitialCamera {
+                cameraTarget = initialCoordinate
+                hasAppliedInitialCamera = true
+            }
         }
     }
 }
@@ -83,7 +89,7 @@ private extension LocationOverviewView {}
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    let dummyStore = DWStore(
 //        initialState: LocationOverviewFeature.State(
 //            caseID: UUID(),
@@ -105,4 +111,4 @@ private extension LocationOverviewView {}
 //        )
 //        .environment(AppCoordinator())
 //    }
-//}
+// }
