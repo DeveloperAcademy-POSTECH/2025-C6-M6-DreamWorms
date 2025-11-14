@@ -22,7 +22,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     // MARK: - Properties
     
     @State private var selectedDetent: PresentationDetent
-    
+
     private let mapShortDetent = PresentationDetent.height(73)
     private let mapMidDetnet = PresentationDetent.fraction(0.4)
     private let mapLargeDetent = PresentationDetent.large
@@ -87,6 +87,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                 selection: $selectedDetent
             )
             .presentationBackgroundInteraction(.enabled)
+            .presentationContentInteraction(.scrolls)
             .presentationDragIndicator(store.state.selectedTab == .map ? .visible : .hidden)
             .interactiveDismissDisabled(true)
         }
@@ -116,6 +117,17 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         .onChange(of: selectedDetent) { _, newDetent in
             let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
             timeLineStore.send(.setMinimized(isMinimized))
+        }
+        .onChange(of: store.state.selectedTab) { _, newTab in
+            if newTab == .map {
+                // Map 탭으로 복귀 시 중간 detent로 설정
+                selectedDetent = mapMidDetnet
+            } else {
+                selectedDetent = otherDetent
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
+            selectedDetent = mapMidDetnet
         }
     }
 }

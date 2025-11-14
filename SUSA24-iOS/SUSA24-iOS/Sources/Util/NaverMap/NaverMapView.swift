@@ -5,6 +5,7 @@
 //  Updated by Moo on 11/08/25.
 //
 
+import CoreLocation
 import NMapsMap
 import SwiftUI
 
@@ -93,9 +94,14 @@ struct NaverMapView: UIViewRepresentable {
         
         // 2) 현위치 포커싱 명령 적용
         if shouldFocusMyLocation {
-            _ = context.coordinator.focusCameraOnMyLocation()
+            let success = context.coordinator.focusCameraOnMyLocation()
             Task { @MainActor in
-                onMyLocationFocusConsumed?()
+                if success {
+                    onMyLocationFocusConsumed?()
+                } else {
+                    // TODO: - 위치를 아직 못받았을 때의 로그 등 필요하면 여기에서 처리
+                    onMyLocationFocusConsumed?()
+                }
             }
         }
         
@@ -137,7 +143,7 @@ struct NaverMapView: UIViewRepresentable {
     
     // MARK: - Coordinator
     
-    class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
+    class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate, CLLocationManagerDelegate {
         /// 네이버 지도 뷰 인스턴스에 대한 약한 참조입니다.
         weak var mapView: NMFMapView?
         let parent: NaverMapView
@@ -154,6 +160,10 @@ struct NaverMapView: UIViewRepresentable {
         private var lastCaseLocationVisibility: Bool?
         private var lastCellMarkerVisibility: Bool?
         private var lastCCTVVisibility: Bool?
+        
+        private let locationManager = CLLocationManager()
+        private var lastKnownLocation: CLLocationCoordinate2D?
+        private var hasCenteredOnUserOnce = false
 
         init(
             parent: NaverMapView,
@@ -163,6 +173,57 @@ struct NaverMapView: UIViewRepresentable {
             self.parent = parent
             self.infrastructureManager = infrastructureManager
             self.caseLocationMarkerManager = caseLocationMarkerManager
+            super.init()
+            
+            // 위치 권한 요청 및 업데이트 시작
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.startUpdatingLocation()
+        }
+        
+        /// 위치 권한 상태가 변경될 때 호출되는 메서드입니다.
+        func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+            let status = manager.authorizationStatus
+            switch status {
+            case .authorizedWhenInUse, .authorizedAlways:
+                manager.startUpdatingLocation()
+            default:
+                break
+            }
+        }
+
+        /// 새로운 위치 정보가 들어올 때마다 호출되는 메서드입니다.
+        func locationManager(
+            _: CLLocationManager,
+            didUpdateLocations locations: [CLLocation]
+        ) {
+            guard let location = locations.last else { return }
+            let coordinate = location.coordinate
+            lastKnownLocation = coordinate
+
+            if let mapView {
+                let overlay = mapView.locationOverlay
+                overlay.location = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+                overlay.hidden = false
+            }
+
+            if !hasCenteredOnUserOnce {
+                hasCenteredOnUserOnce = true
+                let target = MapCoordinate(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                )
+                moveCamera(to: target)
+            }
+        }
+
+        // TODO: - 위치 정보 에러 발생 시 분기 처리 로직 포함
+        func locationManager(
+            _: CLLocationManager,
+            didFailWithError error: Error
+        ) {
+            print("위치 업데이트 가져오기를 실패했습니다.: \(error)")
         }
 
         /// 마커 가시성 상태를 추적하고 네이버 지도 오버레이에 적용합니다.
