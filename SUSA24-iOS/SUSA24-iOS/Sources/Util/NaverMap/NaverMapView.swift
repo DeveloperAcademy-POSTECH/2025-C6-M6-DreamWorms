@@ -34,6 +34,8 @@ struct NaverMapView: UIViewRepresentable {
     var cellStations: [CellMarker] = []
     /// 기지국 레이어 표시 여부
     var isCellLayerEnabled: Bool = false
+    /// 케이스 위치 데이터
+    var locations: [Location] = []
     /// CCTV 데이터
     var cctvMarkers: [CCTVMarker] = []
     /// CCTV 레이어 표시 여부
@@ -43,12 +45,18 @@ struct NaverMapView: UIViewRepresentable {
     
     /// 인프라 마커 관리자
     let infrastructureManager: InfrastructureMarkerManager
+    /// 용의자 마커 관리자
+    let caseLocationMarkerManager: CaseLocationMarkerManager
     
     // MARK: - UIViewRepresentable
     
     /// 네이버 지도 컨트롤을 관리할 코디네이터를 생성합니다.
     func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self, infrastructureManager: infrastructureManager)
+        Coordinator(
+            parent: self,
+            infrastructureManager: infrastructureManager,
+            caseLocationMarkerManager: caseLocationMarkerManager
+        )
     }
     
     /// 네이버 지도 뷰를 생성하고 초기 설정을 수행합니다.
@@ -91,6 +99,10 @@ struct NaverMapView: UIViewRepresentable {
             isVisible: isCellLayerEnabled,
             on: uiView
         )
+        context.coordinator.updateCaseLocations(
+            locations: locations,
+            on: uiView
+        )
         context.coordinator.updateCCTVLayer(
             cctvMarkers: cctvMarkers,
             isVisible: isCCTVLayerEnabled,
@@ -109,17 +121,47 @@ struct NaverMapView: UIViewRepresentable {
         var defaultZoomLevel: Double = 15
         
         private let infrastructureManager: InfrastructureMarkerManager
+        private let caseLocationMarkerManager: CaseLocationMarkerManager
         private var lastCellStationsHash: Int?
+        private var lastLocationsHash: Int?
         private var lastCCTVMarkersHash: Int?
 
-        init(parent: NaverMapView, infrastructureManager: InfrastructureMarkerManager) {
+        init(
+            parent: NaverMapView,
+            infrastructureManager: InfrastructureMarkerManager,
+            caseLocationMarkerManager: CaseLocationMarkerManager
+        ) {
             self.parent = parent
             self.infrastructureManager = infrastructureManager
+            self.caseLocationMarkerManager = caseLocationMarkerManager
         }
         
         /// 지도 터치 이벤트를 SwiftUI 상위 모듈로 전달합니다.
         func mapView(_: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
             parent.onMapTapped?(latlng)
+        }
+        
+        @MainActor
+        func updateCaseLocations(
+            locations: [Location],
+            on mapView: NMFMapView
+        ) {
+            var hasher = Hasher()
+            for location in locations {
+                hasher.combine(location.id)
+                hasher.combine(location.locationType)
+                hasher.combine(location.pointLatitude)
+                hasher.combine(location.pointLongitude)
+            }
+            let newHash = hasher.finalize()
+            
+            if lastLocationsHash != newHash {
+                caseLocationMarkerManager.updateMarkers(
+                    locations,
+                    on: mapView
+                )
+                lastLocationsHash = newHash
+            }
         }
         
         /// 전달받은 좌표로 네이버 지도 카메라를 이동시킵니다.
