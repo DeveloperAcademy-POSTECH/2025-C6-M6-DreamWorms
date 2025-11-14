@@ -57,8 +57,8 @@ struct TimeLineFeature: DWReducer {
         
         /// 고유한 장소(주소) 개수 - 맵에 찍힌 핀 개수
         var totalLocationCount: Int {
-            let allLocations = groupedLocations.flatMap { $0.locations }
-            let uniqueAddresses = Set(allLocations.map { $0.address })
+            let allLocations = groupedLocations.flatMap(\.locations)
+            let uniqueAddresses = Set(allLocations.map(\.address))
             return uniqueAddresses.count
         }
         
