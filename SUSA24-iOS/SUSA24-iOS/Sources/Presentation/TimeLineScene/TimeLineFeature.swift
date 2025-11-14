@@ -100,7 +100,7 @@ struct TimeLineFeature: DWReducer {
         switch action {
         case .onAppear:
             // 탭바를 위한 조건
-            state.isMinimized = true
+            state.isMinimized = false
             
             return .none
             

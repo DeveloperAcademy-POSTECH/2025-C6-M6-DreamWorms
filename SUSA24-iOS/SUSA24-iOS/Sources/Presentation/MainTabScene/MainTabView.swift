@@ -21,7 +21,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     
     // MARK: - Properties
     
-    @State private var selectedDetent: PresentationDetent = PresentationDetent.height(66)
+    @State private var selectedDetent: PresentationDetent
     
     private let mapShortDetent = PresentationDetent.height(73)
     private let mapMidDetnet = PresentationDetent.fraction(0.4)
@@ -54,6 +54,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         self.mapView = mapView
         self.dashboardView = dashboardView
         self.onePageView = onePageView
+        self.selectedDetent = mapMidDetnet
     }
     
     // MARK: - View
@@ -112,7 +113,6 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                 locations: newLocations
             ))
         }
-
         .onChange(of: selectedDetent) { _, newDetent in
             let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
             timeLineStore.send(.setMinimized(isMinimized))

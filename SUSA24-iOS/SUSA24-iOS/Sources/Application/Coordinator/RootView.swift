@@ -67,13 +67,12 @@ struct RootView: View {
                             moduleFactory.makeScanListView(caseID: caseID, scanResults: scanResults, context: context)
                         }
                     }
-                    .onChange(of: coordinator.currentRoute) {
-                        guard let route = coordinator.currentRoute else {
+                    .onChange(of: coordinator.currentRoute) { _, newRoute in
+                        guard let newRoute else {
                             tabBarVisibility.hide()
                             return
                         }
-
-                        if route.useTabBar {
+                        if newRoute.useTabBar {
                             tabBarVisibility.show()
                         } else {
                             tabBarVisibility.hide()
