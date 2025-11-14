@@ -173,6 +173,8 @@ struct MapView: View {
             switch request {
             case let .moveToSearchResult(coordinate, placeInfo):
                 store.send(.moveToSearchResult(coordinate, placeInfo))
+            case let .moveToLocation(coordinate):
+                store.send(.moveToLocation(coordinate))
             }
         }
 
