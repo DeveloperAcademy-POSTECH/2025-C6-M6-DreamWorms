@@ -248,6 +248,17 @@
         }
       }
     },
+    "cancel_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
     "caseAdd_caseName" : {
       "comment" : "케이스 추가_텍스트필드 타이틀_사건명",
       "extractionState" : "manual",
@@ -775,6 +786,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "핀 추가"
+          }
+        }
+      }
+    },
+    "pin_delete_alert_content" : {
+      "comment" : "핀 삭제_설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건을 공유하고 있는 다른 사용자의 화면에서도 지워집니다. 이 핀을 삭제할까요?"
           }
         }
       }
