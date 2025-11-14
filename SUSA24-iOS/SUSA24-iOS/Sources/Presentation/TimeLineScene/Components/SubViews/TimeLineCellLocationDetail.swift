@@ -28,28 +28,34 @@ import SwiftUI
 struct TimeLineCellLocationDetail: View {
     let caseTitle: String
     let startTime: Date
-    let endTime: Date
-    
+    let endTime: Date?
+
     var timeFormat: String = "hh:mm a" // 12시간 형식 ( 01:44 PM )
-    
-    /// 시작 시간
+
+    /// 시간 범위 텍스트
+
     private var timeRangeText: String {
         let start = startTime.formatted(timeFormat)
-        let end = endTime.formatted(timeFormat)
-        // Localizable 포맷 사용
-        return String(localized: .timeRangeFormat(
-            start: start,
-            end: end
-        ))
+
+        if let endTime {
+            let end = endTime.formatted(timeFormat)
+            // Localizable 포맷 사용
+            return String(localized: .timeRangeFormat(
+                start: start,
+                end: end
+            ))
+        } else {
+            return start
+        }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             // 제목
             Text(caseTitle)
                 .font(.titleSemiBold16)
                 .foregroundStyle(.labelNormal)
-            
+
             // 시간 범위
             Text(timeRangeText)
                 .font(.numberRegular15)

@@ -14,13 +14,19 @@ import SwiftUI
 struct ScrollTarget: Equatable {
     let dateID: String // "2025-01-06" 형식
     let triggerID = UUID() // 같은 날짜를 여러 번 탭해도 스크롤되도록
-    
+
     static func == (lhs: ScrollTarget, rhs: ScrollTarget) -> Bool {
         lhs.triggerID == rhs.triggerID
     }
 }
 
 struct TimeLineFeature: DWReducer {
+    private let dispatcher: MapDispatcher
+
+    init(dispatcher: MapDispatcher) {
+        self.dispatcher = dispatcher
+    }
+
     // MARK: - State
     
     struct State: DWState {
@@ -55,9 +61,11 @@ struct TimeLineFeature: DWReducer {
             groupedLocations.isEmpty
         }
         
-        /// 총 Location 개수
+        /// 고유한 장소(주소) 개수 - 맵에 찍힌 핀 개수
         var totalLocationCount: Int {
-            groupedLocations.reduce(0) { $0 + $1.locations.count }
+            let allLocations = groupedLocations.flatMap(\.locations)
+            let uniqueAddresses = Set(allLocations.map(\.address))
+            return uniqueAddresses.count
         }
         
         /// 초기화 - MainTabFeature.State에서 데이터를 받음
@@ -100,12 +108,17 @@ struct TimeLineFeature: DWReducer {
         switch action {
         case .onAppear:
             // 탭바를 위한 조건
-            state.isMinimized = true
+            state.isMinimized = false
             
             return .none
             
-        case .locationTapped:
-            // TODO: Location 상세 화면으로 이동 또는 지도에서 선택된 위치 표시
+        case let .locationTapped(location):
+            // Timeline 셀 탭 시 맵으로 카메라 이동
+            let coordinate = MapCoordinate(
+                latitude: location.pointLatitude,
+                longitude: location.pointLongitude
+            )
+            dispatcher.send(.moveToLocation(coordinate: coordinate))
             return .none
             
         case let .scrollToDate(date):

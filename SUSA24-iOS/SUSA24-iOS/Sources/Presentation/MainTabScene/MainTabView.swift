@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
+    @Environment(TabBarVisibility.self)
+    private var tabBarVisibility
+
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
@@ -51,6 +54,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         self.mapView = mapView
         self.dashboardView = dashboardView
         self.onePageView = onePageView
+        self.selectedDetent = mapMidDetnet
     }
     
     // MARK: - View
@@ -63,7 +67,10 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             case .onePage: onePageView()
             }
         }
-        .sheet(isPresented: .constant(true)) {
+        .sheet(isPresented: Binding(
+            get: { tabBarVisibility.isVisible },
+            set: { _ in }
+        )) {
             DWTabBar(
                 activeTab: Binding(
                     get: { store.state.selectedTab },
@@ -85,15 +92,28 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             .interactiveDismissDisabled(true)
         }
         .navigationBarBackButtonHidden(true)
-        .task { store.send(.onAppear) }
+        .task {
+            // MainTabView 진입 시 TabBar 표시
+            tabBarVisibility.show()
+            store.send(.onAppear)
+        }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
+            print("📍 [MainTabView] caseInfo changed: \(newCaseInfo?.name ?? "nil"), locations count: \(store.state.locations.count)")
             guard let caseInfo = newCaseInfo else { return }
+            // caseInfo 로드 시점에 locations도 함께 업데이트 (초기 바인딩 포함)
             timeLineStore.send(.updateData(
                 caseInfo: caseInfo,
                 locations: store.state.locations
             ))
         }
-        
+        .onChange(of: store.state.locations) { _, newLocations in
+            print("📍 [MainTabView] locations changed: count=\(newLocations.count), caseInfo: \(store.state.caseInfo?.name ?? "nil")")
+            guard let caseInfo = store.state.caseInfo else { return }
+            timeLineStore.send(.updateData(
+                caseInfo: caseInfo,
+                locations: newLocations
+            ))
+        }
         .onChange(of: selectedDetent) { _, newDetent in
             let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
             timeLineStore.send(.setMinimized(isMinimized))

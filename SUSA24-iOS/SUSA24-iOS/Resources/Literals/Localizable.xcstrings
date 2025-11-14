@@ -4,13 +4,32 @@
     "" : {
 
     },
+    "%@" : {
+
+    },
     "%lld" : {
 
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
     },
     "%lld/10" : {
 
     },
+    "%lld%%" : {
+
+    },
     "%lld개" : {
+
+    },
+    "%lld주차" : {
 
     },
     "analyze" : {
@@ -109,6 +128,42 @@
         }
       }
     },
+    "camera_back_sheet_action_cancel" : {
+      "comment" : "카메라 나가기_액션시트_취소",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "camera_back_sheet_action_confirm" : {
+      "comment" : "카메라 나가기_액션시트_모두 삭제",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 자료 삭제"
+          }
+        }
+      }
+    },
+    "camera_back_sheet_title" : {
+      "comment" : "카메라 나가기_액션시트_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "촬영한 모든 자료를 삭제합니다."
+          }
+        }
+      }
+    },
     "camera_ExitAlertContent" : {
       "comment" : "카메라 나가기_스캔 중단 안내 컨텐츠",
       "extractionState" : "manual",
@@ -157,6 +212,18 @@
         }
       }
     },
+    "camera_lensSmudgeMessage" : {
+      "comment" : "카메라 토스트_렌즈 얼룩 알림 메세지",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정확도를 위해 카메라 렌즈를 닦아주세요"
+          }
+        }
+      }
+    },
     "camera_PhotolimitMessage" : {
       "comment" : "카메라 토스트_사진 장수 제한 메세지",
       "extractionState" : "manual",
@@ -165,6 +232,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최대 10장까지 업로드할 수 있습니다."
+          }
+        }
+      }
+    },
+    "camera_stabilizationModeMessage" : {
+      "comment" : "카메라 토스트_흔들림 알림 메세지",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "흔들린 사진은 인식할 수 없습니다."
+          }
+        }
+      }
+    },
+    "cancel_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
           }
         }
       }
@@ -229,6 +319,18 @@
         }
       }
     },
+    "caseAdd_suspect_PhoneNumber" : {
+      "comment" : "추적_셀_전화번호_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "피의자 추적 전화번호"
+          }
+        }
+      }
+    },
     "caseAdd_suspectName" : {
       "comment" : "케이스 추가_텍스트필드 타이틀_피의자명",
       "extractionState" : "manual",
@@ -253,6 +355,42 @@
         }
       }
     },
+    "caseList_allCasePicker" : {
+      "comment" : "케이스 리스트_피커_전체 사건",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체 사건"
+          }
+        }
+      }
+    },
+    "caseList_emptyDescription" : {
+      "comment" : "케이스 리스트_엠티 설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건추가 버튼으로 사건을 등록해보세요."
+          }
+        }
+      }
+    },
+    "caseList_emptyTitle" : {
+      "comment" : "케이스 리스트_엠티 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추가된 사건이 없어요"
+          }
+        }
+      }
+    },
     "caseList_navigationTitle" : {
       "comment" : "케이스 리스트_네비게이션 타이틀",
       "extractionState" : "manual",
@@ -261,6 +399,87 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사건을 추가하거나\n확인할 사건을 선택하세요."
+          }
+        }
+      }
+    },
+    "caseList_shareCasePicker" : {
+      "comment" : "케이스 리스트_피커_공유 받은 사건",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공유 받은 사건"
+          }
+        }
+      }
+    },
+    "cctv" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV"
+          }
+        }
+      }
+    },
+    "cell_station" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국"
+          }
+        }
+      }
+    },
+    "chart_CellLocationTitle" : {
+      "comment" : "차트_상단 기지국 내용 입력 공간",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(location)@ 기지국에서"
+          }
+        }
+      }
+    },
+    "chart_legend_week" : {
+      "comment" : "차트_우측 상단 주석",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(number)lld주차"
+          }
+        }
+      }
+    },
+    "confirm_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인"
+          }
+        }
+      }
+    },
+    "dashboard_emptyChartMessage" : {
+      "comment" : "대시보드_엠티 차트_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 데이터가 없습니다."
           }
         }
       }
@@ -325,6 +544,48 @@
         }
       }
     },
+    "delete_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "from" : {
+
+    },
+    "Hour" : {
+
+    },
+    "Key" : {
+      "extractionState" : "manual"
+    },
+    "layer_setting_coverage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 반경"
+          }
+        }
+      }
+    },
+    "layer_setting_toggle_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 세부 정보"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
@@ -333,6 +594,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지도"
+          }
+        }
+      }
+    },
+    "map_setting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도 설정"
+          }
+        }
+      }
+    },
+    "mapview_pin_create_button" : {
+      "comment" : "스캔 목로_핀 추가 시트_완료 버튼",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "mapview_pin_create_done" : {
+      "comment" : "스캔 목록_핀 추가 완료 시_맵뷰 토스트",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 추가가 완료되었습니다."
           }
         }
       }
@@ -381,6 +677,95 @@
         }
       }
     },
+    "max" : {
+
+    },
+    "memo_delete_cancel" : {
+      "comment" : "메모 삭제 취소",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "memo_delete_confirm" : {
+      "comment" : "메모 삭제",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영구 삭제"
+          }
+        }
+      }
+    },
+    "memo_delete_message" : {
+      "comment" : "메모 노트 삭제 시 Alert message",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "작성한 노트를 영구적으로 삭제하시겠습니까?"
+          }
+        }
+      }
+    },
+    "memo_delete_title" : {
+      "comment" : "메모 노트 삭제 시 Alert 제목",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노트 삭제"
+          }
+        }
+      }
+    },
+    "memo_write_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "형사 노트 작성하기"
+          }
+        }
+      }
+    },
+    "memo_write_placeHolder" : {
+      "comment" : "메모 노트 작성 시 placeholder",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "장소에 대한 상세정보를 메모하세요."
+          }
+        }
+      }
+    },
+    "memo_write_title" : {
+      "comment" : "메모 노트 작성 화면 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "형사노트"
+          }
+        }
+      }
+    },
+    "min" : {
+
+    },
     "photoDetails_currentIndex" : {
       "comment" : "이미지 상세_현재이미지/총 이미지 수",
       "extractionState" : "manual",
@@ -389,6 +774,90 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d/%d"
+          }
+        }
+      }
+    },
+    "pin_add" : {
+      "comment" : "핀 추가_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 추가"
+          }
+        }
+      }
+    },
+    "pin_delete_alert_content" : {
+      "comment" : "핀 삭제_설명",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건을 공유하고 있는 다른 사용자의 화면에서도 지워집니다. 이 핀을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "pin_modify" : {
+      "comment" : "핀 수정_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 수정"
+          }
+        }
+      }
+    },
+    "pin_wirte_limit_length" : {
+      "comment" : "핀 추가 시 최대 글자수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/20"
+          }
+        }
+      }
+    },
+    "pin_write_color_select" : {
+      "comment" : "핀 추가_색상 선택_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 색상 선택"
+          }
+        }
+      }
+    },
+    "pin_write_icon_select" : {
+      "comment" : "핀 추가_아이콘 선택_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 아이콘 선택"
+          }
+        }
+      }
+    },
+    "pin_write_placeHolder" : {
+      "comment" : "핀 추가_플레이스홀더",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지도에 표시될 핀 이름을 작성해주세요."
           }
         }
       }
@@ -453,6 +922,18 @@
         }
       }
     },
+    "placeholder_suspectPhoneNumber" : {
+      "comment" : "플레이스홀더_추적기지국 번호를 입력해 주세요.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "셀 번호를 받을 번호를 입력해 주세요."
+          }
+        }
+      }
+    },
     "recentBaseStation" : {
       "comment" : "맵뷰_필터_최근기지국",
       "extractionState" : "manual",
@@ -461,6 +942,83 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최근 기지국"
+          }
+        }
+      }
+    },
+    "save_completed_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 주소가 지도에 추가되었습니다."
+          }
+        }
+      }
+    },
+    "save_fail_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 실패"
+          }
+        }
+      }
+    },
+    "save_success_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 완료"
+          }
+        }
+      }
+    },
+    "scan_load_failed_content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영하시겠습니까?"
+          }
+        }
+      }
+    },
+    "scan_load_failed_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추출된 주소가 없습니다."
+          }
+        }
+      }
+    },
+    "scan_load_try" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영"
+          }
+        }
+      }
+    },
+    "scan_result_failed_content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "분석 결과가 없습니다."
           }
         }
       }
@@ -477,6 +1035,114 @@
         }
       }
     },
+    "scanList_card_Count" : {
+      "comment" : "스캔 목록_감지 주소 중복 횟수",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld회 인식"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_button_cancel" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_취소",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_button_confirm" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_덮어쓰기",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "덮어쓰기"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_content" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기존에 ‘%@'에 저장된 핀이 있습니다. 기존 내용을 지우고 덮어쓸까요?"
+          }
+        }
+      }
+    },
+    "scanList_pin_add_duplicate_alert_title" : {
+      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 덮어쓰기"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_button_cancel" : {
+      "comment" : "스캔 목록_핀 추가 취소 알람_취소안함",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속 추가"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_button_confirm" : {
+      "comment" : "스캔 목록_핀 추가 취소 알람_삭제함",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제하기"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_contents" : {
+      "comment" : "핀 삭제 Alert_내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "촬영한 자료를 모두 지우고 지도 화면으로 돌아갑니다. 추가 중인 핀을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "scanList_pin_delete_alert_title" : {
+      "comment" : "핀 삭제 Alert_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 삭제"
+          }
+        }
+      }
+    },
     "scanList_title" : {
       "comment" : "스캔 목록_타이틀",
       "extractionState" : "manual",
@@ -484,7 +1150,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "지도에 표시할 주소를\\n모두 선택해주세요"
+            "value" : "지도에 표시할 주소를\n모두 선택해주세요"
           }
         }
       }
@@ -512,6 +1178,9 @@
           }
         }
       }
+    },
+    "Selected Hour" : {
+
     },
     "summary" : {
       "comment" : "탭바_원 페이지 뷰 이름",
@@ -657,6 +1326,9 @@
         }
       }
     },
+    "to" : {
+
+    },
     "us_ver" : {
       "comment" : "미국_버전",
       "extractionState" : "manual",
@@ -693,7 +1365,55 @@
         }
       }
     },
+    "Visits" : {
+
+    },
+    "Week" : {
+
+    },
+    "기지국 위치정보 저장하기" : {
+
+    },
+    "메시지 본문" : {
+
+    },
+    "본문: ${messageBody}, 사건번호: ${caseNumber}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "본문: ${messageBody}, 사건번호: ${caseNumber}"
+          }
+        }
+      }
+    },
+    "분석 결과가 없습니다" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "분석 결과가 없습니다"
+          }
+        }
+      }
+    },
+    "사건번호" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건번호"
+          }
+        }
+      }
+    },
     "사진" : {
+
+    },
+    "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
 
     }
   },

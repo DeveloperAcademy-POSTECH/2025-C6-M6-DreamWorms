@@ -14,9 +14,4 @@ struct CapturedPhoto: Identifiable {
     let data: Data
     let timestamp: Date
     let thumbnail: UIImage?
-    
-    /// 사진 데이터를 UIImage로 변환합니다.
-    var uiImage: UIImage? {
-        UIImage(data: data)
-    }
 }

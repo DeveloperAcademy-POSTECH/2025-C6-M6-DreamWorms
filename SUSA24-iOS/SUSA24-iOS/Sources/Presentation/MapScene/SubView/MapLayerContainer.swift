@@ -29,19 +29,27 @@ struct MapLayerContainer: View {
     var containerHeight: CGFloat = 95
     
     var body: some View {
+        let buttonWidth = containerWidth - horizontalPadding * 2
+        let buttonHeight = (containerHeight - verticalPadding * 2 - buttonSpacing) / 2
+        
         VStack(spacing: buttonSpacing) {
             Button(action: { onLayerTapped?() }) {
                 Image(isLayerActive ? .mapLayerFill : .mapLayerDefault)
                     .foregroundStyle(.labelNeutral)
                     .frame(width: iconWidth, height: iconHeight)
             }
+            .frame(width: buttonWidth, height: buttonHeight)
+            .contentShape(Rectangle())
             
             Button(action: { onRecenterTapped?() }) {
                 Image(.myPosition)
                     .foregroundStyle(.labelNeutral)
                     .frame(width: iconWidth, height: iconHeight)
             }
+            .frame(width: buttonWidth, height: buttonHeight)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .padding(.vertical, verticalPadding)
         .padding(.horizontal, horizontalPadding)
         .frame(width: containerWidth, height: containerHeight)

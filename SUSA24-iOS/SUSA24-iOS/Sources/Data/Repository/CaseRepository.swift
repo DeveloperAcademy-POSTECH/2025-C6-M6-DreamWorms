@@ -26,7 +26,13 @@ protocol CaseRepositoryProtocol: Sendable {
     func loadMockDataIfNeeded(caseId: UUID) async throws
     
     func deleteCase(id: UUID) async throws
-    func createCase(model: Case, imageData: Data?) async throws
+    func createCase(model: Case, imageData: Data?, phoneNumber: String?) async throws
+
+    /// 사건번호로 케이스를 찾습니다.
+    /// - Parameter caseNumber: 사건번호(number)
+    /// - Returns: 매칭되는 케이스 ID. 없으면 nil
+    /// - Throws: CoreData 조회 에러
+    func findCase(byCaseNumber caseNumber: String) async throws -> UUID?
 }
 
 // MARK: - Repository Implementation
@@ -129,19 +135,20 @@ struct CaseRepository: CaseRepositoryProtocol {
         }
     }
     
-    func createCase(model: Case, imageData: Data?) async throws {
+    func createCase(model: Case, imageData: Data?, phoneNumber: String?) async throws {
         try await context.perform {
             let caseEntity = CaseEntity(context: context)
             caseEntity.id = model.id
             caseEntity.name = model.name
             caseEntity.number = model.number
             caseEntity.crime = model.crime
-            
+
             let suspectEntity = SuspectEntity(context: context)
             suspectEntity.id = UUID()
             suspectEntity.name = model.suspect
+            suspectEntity.phoneNumber = phoneNumber
             suspectEntity.relateCase = caseEntity
-            
+
             if let data = imageData,
                let path = try? ImageFileStorage.saveProfileImage(
                    data,
@@ -151,7 +158,7 @@ struct CaseRepository: CaseRepositoryProtocol {
                 // 이미지 경로만 CoreData에 보관
                 suspectEntity.profileImage = path
             }
-            
+
             caseEntity.addToSuspects(suspectEntity)
             try context.save()
         }
@@ -176,6 +183,23 @@ struct CaseRepository: CaseRepositoryProtocol {
         
         print("✅ [CaseRepository] 목데이터 로드 완료")
     }
+
+    // MARK: - 사건번호로 케이스 찾기
+
+    /// 사건번호로 케이스를 찾습니다.
+    /// - Parameter caseNumber: 사건번호
+    /// - Returns: 매칭되는 케이스 ID. 없으면 nil
+    /// - Throws: CoreData 조회 에러
+    /// - Complexity: O(n) where n is the number of cases
+    func findCase(byCaseNumber caseNumber: String) async throws -> UUID? {
+        try await context.perform {
+            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+            request.predicate = NSPredicate(format: "number == %@", caseNumber)
+
+            let results = try context.fetch(request)
+            return results.first?.id
+        }
+    }
 }
 
 // TODO: - Preview용 Mock Repository
@@ -188,5 +212,7 @@ struct MockCaseRepository: CaseRepositoryProtocol {
 
     func loadMockDataIfNeeded(caseId _: UUID) async throws {}
     func deleteCase(id _: UUID) async throws {}
-    func createCase(model _: Case, imageData _: Data?) async throws {}
+    func createCase(model _: Case, imageData _: Data?, phoneNumber _: String?) async throws {}
+
+    func findCase(byCaseNumber _: String) async throws -> UUID? { nil }
 }

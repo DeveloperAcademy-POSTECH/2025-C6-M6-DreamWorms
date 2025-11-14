@@ -9,7 +9,7 @@ import CoreData
 import SwiftUI
 
 protocol ModuleFactoryProtocol {
-    func makeCameraView() -> CameraSampleView
+    func makeCameraView(caseID: UUID) -> CameraView
     func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
@@ -24,15 +24,28 @@ protocol ModuleFactoryProtocol {
     func makeSelectLocationView() -> SelectLocationView
     func makeSettingView() -> SettingView
     func makeTimeLineView(caseInfo: Case?, locations: [Location]) -> TimeLineView
+    func makePhotoDetailsView(photos: [CapturedPhoto], camera: CameraModel) -> PhotoDetailsView
+    func makeScanLoadView(caseID: UUID, photos: [CapturedPhoto]) -> ScanLoadView
+    func makeScanListView(caseID: UUID, scanResults: [ScanResult], context: NSManagedObjectContext) -> ScanListView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
     private lazy var mapDispatcher = MapDispatcher()
+    private lazy var searchService = KakaoSearchAPIService()
+    private lazy var cctvService = VWorldCCTVAPIService()
+    private lazy var infrastructureMarkerManager = InfrastructureMarkerManager()
+    private lazy var caseLocationMarkerManager = CaseLocationMarkerManager()
     
-    func makeCameraView() -> CameraSampleView {
-        let view = CameraSampleView()
+    func makeCameraView(caseID: UUID) -> CameraView {
+        // cameraModel 주입
+        let camera = CameraModel()
+        let store = DWStore(
+            initialState: CameraFeature.State(caseID: caseID, previewSource: camera.previewSource),
+            reducer: CameraFeature(camera: camera)
+        )
+        let view = CameraView(store: store, camera: camera)
         return view
     }
     
@@ -74,10 +87,14 @@ final class ModuleFactory: ModuleFactoryProtocol {
         context: NSManagedObjectContext
     ) -> MainTabView<MapView, DashboardView, OnePageView> {
         let caseRepository = CaseRepository(context: context)
-        
+        let locationRepository = LocationRepository(context: context)
+
         let store = DWStore(
             initialState: MainTabFeature.State(selectedCurrentCaseId: caseID),
-            reducer: MainTabFeature(caseRepository: caseRepository)
+            reducer: MainTabFeature(
+                caseRepository: caseRepository,
+                locationRepository: locationRepository
+            )
         )
         
         let mapView = makeMapView(caseID: caseID, context: context)
@@ -90,7 +107,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
                 caseInfo: nil,
                 locations: []
             ),
-            reducer: TimeLineFeature()
+            reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
         
         let view = MainTabView(
@@ -104,15 +121,25 @@ final class ModuleFactory: ModuleFactoryProtocol {
     }
     
     func makeMapView(
-        caseID _: UUID,
+        caseID: UUID,
         context: NSManagedObjectContext
     ) -> MapView {
         let repository = LocationRepository(context: context)
         let store = DWStore(
-            initialState: MapFeature.State(),
-            reducer: MapFeature(repository: repository, dispatcher: mapDispatcher)
+            initialState: MapFeature.State(caseId: caseID),
+            reducer: MapFeature(
+                repository: repository,
+                searchService: searchService,
+                cctvService: cctvService,
+                dispatcher: mapDispatcher
+            )
         )
-        let view = MapView(store: store, dispatcher: mapDispatcher)
+        let view = MapView(
+            store: store,
+            dispatcher: mapDispatcher,
+            infrastructureManager: infrastructureMarkerManager,
+            caseLocationMarkerManager: caseLocationMarkerManager
+        )
         return view
     }
     
@@ -136,7 +163,10 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeSearchView() -> SearchView {
         let store = DWStore(
             initialState: SearchFeature.State(),
-            reducer: SearchFeature(dispatcher: mapDispatcher)
+            reducer: SearchFeature(
+                searchService: searchService,
+                dispatcher: mapDispatcher
+            )
         )
         let view = SearchView(store: store)
         return view
@@ -161,10 +191,54 @@ final class ModuleFactory: ModuleFactoryProtocol {
                 caseInfo: caseInfo,
                 locations: locations
             ),
-            reducer: TimeLineFeature()
+            reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
-        
+
         let view = TimeLineView(store: store)
         return view
+    }
+    
+    func makePhotoDetailsView(
+        photos: [CapturedPhoto],
+        camera: CameraModel
+    ) -> PhotoDetailsView {
+        let store = DWStore(
+            initialState: PhotoDetailsFeature.State(
+                photos: photos
+            ),
+            reducer: PhotoDetailsFeature(camera: camera)
+        )
+        return PhotoDetailsView(store: store)
+    }
+    
+    func makeScanLoadView(
+        caseID: UUID,
+        photos: [CapturedPhoto]
+    ) -> ScanLoadView {
+        let batchAnalyzer = BatchAddressAnalyzer()
+        let feature = ScanLoadFeature(batchAnalyzer: batchAnalyzer)
+        let store = DWStore(
+            initialState: ScanLoadFeature.State(),
+            reducer: feature
+        )
+        return ScanLoadView(
+            caseID: caseID,
+            photos: photos,
+            store: store
+        )
+    }
+    
+    func makeScanListView(
+        caseID: UUID,
+        scanResults: [ScanResult],
+        context: NSManagedObjectContext
+    ) -> ScanListView {
+        let repository = LocationRepository(context: context)
+        let feature = ScanListFeature(repository: repository)
+        let store = DWStore(
+            initialState: ScanListFeature.State(scanResults: scanResults),
+            reducer: feature
+        )
+        return ScanListView(caseID: caseID, store: store)
     }
 }

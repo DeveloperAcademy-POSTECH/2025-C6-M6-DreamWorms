@@ -10,26 +10,46 @@ import SwiftUI
 /// 장소 정보를 표시하는 바텀 시트
 struct PlaceInfoSheet: View {
     let placeInfo: PlaceInfo
+    let existingLocation: Location?
     let isLoading: Bool
     let onClose: () -> Void
-        
+    let onMemoTapped: () -> Void
+    
+    var hasPin: Bool {
+        existingLocation != nil
+    }
+    
     var body: some View {
         if isLoading {
             CircleProgressView()
                 .frame(maxWidth: .infinity)
         } else {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 0) {
                 PlaceInfoSheetHeader(
-                    title: placeInfo.title,
+                    hasPin: hasPin,
+                    placeName: placeInfo.title,
+                    locationTypeInt: existingLocation?.locationType,
+                    locationColorType: existingLocation?.colorType,
+                    title: hasPin ? (existingLocation?.title ?? placeInfo.title) : placeInfo.title,
                     onClose: onClose
                 )
+                .padding(.top, 18)
+                
+                if hasPin {
+                    // 핀이 있을 때: 형사 노트 버튼 표시
+                    MemoButton(
+                        note: existingLocation?.note,
+                        onTapped: onMemoTapped
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
+                }
                 
                 PlaceInfoSheetContent(placeInfo: placeInfo)
                 
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.top, 18)
         }
     }
 }
@@ -40,6 +60,23 @@ struct PlaceInfoSheet: View {
 
 /// 타이틀과 닫기 버튼을 표시하는 헤더
 struct PlaceInfoSheetHeader: View {
+    let hasPin: Bool
+    
+    let placeName: String
+    
+    let locationTypeInt: Int16?
+    let locationColorType: Int16?
+    
+    var pinType: PinCategoryType? {
+        guard let raw = locationTypeInt else { return nil }
+        return PinCategoryType(raw)
+    }
+    
+    var colorType: PinColorType? {
+        guard let raw = locationColorType else { return nil }
+        return PinColorType(raw)
+    }
+    
     let title: String
     let onClose: () -> Void
     
@@ -50,30 +87,97 @@ struct PlaceInfoSheetHeader: View {
     let topPadding: CGFloat = 2
     
     var body: some View {
-        HStack {
-            Circle()
-                .frame(width: circleWidth, height: circleHeight)
-                .foregroundStyle(.clear)
-            
-            Spacer()
-            
-            Text(title)
-                .font(.titleSemiBold20)
-                .foregroundStyle(.labelNormal)
-            
-            Spacer()
-            
-            Button(action: onClose) {
-                Image(.xmark)
+        VStack {
+            HStack(alignment: .firstTextBaseline) {
+                Circle()
                     .frame(width: circleWidth, height: circleHeight)
-                    .foregroundStyle(.labelAlternative)
+                    .foregroundStyle(.clear)
+                
+                Spacer()
+                VStack(spacing: 0) {
+                    Text(placeName)
+                        .font(.titleSemiBold20)
+                        .foregroundStyle(.labelNormal)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 2)
+                    
+                    if hasPin, let pinType, let colorType {
+                        HStack(spacing: 4) {
+                            pinType.icon
+                                .resizable()
+                                .renderingMode(.template)
+                                .scaledToFit()
+                                .frame(width: pinType.iconWidth, height: pinType.iconHeight)
+                                .foregroundColor(colorType.color)
+                            
+                            Text(title)
+                                .font(.bodyRegular14)
+                                .foregroundColor(colorType.color)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                VStack {
+                    DWGlassEffectCircleButton(
+                        image: Image(.xmark),
+                        action: onClose
+                    )
+                    .setupSize(headerSize)
+                    .setupIconSize(width: circleWidth, height: circleHeight)
+                    .setupIconColor(.labelNeutral)
+                    .setupbuttonBackgroundColor(.labelAssistive)
+                    .setupInteractiveEffect(false)
+                }
             }
-            .frame(width: headerSize, height: headerSize)
-            .background(.labelAssistive)
-            .clipShape(Circle())
         }
         .padding(.horizontal, horizontalPadding)
         .padding(.top, topPadding)
+    }
+}
+
+// MARK: - MemoButton
+
+/// 형사 노트 버튼
+struct MemoButton: View {
+    let note: String?
+    let onTapped: () -> Void
+    
+    var buttonText: String {
+        if let note, !note.isEmpty {
+            note
+        } else {
+            String(localized: .memoWriteEmpty)
+        }
+    }
+    
+    var body: some View {
+        Button(action: onTapped) {
+            HStack(spacing: 8) {
+                Text(.memoWriteTitle)
+                    .font(.bodyMedium16)
+                    .foregroundStyle(.labelNormal)
+                
+                Spacer()
+                
+                Text(buttonText)
+                    .font(.bodyRegular14)
+                    .foregroundStyle(.labelNormal)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.trailing)
+                
+                Image(.rightArrow)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.labelNormal)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
+            .background(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+        }
     }
 }
 
@@ -87,7 +191,7 @@ struct PlaceBasicInfo: View {
     let landAddressSpacing: CGFloat = 56
     let defaultSpacing: CGFloat = 12
     
-    // 지번만 다른 spacing 값ㄴ
+    // 지번만 다른 spacing 값
     var spacing: CGFloat {
         label == String(localized: .mapviewPlaceInfoJibun) ? landAddressSpacing : defaultSpacing
     }
@@ -120,7 +224,7 @@ struct PlaceInfoSheetContent: View {
     let bottomPadding: CGFloat = 16
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             // 기본 정보 레이블
             Text(String(localized: .mapviewPlaceInfoBasicInfo))
                 .font(.bodyMedium16)
@@ -170,67 +274,72 @@ struct CircleProgressView: View {
 
 // MARK: - Preview
 
-//
-// #Preview("전체 시트") {
+// #Preview("핀 없는 경우") {
 //    struct PreviewWrapper: View {
-//        @State private var isPresented = false
+//        @State private var isPresented = true
 //
 //        var body: some View {
-//            Button("시트 열기") {
-//                isPresented = true
-//            }
-//            .sheet(isPresented: $isPresented) {
-//                PlaceInfoSheet(
-//                    placeInfo: PlaceInfo(
-//                        title: "장소명/건물명",
-//                        landAddress: "대구광역시 달서구 상인동 1453-7 상인2동 주민센터",
-//                        roadAddress: "대구광역시 달서구 상원로 27 상인2동주민 센터",
-//                        phoneNumber: "010-9934-9349"
-//                    ),
-//                    isLoading: false,
-//                    onClose: { isPresented = false }
-//                )
-//                .presentationDetents([.fraction(0.4)])
-//                .presentationDragIndicator(.visible)
-//            }
+//            Color.clear
+//                .sheet(isPresented: $isPresented) {
+//                    PlaceInfoSheet(
+//                        placeInfo: PlaceInfo(
+//                            title: "선택한 위치",
+//                            jibunAddress: "대구광역시 달서구 상인동 1453-7 상인2동 주민센터",
+//                            roadAddress: "대구광역시 달서구 상원로 27 상인2동주민 센터",
+//                            phoneNumber: "010-9934-9349"
+//                        ),
+//                        existingLocation: nil,
+//                        isLoading: false,
+//                        onClose: { isPresented = false },
+//                        onMemoTapped: {}
+//                    )
+//                    .presentationDetents([.fraction(0.4)])
+//                    .presentationDragIndicator(.visible)
+//                }
 //        }
 //    }
 //
 //    return PreviewWrapper()
 // }
+
+// #Preview("핀 있는 경우") {
+//    struct PreviewWrapper: View {
+//        @State private var isPresented = true
 //
-// #Preview("타이틀 + X 버튼") {
-//    ZStack {
-//        Color.gray.opacity(0.1)
-//
-//        VStack(spacing: 0) {
-//            PlaceInfoSheetHeader(
-//                title: "장소명/건물명",
-//                onClose: {}
-//            )
-//
-//            Spacer()
+//        var body: some View {
+//            Color.clear
+//                .sheet(isPresented: $isPresented) {
+//                    PlaceInfoSheet(
+//                        placeInfo: PlaceInfo(
+//                            title: "선택한 위치",
+//                            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+//                            roadAddress: "대구광역시 달서구 상원로 27",
+//                            phoneNumber: "010-9934-9349"
+//                        ),
+//                        existingLocation: Location(
+//                            id: UUID(),
+//                            address: "대구광역시 달서구 상인동 1453-7",
+//                            title: "2동 304호",
+//                            note: "CCTV 영상으로 판단했을 때 두 사람이 다툰 것으로 보임. 진술과 일치하지 않은 행동을 보이는 내용을 포착. 김호랭 형사에게 영상전달, 맘스터치 매장 직원 증언으로 단골이라고 함.",
+//                            pointLatitude: 35.8563,
+//                            pointLongitude: 128.5557,
+//                            boxMinLatitude: nil,
+//                            boxMinLongitude: nil,
+//                            boxMaxLatitude: nil,
+//                            boxMaxLongitude: nil,
+//                            locationType: 3,
+//                            colorType: 2,
+//                            receivedAt: Date()
+//                        ),
+//                        isLoading: false,
+//                        onClose: { isPresented = false },
+//                        onMemoTapped: {}
+//                    )
+//                    .presentationDetents([.fraction(0.5)])
+//                    .presentationDragIndicator(.visible)
+//                }
 //        }
 //    }
-//    .frame(height: 200)
-// }
 //
-// #Preview("기본 정보 섹션") {
-//    ZStack {
-//        Color.gray.opacity(0.1)
-//
-//        VStack(spacing: 0) {
-//            PlaceInfoSheetContent(
-//                placeInfo: PlaceInfo(
-//                    title: "",
-//                    landAddress: "대구광역시 달서구 상인동 1453-7 상인2동 주민센터",
-//                    roadAddress: "대구광역시 달서구 상원로 27 상인2동주민 센터",
-//                    phoneNumber: "010-9934-9349"
-//                )
-//            )
-//
-//            Spacer()
-//        }
-//    }
-//    .frame(height: 300)
+//    return PreviewWrapper()
 // }
