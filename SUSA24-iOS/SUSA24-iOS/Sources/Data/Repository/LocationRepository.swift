@@ -3,6 +3,7 @@
 //  SUSA24-iOS
 //
 //  Created by Moo on 11/3/25.
+//  Updated by taeni on 11/13/25.
 //
 
 import CoreData
@@ -45,7 +46,30 @@ protocol LocationRepositoryProtocol: Sendable {
     ///     - longitude: Duble
     func createLocationFromMessage(caseID: UUID, address: String, latitude: Double, longitude: Double) async throws
     
+    /// 특정 Case의 Location 변경사항을 실시간으로 감지합니다.
+    /// - Parameter caseId: 감지할 Case의 UUID
+    /// - Returns: Location 배열 AsyncStream (CoreData 변경 시마다 emit)
+    func watchLocations(caseId: UUID) -> AsyncStream<[Location]>
+    
+    /// Case와 다른 사건들의 전화번호 중복을 검사합니다.
+    /// - Parameters:
+    ///   - caseID: 검사할 케이스의 UUID
+    ///   - phoneNumber: 중복을 확인할 전화번호
     func validateSuspectPhone(caseID: UUID, phoneNumber: String) async throws -> Bool
+    
+    // MARK: - Pin 관련 처리 메소드
+    
+    /// 특정 주소에 해당하는 Location이 이미 존재하는지 확인합니다.
+    /// - Parameters:
+    ///   - address: 확인할 주소
+    ///   - caseId: Case UUID
+    /// - Returns: 존재하는 Location (없으면 nil)
+    func checkLocationExists(address: String, caseId: UUID) async throws -> Location?
+    
+    /// Location을 업데이트합니다.
+    /// - Parameter location: 업데이트할 Location 데이터
+    /// - Throws: CoreData 업데이트 에러
+    func updateLocation(_ location: Location) async throws
 }
 
 // MARK: - Repository Implementation
@@ -147,9 +171,18 @@ struct LocationRepository: LocationRepositoryProtocol {
     func deleteLocation(id: UUID) async throws {
         try await context.perform {
             let request = NSFetchRequest<LocationEntity>(entityName: "LocationEntity")
+            request.fetchLimit = 1
             request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-            guard let locationEntity = try context.fetch(request).first else { return }
-            context.delete(locationEntity)
+
+            guard let entity = try context.fetch(request).first else {
+                throw NSError(
+                    domain: "LocationRepository",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Location not found"]
+                )
+            }
+
+            context.delete(entity)
             try context.save()
         }
     }
@@ -193,6 +226,7 @@ struct LocationRepository: LocationRepositoryProtocol {
                 locationEntity.boxMaxLatitude = location.boxMaxLatitude ?? 0.0
                 locationEntity.boxMaxLongitude = location.boxMaxLongitude ?? 0.0
                 locationEntity.locationType = location.locationType
+                locationEntity.colorType = location.colorType
                 locationEntity.receivedAt = location.receivedAt
                 locationEntity.suspect = suspect
             }
@@ -217,6 +251,7 @@ struct LocationRepository: LocationRepositoryProtocol {
         latitude: Double,
         longitude: Double
     ) async throws {
+        // 새 Location 생성 (중복 체크 없이 무조건 생성)
         let location = Location(
             id: UUID(),
             address: address,
@@ -232,40 +267,108 @@ struct LocationRepository: LocationRepositoryProtocol {
             colorType: 0,
             receivedAt: Date()
         )
-        
+
+        print("✅ [LocationRepository] 새 Location 생성: \(address)")
         try await createLocations(data: [location], caseId: caseID)
     }
     
-    /// AppIntent에서 사용: 용의자를 추적하기 위한 휴대폰 번호 검증
-    func validateSuspectPhone(
-        caseID: UUID,
-        phoneNumber: String
-    ) async throws -> Bool {
+    /// 특정 Case의 Location 변경사항을 실시간으로 감지합니다.
+    func watchLocations(caseId: UUID) -> AsyncStream<[Location]> {
+        AsyncStream { continuation in
+            Task {
+                // 초기 데이터 전송
+                if let initialLocations = try? await fetchLocations(caseId: caseId) {
+                    continuation.yield(initialLocations)
+                }
+
+                // CoreData 변경사항 감지 (AsyncSequence 사용)
+                for await _ in NotificationCenter.default.notifications(
+                    named: .NSManagedObjectContextObjectsDidChange,
+                    object: context
+                ) {
+                    if let locations = try? await fetchLocations(caseId: caseId) {
+                        continuation.yield(locations)
+                    }
+                }
+            }
+        }
+    }
+    
+    /// Case 간 전화번호 중복을 확인합니다.
+    func validateSuspectPhone(caseID: UUID, phoneNumber: String) async throws -> Bool {
         try await context.perform {
-            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-            request.predicate = NSPredicate(format: "id == %@", caseID as CVarArg)
+            guard !phoneNumber.isEmpty else { return true }
             
-            guard let caseEntity = try context.fetch(request).first,
-                  let suspects = caseEntity.suspects as? Set<SuspectEntity>,
-                  let suspect = suspects.first
-            else {
-                return false
+            let request = NSFetchRequest<SuspectEntity>(entityName: "SuspectEntity")
+            request.predicate = NSPredicate(format: "phoneNumber == %@", phoneNumber)
+            let suspects = try context.fetch(request)
+            
+            guard !suspects.isEmpty else { return true }
+            
+            return suspects.allSatisfy { suspect in
+                guard let relateCase = suspect.relateCase else { return true }
+                return relateCase.id == caseID
+            }
+        }
+    }
+    
+    // MARK: - Pin 관련 처리 메소드
+    
+    /// 특정 주소에 해당하는 Location이 이미 존재하는지 확인합니다.
+    func checkLocationExists(address: String, caseId: UUID) async throws -> Location? {
+        let locations = try await fetchLocations(caseId: caseId)
+        return locations.first { $0.address == address }
+    }
+    
+    /// Location을 업데이트합니다.
+    func updateLocation(_ location: Location) async throws {
+        try await context.perform { [context] in
+            let request = NSFetchRequest<LocationEntity>(entityName: "LocationEntity")
+            request.predicate = NSPredicate(format: "id == %@", location.id as CVarArg)
+            
+            guard let locationEntity = try context.fetch(request).first else {
+                throw NSError(
+                    domain: "LocationRepository",
+                    code: 3,
+                    userInfo: [NSLocalizedDescriptionKey: "Location not found"]
+                )
             }
             
-            let cleanInput = phoneNumber.replacingOccurrences(of: "-", with: "")
-            let cleanStored = (suspect.phoneNumber ?? "").replacingOccurrences(of: "-", with: "")
+            // 업데이트
+            locationEntity.address = location.address
+            locationEntity.title = location.title
+            locationEntity.note = location.note
+            locationEntity.pointLatitude = location.pointLatitude
+            locationEntity.pointLongitude = location.pointLongitude
+            locationEntity.boxMinLatitude = location.boxMinLatitude ?? 0.0
+            locationEntity.boxMinLongitude = location.boxMinLongitude ?? 0.0
+            locationEntity.boxMaxLatitude = location.boxMaxLatitude ?? 0.0
+            locationEntity.boxMaxLongitude = location.boxMaxLongitude ?? 0.0
+            locationEntity.locationType = location.locationType
+            locationEntity.colorType = location.colorType
+            locationEntity.receivedAt = location.receivedAt
             
-            return cleanInput == cleanStored
+            try context.save()
         }
     }
 }
+
+// MARK: - Mock Implementation
 
 struct MockLocationRepository: LocationRepositoryProtocol {
     func fetchLocations(caseId _: UUID) async throws -> [Location] { [] }
     func fetchNoCellLocations(caseId _: UUID, locationType _: [Int]) async throws -> [Location] { [] }
     func deleteLocation(id _: UUID) async throws {}
     func createLocations(data _: [Location], caseId _: UUID) async throws {}
-    func createLocationFromMessage(caseID _: UUID, address _: String, latitude _: Double, longitude _: Double) async
-        throws {}
-    func validateSuspectPhone(caseID _: UUID, phoneNumber _: String) async throws -> Bool { false }
+    func createLocationFromMessage(caseID _: UUID, address _: String, latitude _: Double, longitude _: Double) async throws {}
+    func watchLocations(caseId _: UUID) -> AsyncStream<[Location]> {
+        AsyncStream { _ in }
+    }
+
+    func validateSuspectPhone(caseID _: UUID, phoneNumber _: String) async throws -> Bool { true }
+    
+    // MARK: - Pin 관련 처리 메소드
+
+    func checkLocationExists(address _: String, caseId _: UUID) async throws -> Location? { nil }
+    func updateLocation(_: Location) async throws {}
 }

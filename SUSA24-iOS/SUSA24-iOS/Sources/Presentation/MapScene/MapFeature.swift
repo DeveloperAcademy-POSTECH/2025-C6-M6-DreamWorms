@@ -1,5 +1,3 @@
-
-
 //
 //  MapFeature.swift
 //  SUSA24-iOS
@@ -68,6 +66,8 @@ struct MapFeature: DWReducer {
         var cameraTargetCoordinate: MapCoordinate?
         /// 현위치를 포커싱해야 하는지 여부입니다.
         var shouldFocusMyLocation: Bool = false
+        /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
+        var didSetInitialCamera: Bool = false
         
         // MARK: 지도 레이어/필터 UI 상태
         
@@ -97,6 +97,28 @@ struct MapFeature: DWReducer {
         var isPlaceInfoLoading: Bool = false
         /// 선택된 위치정보 데이터입니다.
         var selectedPlaceInfo: PlaceInfo?
+        /// 선택된 위치의 기존 핀 정보가 있는가?
+        var existingLocation: Location?
+        
+        // MARK: - Pin Add/Edit
+
+        var isDeleteAlertPresented: Bool = false
+        /// 핀 추가/수정 화면 표시 여부
+        var isPinWritePresented: Bool = false
+        /// 수정 모드 여부 (true: 수정, false: 추가)
+        var isEditMode: Bool = false
+        
+        // MARK: - Memo Edit
+
+        /// 형사 노트 작성/수정 화면 표시 여부
+        var isMemoEditPresented: Bool = false
+        
+        // MARK: - Computed Properties
+        
+        /// 선택된 위치에 핀이 존재하는지 여부
+        var hasExistingPin: Bool {
+            existingLocation != nil
+        }
     }
     
     // MARK: - Action
@@ -169,6 +191,42 @@ struct MapFeature: DWReducer {
         case requestFocusMyLocation
         /// 현위치 포커싱 명령을 소비합니다.
         case clearFocusMyLocationFlag
+        
+        // MARK: - Pin Actions
+        
+        /// 핀 추가 버튼 탭
+        case addPinTapped
+        /// 핀 수정 버튼 탭
+        case editPinTapped
+        
+        /// 핀 삭제 버튼 탭
+        case deletePinTapped
+        
+        /// 삭제 Alert
+        case showDeleteAlert
+        case hideDeleteAlert
+        
+        case confirmDeletePin
+        case deletePinCompleted
+        
+        /// 핀 저장 (추가/수정)
+        case savePin(Location)
+        case savePinCompleted(Location)
+        /// 핀 추가/수정 화면 닫기
+        case closePinWrite
+        
+        // MARK: - Memo Actions
+        
+        /// 형사 노트 버튼 탭
+        case memoButtonTapped
+        /// 형사 노트 저장
+        case memoSaved(String?)
+        /// 형사 노즈 저장 완료
+        case memoSaveCompleted(Location)
+        /// 형사 노트 화면 닫기
+        case closeMemoEdit
+        /// 형사 노트다 닫히면 다시 PinInfo가 열려야한다
+        case reopenPlaceInfoAfterMemo
     }
     
     // MARK: - Reducer
@@ -177,10 +235,14 @@ struct MapFeature: DWReducer {
         switch action {
         case .onAppear:
             guard let caseId = state.caseId else { return .none }
-            // 초기 카메라 위치를 포항으로 설정 (포항시청 기준)
-            // TODO: 초기 위치 추가해야 함.(등록된 주소나 최근 문자온 주소 등)
-            state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
-            
+            if state.didSetInitialCamera == false {
+                focusLatestCellLocation(&state)
+                if state.cameraTargetCoordinate == nil {
+                    state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
+                }
+                state.didSetInitialCamera = true
+            }
+
             // 병렬로 데이터 로드
             return .merge(
                 .task { [repository] in
@@ -213,6 +275,16 @@ struct MapFeature: DWReducer {
             
         case let .loadLocations(locations):
             state.locations = locations
+            
+            if state.didSetInitialCamera == false {
+                focusLatestCellLocation(&state)
+                
+                if state.cameraTargetCoordinate == nil {
+                    state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
+                }
+                
+                state.didSetInitialCamera = true
+            }
             return .none
             
         case let .loadCellMarkers(cellStations):
@@ -226,7 +298,7 @@ struct MapFeature: DWReducer {
             case .visitFrequency:
                 state.isVisitFrequencySelected.toggle()
             case .recentBaseStation:
-                state.isRecentBaseStationSelected.toggle()
+                focusRecentBaseStation(&state)
             }
             return .none
             
@@ -256,15 +328,21 @@ struct MapFeature: DWReducer {
             
         case let .mapTapped(latlng):
             // 위치정보 시트 표시 및 로딩 상태 설정
+            // 새 위치 탭하면 기존 핀 정보는 즉시 비워야 함
+            state.existingLocation = nil
+            state.isEditMode = false
+            
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
+            state.selectedPlaceInfo = nil
+            
             let requestDTO = latlng.toKakaoRequestDTO()
+            
             return .task {
                 do {
                     let placeInfo = try await fetchPlaceInfo(from: requestDTO)
                     return .showPlaceInfo(placeInfo)
                 } catch {
-                    // API 호출 실패 시 빈 데이터로 시트 표시
                     return .showPlaceInfo(PlaceInfo(
                         title: "",
                         jibunAddress: "",
@@ -275,10 +353,39 @@ struct MapFeature: DWReducer {
             }
             
         case let .showPlaceInfo(placeInfo):
-            // 위치정보 데이터를 상태에 저장하고 로딩 완료 처리
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
+            
+            // - roadAddress 또는 jibunAddress 가 동일한 경우 핀 존재
+            // - title 은 변동 가능성이 있으므로 비교에서 제외
+            let incomingRoad = placeInfo.roadAddress
+            let incomingJibun = placeInfo.jibunAddress
+            
+            state.existingLocation = state.locations.first { loc in
+                // 도로명 주소 매칭
+                if !incomingRoad.isEmpty, loc.address == incomingRoad {
+                    return true
+                }
+                // 지번 주소 매칭
+                if !incomingJibun.isEmpty, loc.address == incomingJibun {
+                    return true
+                }
+                return false
+            }
+            
+            // 추후 좌표로 매칭
+            /*
+             if let lat = placeInfo.latitude,
+             let lng = placeInfo.longitude {
+             state.existingLocation = state.locations.first { loc in
+             loc.pointLatitude == lat && loc.pointLongitude == lng
+             }
+             } else {
+             state.existingLocation = nil
+             }
+             */
+            
             return .none
             
         case .hidePlaceInfo:
@@ -351,6 +458,152 @@ struct MapFeature: DWReducer {
         case .clearFocusMyLocationFlag:
             state.shouldFocusMyLocation = false
             return .none
+            
+            // MARK: - Pin Actions
+            
+        case .addPinTapped:
+            guard let placeInfo = state.selectedPlaceInfo,
+                  state.caseId != nil
+            else {
+                print("❌ Cannot add pin: Missing placeInfo or caseId")
+                return .none
+            }
+            
+            state.isEditMode = false
+            state.existingLocation = nil
+            state.isPinWritePresented = true
+            return .none
+            
+        case .editPinTapped:
+            state.isEditMode = true
+            state.isPinWritePresented = true
+            return .none
+            
+        // TODO: DWAlert 연동
+        case .deletePinTapped:
+            return .send(.confirmDeletePin)
+            
+        case .showDeleteAlert:
+            state.isDeleteAlertPresented = true
+            return .none
+
+        case .hideDeleteAlert:
+            state.isDeleteAlertPresented = false
+            return .none
+
+        case .confirmDeletePin:
+            guard let locationId = state.existingLocation?.id else { return .none }
+
+            return .task { [repository] in
+                do {
+                    try await repository.deleteLocation(id: locationId)
+                    return .deletePinCompleted
+                } catch {
+                    return .none
+                }
+            }
+
+        case .deletePinCompleted:
+            guard let deleteId = state.existingLocation?.id else { return .none }
+
+            state.locations.removeAll { $0.id == deleteId }
+            state.existingLocation = nil
+            state.isPlaceInfoSheetPresented = false
+            state.selectedPlaceInfo = nil
+
+            return .none
+            
+        case let .savePin(location):
+            return .task { [repository, caseId = state.caseId] in
+                do {
+                    if let _ = try await repository.checkLocationExists(address: location.address, caseId: caseId!) {
+                        try await repository.updateLocation(location)
+                    } else {
+                        try await repository.createLocations(data: [location], caseId: caseId!)
+                    }
+                    return .savePinCompleted(location)
+                } catch {
+                    print("❌ savePin failed: \(error)")
+                    return .none
+                }
+            }
+            
+        case let .savePinCompleted(location):
+            state.existingLocation = location
+
+            if let index = state.locations.firstIndex(where: { $0.id == location.id }) {
+                state.locations[index] = location
+            } else {
+                state.locations.append(location)
+            }
+
+            state.isPinWritePresented = false
+            return .none
+            
+        case .closePinWrite:
+            state.isPinWritePresented = false
+            return .none
+            
+            // MARK: - Memo Actions
+            
+        case .memoButtonTapped:
+            state.isPlaceInfoSheetPresented = false
+            state.isMemoEditPresented = true
+            return .none
+            
+        case let .memoSaved(note):
+            state.isMemoEditPresented = false
+            
+            guard let existingLocation = state.existingLocation else { return .none }
+            
+            let updatedLocation = Location(
+                id: existingLocation.id,
+                address: existingLocation.address,
+                title: existingLocation.title,
+                note: note,
+                pointLatitude: existingLocation.pointLatitude,
+                pointLongitude: existingLocation.pointLongitude,
+                boxMinLatitude: existingLocation.boxMinLatitude,
+                boxMinLongitude: existingLocation.boxMinLongitude,
+                boxMaxLatitude: existingLocation.boxMaxLatitude,
+                boxMaxLongitude: existingLocation.boxMaxLongitude,
+                locationType: existingLocation.locationType,
+                colorType: existingLocation.colorType,
+                receivedAt: existingLocation.receivedAt
+            )
+            
+            return .task { [repository] in
+                do {
+                    try await repository.updateLocation(updatedLocation)
+                    return .memoSaveCompleted(updatedLocation)
+                } catch {
+                    return .none
+                }
+            }
+            
+        case let .memoSaveCompleted(updatedLocation):
+            state.existingLocation = updatedLocation
+            if let index = state.locations.firstIndex(where: { $0.id == updatedLocation.id }) {
+                state.locations[index] = updatedLocation
+            }
+            
+            if let info = state.selectedPlaceInfo {
+                return .send(.showPlaceInfo(info))
+            }
+            
+            return .none
+            
+        case .closeMemoEdit:
+            state.isMemoEditPresented = false
+            
+            return .send(.reopenPlaceInfoAfterMemo)
+            
+        case .reopenPlaceInfoAfterMemo:
+            guard let info = state.selectedPlaceInfo else { return .none }
+            return .task {
+                try? await Task.sleep(nanoseconds: 10_000_000)
+                return .showPlaceInfo(info)
+            }
         }
     }
 }
@@ -358,6 +611,34 @@ struct MapFeature: DWReducer {
 // MARK: - Private Extensions
 
 private extension MapFeature {
+    // MARK: - Case Location Helpers
+
+    func focusRecentBaseStation(_ state: inout State) {
+        let wasSelected = state.isRecentBaseStationSelected
+        state.isRecentBaseStationSelected = false
+        // TODO: 버튼으로 전환하여 토글 상태를 유지하지 않도록 설계 변경 필요
+        if !wasSelected {
+            focusLatestCellLocation(&state)
+        }
+    }
+
+    func focusLatestCellLocation(_ state: inout State) {
+        guard let latestCell = state.locations
+            .filter({ LocationType($0.locationType) == .cell })
+            .max(by: { lhs, rhs in
+                let lhsDate = lhs.receivedAt ?? .distantPast
+                let rhsDate = rhs.receivedAt ?? .distantPast
+                return lhsDate < rhsDate
+            }),
+            latestCell.pointLatitude != 0,
+            latestCell.pointLongitude != 0 else { return }
+
+        state.cameraTargetCoordinate = MapCoordinate(
+            latitude: latestCell.pointLatitude,
+            longitude: latestCell.pointLongitude
+        )
+    }
+
     // MARK: - Kakao Place Helpers
     
     /// 좌표를 기반으로 카카오 API에서 위치 정보를 조회합니다.

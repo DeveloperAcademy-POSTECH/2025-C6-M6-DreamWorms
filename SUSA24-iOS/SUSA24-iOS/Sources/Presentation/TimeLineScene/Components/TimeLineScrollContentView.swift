@@ -35,15 +35,15 @@ struct TimeLineScrollContentView: View {
                             // Location List
                             Section {
                                 VStack(spacing: 0) {
-                                    ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, location in
+                                    ForEach(Array(group.consecutiveGroups.enumerated()), id: \.element.id) { index, consecutiveGroup in
                                         TimeLineDetail(
-                                            state: .normal,
-                                            caseTitle: location.address,
-                                            startTime: location.receivedAt ?? Date(),
-                                            endTime: (location.receivedAt ?? Date()).addingTimeInterval(3600),
-                                            isLast: index == group.locations.count - 1,
+                                            state: consecutiveGroup.state,
+                                            caseTitle: consecutiveGroup.address,
+                                            startTime: consecutiveGroup.startTime,
+                                            endTime: consecutiveGroup.endTime,
+                                            isLast: index == group.consecutiveGroups.count - 1,
                                             onTap: {
-                                                onLocationTapped(location)
+                                                onLocationTapped(consecutiveGroup.locations[0])
                                             }
                                         )
                                     }

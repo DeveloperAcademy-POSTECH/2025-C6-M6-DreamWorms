@@ -9,7 +9,7 @@
 
 import Foundation
 
-struct Location: Identifiable, Equatable, Sendable {
+struct Location: Identifiable, Equatable, Sendable, Hashable {
     var id: UUID
     var address: String
     var title: String?
