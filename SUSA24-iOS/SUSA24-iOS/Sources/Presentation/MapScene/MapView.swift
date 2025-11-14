@@ -19,6 +19,7 @@ struct MapView: View {
     @State private var store: DWStore<MapFeature>
     @Bindable private var dispatcher: MapDispatcher
     private let infrastructureManager: InfrastructureMarkerManager
+    private let caseLocationMarkerManager: CaseLocationMarkerManager
     
     // MARK: - Active Sheet
     
@@ -49,11 +50,13 @@ struct MapView: View {
     init(
         store: DWStore<MapFeature>,
         dispatcher: MapDispatcher,
-        infrastructureManager: InfrastructureMarkerManager
+        infrastructureManager: InfrastructureMarkerManager,
+        caseLocationMarkerManager: CaseLocationMarkerManager
     ) {
         self._store = State(initialValue: store)
         self._dispatcher = Bindable(dispatcher)
         self.infrastructureManager = infrastructureManager
+        self.caseLocationMarkerManager = caseLocationMarkerManager
     }
     
     // MARK: - View
@@ -77,9 +80,11 @@ struct MapView: View {
                 },
                 cellStations: store.state.cellStations,
                 isCellLayerEnabled: store.state.isBaseStationLayerEnabled,
+                locations: store.state.locations,
                 cctvMarkers: store.state.cctvMarkers,
                 isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
-                infrastructureManager: infrastructureManager
+                infrastructureManager: infrastructureManager,
+                caseLocationMarkerManager: caseLocationMarkerManager
             )
             .ignoresSafeArea()
             

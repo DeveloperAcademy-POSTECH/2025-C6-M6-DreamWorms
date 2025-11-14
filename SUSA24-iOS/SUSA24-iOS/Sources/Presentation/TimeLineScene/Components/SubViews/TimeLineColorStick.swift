@@ -15,12 +15,12 @@ import SwiftUI
 /// - 'top1', 'top2', 'top3', 'normal' 네가지 상태를 가집니다.
 /// - 색상 및 드랍 섀도우 효과는 블러 4 정도로 동일하게 유지됩니다.
 
-enum TimeLineColorStickState: Equatable {
+enum TimeLineColorStickState: Equatable, Hashable, Sendable {
     case top1
     case top2
     case top3
     case normal
-    
+
     var spotColor: Color {
         switch self {
         case .top1: .blue40
