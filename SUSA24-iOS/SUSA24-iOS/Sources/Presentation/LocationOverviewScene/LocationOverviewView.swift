@@ -17,6 +17,9 @@ struct LocationOverviewView: View {
     
     // MARK: - Properties
     
+    @State private var isMapExpanded: Bool = false
+    @Namespace private var mapNamespace
+    
     let caseID: UUID
     let baseAddress: String
     let initialCoordinate: MapCoordinate
@@ -24,37 +27,55 @@ struct LocationOverviewView: View {
     // MARK: - View
     
     var body: some View {
-        VStack(spacing: 0) {
-            OverviewNaverMapView(
-                centerCoordinate: initialCoordinate,
-                locations: store.state.filteredLocations
-            )
-            .frame(height: 206)
-            .padding(.top, 26)
-            .padding(.bottom, 24)
-            .padding(.horizontal, 16)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            
-            LocationOverviewListHeader(
-                selection: store.state.selection,
-                counts: store.state.counts,
-                onCategoryTap: { store.send(.selectionChanged($0)) }
-            )
-            .padding(.bottom, 12)
-            
-            ScrollView {
-                LazyVStack(spacing: 8) {
-                    ForEach(store.state.filteredLocations) { item in
-                        DWLocationCard(
-                            type: .icon(LocationType(item.locationType).icon),
-                            title: item.title ?? "타이틀",
-                            description: item.address
-                        )
-                        .setupAsButton(false)
-                        .setupIconBackgroundColor(PinColorType(item.colorType).color)
-                    }
-                }
+        ZStack {
+            VStack(spacing: 0) {
+                MapPreviewView(
+                    centerCoordinate: initialCoordinate,
+                    locations: store.state.filteredLocations,
+                    isExpanded: $isMapExpanded,
+                    namespace: mapNamespace
+                )
+                .padding(.top, 26)
+                .padding(.bottom, 24)
                 .padding(.horizontal, 16)
+                
+                LocationOverviewListHeader(
+                    selection: store.state.selection,
+                    counts: store.state.counts,
+                    onCategoryTap: { store.send(.selectionChanged($0)) }
+                )
+                .padding(.bottom, 12)
+                
+                ScrollView {
+                    LazyVStack(spacing: 8) {
+                        ForEach(store.state.filteredLocations) { item in
+                            DWLocationCard(
+                                type: .icon(LocationType(item.locationType).icon),
+                                title: item.title ?? "타이틀",
+                                description: item.address
+                            )
+                            .setupAsButton(false)
+                            .setupIconBackgroundColor(PinColorType(item.colorType).color)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
+            
+            if isMapExpanded {
+                ExpandedMapView(
+                    centerCoordinate: initialCoordinate,
+                    locations: store.state.filteredLocations,
+                    isExpanded: $isMapExpanded,
+                    namespace: mapNamespace
+                )
+                .transition(
+                    .asymmetric(
+                        insertion: .scale(scale: 0.92).combined(with: .opacity),
+                        removal: .opacity
+                    )
+                )
+                .zIndex(10)
             }
         }
         .navigationTitle(baseAddress)
@@ -99,7 +120,7 @@ private extension LocationOverviewView {}
 //            store: dummyStore,
 //            caseID: UUID(),
 //            baseAddress: "기지국주소",
-//            initialCoordinate: nil
+//            initialCoordinate: MapCoordinate(latitude: 0, longitude: 0)
 //        )
 //        .environment(AppCoordinator())
 //    }
