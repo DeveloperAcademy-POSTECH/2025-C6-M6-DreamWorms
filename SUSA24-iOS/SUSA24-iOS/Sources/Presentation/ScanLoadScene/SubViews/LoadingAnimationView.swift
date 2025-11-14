@@ -106,12 +106,13 @@ struct LoadingAnimationView: View {
 }
 
 // MARK: - Preview
+
 //
 //
-//#Preview {
+// #Preview {
 //    VStack(spacing: 24) {
 //        LoadingAnimationView()
 //    }
 //    .padding(32)
 //    .background(Color(.systemBackground))
-//}
+// }
