@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import NMapsGeometry
 import NMapsMap
 
 /// 인프라 레이어 (기지국, CCTV) 마커를 관리하는 매니저
@@ -20,6 +19,8 @@ final class InfrastructureMarkerManager {
     private var cellMarkers: [String: NMFMarker] = [:]
     /// CCTV 마커 저장소 (cctvId -> NMFMarker)
     private var cctvMarkers: [String: NMFMarker] = [:]
+    /// 기지국 커버리지 오버레이 저장소 (stationId -> NMFGroundOverlay)
+    private var cellRangeOverlays: [String: NMFGroundOverlay] = [:]
     
     // MARK: - Public Methods
     
@@ -107,6 +108,10 @@ final class InfrastructureMarkerManager {
             marker.mapView = nil
         }
         cellMarkers.removeAll()
+        for overlay in cellRangeOverlays.values {
+            overlay.mapView = nil
+        }
+        cellRangeOverlays.removeAll()
         
         for marker in cctvMarkers.values {
             marker.mapView = nil
@@ -152,5 +157,51 @@ final class InfrastructureMarkerManager {
         marker.hidden = !isVisible
         marker.mapView = mapView
         return marker
+    }
+    
+    /// 기지국 커버리지 범위 오버레이를 갱신합니다.
+    /// - Parameters:
+    ///   - cellStations: 기준이 되는 기지국 마커 목록
+    ///   - coverageRange: 커버리지 반경 타입
+    ///   - isVisible: 오버레이 표시 여부
+    ///   - mapView: 네이버 지도 뷰
+    func updateCellRanges(
+        _ cellStations: [CellMarker],
+        coverageRange: CoverageRangeType,
+        isVisible: Bool,
+        on mapView: NMFMapView
+    ) async {
+        let stationIds = Set(cellStations.map(\.id))
+        let overlaysToRemove = cellRangeOverlays.keys.filter { !stationIds.contains($0) }
+        for id in overlaysToRemove {
+            cellRangeOverlays[id]?.mapView = nil
+            cellRangeOverlays.removeValue(forKey: id)
+        }
+        
+        guard isVisible else {
+            cellRangeOverlays.values.forEach { $0.mapView = nil }
+            return
+        }
+        
+        let overlayImage = await RangeOverlayImageCache.shared.image(for: coverageRange)
+        let radius = CoverageRangeMetadata.radiusMeters(for: coverageRange)
+        let overlaySource = NMFOverlayImage(image: overlayImage)
+        
+        for station in cellStations {
+            let coordinate = CLLocationCoordinate2D(latitude: station.latitude, longitude: station.longitude)
+            let bounds = NMGLatLngBounds.coverageBounds(center: coordinate, radiusMeters: radius)
+            
+            let overlay: NMFGroundOverlay
+            if let existing = cellRangeOverlays[station.id] {
+                overlay = existing
+            } else {
+                overlay = NMFGroundOverlay()
+                cellRangeOverlays[station.id] = overlay
+            }
+            
+            overlay.overlayImage = overlaySource
+            overlay.bounds = bounds
+            overlay.mapView = mapView
+        }
     }
 }
