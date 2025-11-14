@@ -126,6 +126,9 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                 selectedDetent = otherDetent
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
+            selectedDetent = mapMidDetnet
+        }
     }
 }
 
