@@ -821,7 +821,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "최대 허용 글자 수"
+            "value" : "/20"
           }
         }
       }
