@@ -36,6 +36,7 @@ struct NaverMapView: UIViewRepresentable {
     var isCellLayerEnabled: Bool = false
     /// 케이스 위치 데이터
     var locations: [Location] = []
+    var isVisitFrequencyEnabled: Bool = false
     /// CCTV 데이터
     var cctvMarkers: [CCTVMarker] = []
     /// CCTV 레이어 표시 여부
@@ -101,6 +102,7 @@ struct NaverMapView: UIViewRepresentable {
         )
         context.coordinator.updateCaseLocations(
             locations: locations,
+            visitFrequencyEnabled: isVisitFrequencyEnabled,
             on: uiView
         )
         context.coordinator.updateCCTVLayer(
@@ -144,6 +146,7 @@ struct NaverMapView: UIViewRepresentable {
         @MainActor
         func updateCaseLocations(
             locations: [Location],
+            visitFrequencyEnabled: Bool,
             on mapView: NMFMapView
         ) {
             var hasher = Hasher()
@@ -153,13 +156,21 @@ struct NaverMapView: UIViewRepresentable {
                 hasher.combine(location.pointLatitude)
                 hasher.combine(location.pointLongitude)
             }
+            hasher.combine(visitFrequencyEnabled)
             let newHash = hasher.finalize()
             
             if lastLocationsHash != newHash {
-                caseLocationMarkerManager.updateMarkers(
+                let cellCounts = caseLocationMarkerManager.updateMarkers(
                     locations,
                     on: mapView
                 )
+
+                if visitFrequencyEnabled {
+                    caseLocationMarkerManager.applyVisitFrequency(with: cellCounts, on: mapView)
+                } else {
+                    caseLocationMarkerManager.resetVisitFrequency(on: mapView)
+                }
+
                 lastLocationsHash = newHash
             }
         }
