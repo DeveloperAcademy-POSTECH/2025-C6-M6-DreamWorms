@@ -14,26 +14,23 @@ struct LocationOverviewView: View {
     // MARK: - Dependencies
     
     @State var store: DWStore<LocationOverviewFeature>
-
+    
     // MARK: - Properties
     
     let caseID: UUID
     let baseAddress: String
     let initialCoordinate: MapCoordinate
-
+    
     // MARK: - View
-
+    
     var body: some View {
         VStack(spacing: 0) {
-            OverviewNaverMapView(
-                centerCoordinate: initialCoordinate
-                // locations: store.state.filteredLocations
-            )
-            .frame(height: 206)
-            .padding(.top, 26)
-            .padding(.bottom, 24)
-            .padding(.horizontal, 16)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+            OverviewNaverMapView(centerCoordinate: initialCoordinate)
+                .frame(height: 206)
+                .padding(.top, 26)
+                .padding(.bottom, 24)
+                .padding(.horizontal, 16)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
             
             LocationOverviewListHeader(
                 selection: store.state.selection,
@@ -60,7 +57,13 @@ struct LocationOverviewView: View {
         .navigationTitle(baseAddress)
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            store.send(.onAppear(caseID: caseID, baseAddress: baseAddress))
+            store.send(
+                .onAppear(
+                    caseID: caseID,
+                    baseAddress: baseAddress,
+                    initialCoordinate: initialCoordinate
+                )
+            )
         }
     }
 }

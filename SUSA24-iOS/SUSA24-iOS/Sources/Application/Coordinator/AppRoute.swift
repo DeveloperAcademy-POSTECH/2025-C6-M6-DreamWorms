@@ -30,7 +30,8 @@ extension AppRoute {
         switch self {
         // 보여주지 않을 화면들만 표시
         case .cameraScene, .photoDetailsScene,
-             .scanLoadScene, .searchScene, .scanListScene:
+             .scanLoadScene, .searchScene,
+             .scanListScene, .locationOverviewScene:
             false
         default:
             true
