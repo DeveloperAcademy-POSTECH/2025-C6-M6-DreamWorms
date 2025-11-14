@@ -185,6 +185,9 @@ struct MapFeature: DWReducer {
         ///   - coordinate: 이동할 지도 좌표
         ///   - placeInfo: 바텀시트에 표시할 장소 메타데이터
         case moveToSearchResult(MapCoordinate, PlaceInfo)
+        /// Timeline에서 선택한 Location으로 지도 카메라를 이동시킵니다.
+        /// - Parameter coordinate: 이동할 지도 좌표
+        case moveToLocation(MapCoordinate)
         /// 지도 카메라 이동이 완료되면 호출되는 액션입니다. `cameraTargetCoordinate`를 초기화합니다.
         case clearCameraTarget
         /// 현위치 버튼을 탭했을 때 호출되는 액션입니다.
@@ -445,7 +448,14 @@ struct MapFeature: DWReducer {
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none
-            
+
+        case let .moveToLocation(coordinate):
+            // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
+            state.cameraTargetCoordinate = coordinate
+            // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
+            dispatcher.consume()
+            return .none
+
         case .clearCameraTarget:
             // 지도 카메라 이동이 완료되었음을 반영합니다.
             state.cameraTargetCoordinate = nil
