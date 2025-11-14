@@ -25,23 +25,23 @@ struct LocationGroupedByDate: Identifiable, Equatable, Sendable {
         formatter.timeZone = TimeZone.current
         return formatter.string(from: date)
     }
-    
+
     /// 스크롤 ID로 사용할 String ID (예: "2025-01-06")
     var dateID: String {
         Self.dateToID(date)
     }
-    
+
     static func dateToID(_ date: Date) -> String {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month, .day], from: date)
-        
+
         guard let year = components.year,
               let month = components.month,
               let day = components.day
         else {
             return ""
         }
-        
+
         return String(format: "%04d-%02d-%02d", year, month, day)
     }
 }
@@ -121,15 +121,15 @@ extension LocationGroupedByDate {
         var groups: [ConsecutiveLocationGroup] = []
         var batch: [Location] = [locations[0]]
         var addr = locations[0].address
-        var previousStartTime: Date?
 
         for loc in locations.dropFirst() {
             if loc.address == addr {
                 batch.append(loc)
             } else {
-                // 현재 배치의 시작 시간
+                // 현재 배치의 시간 범위
                 let receivedTimes = batch.compactMap(\.receivedAt)
                 let startTime = receivedTimes.min() ?? Date()
+                let endTime = batch.count > 1 ? receivedTimes.max() : nil
 
                 // 그룹 생성
                 let state = stateResolver(addr)
@@ -138,11 +138,8 @@ extension LocationGroupedByDate {
                     locations: batch,
                     state: state,
                     startTime: startTime,
-                    endTime: previousStartTime
+                    endTime: endTime
                 ))
-
-                // 다음을 위해 저장
-                previousStartTime = startTime
 
                 // 새 배치 시작
                 batch = [loc]
@@ -153,6 +150,7 @@ extension LocationGroupedByDate {
         // 마지막 배치 처리
         let receivedTimes = batch.compactMap(\.receivedAt)
         let startTime = receivedTimes.min() ?? Date()
+        let endTime = batch.count > 1 ? receivedTimes.max() : nil
         let state = stateResolver(addr)
 
         groups.append(ConsecutiveLocationGroup(
@@ -160,7 +158,7 @@ extension LocationGroupedByDate {
             locations: batch,
             state: state,
             startTime: startTime,
-            endTime: previousStartTime
+            endTime: endTime
         ))
 
         return groups

@@ -33,6 +33,7 @@ struct TimeLineCellLocationDetail: View {
     var timeFormat: String = "hh:mm a" // 12시간 형식 ( 01:44 PM )
 
     /// 시간 범위 텍스트
+
     private var timeRangeText: String {
         let start = startTime.formatted(timeFormat)
 

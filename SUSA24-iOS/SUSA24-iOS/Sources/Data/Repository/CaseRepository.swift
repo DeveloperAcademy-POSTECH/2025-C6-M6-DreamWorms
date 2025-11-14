@@ -28,11 +28,11 @@ protocol CaseRepositoryProtocol: Sendable {
     func deleteCase(id: UUID) async throws
     func createCase(model: Case, imageData: Data?, phoneNumber: String?) async throws
 
-    /// 전화번호로 케이스를 찾습니다.
-    /// - Parameter phoneNumber: 피의자 전화번호
+    /// 사건번호로 케이스를 찾습니다.
+    /// - Parameter caseNumber: 사건번호(number)
     /// - Returns: 매칭되는 케이스 ID. 없으면 nil
     /// - Throws: CoreData 조회 에러
-    func findCaseByPhoneNumber(_ phoneNumber: String) async throws -> UUID?
+    func findCase(byCaseNumber caseNumber: String) async throws -> UUID?
 }
 
 // MARK: - Repository Implementation
@@ -184,38 +184,20 @@ struct CaseRepository: CaseRepositoryProtocol {
         print("✅ [CaseRepository] 목데이터 로드 완료")
     }
 
-    // MARK: - 전화번호로 케이스 찾기
+    // MARK: - 사건번호로 케이스 찾기
 
-    /// 전화번호로 케이스를 찾습니다.
-    /// - Parameter phoneNumber: 피의자의 위치 데이터를 받아오는 폰번호
+    /// 사건번호로 케이스를 찾습니다.
+    /// - Parameter caseNumber: 사건번호
     /// - Returns: 매칭되는 케이스 ID. 없으면 nil
     /// - Throws: CoreData 조회 에러
-    func findCaseByPhoneNumber(_ phoneNumber: String) async throws -> UUID? {
+    /// - Complexity: O(n) where n is the number of cases
+    func findCase(byCaseNumber caseNumber: String) async throws -> UUID? {
         try await context.perform {
-            // 모든 케이스 가져오기
             let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-            let cases = try context.fetch(request)
+            request.predicate = NSPredicate(format: "number == %@", caseNumber)
 
-            // 전화번호 정규화 (하이픈 제거)
-            let normalizedInput = phoneNumber.replacingOccurrences(of: "-", with: "")
-
-            // 각 케이스의 피의자 전화번호와 비교
-            for caseEntity in cases {
-                guard let suspects = caseEntity.suspects as? Set<SuspectEntity> else {
-                    continue
-                }
-
-                for suspect in suspects {
-                    if let suspectPhone = suspect.phoneNumber {
-                        let normalizedSuspectPhone = suspectPhone.replacingOccurrences(of: "-", with: "")
-                        if normalizedSuspectPhone == normalizedInput {
-                            return caseEntity.id
-                        }
-                    }
-                }
-            }
-
-            return nil
+            let results = try context.fetch(request)
+            return results.first?.id
         }
     }
 }
@@ -232,5 +214,5 @@ struct MockCaseRepository: CaseRepositoryProtocol {
     func deleteCase(id _: UUID) async throws {}
     func createCase(model _: Case, imageData _: Data?, phoneNumber _: String?) async throws {}
 
-    func findCaseByPhoneNumber(_: String) async throws -> UUID? { nil }
+    func findCase(byCaseNumber _: String) async throws -> UUID? { nil }
 }

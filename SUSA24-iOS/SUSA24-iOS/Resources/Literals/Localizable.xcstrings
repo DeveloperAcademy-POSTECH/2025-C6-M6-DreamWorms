@@ -1377,11 +1377,38 @@
     "메시지 본문" : {
 
     },
-    "발신자 번호" : {
-
+    "본문: ${messageBody}, 사건번호: ${caseNumber}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "본문: ${messageBody}, 사건번호: ${caseNumber}"
+          }
+        }
+      }
     },
-    "본문: ${messageBody}" : {
-
+    "분석 결과가 없습니다" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "분석 결과가 없습니다"
+          }
+        }
+      }
+    },
+    "사건번호" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건번호"
+          }
+        }
+      }
     },
     "사진" : {
 

@@ -91,12 +91,26 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             .interactiveDismissDisabled(true)
         }
         .navigationBarBackButtonHidden(true)
-        .task { store.send(.onAppear) }
+        .task {
+            // MainTabView 진입 시 TabBar 표시
+            tabBarVisibility.show()
+            store.send(.onAppear)
+        }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
+            print("📍 [MainTabView] caseInfo changed: \(newCaseInfo?.name ?? "nil"), locations count: \(store.state.locations.count)")
             guard let caseInfo = newCaseInfo else { return }
+            // caseInfo 로드 시점에 locations도 함께 업데이트 (초기 바인딩 포함)
             timeLineStore.send(.updateData(
                 caseInfo: caseInfo,
                 locations: store.state.locations
+            ))
+        }
+        .onChange(of: store.state.locations) { _, newLocations in
+            print("📍 [MainTabView] locations changed: count=\(newLocations.count), caseInfo: \(store.state.caseInfo?.name ?? "nil")")
+            guard let caseInfo = store.state.caseInfo else { return }
+            timeLineStore.send(.updateData(
+                caseInfo: caseInfo,
+                locations: newLocations
             ))
         }
         .onChange(of: selectedDetent) { _, newDetent in
