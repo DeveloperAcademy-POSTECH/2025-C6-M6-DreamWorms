@@ -53,7 +53,7 @@ struct CaseListView: View {
                         ForEach(store.state.cases) { item in
                             CaseCard(
                                 item: item,
-                                onEdit: {},
+                                onEdit: { coordinator.push(.caseAddScene(caseID: item.id)) },
                                 onDelete: { store.send(.deleteTapped(item: item)) }
                             )
                             .padding(.horizontal, 16)
@@ -68,7 +68,7 @@ struct CaseListView: View {
         }
         .overlay(alignment: .bottom) {
             CaseListBottomFade(
-                onAddCaseTapped: { coordinator.push(.caseAddScene) }
+                onAddCaseTapped: { coordinator.push(.caseAddScene()) }
             )
         }
         .task { store.send(.onAppear) }
