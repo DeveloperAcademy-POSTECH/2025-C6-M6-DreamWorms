@@ -131,7 +131,8 @@ private extension Array<Location> {
                     address: address,
                     totalMinutes: value.count * sampleMinutes,
                     latitude: avgLat,
-                    longitude: avgLon
+                    longitude: avgLon,
+                    visitCount: value.count
                 )
             }
             .sorted { $0.totalMinutes > $1.totalMinutes }
