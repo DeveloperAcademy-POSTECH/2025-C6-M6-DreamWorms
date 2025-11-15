@@ -10,6 +10,7 @@ import SwiftUI
 struct DashboardRankSection: View {
     @Binding var currentTab: DashboardPickerTab
     let topLocations: [StayAddress]
+    let onCardTap: (StayAddress) -> Void
     
     var body: some View {
         VStack {
@@ -36,6 +37,7 @@ struct DashboardRankSection: View {
                             title: item.address,
                             description: formatStay(item.totalMinutes)
                         )
+                        .setupOnTap { onCardTap(item) }
                     }
                 }
             }

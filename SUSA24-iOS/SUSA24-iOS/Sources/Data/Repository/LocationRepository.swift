@@ -221,10 +221,27 @@ struct LocationRepository: LocationRepositoryProtocol {
                 locationEntity.note = location.note
                 locationEntity.pointLatitude = location.pointLatitude
                 locationEntity.pointLongitude = location.pointLongitude
-                locationEntity.boxMinLatitude = location.boxMinLatitude ?? 0.0
-                locationEntity.boxMinLongitude = location.boxMinLongitude ?? 0.0
-                locationEntity.boxMaxLatitude = location.boxMaxLatitude ?? 0.0
-                locationEntity.boxMaxLongitude = location.boxMaxLongitude ?? 0.0
+
+                if let minLat = location.boxMinLatitude,
+                   let minLon = location.boxMinLongitude,
+                   let maxLat = location.boxMaxLatitude,
+                   let maxLon = location.boxMaxLongitude
+                {
+                    locationEntity.boxMinLatitude = minLat
+                    locationEntity.boxMinLongitude = minLon
+                    locationEntity.boxMaxLatitude = maxLat
+                    locationEntity.boxMaxLongitude = maxLon
+                } else {
+                    let box = makeBoundingBox(
+                        centerLatitude: location.pointLatitude,
+                        centerLongitude: location.pointLongitude
+                    )
+                    locationEntity.boxMinLatitude = box.minLat
+                    locationEntity.boxMinLongitude = box.minLon
+                    locationEntity.boxMaxLatitude = box.maxLat
+                    locationEntity.boxMaxLongitude = box.maxLon
+                }
+                
                 locationEntity.locationType = location.locationType
                 locationEntity.colorType = location.colorType
                 locationEntity.receivedAt = location.receivedAt
@@ -251,6 +268,10 @@ struct LocationRepository: LocationRepositoryProtocol {
         latitude: Double,
         longitude: Double
     ) async throws {
+        let box = makeBoundingBox(
+            centerLatitude: latitude,
+            centerLongitude: longitude
+        )
         // 새 Location 생성 (중복 체크 없이 무조건 생성)
         let location = Location(
             id: UUID(),
@@ -259,10 +280,10 @@ struct LocationRepository: LocationRepositoryProtocol {
             note: nil,
             pointLatitude: latitude,
             pointLongitude: longitude,
-            boxMinLatitude: nil,
-            boxMinLongitude: nil,
-            boxMaxLatitude: nil,
-            boxMaxLongitude: nil,
+            boxMinLatitude: box.minLat,
+            boxMinLongitude: box.minLon,
+            boxMaxLatitude: box.maxLat,
+            boxMaxLongitude: box.maxLon,
             locationType: 2, // 기지국
             colorType: 0,
             receivedAt: Date()
@@ -350,6 +371,35 @@ struct LocationRepository: LocationRepositoryProtocol {
             
             try context.save()
         }
+    }
+}
+
+private extension LocationRepository {
+    func makeBoundingBox(
+        centerLatitude lat: Double,
+        centerLongitude lon: Double,
+        radiusInMeters r: Double = 500
+    ) -> (minLat: Double, minLon: Double, maxLat: Double, maxLon: Double) {
+        let metersPerDegreeLat = 111_320.0 // 위도 방향: 1도 ≈ 111_320m 로 단순 근사
+        let deltaLat = r / metersPerDegreeLat // 위/아래로 얼마만큼 움직일지 (deg)
+        
+        // 경도 방향: 위도에 따라 길이가 달라짐 → cos(lat) 적용
+        let latRad = lat * .pi / 180.0
+        let metersPerDegreeLon = metersPerDegreeLat * cos(latRad)
+        
+        // 경도 계산에서 0으로 나누지 않도록 보호
+        let deltaLon: Double = if abs(metersPerDegreeLon) < 0.000001 {
+            0
+        } else {
+            r / metersPerDegreeLon
+        }
+        
+        let minLat = lat - deltaLat
+        let maxLat = lat + deltaLat
+        let minLon = lon - deltaLon
+        let maxLon = lon + deltaLon
+        
+        return (minLat, minLon, maxLat, maxLon)
     }
 }
 

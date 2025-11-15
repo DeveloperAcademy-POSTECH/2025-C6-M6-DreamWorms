@@ -55,5 +55,7 @@ final class MapDispatcher {
     enum RequestType: Equatable {
         /// 검색 결과를 기반으로 지도 카메라를 이동시키고, 동시에 바텀시트에 보여줄 정보를 제공합니다.
         case moveToSearchResult(coordinate: MapCoordinate, placeInfo: PlaceInfo)
+        /// Timeline에서 선택한 Location으로 지도 카메라를 이동시킵니다.
+        case moveToLocation(coordinate: MapCoordinate)
     }
 }

@@ -109,14 +109,31 @@ private extension Array<Location> {
         sampleMinutes: Int = 5,
         topK: Int = 3
     ) -> [StayAddress] {
-        let bucket = filter { $0.locationType == 2 }
-            .reduce(into: [String: Int]()) { result, location in
+        // [주소: (count, latSum, lonSum)]
+        let bucket = filter { $0.locationType == 2 } // Int16이라도 2와 비교 가능
+            .reduce(into: [String: (count: Int, latSum: Double, lonSum: Double)]()) { result, location in
                 let key = location.address.isEmpty ? "기지국 주소" : location.address
-                result[key, default: 0] += 1
+
+                var entry = result[key] ?? (count: 0, latSum: 0, lonSum: 0)
+                entry.count += 1
+                entry.latSum += location.pointLatitude
+                entry.lonSum += location.pointLongitude
+                result[key] = entry
             }
         
         return bucket
-            .map { StayAddress(address: $0.key, totalMinutes: $0.value * sampleMinutes) }
+            .map { address, value in
+                // 평균 좌표 계산
+                let avgLat = value.latSum / Double(value.count)
+                let avgLon = value.lonSum / Double(value.count)
+
+                return StayAddress(
+                    address: address,
+                    totalMinutes: value.count * sampleMinutes,
+                    latitude: avgLat,
+                    longitude: avgLon
+                )
+            }
             .sorted { $0.totalMinutes > $1.totalMinutes }
             .prefix(topK)
             .map(\.self)
