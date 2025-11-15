@@ -742,7 +742,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "형사 노트 작성하기"
+            "value" : "장소에 대한 상세정보를 추가하세요."
           }
         }
       }
@@ -766,7 +766,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "형사노트"
+            "value" : "형사 노트"
           }
         }
       }

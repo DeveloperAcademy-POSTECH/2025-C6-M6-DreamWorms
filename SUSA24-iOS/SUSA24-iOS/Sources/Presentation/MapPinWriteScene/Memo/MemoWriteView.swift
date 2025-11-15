@@ -59,8 +59,7 @@ struct MemoWriteView: View {
                         Text(String(localized: .memoWritePlaceHolder))
                             .font(.bodyRegular14)
                             .foregroundStyle(.labelAlternative)
-                            .padding(.vertical, 20)
-                            .padding(.horizontal, 16)
+                            .padding(20)
                     }
                 }
                 .frame(height: 300)
