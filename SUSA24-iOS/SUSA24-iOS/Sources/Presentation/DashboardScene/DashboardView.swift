@@ -35,7 +35,8 @@ struct DashboardView: View {
                         get: { store.state.tab },
                         set: { store.send(.setTab($0)) }
                     ),
-                    topLocations: store.state.topVisitDurationLocations,
+                    topVisitDurationLocations: store.state.topVisitDurationLocations,
+                    topVisitFrequencyLocations: store.state.visitFrequencyLocations,
                     onCardTap: {
                         coordinator.push(
                             .locationOverviewScene(

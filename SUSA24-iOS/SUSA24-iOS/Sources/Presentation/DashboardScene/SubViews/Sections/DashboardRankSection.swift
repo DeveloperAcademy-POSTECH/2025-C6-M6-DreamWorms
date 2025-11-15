@@ -9,15 +9,14 @@ import SwiftUI
 
 struct DashboardRankSection: View {
     @Binding var currentTab: DashboardPickerTab
-    let topLocations: [StayAddress]
+    let topVisitDurationLocations: [StayAddress]
+    let topVisitFrequencyLocations: [StayAddress]
     let onCardTap: (StayAddress) -> Void
     
-    private var sortedTopLocations: [StayAddress] {
+    private var displayedLocations: [StayAddress] {
         switch currentTab {
-        case .visitDuration:
-            topLocations.sorted { $0.totalMinutes > $1.totalMinutes }
-        case .visitFrequency:
-            topLocations.sorted { $0.visitCount > $1.visitCount }
+        case .visitDuration: topVisitDurationLocations
+        case .visitFrequency: topVisitFrequencyLocations
         }
     }
     
@@ -37,10 +36,10 @@ struct DashboardRankSection: View {
                 .padding(.bottom, 18)
             
             VStack(spacing: 6) {
-                if topLocations.isEmpty {
+                if displayedLocations.isEmpty {
                     TimeLineEmptyState(message: .bottomSheetNoCellData)
                 } else {
-                    ForEach(topLocations.enumerated(), id: \.offset) { index, item in
+                    ForEach(displayedLocations.enumerated(), id: \.offset) { index, item in
                         DWLocationCard(
                             type: .number(index),
                             title: item.address,
