@@ -65,6 +65,8 @@ struct RootView: View {
                             moduleFactory.makeScanLoadView(caseID: caseID, photos: photos)
                         case let .scanListScene(caseID, scanResults):
                             moduleFactory.makeScanListView(caseID: caseID, scanResults: scanResults, context: context)
+                        case let .locationOverviewScene(caseID, address, coordinate):
+                            moduleFactory.makeLocationOverviewView(caseID: caseID, baseAddress: address, initialCoordinate: coordinate, context: context)
                         }
                     }
                     .onChange(of: coordinator.currentRoute) { _, newRoute in

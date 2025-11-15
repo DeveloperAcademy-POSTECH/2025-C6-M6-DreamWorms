@@ -35,7 +35,16 @@ struct DashboardView: View {
                         get: { store.state.tab },
                         set: { store.send(.setTab($0)) }
                     ),
-                    topLocations: store.state.topVisitDurationLocations
+                    topLocations: store.state.topVisitDurationLocations,
+                    onCardTap: {
+                        coordinator.push(
+                            .locationOverviewScene(
+                                caseID: currentCaseID,
+                                address: $0.address,
+                                initialCoordinate: MapCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+                            )
+                        )
+                    }
                 )
                 .padding(.bottom, 34)
                 .padding(.horizontal, 16)

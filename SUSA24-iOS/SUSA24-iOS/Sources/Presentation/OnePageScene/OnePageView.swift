@@ -20,6 +20,15 @@ enum Category: String, CaseIterable, Identifiable {
         case .others: "기타"
         }
     }
+
+    var types: [Int] {
+        switch self {
+        case .all: [0, 1, 3]
+        case .residence: [0]
+        case .workplace: [1]
+        case .others: [3]
+        }
+    }
 }
 
 struct OnePageView: View {
