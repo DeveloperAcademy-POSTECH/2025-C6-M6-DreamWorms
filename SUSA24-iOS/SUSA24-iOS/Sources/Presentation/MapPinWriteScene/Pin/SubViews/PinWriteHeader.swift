@@ -27,11 +27,13 @@ struct PinWriteHeader: View {
                 image: Image(.xmark),
                 action: onCloseTapped
             )
+            .setupSize(36)
+            .setupIconSize(14)
             
             Spacer()
             
             Text(title)
-                .font(.titleSemiBold20)
+                .font(.titleSemiBold16)
                 .foregroundStyle(.labelNormal)
             
             Spacer()
@@ -40,11 +42,14 @@ struct PinWriteHeader: View {
                 image: Image(.checkmark),
                 action: onSaveTapped
             )
+            .setupSize(36)
+            .setupIconSize(14)
+            .setupIconColor(.white)
+            .setupbuttonBackgroundColor(isSaveEnabled ? .primaryNormal : .labelAssistive)
             .disabled(!isSaveEnabled)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 16)
-        .padding(.bottom, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 14)
     }
 }
 
