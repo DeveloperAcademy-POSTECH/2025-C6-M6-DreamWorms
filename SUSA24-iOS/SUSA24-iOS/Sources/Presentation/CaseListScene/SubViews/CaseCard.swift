@@ -11,10 +11,10 @@ struct CaseCard: View {
     let item: Case
     
     let onEdit: () -> Void
-    let onShare: () -> Void
     let onDelete: () -> Void
     
     @State private var showMenu = false
+    @State private var showDeleteAlert = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -81,17 +81,8 @@ struct CaseCard: View {
                         )
                     }
                     
-                    Button {
-                        onShare()
-                    } label: {
-                        Label(
-                            String(localized: .buttonShare),
-                            systemImage: SymbolLiterals.share.rawValue
-                        )
-                    }
-                    
                     Button(role: .destructive) {
-                        onDelete()
+                        showDeleteAlert = true
                     } label: {
                         Label(
                             String(localized: .buttonDelete),
@@ -117,6 +108,17 @@ struct CaseCard: View {
                         .stroke(.labelCoolNormal, lineWidth: 0.5)
                 )
         )
+        .alert(
+            String(localized: .caseListAlertTitle),
+            isPresented: $showDeleteAlert
+        ) {
+            Button(String(localized: .buttonDelete), role: .destructive) {
+                onDelete()
+            }
+            Button(String(localized: .cancelDefault), role: .cancel) {}
+        } message: {
+            Text(.caseListAlertDescription)
+        }
     }
 }
 
@@ -129,7 +131,7 @@ struct CaseCard: View {
             crime: "범죄유형",
             suspect: "피의자명"
         ),
-        onEdit: {}, onShare: {}, onDelete: {}
+        onEdit: {}, onDelete: {}
     )
     .padding(.horizontal, 16)
 }

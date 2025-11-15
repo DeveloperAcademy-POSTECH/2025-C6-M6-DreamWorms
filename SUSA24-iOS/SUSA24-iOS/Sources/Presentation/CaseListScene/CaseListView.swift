@@ -54,7 +54,6 @@ struct CaseListView: View {
                             CaseCard(
                                 item: item,
                                 onEdit: {},
-                                onShare: {},
                                 onDelete: { store.send(.deleteTapped(item: item)) }
                             )
                             .padding(.horizontal, 16)
