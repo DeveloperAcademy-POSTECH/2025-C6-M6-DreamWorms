@@ -21,22 +21,31 @@ struct CaseListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            CaseListHeader(
-                onSettingTapped: { coordinator.push(.settingScene) }
-            )
-            .padding(.bottom, 36)
+            Text(.caseListNavigationTitle)
+                .font(.titleSemiBold22)
+                .kerning(-0.44)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 64)
+                .padding([.leading, .bottom], 24)
+                .padding(.trailing, 16)
             
-            Picker("", selection: Binding(
-                get: { store.state.selectedTab },
-                set: { store.send(.setTab($0)) }
-            )) {
-                ForEach(CaseListPickerTab.allCases, id: \.title) { tab in
-                    Text(tab.title).tag(tab)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 20)
+            // TODO: - 지원되지 않는 기능임에 따라 뷰에서 보이지 않게 처리
+//            CaseListHeader(
+//                onSettingTapped: { coordinator.push(.settingScene) }
+//            )
+//            .padding(.bottom, 24)
+            
+//            Picker("", selection: Binding(
+//                get: { store.state.selectedTab },
+//                set: { store.send(.setTab($0)) }
+//            )) {
+//                ForEach(CaseListPickerTab.allCases, id: \.title) { tab in
+//                    Text(tab.title).tag(tab)
+//                }
+//            }
+//            .pickerStyle(.segmented)
+//            .padding(.horizontal, 16)
+//            .padding(.bottom, 20)
             
             if store.state.selectedTab == .allCase, !store.state.cases.isEmpty {
                 ScrollView {
@@ -63,9 +72,7 @@ struct CaseListView: View {
                 onAddCaseTapped: { coordinator.push(.caseAddScene) }
             )
         }
-        .onAppear {
-            store.send(.onAppear)
-        }
+        .task { store.send(.onAppear) }
         .ignoresSafeArea(edges: .bottom)
     }
 }
