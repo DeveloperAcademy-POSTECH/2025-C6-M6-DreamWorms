@@ -44,7 +44,7 @@ struct DWLocationCard: View {
     let description: String
     
     /// 버튼 탭 시 실행되는 액션 (선택적)
-    let onTap: (() -> Void)? = nil
+    var onTap: (() -> Void)?
     
     /// 버튼 여부 (false일 경우 비활성화)
     var isButton: Bool = true
@@ -144,6 +144,13 @@ extension DWLocationCard {
     @discardableResult
     func setupIconBackgroundColor(_ color: Color) -> Self {
         var v = self; v.iconBackgroundColor = color; return v
+    }
+    
+    /// 카드 탭 시 실행될 액션을 설정합니다.
+    /// - Parameter action: 탭 시 호출될 클로저
+    @discardableResult
+    func setupOnTap(_ action: (() -> Void)?) -> Self {
+        var v = self; v.onTap = action; return v
     }
 }
 

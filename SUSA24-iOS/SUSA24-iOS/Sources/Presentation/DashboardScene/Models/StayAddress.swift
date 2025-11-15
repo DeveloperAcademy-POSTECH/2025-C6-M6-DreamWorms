@@ -11,4 +11,6 @@ struct StayAddress: Identifiable, Equatable, Sendable {
     let id = UUID()
     let address: String
     let totalMinutes: Int
+    let latitude: Double
+    let longitude: Double
 }

@@ -586,6 +586,18 @@
         }
       }
     },
+    "locationOverview_title" : {
+      "comment" : "대시보드 오버뷰_타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "반경 내 저장된 핀"
+          }
+        }
+      }
+    },
     "map" : {
       "comment" : "탭바_지도 뷰 이름",
       "extractionState" : "manual",
