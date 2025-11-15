@@ -34,27 +34,27 @@ struct CameraView: View {
                 
                 // MARK: - 문서 감지 오버레이
                 
-                if store.state.isDocumentDetectionEnabled,
-                   let detection = store.state.documentDetection
-                {
-                    DocumentDetectionOverlayView(
-                        documentDetection: detection,
-                        screenSize: geometry.size
-                    )
-                    .ignoresSafeArea()
-                    .id(detection.timestamp)
-                    .onTapGesture {
-                        store.send(.documentOverlayTapped)
-                    }
-                }
-                
-                // MARK: - 렌즈 얼룩 표시
-                
-                if store.state.isLensSmudgeDetectionEnabled,
-                   let smudge = store.state.lensSmudgeDetection
-                {
-                    LensSmudgeOverlay(smudge: smudge)
-                }
+//                if store.state.isDocumentDetectionEnabled,
+//                   let detection = store.state.documentDetection
+//                {
+//                    DocumentDetectionOverlayView(
+//                        documentDetection: detection,
+//                        screenSize: geometry.size
+//                    )
+//                    .ignoresSafeArea()
+//                    .id(detection.timestamp)
+//                    .onTapGesture {
+//                        store.send(.documentOverlayTapped)
+//                    }
+//                }
+//                
+//                // MARK: - 렌즈 얼룩 표시
+//                
+//                if store.state.isLensSmudgeDetectionEnabled,
+//                   let smudge = store.state.lensSmudgeDetection
+//                {
+//                    LensSmudgeOverlay(smudge: smudge)
+//                }
                 
                 // MARK: - 헤더
                 
