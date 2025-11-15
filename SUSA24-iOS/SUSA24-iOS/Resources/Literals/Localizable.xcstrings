@@ -44,18 +44,6 @@
         }
       }
     },
-    "bottomSheet_caseLocation_pinCount" : {
-      "comment" : "바텀시트_케이스_위치_핀_갯수",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$(countNumber)lld개"
-          }
-        }
-      }
-    },
     "bottomSheet_cellLocation_searchText" : {
       "comment" : "기지국_주소_검색",
       "extractionState" : "manual",
@@ -355,6 +343,28 @@
         }
       }
     },
+    "caseList_alert_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건 기록이 영구 삭제되며 복구할 수 없습니다. 이 사건을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "caseList_alert_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사건 삭제"
+          }
+        }
+      }
+    },
     "caseList_allCasePicker" : {
       "comment" : "케이스 리스트_피커_전체 사건",
       "extractionState" : "manual",
@@ -544,25 +554,11 @@
         }
       }
     },
-    "delete_default" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "삭제"
-          }
-        }
-      }
-    },
     "from" : {
 
     },
     "Hour" : {
 
-    },
-    "Key" : {
-      "extractionState" : "manual"
     },
     "layer_setting_coverage_title" : {
       "extractionState" : "manual",
@@ -991,39 +987,6 @@
         }
       }
     },
-    "scan_load_failed_content" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 촬영하시겠습니까?"
-          }
-        }
-      }
-    },
-    "scan_load_failed_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "추출된 주소가 없습니다."
-          }
-        }
-      }
-    },
-    "scan_load_try" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 촬영"
-          }
-        }
-      }
-    },
     "scan_result_failed_content" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1218,66 +1181,6 @@
         }
       }
     },
-    "test_Camera" : {
-      "comment" : "⚠️지울내용",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera View!"
-          }
-        }
-      }
-    },
-    "test_CaseAdd" : {
-      "comment" : "⚠️지울내용",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CaseAdd View!"
-          }
-        }
-      }
-    },
-    "test_Dashboard" : {
-      "comment" : "⚠️지울내용",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dashboard View!"
-          }
-        }
-      }
-    },
-    "test_OnePage" : {
-      "comment" : "⚠️지울내용",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One Page View!"
-          }
-        }
-      }
-    },
-    "test_Search" : {
-      "comment" : "⚠️지울내용",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search View!"
-          }
-        }
-      }
-    },
     "test_SelectLocation" : {
       "comment" : "⚠️지울내용",
       "extractionState" : "manual",
@@ -1298,18 +1201,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Setting View!"
-          }
-        }
-      }
-    },
-    "test_Timeline" : {
-      "comment" : "⚠️지울내용",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time Line View!"
           }
         }
       }
