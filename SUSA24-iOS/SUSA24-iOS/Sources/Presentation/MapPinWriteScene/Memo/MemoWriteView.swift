@@ -74,21 +74,25 @@ struct MemoWriteView: View {
                         hideKeyboard()
                         showDeleteConfirmation = true
                     }) {
-                        HStack {
-                            Image(.delete)
-                                .renderingMode(.template)
-                                .foregroundColor(.pointRed1)
-                                .padding(.leading, 23)
+                        ZStack {
+                            HStack {
+                                Image(.delete)
+                                    .renderingMode(.template)
+                                    .foregroundStyle(.pointRed1)
+                                    .frame(width: 21, height: 21, alignment: .center)
+                                    .padding(.leading, 24)
+                                
+                                Spacer()
+                            }
                             
                             Text(String(localized: .memoDeleteTitle))
-                                .font(.bodyMedium16)
-                                .foregroundColor(.pointRed1)
-                                .frame(maxWidth: .infinity)
+                                .font(.titleSemiBold16)
+                                .foregroundStyle(.pointRed1)
                         }
-                        .padding(.horizontal, 10)
                         .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
                         .background(.pointRed1.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 26))
+                        .clipShape(Capsule())
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 28)
