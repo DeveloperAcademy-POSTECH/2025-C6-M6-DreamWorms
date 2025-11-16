@@ -17,6 +17,7 @@ struct CaseAddScrollForm<Field: Hashable>: View {
     @Binding var crime: String
     @Binding var suspectPhoneNumber: String
     
+    let isEditMode: Bool
     let focus: FocusState<Field?>.Binding
     
     let nameField: Field
@@ -32,12 +33,14 @@ struct CaseAddScrollForm<Field: Hashable>: View {
     
     /// 해당 필드를 현재 visibleCount에서 노출할지 여부
     private func isVisible(_ field: Field) -> Bool {
+        if isEditMode { return true } // 수정 모드면 항상 모든 필드가 보여야함!
         guard let index = orderedFields.firstIndex(of: field) else { return false }
         return index < visibleCount
     }
     
     /// current 이후의 다음 필드를 1개 노출 + 포커스 + 스크롤
     private func revealNext(after current: Field) {
+        guard !isEditMode else { return } // 수정 모드에서는 reveal 애니메이션 동작하지 않도록
         guard
             let index = orderedFields.firstIndex(of: current),
             index + 1 < orderedFields.count
@@ -149,10 +152,17 @@ struct CaseAddScrollForm<Field: Hashable>: View {
             }
         }
         .task {
-            try? await Task.sleep(for: .milliseconds(120))
-            withAnimation(.snappy(duration: 0.25)) {
+            if isEditMode {
+                // 수정 모드: 5개 필드 전부 한 번에 노출
+                visibleCount = orderedFields.count
                 scrollID = nameField
-                focus.wrappedValue = nameField
+            } else {
+                // 신규 모드: 아래에서부터 하나씩 열리는 애니메이션 유지
+                try? await Task.sleep(for: .milliseconds(120))
+                withAnimation(.snappy(duration: 0.25)) {
+                    scrollID = nameField
+                    focus.wrappedValue = nameField
+                }
             }
         }
     }

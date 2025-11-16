@@ -292,8 +292,7 @@ struct NaverMapView: UIViewRepresentable {
             guard let mapView else { return }
             let target = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
             let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: defaultZoomLevel))
-            cameraUpdate.animation = .easeIn
-            cameraUpdate.animationDuration = 0.5
+            cameraUpdate.animation = .none
             mapView.moveCamera(cameraUpdate)
         }
         

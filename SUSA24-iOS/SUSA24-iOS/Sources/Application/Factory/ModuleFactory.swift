@@ -10,7 +10,7 @@ import SwiftUI
 
 protocol ModuleFactoryProtocol {
     func makeCameraView(caseID: UUID) -> CameraView
-    func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView
+    func makeCaseAddView(caseID: UUID?, context: NSManagedObjectContext) -> CaseAddView
     func makeCaseListView(context: NSManagedObjectContext) -> CaseListView
     func makeDashboardView(caseID: UUID, context: NSManagedObjectContext) -> DashboardView
     func makeLocationOverviewView(
@@ -54,10 +54,10 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return view
     }
     
-    func makeCaseAddView(context: NSManagedObjectContext) -> CaseAddView {
+    func makeCaseAddView(caseID: UUID?, context: NSManagedObjectContext) -> CaseAddView {
         let repository = CaseRepository(context: context)
         let store = DWStore(
-            initialState: CaseAddFeature.State(),
+            initialState: CaseAddFeature.State(editingCaseId: caseID),
             reducer: CaseAddFeature(repository: repository)
         )
         let view = CaseAddView(store: store)

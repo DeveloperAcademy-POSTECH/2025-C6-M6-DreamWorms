@@ -219,7 +219,7 @@ struct MapView: View {
                         ),
                     ]
                 )
-                .iconSize(16)
+                .iconSize(20)
                 .setupPadding(top: 4, leading: 3, bottom: 4, trailing: 6),
             ]
         } else {
@@ -228,20 +228,20 @@ struct MapView: View {
                 .button(image: Image(.pin), action: {
                     store.send(.addPinTapped)
                 })
-                .iconSize(16)
+                .iconSize(20)
                 .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3),
-                .menu(
-                    image: Image(.ellipsis),
-                    items: [
-                        DWBottomToolbarItem.MenuItem(
-                            title: String(localized: .buttonShare),
-                            systemImage: "square.and.arrow.up",
-                            role: nil,
-                            action: {}
-                        ),
-                    ]
-                )
-                .iconSize(16),
+//                .menu(
+//                    image: Image(.ellipsis),
+//                    items: [
+//                        DWBottomToolbarItem.MenuItem(
+//                            title: String(localized: .buttonShare),
+//                            systemImage: "square.and.arrow.up",
+//                            role: nil,
+//                            action: {}
+//                        ),
+//                    ]
+//                )
+//                .iconSize(16),
             ]
         }
     }
