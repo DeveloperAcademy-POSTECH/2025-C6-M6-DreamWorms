@@ -9,7 +9,15 @@ import SwiftUI
 
 struct DashboardFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
-    init(repository: LocationRepositoryProtocol) { self.repository = repository }
+    private let analysisService: DashboardAnalysisServiceProtocol
+    
+    init(
+        repository: LocationRepositoryProtocol,
+        analysisService: DashboardAnalysisServiceProtocol
+    ) {
+        self.repository = repository
+        self.analysisService = analysisService
+    }
     
     // MARK: - State
     
@@ -20,14 +28,26 @@ struct DashboardFeature: DWReducer {
         /// 현재 caseID에 대해 초기 데이터(fetch + 가공)가 완료되었는지 여부
         var hasLoaded: Bool = false
         
-        /// 상단 TOP3 체류 기지국 카드 데이터
+        /// 상단 TOP3 체류 시간 기지국 카드 데이터
         var topVisitDurationLocations: [StayAddress] = []
+        
+        /// 상단 TOP3 방문 빈도 기지국 카드 데이터
+        var visitFrequencyLocations: [StayAddress] = []
         
         /// 시간대별 기지국 차트 카드 데이터
         var cellCharts: [CellChartData] = []
         
         /// 원본 Location 데이터 (필요시 추가 가공용)
         var locations: [Location] = []
+        
+        /// 체류시간 탭에서 사용할 헤더 문장
+        var visitDurationSummary: String = ""
+        
+        /// 방문빈도 탭에서 사용할 헤더 문장
+        var visitFrequencySummary: String = ""
+        
+        /// Foundation Models 분석 중 여부
+        var isAnalyzingWithFM: Bool = false
     }
     
     // MARK: - Action
@@ -40,10 +60,33 @@ struct DashboardFeature: DWReducer {
         case onAppear(UUID)
         
         /// 초기 데이터 세팅 (fetch + 가공 완료 후)
-        case setInitialData(locations: [Location], top3: [StayAddress], chart: [CellChartData])
+        case setInitialData(
+            locations: [Location],
+            topDuration: [StayAddress],
+            topFrequency: [StayAddress],
+            chart: [CellChartData]
+        )
         
         /// 개별 차트에서 요일이 변경되었을 때
         case setChartWeekday(id: CellChartData.ID, weekday: Weekday)
+        
+        /// Foundation Model에게 상단 분석 문장 생성을 요청 (스트리밍 시작 트리거)
+        case analyzeWithFoundationModel
+        
+        /// 스트리밍 도중, Foundation Model의 부분 생성 결과를 수신
+        case updatePartialAnalysis(
+            visitDurationSummary: String?,
+            visitFrequencySummary: String?
+        )
+        
+        /// 스트리밍 완료 후, 최종 결과 확정
+        case setAnalysisResult(
+            visitDurationSummary: String,
+            visitFrequencySummary: String
+        )
+        
+        /// Foundation Model 분석 실패
+        case analysisFailed
     }
     
     // MARK: - Reducer
@@ -63,32 +106,108 @@ struct DashboardFeature: DWReducer {
             return .task { [repository] in
                 do {
                     let locations = try await repository.fetchLocations(caseId: caseID)
-                    let top3Locations = await locations.topAddressStays()
+                    let topDuration = await locations.topVisitDuration()
+                    let topFrequency = await locations.topVisitFrequency()
                     let chartLocations = await locations.buildCellChartData()
                     
                     return .setInitialData(
                         locations: locations,
-                        top3: top3Locations,
+                        topDuration: topDuration,
+                        topFrequency: topFrequency,
                         chart: chartLocations
                     )
                 } catch {
-                    // TODO: - 에러 상태 액션 분리해서 사용자에게 알려줄지 여부는 추후 결정
                     return .none
                 }
             }
             
-        case let .setInitialData(locations, top3, charts):
+        case let .setInitialData(locations, topDuration, topFrequency, charts):
             state.locations = locations
-            state.topVisitDurationLocations = top3
+            state.topVisitDurationLocations = topDuration
+            state.visitFrequencyLocations = topFrequency
             state.cellCharts = charts
             state.hasLoaded = true
-            return .none
+            return .task { .analyzeWithFoundationModel }
             
         case let .setChartWeekday(id, weekday):
             guard let index = state.cellCharts.firstIndex(where: { $0.id == id }) else {
                 return .none
             }
             state.cellCharts[index].selectedWeekday = weekday
+            return .none
+            
+        case .analyzeWithFoundationModel:
+            guard !state.locations.isEmpty else { return .none }
+            
+            state.isAnalyzingWithFM = true
+            state.visitDurationSummary = "체류시간을 분석하고 있어요..."
+            state.visitFrequencySummary = "방문 빈도를 분석하고 있어요..."
+            
+            let locations = state.locations
+            let topDuration = state.topVisitDurationLocations
+            let topFrequency = state.visitFrequencyLocations
+            
+            return DWEffect { [analysisService] downstream in
+                do {
+                    let stream = await analysisService.streamDashboardHeaderAnalysis(
+                        locations: locations,
+                        topDuration: topDuration,
+                        topFrequency: topFrequency
+                    )
+                    
+                    var lastPartialDuration: String?
+                    var lastPartialFrequency: String?
+                    
+                    for try await partial in stream {
+                        if let partialDuration = partial.visitDurationSummary {
+                            lastPartialDuration = partialDuration
+                        }
+                        if let partialFrequency = partial.visitFrequencySummary {
+                            lastPartialFrequency = partialFrequency
+                        }
+                        
+                        downstream(
+                            .updatePartialAnalysis(
+                                visitDurationSummary: partial.visitDurationSummary,
+                                visitFrequencySummary: partial.visitFrequencySummary
+                            )
+                        )
+                    }
+                    
+                    if let finalDuration = lastPartialDuration,
+                       let finalFrequency = lastPartialFrequency
+                    {
+                        downstream(
+                            .setAnalysisResult(
+                                visitDurationSummary: finalDuration,
+                                visitFrequencySummary: finalFrequency
+                            )
+                        )
+                    } else {
+                        downstream(.analysisFailed)
+                    }
+                } catch {
+                    downstream(.analysisFailed)
+                }
+            }
+            
+        case let .updatePartialAnalysis(visitDurationSummary, visitFrequencySummary):
+            if let summary = visitDurationSummary {
+                state.visitDurationSummary = summary
+            }
+            if let summary = visitFrequencySummary {
+                state.visitFrequencySummary = summary
+            }
+            return .none
+            
+        case let .setAnalysisResult(visitDurationSummary, visitFrequencySummary):
+            state.visitDurationSummary = visitDurationSummary
+            state.visitFrequencySummary = visitFrequencySummary
+            state.isAnalyzingWithFM = false
+            return .none
+            
+        case .analysisFailed:
+            state.isAnalyzingWithFM = false
             return .none
         }
     }
@@ -99,89 +218,119 @@ struct DashboardFeature: DWReducer {
 private extension DashboardFeature {}
 
 private extension Array<Location> {
-    /// 기지국 데이터(locationType == 2)를 대상으로, 주소별 체류시간(분)을 누적해 상위 K개 반환
+    /// 기지국(LocationType == 2) 데이터만을 대상으로,
+    /// 주소별로 체류 시간 / 평균 좌표 / 방문 빈도(연속 구간 기준)를 집계합니다.
     ///
-    /// 이 메서드는 원본 위치 데이터 배열에서 기지국(셀타워) 데이터만 필터링하고,
-    /// 동일 주소에 대해 관측 횟수를 합산한 뒤, `sampleMinutes` (간격)을 곱해 추정 체류 시간(분)으로 변환합니다.
-    ///
-    /// - Returns: 주소와 총 체류 시간을 담은 `StayAddress` 배열. 최대 `topK`개까지 반환됩니다.
-    func topAddressStays(
-        sampleMinutes: Int = 5,
-        topK: Int = 3
-    ) -> [StayAddress] {
-        // [주소: (count, latSum, lonSum)]
-        let bucket = filter { $0.locationType == 2 } // Int16이라도 2와 비교 가능
-            .reduce(into: [String: (count: Int, latSum: Double, lonSum: Double)]()) { result, location in
-                let key = location.address.isEmpty ? "기지국 주소" : location.address
-
-                var entry = result[key] ?? (count: 0, latSum: 0, lonSum: 0)
-                entry.count += 1
-                entry.latSum += location.pointLatitude
-                entry.lonSum += location.pointLongitude
-                result[key] = entry
-            }
+    /// - Parameter sampleIntervalMinutes: 한 샘플이 의미하는 시간(분 단위, 기본값 5분)
+    /// - Returns: 주소별 요약 정보 `StayAddress` 배열
+    func summarizedStays(sampleIntervalMinutes: Int = 5) -> [StayAddress] {
+        // 1. 기지국만 필터링
+        let cellLocations = filter { $0.locationType == 2 }
+        guard !cellLocations.isEmpty else { return [] }
         
-        return bucket
-            .map { address, value in
-                // 평균 좌표 계산
-                let avgLat = value.latSum / Double(value.count)
-                let avgLon = value.lonSum / Double(value.count)
-
-                return StayAddress(
-                    address: address,
-                    totalMinutes: value.count * sampleMinutes,
-                    latitude: avgLat,
-                    longitude: avgLon
-                )
-            }
+        // 2. 주소별 체류 시간(샘플 수) + 좌표 합계 계산
+        //    - visitCount는 VisitFrequencyCalculator(연속 그룹 방식)에서 가져온다.
+        var bucket: [String: (sampleCount: Int, latitudeSum: Double, longitudeSum: Double)] = [:]
+        
+        for location in cellLocations {
+            let addressKey = location.address.isEmpty ? "기지국 주소" : location.address
+            
+            var entry = bucket[addressKey]
+                ?? (sampleCount: 0, latitudeSum: 0, longitudeSum: 0)
+            
+            entry.sampleCount += 1
+            entry.latitudeSum += location.pointLatitude
+            entry.longitudeSum += location.pointLongitude
+            
+            bucket[addressKey] = entry
+        }
+        
+        // 3. 연속 그룹 기준 방문 빈도 계산 (VisitFrequencyCalculator 활용)
+        let visitFrequency = visitFrequencyByAddress() // [주소: 방문 횟수]
+        
+        // 4. 평균 좌표, 체류 시간(분), 방문 빈도를 사용해 StayAddress 배열 생성
+        return bucket.map { address, value in
+            let averageLatitude = value.latitudeSum / Double(value.sampleCount)
+            let averageLongitude = value.longitudeSum / Double(value.sampleCount)
+            let visitCount = visitFrequency[address] ?? 0
+            
+            return StayAddress(
+                address: address,
+                totalMinutes: value.sampleCount * sampleIntervalMinutes,
+                latitude: averageLatitude,
+                longitude: averageLongitude,
+                visitCount: visitCount
+            )
+        }
+    }
+    
+    /// 체류 시간 기준으로 상위 N개의 기지국을 반환합니다.
+    func topVisitDuration(
+        sampleIntervalMinutes: Int = 5,
+        maxCount: Int = 3
+    ) -> [StayAddress] {
+        summarizedStays(sampleIntervalMinutes: sampleIntervalMinutes)
             .sorted { $0.totalMinutes > $1.totalMinutes }
-            .prefix(topK)
+            .prefix(maxCount)
             .map(\.self)
     }
     
-    /// 주어진 위치 데이터에서 상위 K개 기지국 주소를 기준으로,
-    /// 각 주소에 대한 요일·시간대·주차별 방문 패턴을 `CellChartData` 형태로 생성합니다.
-    ///
-    /// 이 메서드는:
-    /// 1. 기지국 데이터(`locationType == 2`)에 대해 기간(주차 수)을 계산하고,
-    /// 2. 상위 K개의 주소를 선정한 뒤,
-    /// 3. 각 주소에 대해 `hourlySeriesForAllWeekdays`를 호출하여 시간대별 방문 시리즈를 만들고,
-    /// 4. 주어진 `initialWeekday`를 기준으로 초기 선택 요일을 설정한 `CellChartData`를 반환합니다.
+    /// 방문 빈도 기준으로 상위 N개의 기지국을 반환합니다.
+    /// 방문 빈도는 VisitFrequencyCalculator의 "연속 그룹" 방식을 사용합니다.
+    func topVisitFrequency(
+        sampleIntervalMinutes: Int = 5,
+        maxCount: Int = 3
+    ) -> [StayAddress] {
+        summarizedStays(sampleIntervalMinutes: sampleIntervalMinutes)
+            .sorted { $0.visitCount > $1.visitCount }
+            .prefix(maxCount)
+            .map(\.self)
+    }
+    
+    /// 기지국 데이터에서 상위 몇 개 주소에 대해 시간대별 방문 패턴을 `CellChartData`로 생성합니다.
     ///
     /// - Parameters:
-    ///   - topK: 상위 몇 개 주소에 대해 차트를 생성할지 여부. 기본값은 3입니다.
-    ///   - maxWeeks: 최대 고려할 주차 수. 기본값은 4주입니다.
-    /// - Returns: 각 주소별 시간대 패턴을 포함한 `CellChartData` 배열.
+    ///   - maxAddressCount: 차트로 보여줄 상위 주소 개수
+    ///   - maxWeeks: 최대 고려 주차 수
     func buildCellChartData(
-        topK: Int = 3,
+        maxAddressCount: Int = 3,
         maxWeeks: Int = 4
     ) -> [CellChartData] {
-        let cells = filter { $0.locationType == 2 }
+        let cellLocations = filter { $0.locationType == 2 }
         guard
-            let firstDate = cells.compactMap(\.receivedAt).min(),
-            let lastDate = cells.compactMap(\.receivedAt).max()
+            !cellLocations.isEmpty,
+            let firstDate = cellLocations.compactMap(\.receivedAt).min(),
+            let lastDate = cellLocations.compactMap(\.receivedAt).max()
         else { return [] }
         
         let calendar = Calendar.current
+        
+        // 기준이 되는 "첫 주의 월요일(또는 해당 주 시작일)" 계산
         let baseWeekStart = calendar.date(
             from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: firstDate)
         ) ?? firstDate
         
-        let days = calendar.dateComponents([.day], from: baseWeekStart, to: lastDate).day ?? 0
-        let actualWeeks = Swift.min(maxWeeks, days / 7 + 1)
-        let addresses = topCellAddresses(topK: topK)
+        // 실제 존재하는 기간을 기준으로 몇 주치 데이터를 그릴지 계산
+        let dayDifference = calendar.dateComponents([.day], from: baseWeekStart, to: lastDate).day ?? 0
+        let actualWeeks = Swift.min(maxWeeks, dayDifference / 7 + 1)
         
-        return addresses.map { address in
+        // 체류 시간 기준 상위 주소 목록만 추출
+        let topAddresses = summarizedStays()
+            .sorted { $0.totalMinutes > $1.totalMinutes }
+            .prefix(maxAddressCount)
+            .map(\.address)
+        
+        return topAddresses.map { address in
             let allSeries = hourlySeriesForAllWeekdays(
                 for: address,
                 baseWeekStart: baseWeekStart,
                 maxWeeks: actualWeeks
             )
             
+            // 초기 선택 요일은 "오늘" 기준
             let today = Date()
-            let initialWeekday = Weekday(
-                systemWeekday: calendar.component(.weekday, from: today)
-            ) ?? .mon
+            let weekdayValue = calendar.component(.weekday, from: today)
+            let initialWeekday = Weekday(systemWeekday: weekdayValue) ?? .mon
             
             return CellChartData(
                 address: address,
@@ -191,70 +340,44 @@ private extension Array<Location> {
         }
     }
     
-    /// 기지국(Location) 데이터에서 상위 K개의 셀타워 주소 목록을 반환합니다.
-    ///
-    /// 이 메서드는 `locationType == 2` 인 항목만을 대상으로,
-    /// 주소 문자열(비어 있는 경우 "기지국 주소"로 대체)을 기준으로 그룹화한 뒤
-    /// 관측 횟수가 많은 순서대로 상위 K개의 주소를 추립니다.
-    ///
-    /// - Parameter topK: 반환할 상위 주소 개수. 기본값은 3입니다.
-    /// - Returns: 셀타워 주소 문자열 배열.
-    func topCellAddresses(topK: Int) -> [String] {
-        let cells = filter { $0.locationType == 2 }
-        let grouped = Dictionary(grouping: cells) {
-            $0.address.isEmpty ? "기지국 주소" : $0.address
-        }
-        
-        return grouped
-            .sorted { $0.value.count > $1.value.count }
-            .prefix(topK)
-            .map(\.key)
-    }
-    
     /// 특정 주소에 대해, 주차·요일·시간별 방문 횟수를 `HourlyVisit` 시리즈로 생성합니다.
     ///
-    /// 내부적으로 다음 로직을 수행합니다:
-    /// - 주소와 `locationType == 2` 조건에 맞는 Location만 필터링
-    /// - 기준 주 시작일(`baseWeekStart`)로부터의 일 수 차이를 통해 `weekIndex` 계산
-    /// - `Weekday` 및 시(hour) 단위로 그룹화 후 카운트 누적
-    /// - 1주차부터 `maxWeeks`까지, 모든 요일과 0~23시 조합에 대해 누락된 값은 0으로 채워 반환
-    ///
-    /// 이 결과는 차트에서 주별/요일별/시간대별 라인 그래프를 일관되게 그리기 위한
-    /// 균일한 그리드 형태의 데이터로 사용됩니다.
-    ///
     /// - Parameters:
-    ///   - address: 대상이 되는 셀타워 주소.
-    ///   - baseWeekStart: 주차 계산의 기준이 되는 시작 날짜.
-    ///   - maxWeeks: 생성할 최대 주차 수.
-    /// - Returns: 주차(`weekIndex`), 요일(`weekday`), 시간(`hour`)별 방문 수(`count`)를 담은 `HourlyVisit` 배열.
+    ///   - address: 대상이 되는 셀타워 주소
+    ///   - baseWeekStart: 주차 계산의 기준이 되는 시작 날짜
+    ///   - maxWeeks: 생성할 최대 주차 수
     func hourlySeriesForAllWeekdays(
         for address: String,
         baseWeekStart: Date,
         maxWeeks: Int
     ) -> [HourlyVisit] {
         let calendar = Calendar.current
-        let normalized = address.isEmpty ? "기지국 주소" : address
+        let normalizedAddress = address.isEmpty ? "기지국 주소" : address
         
-        var buckets: [Int: [Weekday: [Int: Int]]] = [:] // [주차: [요일: [시간: 카운트]]]
+        // [주차: [요일: [시간: 카운트]]] 구조로 집계
+        var buckets: [Int: [Weekday: [Int: Int]]] = [:]
         
         for location in self where location.locationType == 2 {
             guard
-                (location.address.isEmpty ? "기지국 주소" : location.address) == normalized,
-                let time = location.receivedAt
+                (location.address.isEmpty ? "기지국 주소" : location.address) == normalizedAddress,
+                let timestamp = location.receivedAt
             else { continue }
             
-            let daysDiff = calendar.dateComponents([.day], from: baseWeekStart, to: time).day ?? 0
-            let weekIndex = daysDiff / 7 + 1
+            let daysFromBase = calendar.dateComponents([.day], from: baseWeekStart, to: timestamp).day ?? 0
+            let weekIndex = daysFromBase / 7 + 1
             guard (1 ... maxWeeks).contains(weekIndex) else { continue }
             
-            guard let weekday = Weekday(systemWeekday: calendar.component(.weekday, from: time)) else { continue }
-            let hour = calendar.component(.hour, from: time)
+            guard let weekday = Weekday(systemWeekday: calendar.component(.weekday, from: timestamp)) else {
+                continue
+            }
+            let hour = calendar.component(.hour, from: timestamp)
             
             buckets[weekIndex, default: [:]][weekday, default: [:]][hour, default: 0] += 1
         }
         
         let validWeeks = buckets.keys.sorted()
         
+        // 1주차부터 maxWeeks까지, 모든 요일·시간 조합을 채우되 값이 없으면 0으로 채움
         return validWeeks.flatMap { weekIndex in
             Weekday.allCases.flatMap { weekday in
                 (0 ... 23).map { hour in

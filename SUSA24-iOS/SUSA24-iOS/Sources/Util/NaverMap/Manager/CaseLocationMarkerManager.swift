@@ -29,10 +29,11 @@ final class CaseLocationMarkerManager {
     @discardableResult
     func updateMarkers(
         _ locations: [Location],
-        on mapView: NMFMapView
+        on mapView: NMFMapView,
+        onCellTapped: @escaping (String) -> Void
     ) -> [String: Int] {
         let (markers, cellCounts) = buildMarkers(from: locations)
-        applyMarkers(markers, on: mapView)
+        applyMarkers(markers, on: mapView, onCellTapped: onCellTapped)
         return cellCounts
     }
     
@@ -175,7 +176,12 @@ final class CaseLocationMarkerManager {
     /// - Parameters:
     ///   - markerModels: 생성한 마커 모델 배열
     ///   - mapView: 갱신할 네이버 지도 뷰
-    private func applyMarkers(_ markerModels: [MarkerModel], on mapView: NMFMapView) {
+    ///   - onCellTapped: 셀 타입 마커 탭 이벤트 콜백 (id == coordinateKey)
+    private func applyMarkers(
+        _ markerModels: [MarkerModel],
+        on mapView: NMFMapView,
+        onCellTapped: @escaping (String) -> Void
+    ) {
         let currentIds = Set(markerModels.map(\.id))
         let existingIds = Set(markers.keys)
         let idsToRemove = existingIds.subtracting(currentIds)
@@ -204,6 +210,13 @@ final class CaseLocationMarkerManager {
                     }
                     
                     overlay.hidden = false
+                    
+                    if case .cell = markerInfo.markerType {
+                        overlay.touchHandler = { _ in
+                            onCellTapped(markerInfo.id)
+                            return true
+                        }
+                    }
                 } else {
                     let overlay = await self.createMarker(
                         for: markerInfo,
@@ -211,6 +224,13 @@ final class CaseLocationMarkerManager {
                     )
                     self.markers[markerInfo.id] = overlay
                     self.markerTypes[markerInfo.id] = markerInfo.markerType
+                    
+                    if case .cell = markerInfo.markerType {
+                        overlay.touchHandler = { _ in
+                            onCellTapped(markerInfo.id)
+                            return true
+                        }
+                    }
                 }
             }
         }

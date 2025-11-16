@@ -43,10 +43,9 @@ final class ModuleFactory: ModuleFactoryProtocol {
     private lazy var cctvService = VWorldCCTVAPIService()
     private lazy var infrastructureMarkerManager = InfrastructureMarkerManager()
     private lazy var caseLocationMarkerManager = CaseLocationMarkerManager()
+    private lazy var camera = CameraModel()
     
     func makeCameraView(caseID: UUID) -> CameraView {
-        // cameraModel 주입
-        let camera = CameraModel()
         let store = DWStore(
             initialState: CameraFeature.State(caseID: caseID, previewSource: camera.previewSource),
             reducer: CameraFeature(camera: camera)
@@ -80,9 +79,13 @@ final class ModuleFactory: ModuleFactoryProtocol {
         context: NSManagedObjectContext
     ) -> DashboardView {
         let repository = LocationRepository(context: context)
+        let service = DashboardAnalysisService()
         let store = DWStore(
             initialState: DashboardFeature.State(),
-            reducer: DashboardFeature(repository: repository)
+            reducer: DashboardFeature(
+                repository: repository,
+                analysisService: service
+            )
         )
         let view = DashboardView(store: store, currentCaseID: caseID)
         return view
@@ -135,10 +138,11 @@ final class ModuleFactory: ModuleFactoryProtocol {
             ),
             reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
-        
+
         let view = MainTabView(
             store: store,
             timeLineStore: timeLineStore,
+            dispatcher: mapDispatcher,
             mapView: { mapView },
             dashboardView: { dashboardView },
             onePageView: { onePageView }
@@ -219,7 +223,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
             ),
             reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
-
+        
         let view = TimeLineView(store: store)
         return view
     }
@@ -250,6 +254,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         return ScanLoadView(
             caseID: caseID,
             photos: photos,
+            camera: camera,
             store: store
         )
     }
