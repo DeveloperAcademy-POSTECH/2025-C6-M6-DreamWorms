@@ -114,7 +114,7 @@ private extension MapSheetContainer {
                     onSave: { send(.savePin($0)) },
                     onCancel: { send(.closePinWrite) }
                 )
-                .presentationDetents([.height(700)])
+                .presentationDetents([.height(630)])
                 .presentationDragIndicator(.visible)
             }
             

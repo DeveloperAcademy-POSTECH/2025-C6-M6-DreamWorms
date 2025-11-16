@@ -25,4 +25,16 @@ enum PinColorType: Int16, CaseIterable, Codable {
         case .purple: Color.pointPurple
         }
     }
+    
+    var pinImage: Image {
+        switch self {
+        case .black: Image(.pinBlack)
+        case .red: Image(.pinRed)
+        case .orange: Image(.pinOrange)
+        case .yellow: Image(.pinYellow)
+        case .lightGreen: Image(.pinLightGreen)
+        case .darkGreen: Image(.pinDarkGreen)
+        case .purple: Image(.pinPurple)
+        }
+    }
 }

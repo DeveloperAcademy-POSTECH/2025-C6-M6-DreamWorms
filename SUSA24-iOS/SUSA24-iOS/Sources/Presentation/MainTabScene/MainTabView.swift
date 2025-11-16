@@ -33,6 +33,14 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         return detentsShowingDivider.contains(selectedDetent)
     }
     
+    private var shouldHideTimeline: Bool {
+        if store.state.selectedTab == .map {
+            selectedDetent == mapShortDetent
+        } else {
+            selectedDetent == otherDetent
+        }
+    }
+    
     private let mapView: () -> MapView
     private let dashboardView: () -> DashboardView
     private let onePageView: () -> OnePageView
@@ -76,7 +84,8 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                     get: { store.state.selectedTab },
                     set: { store.send(.selectTab($0)) }
                 ),
-                showDivider: showDividerByDetent
+                showDivider: showDividerByDetent,
+                hideContent: shouldHideTimeline
             ) {
                 timeLineView
             }
