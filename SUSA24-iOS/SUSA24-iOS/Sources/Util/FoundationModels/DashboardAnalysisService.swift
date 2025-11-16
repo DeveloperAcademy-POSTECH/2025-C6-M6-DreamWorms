@@ -39,7 +39,7 @@ actor DashboardAnalysisService: DashboardAnalysisServiceProtocol {
         )
     }
 
-    // 최종 결과 한 번에 받는 버전 (있어도 되고, 안 써도 됨)
+    // 최종 결과 한 번에 받는 버전 (일단 지금은 안쓰는데, 한번에 뜨길 원하면 바꿀게요)
     func makeDashboardHeaderAnalysis(
         locations: [Location],
         topDuration: [StayAddress],
@@ -78,7 +78,7 @@ actor DashboardAnalysisService: DashboardAnalysisServiceProtocol {
         return response.content
     }
 
-    /// PartiallyGenerated를 스트리밍으로 반환하는 버전
+    /// PartiallyGenerated를 스트리밍으로 반환하는 버전 (현재 사용 버전)
     nonisolated func streamDashboardHeaderAnalysis(
         locations: [Location],
         topDuration: [StayAddress],
@@ -118,7 +118,7 @@ actor DashboardAnalysisService: DashboardAnalysisServiceProtocol {
                     }
 
                     for try await partial in stream {
-                        continuation.yield(partial.content) // <- PartiallyGenerated
+                        continuation.yield(partial.content)
                     }
                     continuation.finish()
                 } catch {
@@ -127,9 +127,11 @@ actor DashboardAnalysisService: DashboardAnalysisServiceProtocol {
             }
         }
     }
+}
 
-    /// 프롬프트 부분만 함수로 분리해두면 respond/streamResponse에서 같이 씀
-    nonisolated func prompt(
+nonisolated extension DashboardAnalysisService {
+    /// 프롬프트 부분만 함수로 분리해두면 respond/streamResponse에서 같이 쓸 수 있음!
+    func prompt(
         durationAddress: String,
         frequencyAddress: String,
         timeRangeString: String,
@@ -170,11 +172,8 @@ actor DashboardAnalysisService: DashboardAnalysisServiceProtocol {
            "방문빈도 1위 지역은\n10월 27일 수요일에\n가장 많이 방문했어요."
         """
     }
-}
-
-nonisolated extension DashboardAnalysisService {
-    // MARK: - FM 프롬프트에 넣을 요약값 계산 헬퍼
-
+    
+    /// 특정 주소에 대해 가장 많이 방문한 날짜와 요일을 계산합니다.
     func mostVisitedDateString(
         for address: String,
         locations: [Location]
@@ -211,6 +210,7 @@ nonisolated extension DashboardAnalysisService {
         return (dateString, weekdayString)
     }
 
+    /// 특정 주소에 대해 가장 많이 머문 시간대를 `"오전 h시-오후 h시"` 형식으로 계산합니다.
     func mostLikelyTimeRangeString(
         for address: String,
         locations: [Location]
