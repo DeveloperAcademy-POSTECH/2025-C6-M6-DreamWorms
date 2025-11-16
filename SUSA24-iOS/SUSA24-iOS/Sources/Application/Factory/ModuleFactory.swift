@@ -135,10 +135,11 @@ final class ModuleFactory: ModuleFactoryProtocol {
             ),
             reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
-        
+
         let view = MainTabView(
             store: store,
             timeLineStore: timeLineStore,
+            dispatcher: mapDispatcher,
             mapView: { mapView },
             dashboardView: { dashboardView },
             onePageView: { onePageView }
@@ -219,7 +220,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
             ),
             reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
-
+        
         let view = TimeLineView(store: store)
         return view
     }

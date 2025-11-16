@@ -72,6 +72,9 @@ struct MapView: View {
                 onMyLocationFocusConsumed: {
                     store.send(.clearFocusMyLocationFlag)
                 },
+                onCellMarkerTapped: { cellKey, title in
+                    dispatcher.send(.focusCellTimeline(cellKey: cellKey, title: title))
+                },
                 onMapTapped: { latlng in
                     store.send(.mapTapped(latlng))
                 },
@@ -175,6 +178,9 @@ struct MapView: View {
                 store.send(.moveToSearchResult(coordinate, placeInfo))
             case let .moveToLocation(coordinate):
                 store.send(.moveToLocation(coordinate))
+            case .focusCellTimeline:
+                // Timeline 전용 요청은 MapView에서는 처리하지 않습니다.
+                break
             }
         }
 
