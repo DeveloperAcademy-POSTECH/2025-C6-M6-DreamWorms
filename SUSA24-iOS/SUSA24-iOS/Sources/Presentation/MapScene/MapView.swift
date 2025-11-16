@@ -74,8 +74,6 @@ struct MapView: View {
                 },
                 onCellMarkerTapped: { cellKey, title in
                     dispatcher.send(.focusCellTimeline(cellKey: cellKey, title: title))
-                    // 셀 타워를 탭하면 항상 시트를 중간 detent로 올립니다.
-                    NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
                 },
                 onMapTapped: { latlng in
                     store.send(.mapTapped(latlng))

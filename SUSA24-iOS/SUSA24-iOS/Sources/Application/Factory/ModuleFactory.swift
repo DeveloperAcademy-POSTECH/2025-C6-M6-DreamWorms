@@ -220,7 +220,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
             reducer: TimeLineFeature(dispatcher: mapDispatcher)
         )
         
-        let view = TimeLineView(store: store, dispatcher: mapDispatcher)
+        let view = TimeLineView(store: store)
         return view
     }
     
