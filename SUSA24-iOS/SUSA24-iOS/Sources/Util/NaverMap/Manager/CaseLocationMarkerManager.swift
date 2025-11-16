@@ -36,7 +36,7 @@ final class CaseLocationMarkerManager {
         applyMarkers(markers, on: mapView, onCellTapped: onCellTapped)
         return cellCounts
     }
-
+    
     /// 모든 마커를 제거합니다.
     func clearAll() {
         for marker in markers.values {
@@ -52,7 +52,7 @@ final class CaseLocationMarkerManager {
     ///   - mapView: 네이버 지도 뷰
     func applyVisitFrequency(with cellCounts: [String: Int], on mapView: NMFMapView) {
         guard !cellCounts.isEmpty else { return }
-
+        
         Task {
             for (id, count) in cellCounts {
                 guard let overlay = self.markers[id] else { continue }
@@ -64,7 +64,7 @@ final class CaseLocationMarkerManager {
             }
         }
     }
-
+    
     /// 방문 빈도 배지를 기본 상태로 복원합니다.
     /// - Parameter mapView: 네이버 지도 뷰
     func resetVisitFrequency(on mapView: NMFMapView) {
@@ -79,7 +79,7 @@ final class CaseLocationMarkerManager {
             }
         }
     }
-
+    
     /// 모든 케이스 위치 마커의 표시/숨김을 전환합니다.
     /// - Parameter isVisible: true면 표시, false면 숨김
     func setVisibility(_ isVisible: Bool) {
@@ -114,19 +114,19 @@ final class CaseLocationMarkerManager {
         overlay.mapView = mapView
         return overlay
     }
-
+    
     /// Location 배열을 마커 모델과 셀 좌표 카운트로 변환합니다.
     private func buildMarkers(from locations: [Location]) -> ([MarkerModel], [String: Int]) {
         var markers: [MarkerModel] = []
-        var cellGroups: [String: (coordinate: MapCoordinate, count: Int)] = [:]
-
+        
+        // 1. 기지국 외 마커 처리 (home, work, custom)
         for location in locations {
             let latitude = location.pointLatitude
             let longitude = location.pointLongitude
             guard latitude != 0, longitude != 0 else { continue }
-
+            
             let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
-
+            
             switch LocationType(location.locationType) {
             case .home:
                 markers.append(MarkerModel(
@@ -134,43 +134,44 @@ final class CaseLocationMarkerManager {
                     coordinate: coordinate,
                     markerType: .home
                 ))
-
             case .work:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
                     markerType: .work
                 ))
-
             case .custom:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
                     markerType: .custom
                 ))
-
             case .cell:
-                let key = MapCoordinate(latitude: latitude, longitude: longitude).coordinateKey
-                var entry = cellGroups[key] ?? (coordinate, 0)
-                entry.count += 1
-                cellGroups[key] = entry
+                break
             }
         }
-
+        
+        // 2. 기지국 방문 빈도 계산 (유틸리티 사용)
+        // TAENI : 계산로직을 visitFrequencyByCoordinate 에서 처리
+        let cellGroups = locations.visitFrequencyByCoordinate()
+        
+        // 3. 기지국 마커 생성
         for (key, entry) in cellGroups {
+            let coordinate = MapCoordinate(latitude: entry.latitude, longitude: entry.longitude)
             markers.append(
                 MarkerModel(
                     id: key,
-                    coordinate: entry.coordinate,
+                    coordinate: coordinate,
                     markerType: .cell(isVisited: true)
                 )
             )
         }
-
+        
+        // 4. count만 추출
         let cellCounts = cellGroups.mapValues(\.count)
         return (markers, cellCounts)
     }
-
+    
     /// Location으로부터 생성된 마커를 지도에 적용합니다.
     /// - Parameters:
     ///   - markerModels: 생성한 마커 모델 배열
@@ -184,13 +185,13 @@ final class CaseLocationMarkerManager {
         let currentIds = Set(markerModels.map(\.id))
         let existingIds = Set(markers.keys)
         let idsToRemove = existingIds.subtracting(currentIds)
-
+        
         for markerId in idsToRemove {
             markers[markerId]?.mapView = nil
             markers.removeValue(forKey: markerId)
             markerTypes.removeValue(forKey: markerId)
         }
-
+        
         Task {
             for markerInfo in markerModels {
                 if let overlay = self.markers[markerInfo.id] {
@@ -201,13 +202,13 @@ final class CaseLocationMarkerManager {
                     if overlay.mapView == nil {
                         overlay.mapView = mapView
                     }
-
+                    
                     if markerTypes[markerInfo.id] != markerInfo.markerType {
                         let icon = await MarkerImageCache.shared.image(for: markerInfo.markerType)
                         overlay.iconImage = NMFOverlayImage(image: icon)
                         markerTypes[markerInfo.id] = markerInfo.markerType
                     }
-
+                    
                     overlay.hidden = false
                     
                     if case .cell = markerInfo.markerType {
@@ -234,7 +235,13 @@ final class CaseLocationMarkerManager {
             }
         }
     }
-
+    
+    private func coordinateKey(latitude: Double, longitude: Double) -> String {
+        let latString = String(format: "%.6f", latitude)
+        let lngString = String(format: "%.6f", longitude)
+        return "\(latString)_\(lngString)"
+    }
+    
     private func desiredMarkerType(
         for markerInfo: MarkerModel,
         visitFrequencyEnabled: Bool,
@@ -252,7 +259,7 @@ final class CaseLocationMarkerManager {
             return markerInfo.markerType
         }
     }
-
+    
     /// 셀 마커의 방문 횟수를 정수로 반환합니다.
     /// - Parameters:
     ///   - markerInfo: 평가할 마커 모델 정보
