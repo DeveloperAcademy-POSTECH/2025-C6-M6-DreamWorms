@@ -515,14 +515,20 @@ struct MapFeature: DWReducer {
                 }
             }
 
+        // ✅ FIX: 배열 재할당으로 SwiftUI 변경 감지 보장
         case .deletePinCompleted:
+            print("🔵 [MapFeature] deletePinCompleted")
+            
             guard let deleteId = state.existingLocation?.id else { return .none }
 
-            state.locations.removeAll { $0.id == deleteId }
+            // ✅ filter를 사용하면 자동으로 새 배열 생성
+            state.locations = state.locations.filter { $0.id != deleteId }
+            
             state.existingLocation = nil
             state.isPlaceInfoSheetPresented = false
             state.selectedPlaceInfo = nil
 
+            print("🔵 [MapFeature] After delete - locations.count: \(state.locations.count)")
             return .none
             
         case let .savePin(location):
@@ -540,14 +546,26 @@ struct MapFeature: DWReducer {
                 }
             }
             
+        // TAENI: - 작업한 부분
+        // 저장하면 해당 정보를 참조로 추가하여 밀어넣습니다. 그 후 sheet 는 닫습니다.
         case let .savePinCompleted(location):
+            print("🔵 [MapFeature] savePinCompleted")
+            print("🔵 [MapFeature] location.id: \(location.id)")
+            print("🔵 [MapFeature] Before - state.locations.count: \(state.locations.count)")
+            
             state.existingLocation = location
 
-            if let index = state.locations.firstIndex(where: { $0.id == location.id }) {
-                state.locations[index] = location
+            var newLocations = state.locations
+            if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
+                print("🔵 [MapFeature] Updating existing location at index: \(index)")
+                newLocations[index] = location
             } else {
-                state.locations.append(location)
+                print("🔵 [MapFeature] Adding new location")
+                newLocations.append(location)
             }
+            state.locations = newLocations
+            
+            print("🔵 [MapFeature] After - state.locations.count: \(state.locations.count)")
 
             state.isPinWritePresented = false
             return .none
@@ -593,11 +611,17 @@ struct MapFeature: DWReducer {
                 }
             }
             
+        // TAENI: - 배열 재할당으로 SwiftUI 가 감지해서 바꾸도록 하게 합니다
         case let .memoSaveCompleted(updatedLocation):
+            print("🔵 [MapFeature] memoSaveCompleted")
+            
             state.existingLocation = updatedLocation
-            if let index = state.locations.firstIndex(where: { $0.id == updatedLocation.id }) {
-                state.locations[index] = updatedLocation
+            
+            var newLocations = state.locations
+            if let index = newLocations.firstIndex(where: { $0.id == updatedLocation.id }) {
+                newLocations[index] = updatedLocation
             }
+            state.locations = newLocations
             
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
