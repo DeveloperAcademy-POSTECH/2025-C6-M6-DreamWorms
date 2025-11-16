@@ -1163,6 +1163,12 @@
         }
       }
     },
+    "scanLoad_failed_content" : {
+      "extractionState" : "manual"
+    },
+    "scanLoad_failed_title" : {
+      "extractionState" : "manual"
+    },
     "scanLoad_subTitle" : {
       "comment" : "스캔 로딩_서브타이틀",
       "extractionState" : "manual",
@@ -1186,6 +1192,9 @@
           }
         }
       }
+    },
+    "scanLoad_try" : {
+      "extractionState" : "manual"
     },
     "Selected Hour" : {
 
