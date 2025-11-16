@@ -10,6 +10,9 @@ import SwiftUI
 struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
     @Environment(TabBarVisibility.self)
     private var tabBarVisibility
+    
+    @Environment(AppCoordinator.self)
+    private var coordinator
 
     // MARK: - Dependencies
     
@@ -76,8 +79,12 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             }
         }
         .sheet(isPresented: Binding(
-            get: { tabBarVisibility.isVisible },
-            set: { _ in }
+            get: {
+                tabBarVisibility.isVisible
+            },
+            set: { newValue in
+                tabBarVisibility.setVisibility(newValue)
+            }
         )) {
             DWTabBar(
                 activeTab: Binding(
@@ -101,10 +108,17 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             .interactiveDismissDisabled(true)
         }
         .navigationBarBackButtonHidden(true)
-        .task {
-            // MainTabView 진입 시 TabBar 표시
-            tabBarVisibility.show()
+        .onAppear {
+            // MainTabView가 최상위 route일 때만 TabBar 표시
+            if case .mainTabScene = coordinator.currentRoute {
+                tabBarVisibility.show()
+            }
+            
             store.send(.onAppear)
+        }
+        .onDisappear {
+            // MainTabView 떠날 때 TabBar 숨김
+            tabBarVisibility.hide()
         }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
             print("📍 [MainTabView] caseInfo changed: \(newCaseInfo?.name ?? "nil"), locations count: \(store.state.locations.count)")
