@@ -47,9 +47,9 @@ struct CameraView: View {
 //                        store.send(.documentOverlayTapped)
 //                    }
 //                }
-//                
+//
 //                // MARK: - 렌즈 얼룩 표시
-//                
+//
 //                if store.state.isLensSmudgeDetectionEnabled,
 //                   let smudge = store.state.lensSmudgeDetection
 //                {
@@ -133,24 +133,19 @@ struct CameraView: View {
                 break
             }
         }
-        .dwAlert(
+        .dwActionSheet(
             isPresented: $showExitConfirmation,
             title: String(localized: .cameraBackSheetTitle),
             message: nil,
-            primaryButton: DWAlertButton(
-                title: String(localized: .cameraBackSheetActionConfirm),
-                style: .destructive
-            ) {
-                // 사진 모두 삭제 후 나가기
-                Task {
-                    camera.clearAllPhotos()
-                }
-                coordinator.pop()
-            },
-            secondaryButton: DWAlertButton(
-                title: String(localized: .cameraBackSheetActionCancel),
-                style: .cancel
-            )
+            items: [
+                .destructive(String(localized: .cameraBackSheetActionConfirm)) {
+                    Task {
+                        camera.clearAllPhotos()
+                    }
+                    coordinator.pop()
+                },
+                .cancel(String(localized: .cameraBackSheetActionCancel)),
+            ]
         )
     }
 }
