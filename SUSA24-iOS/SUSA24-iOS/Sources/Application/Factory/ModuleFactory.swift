@@ -80,9 +80,13 @@ final class ModuleFactory: ModuleFactoryProtocol {
         context: NSManagedObjectContext
     ) -> DashboardView {
         let repository = LocationRepository(context: context)
+        let service = DashboardAnalysisService()
         let store = DWStore(
             initialState: DashboardFeature.State(),
-            reducer: DashboardFeature(repository: repository)
+            reducer: DashboardFeature(
+                repository: repository,
+                analysisService: service
+            )
         )
         let view = DashboardView(store: store, currentCaseID: caseID)
         return view

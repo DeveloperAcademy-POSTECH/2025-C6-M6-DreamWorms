@@ -9,14 +9,22 @@ import SwiftUI
 
 struct DashboardFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
-    init(repository: LocationRepositoryProtocol) { self.repository = repository }
+    private let analysisService: DashboardAnalysisServiceProtocol
+    
+    init(
+        repository: LocationRepositoryProtocol,
+        analysisService: DashboardAnalysisServiceProtocol
+    ) {
+        self.repository = repository
+        self.analysisService = analysisService
+    }
     
     // MARK: - State
     
     struct State: DWState {
         var tab: DashboardPickerTab = .visitDuration
         var caseID: UUID?
-                
+        
         /// 현재 caseID에 대해 초기 데이터(fetch + 가공)가 완료되었는지 여부
         var hasLoaded: Bool = false
         
@@ -31,6 +39,15 @@ struct DashboardFeature: DWReducer {
         
         /// 원본 Location 데이터 (필요시 추가 가공용)
         var locations: [Location] = []
+        
+        /// 체류시간 탭에서 사용할 헤더 문장
+        var visitDurationSummary: String = ""
+        
+        /// 방문빈도 탭에서 사용할 헤더 문장
+        var visitFrequencySummary: String = ""
+        
+        /// Foundation Models 분석 중 여부
+        var isAnalyzingWithFM: Bool = false
     }
     
     // MARK: - Action
@@ -52,6 +69,24 @@ struct DashboardFeature: DWReducer {
         
         /// 개별 차트에서 요일이 변경되었을 때
         case setChartWeekday(id: CellChartData.ID, weekday: Weekday)
+        
+        /// Foundation Model에게 상단 분석 문장 생성을 요청 (스트리밍 시작 트리거)
+        case analyzeWithFoundationModel
+        
+        /// 스트리밍 도중, Foundation Model의 부분 생성 결과를 수신
+        case updatePartialAnalysis(
+            visitDurationSummary: String?,
+            visitFrequencySummary: String?
+        )
+        
+        /// 스트리밍 완료 후, 최종 결과 확정
+        case setAnalysisResult(
+            visitDurationSummary: String,
+            visitFrequencySummary: String
+        )
+        
+        /// Foundation Model 분석 실패
+        case analysisFailed
     }
     
     // MARK: - Reducer
@@ -73,7 +108,6 @@ struct DashboardFeature: DWReducer {
                     let locations = try await repository.fetchLocations(caseId: caseID)
                     let topDuration = await locations.topVisitDuration()
                     let topFrequency = await locations.topVisitFrequency()
-                    
                     let chartLocations = await locations.buildCellChartData()
                     
                     return .setInitialData(
@@ -93,13 +127,87 @@ struct DashboardFeature: DWReducer {
             state.visitFrequencyLocations = topFrequency
             state.cellCharts = charts
             state.hasLoaded = true
-            return .none
+            return .task { .analyzeWithFoundationModel }
             
         case let .setChartWeekday(id, weekday):
             guard let index = state.cellCharts.firstIndex(where: { $0.id == id }) else {
                 return .none
             }
             state.cellCharts[index].selectedWeekday = weekday
+            return .none
+            
+        case .analyzeWithFoundationModel:
+            guard !state.locations.isEmpty else { return .none }
+            
+            state.isAnalyzingWithFM = true
+            state.visitDurationSummary = "체류시간을 분석하고 있어요..."
+            state.visitFrequencySummary = "방문 빈도를 분석하고 있어요..."
+            
+            let locations = state.locations
+            let topDuration = state.topVisitDurationLocations
+            let topFrequency = state.visitFrequencyLocations
+            
+            return DWEffect { [analysisService] downstream in
+                do {
+                    let stream = await analysisService.streamDashboardHeaderAnalysis(
+                        locations: locations,
+                        topDuration: topDuration,
+                        topFrequency: topFrequency
+                    )
+                    
+                    var lastPartialDuration: String?
+                    var lastPartialFrequency: String?
+                    
+                    for try await partial in stream {
+                        if let partialDuration = partial.visitDurationSummary {
+                            lastPartialDuration = partialDuration
+                        }
+                        if let partialFrequency = partial.visitFrequencySummary {
+                            lastPartialFrequency = partialFrequency
+                        }
+                        
+                        downstream(
+                            .updatePartialAnalysis(
+                                visitDurationSummary: partial.visitDurationSummary,
+                                visitFrequencySummary: partial.visitFrequencySummary
+                            )
+                        )
+                    }
+                    
+                    if let finalDuration = lastPartialDuration,
+                       let finalFrequency = lastPartialFrequency
+                    {
+                        downstream(
+                            .setAnalysisResult(
+                                visitDurationSummary: finalDuration,
+                                visitFrequencySummary: finalFrequency
+                            )
+                        )
+                    } else {
+                        downstream(.analysisFailed)
+                    }
+                } catch {
+                    downstream(.analysisFailed)
+                }
+            }
+            
+        case let .updatePartialAnalysis(visitDurationSummary, visitFrequencySummary):
+            if let summary = visitDurationSummary {
+                state.visitDurationSummary = summary
+            }
+            if let summary = visitFrequencySummary {
+                state.visitFrequencySummary = summary
+            }
+            return .none
+            
+        case let .setAnalysisResult(visitDurationSummary, visitFrequencySummary):
+            state.visitDurationSummary = visitDurationSummary
+            state.visitFrequencySummary = visitFrequencySummary
+            state.isAnalyzingWithFM = false
+            return .none
+            
+        case .analysisFailed:
+            state.isAnalyzingWithFM = false
             return .none
         }
     }

@@ -19,13 +19,40 @@ struct DashboardView: View {
     
     var currentCaseID: UUID
     
+    private var headerTitle: String {
+        if store.state.isAnalyzingWithFM {
+            // 로딩 중일 때
+            switch store.state.tab {
+            case .visitDuration:
+                store.state.visitDurationSummary.isEmpty
+                    ? "체류시간을 분석하고 있어요..."
+                    : store.state.visitDurationSummary
+            case .visitFrequency:
+                store.state.visitFrequencySummary.isEmpty
+                    ? "방문 빈도를 분석하고 있어요..."
+                    : store.state.visitFrequencySummary
+            }
+        } else {
+            // 분석 완료 or 실패 후
+            switch store.state.tab {
+            case .visitDuration:
+                store.state.visitDurationSummary.isEmpty
+                    ? "체류시간 분석을 위한 데이터가 충분하지 않아요."
+                    : store.state.visitDurationSummary
+            case .visitFrequency:
+                store.state.visitFrequencySummary.isEmpty
+                    ? "방문빈도 분석을 위한 데이터가 충분하지 않아요."
+                    : store.state.visitFrequencySummary
+            }
+        }
+    }
+    
     // MARK: - View
     
     var body: some View {
         VStack(spacing: 0) {
             DashboardHeader(
-                // TODO: - 추후 Foundation Model 연동시 수정 필요
-                title: String(localized: .testAnalyze),
+                title: headerTitle,
                 onBack: { coordinator.pop() }
             )
             
