@@ -39,7 +39,9 @@ struct DWTabBar<Content: View>: View {
             ForEach(MainTabIdentifier.allCases, id: \.title) { tab in
                 VStack(spacing: 4) {
                     tab.icon
-                        .font(.system(size: 20))
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 25)
                     
                     Text(tab.title)
                         .font(.bodyMedium10)

@@ -1226,18 +1226,6 @@
     "Selected Hour" : {
 
     },
-    "summary" : {
-      "comment" : "탭바_원 페이지 뷰 이름",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "요약"
-          }
-        }
-      }
-    },
     "test_analyze" : {
       "comment" : "분석_타이틀 예시 문구",
       "extractionState" : "manual",
@@ -1300,6 +1288,18 @@
     },
     "to" : {
 
+    },
+    "tracking" : {
+      "comment" : "탭바_트라이앵글 뷰 이름",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추적"
+          }
+        }
+      }
     },
     "us_ver" : {
       "comment" : "미국_버전",

@@ -9,7 +9,7 @@ import SwiftUI
 
 enum SymbolLiterals: String {
     case map = "map.fill"
-    case analytics = "chart.pie.fill"
+    case analytics = "chart.bar.fill"
     case people = "person.text.rectangle.fill"
     case setting = "gearshape"
     case person = "person.fill"
