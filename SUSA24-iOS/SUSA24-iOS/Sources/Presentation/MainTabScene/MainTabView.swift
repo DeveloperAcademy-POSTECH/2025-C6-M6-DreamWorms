@@ -10,6 +10,9 @@ import SwiftUI
 struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
     @Environment(TabBarVisibility.self)
     private var tabBarVisibility
+    
+    @Environment(AppCoordinator.self)
+    private var coordinator
 
     // MARK: - Dependencies
     
@@ -105,7 +108,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         }
         .navigationBarBackButtonHidden(true)
         .task {
-            // MainTabView 진입 시 TabBar 표시
+            // MainTabView가 최상위 route일 때만 TabBar 표시
             tabBarVisibility.show()
             store.send(.onAppear)
         }
