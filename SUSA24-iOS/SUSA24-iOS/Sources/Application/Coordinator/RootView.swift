@@ -39,8 +39,8 @@ struct RootView: View {
                         switch route {
                         case let .cameraScene(caseID):
                             moduleFactory.makeCameraView(caseID: caseID)
-                        case .caseAddScene:
-                            moduleFactory.makeCaseAddView(context: context)
+                        case let .caseAddScene(caseID):
+                            moduleFactory.makeCaseAddView(caseID: caseID, context: context)
                         case .caseListScene:
                             moduleFactory.makeCaseListView(context: context)
                         case let .dashboardScene(caseID):

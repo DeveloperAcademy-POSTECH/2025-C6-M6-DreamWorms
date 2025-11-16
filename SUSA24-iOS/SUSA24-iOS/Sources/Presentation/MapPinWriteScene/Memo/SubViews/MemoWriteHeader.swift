@@ -19,11 +19,13 @@ struct MemoWriteHeader: View {
                 image: Image(.xmark),
                 action: onCloseTapped
             )
+            .setupSize(36)
+            .setupIconSize(14)
             
             Spacer()
             
             Text(String(localized: .memoWriteTitle))
-                .font(.titleSemiBold20)
+                .font(.titleSemiBold16)
                 .foregroundStyle(.labelNormal)
             
             Spacer()
@@ -32,6 +34,10 @@ struct MemoWriteHeader: View {
                 image: Image(.checkmark),
                 action: onSaveTapped
             )
+            .setupSize(36)
+            .setupIconSize(14)
+            .setupIconColor(.white)
+            .setupbuttonBackgroundColor(isSaveEnabled ? .primaryNormal : .labelAssistive)
             .disabled(!isSaveEnabled)
         }
         .padding(.horizontal, 16)

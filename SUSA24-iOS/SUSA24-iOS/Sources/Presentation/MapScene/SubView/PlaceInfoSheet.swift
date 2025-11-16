@@ -146,37 +146,44 @@ struct MemoButton: View {
     let note: String?
     let onTapped: () -> Void
     
-    var buttonText: String {
-        if let note, !note.isEmpty {
-            note
-        } else {
-            String(localized: .memoWriteEmpty)
-        }
-    }
-    
     var body: some View {
         Button(action: onTapped) {
             HStack(spacing: 8) {
-                Text(.memoWriteTitle)
-                    .font(.bodyMedium16)
-                    .foregroundStyle(.labelNormal)
-                
-                Spacer()
-                
-                Text(buttonText)
-                    .font(.bodyRegular14)
-                    .foregroundStyle(.labelNormal)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.trailing)
+                VStack(alignment: .leading, spacing: 0) {
+                    if let note, !note.isEmpty {
+                        Text(note)
+                            .font(.bodyRegular14)
+                            .foregroundStyle(.labelNormal)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    } else {
+                        Text(.memoWriteTitle)
+                            .font(.titleSemiBold16)
+                            .foregroundStyle(.labelNormal)
+                        
+                        Text(.memoWriteEmpty)
+                            .font(.bodyRegular14)
+                            .foregroundStyle(.labelAlternative)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Image(.rightArrow)
                     .font(.system(size: 14))
-                    .foregroundStyle(.labelNormal)
+                    .foregroundStyle(.labelNeutral)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-            .background(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .padding([.leading, .vertical], 20)
+            .padding(.trailing, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.mainBackground)
+                    .shadow(
+                        color: .black.opacity(0.05),
+                        radius: 12,
+                        x: 0,
+                        y: 2
+                    )
+            )
         }
     }
 }
@@ -197,17 +204,24 @@ struct PlaceBasicInfo: View {
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: spacing) {
-            Text(label)
-                .font(.bodyMedium12)
-                .foregroundStyle(.labelAlternative)
+        VStack(spacing: 6) {
+            HStack(alignment: .top, spacing: spacing) {
+                Text(label)
+                    .font(.bodyMedium12)
+                    .foregroundStyle(.labelAlternative)
+                
+                Spacer()
+                
+                Text(value)
+                    .font(.bodyMedium14)
+                    .foregroundStyle(.labelNeutral)
+                    .multilineTextAlignment(.trailing)
+            }
             
-            Spacer()
-            
-            Text(value)
-                .font(.bodyMedium14)
-                .foregroundStyle(.labelNeutral)
-                .multilineTextAlignment(.trailing)
+            Rectangle()
+                .fill(.labelAssistive)
+                .frame(height: 0.5)
+                .frame(maxWidth: .infinity)
         }
     }
 }
@@ -231,13 +245,13 @@ struct PlaceInfoSheetContent: View {
                 .foregroundStyle(.labelNormal)
                 .padding(.horizontal, horizontalPadding)
                 .padding(.top, sectionTopPadding)
-            
+                .padding(.bottom, bottomPadding)
+                        
             PlaceBasicInfo(
                 label: String(localized: .mapviewPlaceInfoJibun),
                 value: placeInfo.jibunAddress
             )
             .padding(.horizontal, horizontalPadding)
-            .padding(.top, rowTopPadding)
             
             // 도로명
             PlaceBasicInfo(
@@ -274,72 +288,114 @@ struct CircleProgressView: View {
 
 // MARK: - Preview
 
-// #Preview("핀 없는 경우") {
-//    struct PreviewWrapper: View {
-//        @State private var isPresented = true
-//
-//        var body: some View {
-//            Color.clear
-//                .sheet(isPresented: $isPresented) {
-//                    PlaceInfoSheet(
-//                        placeInfo: PlaceInfo(
-//                            title: "선택한 위치",
-//                            jibunAddress: "대구광역시 달서구 상인동 1453-7 상인2동 주민센터",
-//                            roadAddress: "대구광역시 달서구 상원로 27 상인2동주민 센터",
-//                            phoneNumber: "010-9934-9349"
-//                        ),
-//                        existingLocation: nil,
-//                        isLoading: false,
-//                        onClose: { isPresented = false },
-//                        onMemoTapped: {}
-//                    )
-//                    .presentationDetents([.fraction(0.4)])
-//                    .presentationDragIndicator(.visible)
-//                }
-//        }
-//    }
-//
-//    return PreviewWrapper()
-// }
+#Preview("핀 없는 경우") {
+    struct PreviewWrapper: View {
+        @State private var isPresented = true
 
-// #Preview("핀 있는 경우") {
-//    struct PreviewWrapper: View {
-//        @State private var isPresented = true
-//
-//        var body: some View {
-//            Color.clear
-//                .sheet(isPresented: $isPresented) {
-//                    PlaceInfoSheet(
-//                        placeInfo: PlaceInfo(
-//                            title: "선택한 위치",
-//                            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-//                            roadAddress: "대구광역시 달서구 상원로 27",
-//                            phoneNumber: "010-9934-9349"
-//                        ),
-//                        existingLocation: Location(
-//                            id: UUID(),
-//                            address: "대구광역시 달서구 상인동 1453-7",
-//                            title: "2동 304호",
-//                            note: "CCTV 영상으로 판단했을 때 두 사람이 다툰 것으로 보임. 진술과 일치하지 않은 행동을 보이는 내용을 포착. 김호랭 형사에게 영상전달, 맘스터치 매장 직원 증언으로 단골이라고 함.",
-//                            pointLatitude: 35.8563,
-//                            pointLongitude: 128.5557,
-//                            boxMinLatitude: nil,
-//                            boxMinLongitude: nil,
-//                            boxMaxLatitude: nil,
-//                            boxMaxLongitude: nil,
-//                            locationType: 3,
-//                            colorType: 2,
-//                            receivedAt: Date()
-//                        ),
-//                        isLoading: false,
-//                        onClose: { isPresented = false },
-//                        onMemoTapped: {}
-//                    )
-//                    .presentationDetents([.fraction(0.5)])
-//                    .presentationDragIndicator(.visible)
-//                }
-//        }
-//    }
-//
-//    return PreviewWrapper()
-// }
+        var body: some View {
+            Color.clear
+                .sheet(isPresented: $isPresented) {
+                    PlaceInfoSheet(
+                        placeInfo: PlaceInfo(
+                            title: "선택한 위치",
+                            jibunAddress: "대구광역시 달서구 상인동 1453-7 상인2동 주민센터",
+                            roadAddress: "대구광역시 달서구 상원로 27 상인2동주민 센터",
+                            phoneNumber: "010-9934-9349"
+                        ),
+                        existingLocation: nil,
+                        isLoading: false,
+                        onClose: { isPresented = false },
+                        onMemoTapped: {}
+                    )
+                    .presentationDetents([.fraction(0.4)])
+                    .presentationDragIndicator(.visible)
+                }
+        }
+    }
+
+    return PreviewWrapper()
+}
+
+#Preview("핀 있는 경우") {
+    struct PreviewWrapper: View {
+        @State private var isPresented = true
+
+        var body: some View {
+            Color.clear
+                .sheet(isPresented: $isPresented) {
+                    PlaceInfoSheet(
+                        placeInfo: PlaceInfo(
+                            title: "선택한 위치",
+                            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+                            roadAddress: "대구광역시 달서구 상원로 27",
+                            phoneNumber: "010-9934-9349"
+                        ),
+                        existingLocation: Location(
+                            id: UUID(),
+                            address: "대구광역시 달서구 상인동 1453-7",
+                            title: "2동 304호",
+                            note: "CCTV 영상으로 판단했을 때 두 사람이 다툰 것으로 보임. 진술과 일치하지 않은 행동을 보이는 내용을 포착. 김호랭 형사에게 영상전달, 맘스터치 매장 직원 증언으로 단골이라고 함.",
+                            pointLatitude: 35.8563,
+                            pointLongitude: 128.5557,
+                            boxMinLatitude: nil,
+                            boxMinLongitude: nil,
+                            boxMaxLatitude: nil,
+                            boxMaxLongitude: nil,
+                            locationType: 3,
+                            colorType: 2,
+                            receivedAt: Date()
+                        ),
+                        isLoading: false,
+                        onClose: { isPresented = false },
+                        onMemoTapped: {}
+                    )
+                    .presentationDetents([.fraction(0.5)])
+                    .presentationDragIndicator(.visible)
+                }
+        }
+    }
+
+    return PreviewWrapper()
+}
+
+#Preview("핀 있는데 노트안쓴 경우") {
+    struct PreviewWrapper: View {
+        @State private var isPresented = true
+
+        var body: some View {
+            Color.clear
+                .sheet(isPresented: $isPresented) {
+                    PlaceInfoSheet(
+                        placeInfo: PlaceInfo(
+                            title: "선택한 위치",
+                            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+                            roadAddress: "대구광역시 달서구 상원로 27",
+                            phoneNumber: "010-9934-9349"
+                        ),
+                        existingLocation: Location(
+                            id: UUID(),
+                            address: "대구광역시 달서구 상인동 1453-7",
+                            title: "2동 304호",
+                            note: "",
+                            pointLatitude: 35.8563,
+                            pointLongitude: 128.5557,
+                            boxMinLatitude: nil,
+                            boxMinLongitude: nil,
+                            boxMaxLatitude: nil,
+                            boxMaxLongitude: nil,
+                            locationType: 3,
+                            colorType: 2,
+                            receivedAt: Date()
+                        ),
+                        isLoading: false,
+                        onClose: { isPresented = false },
+                        onMemoTapped: {}
+                    )
+                    .presentationDetents([.fraction(0.5)])
+                    .presentationDragIndicator(.visible)
+                }
+        }
+    }
+
+    return PreviewWrapper()
+}

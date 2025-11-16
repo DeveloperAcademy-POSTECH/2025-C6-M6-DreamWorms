@@ -38,50 +38,48 @@ struct PinWriteView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // MARK: - Header
-                
-                PinWriteHeader(
-                    title: isEditMode ? String(localized: .pinModify) : String(localized: .pinAdd),
-                    isSaveEnabled: isValidPinName,
-                    onCloseTapped: onCancel,
-                    onSaveTapped: savePin
+        VStack(spacing: 0) {
+            PinWriteHeader(
+                title: isEditMode ? String(localized: .pinModify) : String(localized: .pinAdd),
+                isSaveEnabled: isValidPinName,
+                onCloseTapped: onCancel,
+                onSaveTapped: savePin
+            )
+            .padding(.top, 8)
+            .padding(.bottom, 6)
+            
+            ScrollView {
+                // 핀 이름 입력
+                PinNameInputSection(
+                    pinName: $pinName,
+                    isValid: isValidPinName
                 )
+                .padding(.bottom, 24)
                 
-                // MARK: - Content
+                // 핀 색상 선택
+                PinColorSelectionSection(
+                    selectedColor: $selectedColor
+                )
+                .padding(.bottom, 24)
                 
-                VStack(alignment: .leading, spacing: 24) {
-                    // 핀 이름 입력
-                    PinNameInputSection(
-                        pinName: $pinName,
-                        isValid: isValidPinName
-                    )
-                    .padding(.top, 24)
-                    
-                    // 핀 색상 선택
-                    PinColorSelectionSection(
-                        selectedColor: $selectedColor
-                    )
-                    
-                    // 핀 아이콘 선택
-                    PinCategorySelectionSection(
-                        selectedCategory: $selectedCategory,
-                        selectedColor: selectedColor
-                    )
-                    
-                    DWButton(
-                        isEnabled: .constant(isValidPinName),
-                        title: String(localized: .mapviewPinCreateButton)
-                    ) {
-                        savePin()
-                    }
-                    .padding(.bottom, 25)
-                }
-                .padding(.horizontal, 16)
+                // 핀 아이콘 선택
+                PinCategorySelectionSection(
+                    selectedCategory: $selectedCategory,
+                    selectedColor: selectedColor
+                )
+            }
+            .padding(.bottom, 6)
+            .scrollIndicators(.hidden)
+            .scrollDismissesKeyboard(.interactively)
+                        
+            DWButton(
+                isEnabled: .constant(isValidPinName),
+                title: String(localized: .mapviewPinCreateButton)
+            ) {
+                savePin()
             }
         }
-        .scrollBounceBehavior(.basedOnSize)
+        .padding(.horizontal, 16)
         .background(.labelAssistive)
         .onAppear {
             if let location = existingLocation {
@@ -135,7 +133,7 @@ struct PinNameInputSection: View {
         VStack(alignment: .trailing, spacing: 8) {
             HStack {
                 TextField(.pinWritePlaceHolder, text: $pinName)
-                    .font(.bodyRegular14)
+                    .font(.bodyMedium14)
                     .foregroundStyle(.labelNormal)
                     .padding(.leading, 8)
                     .onChange(of: pinName) { _, newValue in
@@ -147,21 +145,21 @@ struct PinNameInputSection: View {
                         Image(.xmarkFill)
                             .foregroundStyle(.labelAssistive)
                     }
-                    .padding(.trailing, 4)
+                    .padding(.trailing, 10)
                 }
                 
                 HStack(spacing: 0) {
                     Text("\(characterCount)")
-                        .font(.captionRegular12)
+                        .font(.numberMedium12)
                         .foregroundStyle(.labelNormal)
                     Text(String(localized: .pinWirteLimitLength))
-                        .font(.captionRegular12)
+                        .font(.numberMedium12)
                         .foregroundStyle(.labelAlternative)
                 }
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 18)
-            .background(.white)
+            .background(.mainAlternative)
             .clipShape(RoundedRectangle(cornerRadius: 18))
         }
     }
@@ -216,6 +214,7 @@ struct PinColorSelectionSection: View {
                     )
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 }
@@ -231,16 +230,20 @@ struct ColorCircleButton: View {
         Button(action: onTap) {
             Circle()
                 .fill(color.color)
-                .frame(width: 40, height: 40)
+                .frame(
+                    width: isSelected ? 42 : 36,
+                    height: isSelected ? 42 : 36
+                )
                 .overlay {
                     if isSelected {
                         Circle()
                             .strokeBorder(Color.white, lineWidth: 3)
                         Circle()
-                            .strokeBorder(color.color, lineWidth: 6)
+                            .strokeBorder(.primaryNormal, lineWidth: 2)
                     }
                 }
         }
+        .frame(width: 42, height: 42)
     }
 }
 
@@ -256,9 +259,12 @@ struct PinCategorySelectionSection: View {
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
             
-            VStack(spacing: 12) {
+            VStack(spacing: 4) {
                 // Int16 기준으로 정렬 (home=0, work=1, custom=3)
-                ForEach(PinCategoryType.allCases.sorted(by: { $0.rawValue < $1.rawValue }), id: \.rawValue) { category in
+                ForEach(
+                    PinCategoryType.allCases.sorted(by: { $0.rawValue < $1.rawValue }),
+                    id: \.rawValue
+                ) { category in
                     CategoryCard(
                         category: category,
                         selectedColor: selectedColor,
@@ -283,7 +289,7 @@ struct CategoryCard: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
+                    HStack(alignment: .center, spacing: 8) {
                         category.icon
                             .renderingMode(.template)
                             .resizable()
@@ -293,7 +299,7 @@ struct CategoryCard: View {
                         
                         Text(category.text)
                             .font(.titleSemiBold16)
-                            .foregroundStyle(.labelNormal)
+                            .foregroundStyle(selectedColor.color)
                     }
                     
                     Text(category.description)
@@ -316,10 +322,12 @@ struct CategoryCard: View {
                 }
                 .frame(alignment: .center)
             }
-            .padding(16)
+            .padding([.vertical, .trailing], 16)
+            .padding(.leading, 20)
             .background(.white)
             .clipShape(RoundedRectangle(cornerRadius: 18))
         }
+        .buttonStyle(.plain) // 깜빡이는 효과 제거 목적
     }
 }
 
@@ -354,48 +362,48 @@ extension CharacterSet {
 
 // MARK: - Preview
 
-// #Preview("핀 추가") {
-//    PinWriteView(
-//        placeInfo: PlaceInfo(
-//            title: "선택한 위치",
-//            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-//            roadAddress: "대구광역시 달서구 상원로 27",
-//            phoneNumber: "-"
-//        ),
-//        existingLocation: nil,
-//        caseId: UUID(),
-//        isEditMode: false,
-//        onSave: { _ in },
-//        onCancel: {}
-//    )
-// }
-//
-// #Preview("핀 수정") {
-//    PinWriteView(
-//        placeInfo: PlaceInfo(
-//            title: "선택한 위치",
-//            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-//            roadAddress: "대구광역시 달서구 상원로 27",
-//            phoneNumber: "-"
-//        ),
-//        existingLocation: Location(
-//            id: UUID(),
-//            address: "대구광역시 달서구 상인동 1453-7",
-//            title: "2동 304호",
-//            note: nil,
-//            pointLatitude: 35.8563,
-//            pointLongitude: 128.5557,
-//            boxMinLatitude: nil,
-//            boxMinLongitude: nil,
-//            boxMaxLatitude: nil,
-//            boxMaxLongitude: nil,
-//            locationType: 0,
-//            colorType: 2,
-//            receivedAt: Date()
-//        ),
-//        caseId: UUID(),
-//        isEditMode: true,
-//        onSave: { _ in },
-//        onCancel: {}
-//    )
-// }
+#Preview("핀 추가") {
+    PinWriteView(
+        placeInfo: PlaceInfo(
+            title: "선택한 위치",
+            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+            roadAddress: "대구광역시 달서구 상원로 27",
+            phoneNumber: "-"
+        ),
+        existingLocation: nil,
+        caseId: UUID(),
+        isEditMode: false,
+        onSave: { _ in },
+        onCancel: {}
+    )
+}
+
+#Preview("핀 수정") {
+    PinWriteView(
+        placeInfo: PlaceInfo(
+            title: "선택한 위치",
+            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+            roadAddress: "대구광역시 달서구 상원로 27",
+            phoneNumber: "-"
+        ),
+        existingLocation: Location(
+            id: UUID(),
+            address: "대구광역시 달서구 상인동 1453-7",
+            title: "2동 304호",
+            note: nil,
+            pointLatitude: 35.8563,
+            pointLongitude: 128.5557,
+            boxMinLatitude: nil,
+            boxMinLongitude: nil,
+            boxMaxLatitude: nil,
+            boxMaxLongitude: nil,
+            locationType: 0,
+            colorType: 2,
+            receivedAt: Date()
+        ),
+        caseId: UUID(),
+        isEditMode: true,
+        onSave: { _ in },
+        onCancel: {}
+    )
+}

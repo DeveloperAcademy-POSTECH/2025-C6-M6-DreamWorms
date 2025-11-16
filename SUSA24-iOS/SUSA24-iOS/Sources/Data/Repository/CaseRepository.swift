@@ -27,6 +27,12 @@ protocol CaseRepositoryProtocol: Sendable {
     
     func deleteCase(id: UUID) async throws
     func createCase(model: Case, imageData: Data?, phoneNumber: String?) async throws
+    
+    /// CaseID 값을 기준으로 Case의 정보를 찾습니다.
+    func fetchCaseForEdit(for caseId: UUID) async throws -> (case: Case?, phoneNumber: String?, profileImagePath: String?)
+
+    /// Case 내용을 수정합니다.
+    func updateCase(model: Case, imageData: Data?, phoneNumber: String?) async throws
 
     /// 사건번호로 케이스를 찾습니다.
     /// - Parameter caseNumber: 사건번호(number)
@@ -164,6 +170,77 @@ struct CaseRepository: CaseRepositoryProtocol {
         }
     }
     
+    func fetchCaseForEdit(
+        for caseId: UUID
+    ) async throws -> (case: Case?, phoneNumber: String?, profileImagePath: String?) {
+        try await context.perform {
+            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+            request.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
+
+            guard let caseEntity = try context.fetch(request).first else {
+                return (nil, nil, nil)
+            }
+
+            let suspects = (caseEntity.suspects as? Set<SuspectEntity>) ?? []
+            let primarySuspect = suspects.first
+
+            let caseModel = Case(
+                id: caseEntity.id ?? caseId,
+                number: caseEntity.number ?? "",
+                name: caseEntity.name ?? "",
+                crime: caseEntity.crime ?? "",
+                suspect: primarySuspect?.name ?? "",
+                suspectProfileImage: primarySuspect?.profileImage
+            )
+
+            let phoneNumber = primarySuspect?.phoneNumber
+            let profileImagePath = primarySuspect?.profileImage
+
+            return (caseModel, phoneNumber, profileImagePath)
+        }
+    }
+
+    func updateCase(
+        model: Case,
+        imageData: Data?,
+        phoneNumber: String?
+    ) async throws {
+        try await context.perform {
+            let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+            request.predicate = NSPredicate(format: "id == %@", model.id as CVarArg)
+
+            guard let caseEntity = try context.fetch(request).first else {
+                return
+            }
+
+            caseEntity.name = model.name
+            caseEntity.number = model.number
+            caseEntity.crime = model.crime
+
+            if let suspects = caseEntity.suspects as? Set<SuspectEntity>,
+               let suspectEntity = suspects.first
+            {
+                suspectEntity.name = model.suspect
+                suspectEntity.phoneNumber = phoneNumber
+
+                // 이미지 업데이트 (imageData가 nil이면 기존 이미지 유지)
+                if let data = imageData {
+                    // 기존 이미지 경로가 있으면 삭제
+                    if let oldPath = suspectEntity.profileImage {
+                        ImageFileStorage.deleteProfileImage(at: oldPath)
+                    }
+                    // 새 이미지 저장
+                    let id = suspectEntity.id ?? UUID()
+                    if let newPath = try? ImageFileStorage.saveProfileImage(data, for: id) {
+                        suspectEntity.profileImage = newPath
+                    }
+                }
+            }
+
+            try context.save()
+        }
+    }
+    
     /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
     /// - Parameter caseId: 저장할 Case의 UUID
     /// - Throws: CoreData 저장 에러
@@ -213,6 +290,11 @@ struct MockCaseRepository: CaseRepositoryProtocol {
     func loadMockDataIfNeeded(caseId _: UUID) async throws {}
     func deleteCase(id _: UUID) async throws {}
     func createCase(model _: Case, imageData _: Data?, phoneNumber _: String?) async throws {}
+    func fetchCaseForEdit(for _: UUID) async throws -> (case: Case?, phoneNumber: String?, profileImagePath: String?) {
+        (nil, nil, nil)
+    }
+
+    func updateCase(model _: Case, imageData _: Data?, phoneNumber _: String?) async throws {}
 
     func findCase(byCaseNumber _: String) async throws -> UUID? { nil }
 }

@@ -9,7 +9,7 @@ import Foundation
 
 enum AppRoute: Hashable {
     case cameraScene(caseID: UUID)
-    case caseAddScene
+    case caseAddScene(caseID: UUID? = nil)
     case caseListScene
     case dashboardScene(caseID: UUID)
     case locationOverviewScene(caseID: UUID, address: String, initialCoordinate: MapCoordinate)
