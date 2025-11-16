@@ -19,13 +19,40 @@ struct DashboardView: View {
     
     var currentCaseID: UUID
     
+    private var headerTitle: String {
+        if store.state.isAnalyzingWithFM {
+            // 로딩 중일 때
+            switch store.state.tab {
+            case .visitDuration:
+                store.state.visitDurationSummary.isEmpty
+                    ? "체류시간을 분석하고 있어요..."
+                    : normalizeTrailingDots(store.state.visitDurationSummary)
+            case .visitFrequency:
+                store.state.visitFrequencySummary.isEmpty
+                    ? "방문 빈도를 분석하고 있어요..."
+                    : normalizeTrailingDots(store.state.visitFrequencySummary)
+            }
+        } else {
+            // 분석 완료 or 실패 후
+            switch store.state.tab {
+            case .visitDuration:
+                store.state.visitDurationSummary.isEmpty
+                    ? "체류시간 분석을 위한 데이터가 충분하지 않아요."
+                    : normalizeTrailingDots(store.state.visitDurationSummary)
+            case .visitFrequency:
+                store.state.visitFrequencySummary.isEmpty
+                    ? "방문빈도 분석을 위한 데이터가 충분하지 않아요."
+                    : normalizeTrailingDots(store.state.visitFrequencySummary)
+            }
+        }
+    }
+    
     // MARK: - View
     
     var body: some View {
         VStack(spacing: 0) {
             DashboardHeader(
-                // TODO: - 추후 Foundation Model 연동시 수정 필요
-                title: String(localized: .testAnalyze),
+                title: headerTitle,
                 onBack: { coordinator.pop() }
             )
             
@@ -35,7 +62,8 @@ struct DashboardView: View {
                         get: { store.state.tab },
                         set: { store.send(.setTab($0)) }
                     ),
-                    topLocations: store.state.topVisitDurationLocations,
+                    topVisitDurationLocations: store.state.topVisitDurationLocations,
+                    topVisitFrequencyLocations: store.state.visitFrequencyLocations,
                     onCardTap: {
                         coordinator.push(
                             .locationOverviewScene(
@@ -69,7 +97,21 @@ extension DashboardView {}
 
 // MARK: - Private Extension Methods
 
-private extension DashboardView {}
+private extension DashboardView {
+    /// 문장 끝의 `...`, `....` 같은 여러 개의 마침표를 단일 `.`로 정리합니다.
+    func normalizeTrailingDots(_ text: String) -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // 끝에 2개 이상 붙은 마침표를 하나로 치환
+        if let range = trimmed.range(of: #"\.{2,}$"#, options: .regularExpression) {
+            var result = trimmed
+            result.replaceSubrange(range, with: ".")
+            return result
+        }
+        
+        return trimmed
+    }
+}
 
 // MARK: - Preview
 

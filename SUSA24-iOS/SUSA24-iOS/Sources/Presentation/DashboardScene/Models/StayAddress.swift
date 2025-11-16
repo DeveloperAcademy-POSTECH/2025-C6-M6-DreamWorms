@@ -13,4 +13,5 @@ struct StayAddress: Identifiable, Equatable, Sendable {
     let totalMinutes: Int
     let latitude: Double
     let longitude: Double
+    let visitCount: Int
 }
