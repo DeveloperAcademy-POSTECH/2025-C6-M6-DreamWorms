@@ -987,6 +987,39 @@
         }
       }
     },
+    "scan_load_failed_content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추출된 주소가 없습니다."
+          }
+        }
+      }
+    },
+    "scan_load_failed_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영하시겠습니까?"
+          }
+        }
+      }
+    },
+    "scan_load_try" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영"
+          }
+        }
+      }
+    },
     "scan_result_failed_content" : {
       "extractionState" : "manual",
       "localizations" : {
