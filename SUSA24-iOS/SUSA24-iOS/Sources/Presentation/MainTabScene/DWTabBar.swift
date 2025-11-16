@@ -41,7 +41,7 @@ struct DWTabBar<Content: View>: View {
                     tab.icon
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 25)
+                        .frame(height: 22)
                     
                     Text(tab.title)
                         .font(.bodyMedium10)
