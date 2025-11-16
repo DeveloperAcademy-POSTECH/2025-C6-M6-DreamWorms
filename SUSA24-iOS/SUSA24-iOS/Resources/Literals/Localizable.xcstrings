@@ -1164,10 +1164,28 @@
       }
     },
     "scanLoad_failed_content" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영하시겠습니까?"
+          }
+        }
+      }
     },
     "scanLoad_failed_title" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추출된 주소가 없습니다."
+          }
+        }
+      }
     },
     "scanLoad_subTitle" : {
       "comment" : "스캔 로딩_서브타이틀",
@@ -1194,7 +1212,16 @@
       }
     },
     "scanLoad_try" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영"
+          }
+        }
+      }
     },
     "Selected Hour" : {
 
