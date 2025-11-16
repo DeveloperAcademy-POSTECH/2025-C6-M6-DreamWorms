@@ -230,18 +230,18 @@ struct MapView: View {
                 })
                 .iconSize(20)
                 .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3),
-                .menu(
-                    image: Image(.ellipsis),
-                    items: [
-                        DWBottomToolbarItem.MenuItem(
-                            title: String(localized: .buttonShare),
-                            systemImage: "square.and.arrow.up",
-                            role: nil,
-                            action: {}
-                        ),
-                    ]
-                )
-                .iconSize(16),
+//                .menu(
+//                    image: Image(.ellipsis),
+//                    items: [
+//                        DWBottomToolbarItem.MenuItem(
+//                            title: String(localized: .buttonShare),
+//                            systemImage: "square.and.arrow.up",
+//                            role: nil,
+//                            action: {}
+//                        ),
+//                    ]
+//                )
+//                .iconSize(16),
             ]
         }
     }

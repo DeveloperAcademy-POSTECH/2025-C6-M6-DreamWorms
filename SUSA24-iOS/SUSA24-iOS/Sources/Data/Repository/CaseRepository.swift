@@ -293,6 +293,7 @@ struct MockCaseRepository: CaseRepositoryProtocol {
     func fetchCaseForEdit(for _: UUID) async throws -> (case: Case?, phoneNumber: String?, profileImagePath: String?) {
         (nil, nil, nil)
     }
+
     func updateCase(model _: Case, imageData _: Data?, phoneNumber _: String?) async throws {}
 
     func findCase(byCaseNumber _: String) async throws -> UUID? { nil }
