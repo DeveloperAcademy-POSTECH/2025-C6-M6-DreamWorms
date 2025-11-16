@@ -31,8 +31,20 @@ final class CaseLocationMarkerManager {
         _ locations: [Location],
         on mapView: NMFMapView
     ) -> [String: Int] {
+        // TAENI : 테스트를 위한 로그 추가
+        // 전체 로케이션을 다 직어보고 싶으면 세번째 주석 처리 된 로그를 풀면 다 나옴.
+        print("🟡 [MarkerManager] updateMarkers called")
+        print("🟡 [MarkerManager] locations.count: \(locations.count)")
+//        print("🟡 [MarkerManager] locations: \(locations.map { "[\($0.id)] \($0.address)" })")
+        
         let (markers, cellCounts) = buildMarkers(from: locations)
+        
+        print("🟡 [MarkerManager] markers built: \(markers.count)")
+        
         applyMarkers(markers, on: mapView)
+        
+        print("🟡 [MarkerManager] markers applied to map")
+        
         return cellCounts
     }
 
