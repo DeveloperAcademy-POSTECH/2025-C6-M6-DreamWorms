@@ -47,9 +47,9 @@ struct CameraView: View {
 //                        store.send(.documentOverlayTapped)
 //                    }
 //                }
-//                
+//
 //                // MARK: - 렌즈 얼룩 표시
-//                
+//
 //                if store.state.isLensSmudgeDetectionEnabled,
 //                   let smudge = store.state.lensSmudgeDetection
 //                {
