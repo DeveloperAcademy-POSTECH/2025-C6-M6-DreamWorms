@@ -45,7 +45,10 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     private let dashboardView: () -> DashboardView
     private let onePageView: () -> OnePageView
     private var timeLineView: some View {
-        TimeLineView(store: timeLineStore)
+        TimeLineView(
+            store: timeLineStore,
+            dispatcher: ModuleFactory.shared.mapDispatcher
+        )
     }
     
     // MARK: - Init
@@ -122,10 +125,6 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                 caseInfo: caseInfo,
                 locations: newLocations
             ))
-        }
-        .onChange(of: selectedDetent) { _, newDetent in
-            let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
-            timeLineStore.send(.setMinimized(isMinimized))
         }
         .onChange(of: store.state.selectedTab) { _, newTab in
             if newTab == .map {
