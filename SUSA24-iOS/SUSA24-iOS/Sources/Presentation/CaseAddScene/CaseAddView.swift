@@ -85,6 +85,7 @@ struct CaseAddView: View {
                         get: { store.state.suspectPhoneNumber },
                         set: { store.send(.updateSuspectPhoneNumber($0)) }
                     ),
+                    isEditMode: store.state.isEditMode,
                     focus: $focus,
                     nameField: .name,
                     numberField: .number,
@@ -112,6 +113,15 @@ struct CaseAddView: View {
                 store.send(.setProfileImage(data))
             }
             .ignoresSafeArea()
+        }
+        .task { store.send(.onAppear) }
+        .onChange(of: store.state.existingProfileImagePath) { _, newPath in
+            guard store.state.isEditMode,
+                  let newPath,
+                  let uiImage = ImageFileStorage.loadProfileImage(from: newPath)
+            else { return }
+            
+            selectedImage = Image(uiImage: uiImage)
         }
     }
 }
