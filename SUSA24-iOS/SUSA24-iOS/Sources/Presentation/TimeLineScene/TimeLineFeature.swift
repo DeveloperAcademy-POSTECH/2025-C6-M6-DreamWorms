@@ -36,11 +36,12 @@ struct TimeLineFeature: DWReducer {
         var locations: [Location]
         /// 날짜별로 그룹화된 Location
         var groupedLocations: [LocationGroupedByDate]
+        /// 기지국 셀 타임라인 모드 여부
+        var isCellTimelineMode: Bool = false
+        /// 셀 타임라인 모드일 때 헤더에 표시할 타이틀 (기지국 주소)
+        var cellTimelineTitle: String?
         
         var scrollTarget: ScrollTarget?
-        
-        /// Tabar 관련 보일 컨텐츠 영역잡기용
-        var isMinimized: Bool = false
         
         /// 검색 관련 State
         var searchText: String = ""
@@ -92,8 +93,13 @@ struct TimeLineFeature: DWReducer {
         case resetScrollTarget
         
         case updateData(caseInfo: Case?, locations: [Location])
-        
-        case setMinimized(Bool)
+        /// 선택한 셀에 해당하는 타임라인을 표시하도록 필터를 적용합니다.
+        /// - Parameters:
+        ///   - cellKey: 좌표 키 (latitude_longitude 형식)
+        ///   - title: 헤더에 표시할 기지국 주소
+        case applyCellFilter(cellKey: String, title: String?)
+        /// 셀 타임라인 필터를 해제하고 전체 타임라인을 표시합니다.
+        case clearCellFilter
         
         /// 검색바 터치
         case searchTextChanged(String)
@@ -107,9 +113,6 @@ struct TimeLineFeature: DWReducer {
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
         case .onAppear:
-            // 탭바를 위한 조건
-            state.isMinimized = false
-            
             return .none
             
         case let .locationTapped(location):
@@ -143,10 +146,6 @@ struct TimeLineFeature: DWReducer {
             state.locations = locations
             state.groupedLocations = LocationGroupedByDate.groupByDate(locations)
             return .none
-            
-        case let .setMinimized(isMinimized):
-            state.isMinimized = isMinimized
-            return .none
 
         case let .searchTextChanged(text):
             state.searchText = text
@@ -154,6 +153,32 @@ struct TimeLineFeature: DWReducer {
             return .none
             
         case let .setSearchActive(isActive):
+            // TODO: 검색 활성/비활성 상태에 따라 필터 로직이 추가되면 연결
+            return .none
+            
+        case let .applyCellFilter(cellKey, title):
+            // 셀 타임라인 모드로 전환하고, 선택한 셀에 해당하는 Location만 필터링
+            state.isCellTimelineMode = true
+            let filtered = state.locations.filter { location in
+                guard LocationType(location.locationType) == .cell else { return false }
+                let key = coordinateKey(
+                    latitude: location.pointLatitude,
+                    longitude: location.pointLongitude
+                )
+                return key == cellKey
+            }
+            // 타이틀이 명시되지 않았다면, 필터된 Location 중 하나의 주소를 사용합니다.
+            if state.cellTimelineTitle == nil {
+                state.cellTimelineTitle = title ?? filtered.first?.address
+            }
+            state.groupedLocations = LocationGroupedByDate.groupByDate(filtered)
+            return .none
+            
+        case .clearCellFilter:
+            // 셀 타임라인 모드를 해제하고 전체 타임라인으로 복구
+            state.isCellTimelineMode = false
+            state.cellTimelineTitle = nil
+            state.groupedLocations = LocationGroupedByDate.groupByDate(state.locations)
             return .none
         }
     }
@@ -173,5 +198,12 @@ struct TimeLineFeature: DWReducer {
         }
         
         return String(format: "%04d-%02d-%02d", year, month, day)
+    }
+
+    /// Location 좌표를 셀 좌표 키로 변환합니다. (소수점 6자리 위도/경도 조합)
+    private func coordinateKey(latitude: Double, longitude: Double) -> String {
+        let latString = String(format: "%.6f", latitude)
+        let lngString = String(format: "%.6f", longitude)
+        return "\(latString)_\(lngString)"
     }
 }
