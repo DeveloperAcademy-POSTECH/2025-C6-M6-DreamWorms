@@ -91,6 +91,8 @@ final class CaseLocationMarkerManager {
     private struct MarkerModel {
         let id: String
         let coordinate: MapCoordinate
+        /// 사용자 위치 마커의 색상 (home / work / custom 에서만 사용)
+        let pinColor: PinColorType?
         
         var markerType: MarkerType
     }
@@ -106,7 +108,11 @@ final class CaseLocationMarkerManager {
             lat: marker.coordinate.latitude,
             lng: marker.coordinate.longitude
         )
-        let icon = await MarkerImageCache.shared.image(for: marker.markerType)
+        let icon: UIImage = if marker.markerType.isUserLocation, let color = marker.pinColor {
+            await MarkerImageCache.shared.userLocationImage(for: marker.markerType, color: color)
+        } else {
+            await MarkerImageCache.shared.image(for: marker.markerType)
+        }
         overlay.iconImage = NMFOverlayImage(image: icon)
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.height = CGFloat(NMF_MARKER_SIZE_AUTO)
@@ -126,24 +132,28 @@ final class CaseLocationMarkerManager {
             guard latitude != 0, longitude != 0 else { continue }
             
             let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
+            let pinColor = PinColorType(location.colorType)
             
             switch LocationType(location.locationType) {
             case .home:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
+                    pinColor: pinColor,
                     markerType: .home
                 ))
             case .work:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
+                    pinColor: pinColor,
                     markerType: .work
                 ))
             case .custom:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
+                    pinColor: pinColor,
                     markerType: .custom
                 ))
             case .cell:
@@ -162,6 +172,7 @@ final class CaseLocationMarkerManager {
                 MarkerModel(
                     id: key,
                     coordinate: coordinate,
+                    pinColor: nil,
                     markerType: .cell(isVisited: true)
                 )
             )
@@ -203,8 +214,18 @@ final class CaseLocationMarkerManager {
                         overlay.mapView = mapView
                     }
                     
-                    if markerTypes[markerInfo.id] != markerInfo.markerType {
-                        let icon = await MarkerImageCache.shared.image(for: markerInfo.markerType)
+                    // 사용자 위치 마커(home / work / custom)는 색(pinColor)이 변경될 수 있으므로
+                    // 타입이 같아도 항상 아이콘을 갱신한다.
+                    // 셀 / CCTV 등 인프라 마커는 타입이 바뀐 경우에만 갱신한다.
+                    let isUserLocation = markerInfo.markerType.isUserLocation
+                    let typeChanged = markerTypes[markerInfo.id] != markerInfo.markerType
+                    
+                    if isUserLocation || typeChanged {
+                        let icon: UIImage = if isUserLocation, let color = markerInfo.pinColor {
+                            await MarkerImageCache.shared.userLocationImage(for: markerInfo.markerType, color: color)
+                        } else {
+                            await MarkerImageCache.shared.image(for: markerInfo.markerType)
+                        }
                         overlay.iconImage = NMFOverlayImage(image: icon)
                         markerTypes[markerInfo.id] = markerInfo.markerType
                     }

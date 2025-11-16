@@ -268,6 +268,8 @@ struct NaverMapView: UIViewRepresentable {
                 hasher.combine(location.locationType)
                 hasher.combine(location.pointLatitude)
                 hasher.combine(location.pointLongitude)
+                // 색이 변경되었을 때도 해시가 달라지도록 colorType을 포함
+                hasher.combine(location.colorType)
             }
             hasher.combine(visitFrequencyEnabled)
             let newHash = hasher.finalize()
