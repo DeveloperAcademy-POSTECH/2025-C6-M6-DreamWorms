@@ -23,7 +23,7 @@ protocol CaseRepositoryProtocol: Sendable {
     /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
     /// - Parameter caseId: 저장할 Case의 UUID
     /// - Throws: CoreData 저장 에러
-    func loadMockDataIfNeeded(caseId: UUID) async throws
+//    func loadMockDataIfNeeded(caseId: UUID) async throws
     
     func deleteCase(id: UUID) async throws
     func createCase(model: Case, imageData: Data?, phoneNumber: String?) async throws
@@ -244,22 +244,23 @@ struct CaseRepository: CaseRepositoryProtocol {
     /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
     /// - Parameter caseId: 저장할 Case의 UUID
     /// - Throws: CoreData 저장 에러
-    func loadMockDataIfNeeded(caseId: UUID) async throws {
-        // 이미 Location 데이터가 있는지 확인
-        let (_, existingLocations) = try await fetchAllDataOfSpecificCase(for: caseId)
-        guard existingLocations.isEmpty else {
-            print(" [CaseRepository] 이미 Location 데이터가 있습니다. 목데이터를 로드하지 않습니다.")
-            return
-        }
-        
-        print("⚠️ [CaseRepository] Location 데이터가 없습니다. 목데이터를 로드합니다...")
-        
-        // LocationRepository를 통해 목데이터 로드
-        let locationRepository = LocationRepository(context: context)
-        try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
-        
-        print("✅ [CaseRepository] 목데이터 로드 완료")
-    }
+    /// 기존 목데이터 가져오는 방식 주석 처리
+//    func loadMockDataIfNeeded(caseId: UUID) async throws {
+//        // 이미 Location 데이터가 있는지 확인
+//        let (_, existingLocations) = try await fetchAllDataOfSpecificCase(for: caseId)
+//        guard existingLocations.isEmpty else {
+//            print(" [CaseRepository] 이미 Location 데이터가 있습니다. 목데이터를 로드하지 않습니다.")
+//            return
+//        }
+//
+//        print("⚠️ [CaseRepository] Location 데이터가 없습니다. 목데이터를 로드합니다...")
+//
+//        // LocationRepository를 통해 목데이터 로드
+//        let locationRepository = LocationRepository(context: context)
+//        try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
+//
+//        print("✅ [CaseRepository] 목데이터 로드 완료")
+//    }
 
     // MARK: - 사건번호로 케이스 찾기
 
