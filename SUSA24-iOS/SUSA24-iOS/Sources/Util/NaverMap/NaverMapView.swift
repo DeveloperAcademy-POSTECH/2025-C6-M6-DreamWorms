@@ -403,8 +403,9 @@ struct NaverMapView: UIViewRepresentable {
                 let longitude = location.pointLongitude
                 guard latitude != 0, longitude != 0 else { continue }
                 
-                let key = coordinateKey(latitude: latitude, longitude: longitude)
-                var entry = cellGroups[key] ?? (latitude: latitude, longitude: longitude, count: 0)
+                let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
+                let key = coordinate.coordinateKey
+                var entry = cellGroups[key] ?? (latitude: coordinate.latitude, longitude: coordinate.longitude, count: 0)
                 entry.count += 1
                 cellGroups[key] = entry
             }
@@ -423,16 +424,10 @@ struct NaverMapView: UIViewRepresentable {
                 }
         }
         
-        private func coordinateKey(latitude: Double, longitude: Double) -> String {
-            let latString = String(format: "%.6f", latitude)
-            let lngString = String(format: "%.6f", longitude)
-            return "\(latString)_\(lngString)"
-        }
-        
         /// 좌표 키에 해당하는 기지국 셀의 주소(CellMarker.location)를 반환합니다.
         private func cellTitle(for cellKey: String) -> String? {
             for marker in parent.cellStations {
-                let key = coordinateKey(latitude: marker.latitude, longitude: marker.longitude)
+                let key = MapCoordinate(latitude: marker.latitude, longitude: marker.longitude).coordinateKey
                 if key == cellKey {
                     return marker.location
                 }

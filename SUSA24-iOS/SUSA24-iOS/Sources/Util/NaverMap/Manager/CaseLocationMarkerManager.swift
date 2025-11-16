@@ -150,7 +150,7 @@ final class CaseLocationMarkerManager {
                 ))
 
             case .cell:
-                let key = coordinateKey(latitude: latitude, longitude: longitude)
+                let key = MapCoordinate(latitude: latitude, longitude: longitude).coordinateKey
                 var entry = cellGroups[key] ?? (coordinate, 0)
                 entry.count += 1
                 cellGroups[key] = entry
@@ -233,12 +233,6 @@ final class CaseLocationMarkerManager {
                 }
             }
         }
-    }
-
-    private func coordinateKey(latitude: Double, longitude: Double) -> String {
-        let latString = String(format: "%.6f", latitude)
-        let lngString = String(format: "%.6f", longitude)
-        return "\(latString)_\(lngString)"
     }
 
     private func desiredMarkerType(

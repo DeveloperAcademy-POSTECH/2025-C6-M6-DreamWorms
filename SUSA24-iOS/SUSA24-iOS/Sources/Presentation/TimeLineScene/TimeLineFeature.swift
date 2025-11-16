@@ -161,10 +161,10 @@ struct TimeLineFeature: DWReducer {
             state.isCellTimelineMode = true
             let filtered = state.locations.filter { location in
                 guard LocationType(location.locationType) == .cell else { return false }
-                let key = coordinateKey(
+                let key = MapCoordinate(
                     latitude: location.pointLatitude,
                     longitude: location.pointLongitude
-                )
+                ).coordinateKey
                 return key == cellKey
             }
             // 타이틀이 명시되지 않았다면, 필터된 Location 중 하나의 주소를 사용합니다.
@@ -198,12 +198,5 @@ struct TimeLineFeature: DWReducer {
         }
         
         return String(format: "%04d-%02d-%02d", year, month, day)
-    }
-
-    /// Location 좌표를 셀 좌표 키로 변환합니다. (소수점 6자리 위도/경도 조합)
-    private func coordinateKey(latitude: Double, longitude: Double) -> String {
-        let latString = String(format: "%.6f", latitude)
-        let lngString = String(format: "%.6f", longitude)
-        return "\(latString)_\(lngString)"
     }
 }
