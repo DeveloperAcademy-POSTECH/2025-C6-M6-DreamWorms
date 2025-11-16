@@ -38,7 +38,7 @@ protocol ModuleFactoryProtocol {
 final class ModuleFactory: ModuleFactoryProtocol {
     static let shared = ModuleFactory()
     private init() {}
-    lazy var mapDispatcher = MapDispatcher()
+    private lazy var mapDispatcher = MapDispatcher()
     private lazy var searchService = KakaoSearchAPIService()
     private lazy var cctvService = VWorldCCTVAPIService()
     private lazy var infrastructureMarkerManager = InfrastructureMarkerManager()
@@ -139,6 +139,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let view = MainTabView(
             store: store,
             timeLineStore: timeLineStore,
+            dispatcher: mapDispatcher,
             mapView: { mapView },
             dashboardView: { dashboardView },
             onePageView: { onePageView }
