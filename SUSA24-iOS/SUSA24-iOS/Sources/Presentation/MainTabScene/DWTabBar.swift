@@ -10,6 +10,7 @@ import SwiftUI
 struct DWTabBar<Content: View>: View {
     @Binding var activeTab: MainTabIdentifier
     let showDivider: Bool
+    let hideContent: Bool
     @ViewBuilder var content: () -> Content
     
     var body: some View {
@@ -18,7 +19,7 @@ struct DWTabBar<Content: View>: View {
             let bottomPadding = safeArea.bottom / 4
 
             VStack(spacing: 0) {
-                if activeTab == .map {
+                if activeTab == .map, hideContent == false {
                     content()
                     if showDivider { Divider() }
                 } else {
