@@ -254,6 +254,7 @@ struct NaverMapView: UIViewRepresentable {
             parent.onMapTapped?(latlng)
         }
         
+        // TAENI : 로케이션 업데이트 작업 한 부분
         @MainActor
         func updateCaseLocations(
             locations: [Location],
@@ -261,16 +262,18 @@ struct NaverMapView: UIViewRepresentable {
             on mapView: NMFMapView
         ) {
             var hasher = Hasher()
-            for location in locations {
-                hasher.combine(location.id)
-                hasher.combine(location.locationType)
-                hasher.combine(location.pointLatitude)
-                hasher.combine(location.pointLongitude)
+            
+            let sortedLocations = locations.sorted { $0.id.uuidString < $1.id.uuidString }
+            for location in sortedLocations {
+                hasher.combine(location)
             }
             hasher.combine(visitFrequencyEnabled)
             let newHash = hasher.finalize()
             
             if lastLocationsHash != newHash {
+                print("🟢 [NaverMapView] Locations changed - updating markers")
+                print("🟢 [NaverMapView] Total locations: \(locations.count)")
+                
                 let cellCounts = caseLocationMarkerManager.updateMarkers(
                     locations,
                     on: mapView
@@ -283,6 +286,9 @@ struct NaverMapView: UIViewRepresentable {
                 }
 
                 lastLocationsHash = newHash
+                print("🟢 [NaverMapView] Markers updated successfully")
+            } else {
+                print("🟡 [NaverMapView] No change detected in locations")
             }
         }
         
