@@ -12,6 +12,7 @@ struct CaseCard: View {
     
     let onEdit: () -> Void
     let onDelete: () -> Void
+    let onAddCellLog: () -> Void
     
     @State private var showMenu = false
     @State private var showDeleteAlert = false
@@ -81,6 +82,16 @@ struct CaseCard: View {
                         )
                     }
                     
+                    // 1116 mock 데이터 추가 버튼
+                    Button {
+                        onAddCellLog()
+                    } label: {
+                        Label(
+                            "기지국데이터 추가",
+                            systemImage: "antenna.radiowaves.left.and.right"
+                        )
+                    }
+                    
                     Button(role: .destructive) {
                         showDeleteAlert = true
                     } label: {
@@ -121,17 +132,19 @@ struct CaseCard: View {
         }
     }
 }
-
-#Preview {
-    CaseCard(
-        item: Case(
-            id: UUID(),
-            number: "12-2025",
-            name: "사건명",
-            crime: "범죄유형",
-            suspect: "피의자명"
-        ),
-        onEdit: {}, onDelete: {}
-    )
-    .padding(.horizontal, 16)
-}
+//
+//#Preview {
+//    CaseCard(
+//        item: Case(
+//            id: UUID(),
+//            number: "12-2025",
+//            name: "사건명",
+//            crime: "범죄유형",
+//            suspect: "피의자명"
+//        ),
+//        onEdit: {},
+//        onDelete: {},
+//        onAddCellLog: {}
+//    )
+//    .padding(.horizontal, 16)
+//}
