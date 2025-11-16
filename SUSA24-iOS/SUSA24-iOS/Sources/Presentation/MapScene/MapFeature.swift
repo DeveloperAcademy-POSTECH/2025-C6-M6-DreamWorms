@@ -452,8 +452,6 @@ struct MapFeature: DWReducer {
         case let .moveToLocation(coordinate):
             // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
             state.cameraTargetCoordinate = coordinate
-            // 시트의 Detent 높이를 조절하라는 Notification을 전달합니다.
-            NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none

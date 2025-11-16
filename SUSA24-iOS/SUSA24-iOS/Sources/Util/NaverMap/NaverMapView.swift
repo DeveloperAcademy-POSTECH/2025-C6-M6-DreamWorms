@@ -24,6 +24,8 @@ struct NaverMapView: UIViewRepresentable {
     var onCameraMoveConsumed: (() -> Void)?
     /// 현위치 포커싱 명령을 소비했음을 상위 모듈에 알리는 콜백입니다.
     var onMyLocationFocusConsumed: (() -> Void)?
+    /// 기지국 셀 마커 탭 이벤트를 상위 모듈로 전달하는 콜백입니다.
+    var onCellMarkerTapped: ((String, String?) -> Void)?
     
     // MARK: 사용자 상호작용 콜백
     
@@ -273,7 +275,14 @@ struct NaverMapView: UIViewRepresentable {
             if lastLocationsHash != newHash {
                 let cellCounts = caseLocationMarkerManager.updateMarkers(
                     locations,
-                    on: mapView
+                    on: mapView,
+                    onCellTapped: { [weak self] cellKey in
+                        guard let self else { return }
+                        Task { @MainActor in
+                            let title = self.cellTitle(for: cellKey)
+                            parent.onCellMarkerTapped?(cellKey, title)
+                        }
+                    }
                 )
 
                 if visitFrequencyEnabled {
@@ -394,8 +403,9 @@ struct NaverMapView: UIViewRepresentable {
                 let longitude = location.pointLongitude
                 guard latitude != 0, longitude != 0 else { continue }
                 
-                let key = coordinateKey(latitude: latitude, longitude: longitude)
-                var entry = cellGroups[key] ?? (latitude: latitude, longitude: longitude, count: 0)
+                let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
+                let key = coordinate.coordinateKey
+                var entry = cellGroups[key] ?? (latitude: coordinate.latitude, longitude: coordinate.longitude, count: 0)
                 entry.count += 1
                 cellGroups[key] = entry
             }
@@ -414,10 +424,15 @@ struct NaverMapView: UIViewRepresentable {
                 }
         }
         
-        private func coordinateKey(latitude: Double, longitude: Double) -> String {
-            let latString = String(format: "%.6f", latitude)
-            let lngString = String(format: "%.6f", longitude)
-            return "\(latString)_\(lngString)"
+        /// 좌표 키에 해당하는 기지국 셀의 주소(CellMarker.location)를 반환합니다.
+        private func cellTitle(for cellKey: String) -> String? {
+            for marker in parent.cellStations {
+                let key = MapCoordinate(latitude: marker.latitude, longitude: marker.longitude).coordinateKey
+                if key == cellKey {
+                    return marker.location
+                }
+            }
+            return nil
         }
         
         private static func hash(for cellMarkers: [CellMarker]) -> Int {

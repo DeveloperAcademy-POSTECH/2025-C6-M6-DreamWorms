@@ -17,6 +17,7 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     // MARK: - Dependencies
     
     @State var store: DWStore<MainTabFeature>
+    @Bindable private var dispatcher: MapDispatcher
     
     // MARK: - TimeLine Store (탭 전환 시에도 유지!)
     
@@ -56,12 +57,14 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     init(
         store: DWStore<MainTabFeature>,
         timeLineStore: DWStore<TimeLineFeature>,
+        dispatcher: MapDispatcher,
         @ViewBuilder mapView: @escaping () -> MapView,
         @ViewBuilder dashboardView: @escaping () -> DashboardView,
         @ViewBuilder onePageView: @escaping () -> OnePageView
     ) {
         self._store = State(initialValue: store)
         self._timeLineStore = State(initialValue: timeLineStore)
+        self._dispatcher = Bindable(dispatcher)
         self.mapView = mapView
         self.dashboardView = dashboardView
         self.onePageView = onePageView
@@ -138,8 +141,11 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
             ))
         }
         .onChange(of: selectedDetent) { _, newDetent in
-            let isMinimized = (newDetent == mapShortDetent || newDetent == otherDetent)
-            timeLineStore.send(.setMinimized(isMinimized))
+            // 시트를 최소 높이로 내렸을 때는 셀 타임라인 모드를 해제합니다.
+            let isShortDetent = (newDetent == mapShortDetent || newDetent == otherDetent)
+            if isShortDetent {
+                timeLineStore.send(.clearCellFilter)
+            }
         }
         .onChange(of: store.state.selectedTab) { _, newTab in
             if newTab == .map {
@@ -149,8 +155,17 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
                 selectedDetent = otherDetent
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
-            selectedDetent = mapMidDetnet
+        .onChange(of: dispatcher.request) { _, request in
+            guard let request else { return }
+            switch request {
+            case let .focusCellTimeline(cellKey, title):
+                // 먼저 타임라인 상태를 셀 전용으로 바꾼 뒤 시트를 중간 detent로 올립니다.
+                timeLineStore.send(.applyCellFilter(cellKey: cellKey, title: title))
+                selectedDetent = mapMidDetnet
+                dispatcher.consume()
+            default:
+                break
+            }
         }
     }
 }

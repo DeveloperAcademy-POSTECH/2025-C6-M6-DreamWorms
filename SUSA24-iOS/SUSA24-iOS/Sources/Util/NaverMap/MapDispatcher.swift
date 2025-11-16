@@ -53,9 +53,19 @@ final class MapDispatcher {
     
     /// MapDispatcher가 전달할 수 있는 지도 명령 요청의 목록입니다.
     enum RequestType: Equatable {
+        // MARK: - Map 전용 요청 (MapView / MapFeature 에서만 소비)
+
         /// 검색 결과를 기반으로 지도 카메라를 이동시키고, 동시에 바텀시트에 보여줄 정보를 제공합니다.
         case moveToSearchResult(coordinate: MapCoordinate, placeInfo: PlaceInfo)
         /// Timeline에서 선택한 Location으로 지도 카메라를 이동시킵니다.
         case moveToLocation(coordinate: MapCoordinate)
+        
+        // MARK: - Timeline 전용 요청 (TimeLineView / TimeLineFeature 에서만 소비)
+
+        /// 선택한 기지국 셀의 타임라인을 강조하도록 요청합니다.
+        /// - Parameters:
+        ///   - cellKey: 셀 좌표 키 (\"latitude_longitude\" 형식)
+        ///   - title: 헤더에 표시할 기지국 주소 (없으면 Location.address 기반으로 결정)
+        case focusCellTimeline(cellKey: String, title: String?)
     }
 }
