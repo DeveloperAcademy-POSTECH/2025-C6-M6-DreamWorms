@@ -113,7 +113,7 @@ struct MarkerImage: View {
             if let badgeText {
                 // 숫자 배지
                 Text(badgeText)
-                    .font(.numberSmall9)
+                    .font(.numberSemiBold9)
                     .foregroundStyle(badgeTextColor)
             } else if let icon {
                 // 아이콘
