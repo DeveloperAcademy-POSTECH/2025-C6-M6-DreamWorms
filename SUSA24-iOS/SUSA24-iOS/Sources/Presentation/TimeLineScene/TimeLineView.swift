@@ -15,9 +15,36 @@ struct TimeLineView: View {
     
     // MARK: - View
     
+    // MARK: - Initializer
+    
+    init(
+        store: DWStore<TimeLineFeature>
+    ) {
+        self._store = State(initialValue: store)
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
-            if !store.state.isMinimized {
+            if store.state.isCellTimelineMode {
+                // 셀 타임라인 모드: 타이틀만 표시, suspect / count / 검색바는 숨김
+                Text(store.state.cellTimelineTitle ?? store.state.caseName)
+                    .font(.titleSemiBold20)
+                    .foregroundStyle(.labelNormal)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 16)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                
+                if !store.state.isEmpty {
+                    TimeLineDateChipList(
+                        dates: store.state.groupedLocations.map(\.date),
+                        onDateTapped: { date in
+                            store.send(.scrollToDate(date))
+                        }
+                    )
+                    .padding(.bottom, 11)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            } else {
                 if !isSearchFocused {
                     TimeLineBottomSheetHeader(
                         title: store.state.caseName,
@@ -57,7 +84,7 @@ struct TimeLineView: View {
                 .setupBackground(.mainBackground)
                 .padding(.horizontal, 16)
                 .padding(16)
-                .opacity(store.state.isMinimized ? 0 : 0.5)
+                .opacity(0.5)
             } else {
                 TimeLineScrollContentView(
                     groupedLocations: store.state.groupedLocations,
@@ -66,10 +93,13 @@ struct TimeLineView: View {
                         store.send(.locationTapped(location))
                     }
                 )
-                .opacity(store.state.isMinimized ? 0 : 1)
+                .opacity(1)
             }
         }
-        .task { store.send(.onAppear) }
+        .task {
+            // 타임라인 최초 진입 시 기본 onAppear 처리
+            store.send(.onAppear)
+        }
     }
     
     // MARK: - Helper Methods

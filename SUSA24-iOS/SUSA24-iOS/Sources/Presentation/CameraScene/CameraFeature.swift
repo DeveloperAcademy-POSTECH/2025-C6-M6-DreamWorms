@@ -215,6 +215,7 @@ struct CameraFeature: DWReducer {
         case .viewDidDisappear:
             camera.stopVisionAnalysis()
             camera.pauseCamera()
+            camera.clearAllPhotos()
             return .none
             
         case .sceneDidBecomeActive:

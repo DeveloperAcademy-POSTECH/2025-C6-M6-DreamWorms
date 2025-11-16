@@ -987,6 +987,39 @@
         }
       }
     },
+    "scan_load_failed_content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추출된 주소가 없습니다."
+          }
+        }
+      }
+    },
+    "scan_load_failed_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영하시겠습니까?"
+          }
+        }
+      }
+    },
+    "scan_load_try" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영"
+          }
+        }
+      }
+    },
     "scan_result_failed_content" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1130,6 +1163,30 @@
         }
       }
     },
+    "scanLoad_failed_content" : {
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영하시겠습니까?"
+          }
+        }
+      }
+    },
+    "scanLoad_failed_title" : {
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추출된 주소가 없습니다."
+          }
+        }
+      }
+    },
     "scanLoad_subTitle" : {
       "comment" : "스캔 로딩_서브타이틀",
       "extractionState" : "manual",
@@ -1137,7 +1194,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "잠시만 기다려 주세요,"
+            "value" : "잠시만 기다려 주세요."
           }
         }
       }
@@ -1150,6 +1207,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "문서를 정리하고 있어요"
+          }
+        }
+      }
+    },
+    "scanLoad_try" : {
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 촬영"
           }
         }
       }
