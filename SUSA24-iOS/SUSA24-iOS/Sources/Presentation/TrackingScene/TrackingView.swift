@@ -37,10 +37,9 @@ struct TrackingView: View {
             // 배경: 네이버 지도
             TrackingNaverMapView(
                 locations: timeLineStore.state.locations,
-                selectedLocationIDs: selectedLocationIDSet
-            ) { tappedId, name in
-                handleLocationTapped(id: tappedId, name: name)
-            }
+                selectedLocationIDs: selectedLocationIDSet,
+                onLocationTapped: handleLocationTapped
+            )
             .ignoresSafeArea()
         }
         // 상단 CCTV 선택 패널
@@ -48,14 +47,12 @@ struct TrackingView: View {
             CCTVSelectionPanel(
                 slotTitles: $slots,
                 onSelectSlot: { index in
-                    // 이 슬롯에 다음 탭되는 핀을 바인딩
                     activeSlotIndex = index
                 },
                 onBack: { coordinator.pop() },
                 onDone: {
                     // 완료 시점에 선택된 Location 들을 사용
                     print("완료: \(slotLocationIds)")
-                    // coordinator.pop() 등 로직 연결 가능
                 }
             )
         }
