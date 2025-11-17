@@ -150,7 +150,7 @@ nonisolated extension DashboardAnalysisService {
         - 가장 많이 방문한 날짜: \(bestDateString) (\(bestWeekdayString))
         
         위 정보를 사용해서,
-
+        
         1. `visitDurationSummary` 필드는 **항상 정확히 3줄**로 작성해.
            - 1줄: "체류시간 1위 지역에서"
            - 2줄: 위에서 제공한 시간대 `\(timeRangeString)`을 그대로 사용한 문장
@@ -158,16 +158,16 @@ nonisolated extension DashboardAnalysisService {
            - 줄과 줄 사이는 **문자 `\n` 한 개**로만 구분해.
            - 따라서 `visitDurationSummary` 안에는 **줄바꿈 문자(`\n`)가 정확히 2개**만 있어야 해.
            - 줄의 앞뒤에는 공백을 넣지 마.
-
+        
            예시:
            "체류시간 1위 지역에서\n오전 11시 22분-오후 12시 33분에\n머무를 가능성이 가장 높아요."
-
+        
         2. `visitFrequencySummary` 필드도 **항상 정확히 3줄**로 작성해.
            - 1줄: "방문빈도 1위 지역은"
            - 2줄: 제공된 날짜와 요일 `\(bestDateString) \(bestWeekdayString)`을 그대로 사용한 문장
            - 3줄: "가장 많이 방문했어요." 와 비슷한 의미의 문장
            - 마찬가지로 **줄바꿈 문자(`\n`)는 2개만 사용**하고, 줄 앞뒤 공백은 넣지 마.
-
+        
            예시:
            "방문빈도 1위 지역은\n10월 27일 수요일에\n가장 많이 방문했어요."
         """

@@ -333,7 +333,7 @@ struct SelectedPinImage: View {
 
 // MARK: - Selected Pin Preview
 
-//#Preview("Selected Pins") {
+// #Preview("Selected Pins") {
 //    VStack(spacing: 16) {
 //        HStack(spacing: 16) {
 //            SelectedPinImage(style: .home(.black))
@@ -348,7 +348,7 @@ struct SelectedPinImage: View {
 //    }
 //    .padding()
 //    .background(Color.gray.opacity(0.2))
-//}
+// }
 
 // MARK: - Preview
 
