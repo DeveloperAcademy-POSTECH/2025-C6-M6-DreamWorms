@@ -36,6 +36,8 @@ enum SymbolLiterals: String {
     case radioSelected = "button.programmable"
     case radioDeselected = "circle"
     case expand = "arrow.up.left.and.arrow.down.right"
+    case minus
+    case tracking = "point.3.filled.connected.trianglepath.dotted"
 }
 
 extension Image {

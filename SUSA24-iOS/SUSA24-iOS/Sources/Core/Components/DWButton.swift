@@ -24,6 +24,7 @@ struct DWButton: View {
     var iconImage: Image?
     var foregroundColor: Color = .white
     var backgroundColor: Color = .primaryNormal
+    var textFont: Font = .titleSemiBold16
     var verticalPadding: CGFloat = 16
     var isInteractiveEffect: Bool = true
     var isHapticFeedback: Bool = true
@@ -43,7 +44,7 @@ struct DWButton: View {
                 }
                 
                 Text(title)
-                    .font(.titleSemiBold16)
+                    .font(textFont)
             }
             .padding(.vertical, verticalPadding)
             .frame(maxWidth: .infinity)
@@ -82,6 +83,15 @@ extension DWButton {
     func setupForegroundColor(_ color: Color) -> Self {
         var view = self
         view.foregroundColor = color
+        return view
+    }
+    
+    /// 버튼 텍스트 폰트를 설정합니다.
+    /// - Parameter font: 전경색
+    @discardableResult
+    func setupFont(_ font: Font) -> Self {
+        var view = self
+        view.textFont = font
         return view
     }
     

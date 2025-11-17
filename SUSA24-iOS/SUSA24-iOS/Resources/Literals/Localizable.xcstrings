@@ -1301,6 +1301,18 @@
         }
       }
     },
+    "tracking_navigationTitle" : {
+      "comment" : "추적탭_상단 네비게이션 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV 영역 선택"
+          }
+        }
+      }
+    },
     "us_ver" : {
       "comment" : "미국_버전",
       "extractionState" : "manual",

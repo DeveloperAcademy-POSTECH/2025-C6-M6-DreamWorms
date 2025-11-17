@@ -21,7 +21,7 @@ enum MainTabIdentifier: Hashable, CaseIterable {
     var icon: Image {
         switch self {
         case .map: Image(.map)
-        case .tracking: Image(.icnTracking)
+        case .tracking: Image(.tracking)
         case .analyze: Image(.analytics)
         }
     }
