@@ -59,10 +59,11 @@ struct ScanResultCard: View {
                                     }
                                 }) {
                                     Image(systemName: isShowingJibunAddress ? "chevron.down" : "chevron.up")
-                                        .font(.system(size: 10))
+                                        .font(.system(size: 12))
                                         .foregroundStyle(.labelAlternative)
-                                }
+                                 }
                                 .buttonStyle(.borderless)
+                                .padding(.bottom, 4)
                             }
                         }
                         
@@ -130,42 +131,42 @@ struct ScanResultCard: View {
 }
 
 // MARK: - Preview
-//
-//#Preview {
-//    VStack(spacing: 12) {
-//        // 신주소만 있는 카드
-//        ScanResultCard(
-//            roadAddress: "부산광역시 북구 화명대로 7",
-//            jibunAddress: "",
-//            duplicateCount: 38,
-//            isSelected: false,
-//            selectedCategory: nil,
-//            onToggleSelection: {},
-//            onCategorySelect: { _ in }
-//        )
-//
-//        // 구주소만 있는 카드
-//        ScanResultCard(
-//            roadAddress: "",
-//            jibunAddress: "부산 강서구 대저1동 123-45",
-//            duplicateCount: 28,
-//            isSelected: false,
-//            selectedCategory: nil,
-//            onToggleSelection: {},
-//            onCategorySelect: { _ in }
-//        )
-//        
-//        // 신주소/구주소 둘 다 있는 카드
-//        ScanResultCard(
-//            roadAddress: "부산광역시 강서구 공항로 두 줄이 넘어가는 긴 주소 108",
-//            jibunAddress: "부산 강서구 대저2동 2350",
-//            duplicateCount: 18,
-//            isSelected: true,
-//            selectedCategory: .custom,
-//            onToggleSelection: {},
-//            onCategorySelect: { _ in }
-//        )
-//    }
-//    .padding(16)
-//    .background(Color(.systemGray6))
-//}
+
+#Preview {
+    VStack(spacing: 12) {
+        // 신주소만 있는 카드
+        ScanResultCard(
+            roadAddress: "부산광역시 북구 화명대로 7",
+            jibunAddress: "",
+            duplicateCount: 38,
+            isSelected: false,
+            selectedCategory: nil,
+            onToggleSelection: {},
+            onCategorySelect: { _ in }
+        )
+
+        // 구주소만 있는 카드
+        ScanResultCard(
+            roadAddress: "",
+            jibunAddress: "부산 강서구 대저1동 123-45",
+            duplicateCount: 28,
+            isSelected: false,
+            selectedCategory: nil,
+            onToggleSelection: {},
+            onCategorySelect: { _ in }
+        )
+        
+        // 신주소/구주소 둘 다 있는 카드
+        ScanResultCard(
+            roadAddress: "부산광역시 강서구 공항로 두 줄이 넘어가는 긴 주소 108",
+            jibunAddress: "부산 강서구 대저2동 2350",
+            duplicateCount: 18,
+            isSelected: true,
+            selectedCategory: .custom,
+            onToggleSelection: {},
+            onCategorySelect: { _ in }
+        )
+    }
+    .padding(16)
+    .background(Color(.systemGray6))
+}
