@@ -108,6 +108,7 @@ private extension MapSheetContainer {
             {
                 PinWriteView(
                     placeInfo: placeInfo,
+                    coordinate: state.selectedCoordinate,
                     existingLocation: state.existingLocation,
                     caseId: caseId,
                     isEditMode: state.isEditMode,

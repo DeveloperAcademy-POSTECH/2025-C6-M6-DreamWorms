@@ -30,7 +30,7 @@ struct OnePageStickyHeader: View {
                 HStack(alignment: .center, spacing: 8) {
                     ForEach(Category.allCases) { cat in
                         DWSelectPin(
-                            text: "\(cat.title) 12",
+                            text: "\(cat.title)",
                             isSelected: selection == cat,
                             action: { selection = cat }
                         )

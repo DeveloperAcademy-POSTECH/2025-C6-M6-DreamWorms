@@ -121,6 +121,7 @@ struct TimeLineFeature: DWReducer {
                 latitude: location.pointLatitude,
                 longitude: location.pointLongitude
             )
+            NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
             dispatcher.send(.moveToLocation(coordinate: coordinate))
             return .none
             

@@ -10,6 +10,7 @@ import SwiftUI
 /// 핀 추가/수정 화면
 struct PinWriteView: View {
     let placeInfo: PlaceInfo
+    let coordinate: MapCoordinate?
     let existingLocation: Location?
     let caseId: UUID
     let isEditMode: Bool
@@ -91,17 +92,20 @@ struct PinWriteView: View {
     }
     
     private func savePin() {
-        // 기존 위치가 있으면 좌표 유지, 없으면 0.0으로 설정 (TODO: 실제 좌표 연동)
-        let latitude = existingLocation?.pointLatitude ?? 0.0
-        let longitude = existingLocation?.pointLongitude ?? 0.0
+        // 좌표 결정 로직
+        let coordinateSource = existingLocation.map {
+            MapCoordinate(latitude: $0.pointLatitude, longitude: $0.pointLongitude)
+        } ?? coordinate
+        // 좌표가 없는 예외 상황: 저장을 진행하지 않고 로그만 남깁니다.
+        guard let coordinateSource else { return }
         
         let location = Location(
             id: existingLocation?.id ?? UUID(),
             address: placeInfo.jibunAddress,
             title: pinName.trimmingCharacters(in: .whitespacesAndNewlines),
             note: existingLocation?.note,
-            pointLatitude: latitude,
-            pointLongitude: longitude,
+            pointLatitude: coordinateSource.latitude,
+            pointLongitude: coordinateSource.longitude,
             boxMinLatitude: nil,
             boxMinLongitude: nil,
             boxMaxLatitude: nil,
@@ -370,6 +374,7 @@ extension CharacterSet {
 //            roadAddress: "대구광역시 달서구 상원로 27",
 //            phoneNumber: "-"
 //        ),
+//        coordinate: MapCoordinate(latitude: 35.8563, longitude: 128.5557),
 //        existingLocation: nil,
 //        caseId: UUID(),
 //        isEditMode: false,
@@ -386,6 +391,7 @@ extension CharacterSet {
 //            roadAddress: "대구광역시 달서구 상원로 27",
 //            phoneNumber: "-"
 //        ),
+//        coordinate: MapCoordinate(latitude: 35.8563, longitude: 128.5557),
 //        existingLocation: Location(
 //            id: UUID(),
 //            address: "대구광역시 달서구 상인동 1453-7",

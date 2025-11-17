@@ -122,6 +122,7 @@ struct NaverMapView: UIViewRepresentable {
         context.coordinator.updateCaseLocations(
             locations: locations,
             visitFrequencyEnabled: isVisitFrequencyEnabled,
+            isVisible: shouldShowMarkers,
             on: uiView
         )
         context.coordinator.updateCellRangeOverlay(
@@ -159,7 +160,6 @@ struct NaverMapView: UIViewRepresentable {
         private var lastLocationsHash: Int?
         private var lastCellRangeConfig: CellRangeConfig?
         private var lastCCTVMarkersHash: Int?
-        private var lastCaseLocationVisibility: Bool?
         private var lastCellMarkerVisibility: Bool?
         private var lastCCTVVisibility: Bool?
         
@@ -229,16 +229,14 @@ struct NaverMapView: UIViewRepresentable {
         }
 
         /// 마커 가시성 상태를 추적하고 네이버 지도 오버레이에 적용합니다.
+        /// CaseLocation 마커는 updateCaseLocations에서 이미 처리되므로 여기서는 CellMarker와 CCTV만 처리합니다.
         @MainActor
         func updateMarkerVisibility(
-            isCaseLocationVisible: Bool,
+            isCaseLocationVisible _: Bool,
             isCellMarkerVisible: Bool,
             isCCTVVisible: Bool
         ) {
-            if lastCaseLocationVisibility != isCaseLocationVisible {
-                lastCaseLocationVisibility = isCaseLocationVisible
-                caseLocationMarkerManager.setVisibility(isCaseLocationVisible)
-            }
+            // CaseLocation은 updateCaseLocations에서 이미 처리됨
             
             if lastCellMarkerVisibility != isCellMarkerVisible {
                 lastCellMarkerVisibility = isCellMarkerVisible
@@ -260,6 +258,7 @@ struct NaverMapView: UIViewRepresentable {
         func updateCaseLocations(
             locations: [Location],
             visitFrequencyEnabled: Bool,
+            isVisible: Bool,
             on mapView: NMFMapView
         ) {
             var hasher = Hasher()
@@ -268,30 +267,42 @@ struct NaverMapView: UIViewRepresentable {
                 hasher.combine(location.locationType)
                 hasher.combine(location.pointLatitude)
                 hasher.combine(location.pointLongitude)
+                // 색이 변경되었을 때도 해시가 달라지도록 colorType을 포함
+                hasher.combine(location.colorType)
             }
             hasher.combine(visitFrequencyEnabled)
             let newHash = hasher.finalize()
             
-            if lastLocationsHash != newHash {
-                let cellCounts = caseLocationMarkerManager.updateMarkers(
-                    locations,
-                    on: mapView,
-                    onCellTapped: { [weak self] cellKey in
-                        guard let self else { return }
-                        Task { @MainActor in
-                            let title = self.cellTitle(for: cellKey)
-                            parent.onCellMarkerTapped?(cellKey, title)
+            let shouldUpdate = lastLocationsHash != newHash
+            
+            if shouldUpdate {
+                Task { @MainActor in
+                    let cellCounts = await caseLocationMarkerManager.updateMarkers(
+                        locations,
+                        on: mapView,
+                        onCellTapped: { [weak self] cellKey in
+                            guard let self else { return }
+                            Task { @MainActor in
+                                let title = self.cellTitle(for: cellKey)
+                                parent.onCellMarkerTapped?(cellKey, title)
+                            }
                         }
-                    }
-                )
+                    )
 
-                if visitFrequencyEnabled {
-                    caseLocationMarkerManager.applyVisitFrequency(with: cellCounts, on: mapView)
-                } else {
-                    caseLocationMarkerManager.resetVisitFrequency(on: mapView)
+                    if visitFrequencyEnabled {
+                        await caseLocationMarkerManager.applyVisitFrequency(with: cellCounts, on: mapView)
+                    } else {
+                        await caseLocationMarkerManager.resetVisitFrequency(on: mapView)
+                    }
+                    
+                    // 마커 업데이트 완료 후 가시성 재적용
+                    caseLocationMarkerManager.setVisibility(isVisible)
                 }
 
                 lastLocationsHash = newHash
+            } else {
+                // 해시가 같아도 가시성은 다시 적용 (줌 레벨 변경 시)
+                caseLocationMarkerManager.setVisibility(isVisible)
             }
         }
         
