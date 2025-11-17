@@ -3,7 +3,6 @@
 //  SUSA24-iOS
 //
 //  Created by taeni on 11/9/25.
-//  Updated: 11/17/25 - Pass roadAddress and jibunAddress to ScanResultCard
 //
 
 import CoreData
