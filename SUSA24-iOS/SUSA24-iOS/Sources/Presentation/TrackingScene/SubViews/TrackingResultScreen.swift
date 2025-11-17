@@ -11,7 +11,8 @@ struct TrackingResultScreen: View {
     let locations: [Location]
     let selectedLocationIDs: Set<UUID>
     let slots: [String?]
-    let cctvItems: [CCTVItem]
+    
+    let cctvMarkers: [CCTVMarker]
     let isCCTVLoading: Bool
     
     let namespace: Namespace.ID
@@ -55,6 +56,7 @@ struct TrackingResultScreen: View {
                 TrackingResultMapPreview(
                     locations: locations,
                     selectedLocationIDs: selectedLocationIDs,
+                    cctvMarkers: cctvMarkers,
                     namespace: namespace,
                     onExpand: {
                         withAnimation(
@@ -83,11 +85,11 @@ struct TrackingResultScreen: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 8) {
-                            ForEach(cctvItems) { item in
+                            ForEach(cctvMarkers) { item in
                                 DWLocationCard(
                                     type: .cctv,
                                     title: item.name,
-                                    description: item.address
+                                    description: item.location
                                 )
                                 .setupAsButton(false)
                             }
@@ -102,6 +104,7 @@ struct TrackingResultScreen: View {
                 TrackingResultExpandedMapView(
                     locations: locations,
                     selectedLocationIDs: selectedLocationIDs,
+                    cctvMarkers: cctvMarkers,
                     namespace: namespace,
                     onCollapse: {
                         withAnimation(
@@ -127,6 +130,7 @@ struct TrackingResultScreen: View {
 struct TrackingResultMapPreview: View {
     let locations: [Location]
     let selectedLocationIDs: Set<UUID>
+    let cctvMarkers: [CCTVMarker]
     let namespace: Namespace.ID
     let onExpand: () -> Void
     
@@ -135,6 +139,7 @@ struct TrackingResultMapPreview: View {
             TrackingNaverMapView(
                 locations: locations,
                 selectedLocationIDs: selectedLocationIDs,
+                cctvMarkers: cctvMarkers,
                 onLocationTapped: { _, _ in }
             )
             .matchedGeometryEffect(id: "trackingMap", in: namespace)
@@ -157,6 +162,7 @@ struct TrackingResultMapPreview: View {
 struct TrackingResultExpandedMapView: View {
     let locations: [Location]
     let selectedLocationIDs: Set<UUID>
+    let cctvMarkers: [CCTVMarker]
     let namespace: Namespace.ID
     let onCollapse: () -> Void
     
@@ -165,6 +171,7 @@ struct TrackingResultExpandedMapView: View {
             TrackingNaverMapView(
                 locations: locations,
                 selectedLocationIDs: selectedLocationIDs,
+                cctvMarkers: cctvMarkers,
                 onLocationTapped: { _, _ in }
             )
             .matchedGeometryEffect(id: "trackingMap", in: namespace)

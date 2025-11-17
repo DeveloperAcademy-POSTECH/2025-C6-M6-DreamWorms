@@ -25,7 +25,7 @@ struct TrackingFeature: DWReducer {
         var caseId: UUID?
         var locations: [Location] = []
         var isLoading: Bool = false
-        var cctvItems: [CCTVItem] = []
+        var cctvMarkers: [CCTVMarker] = []
         var isCCTVLoading: Bool = false
     }
     
@@ -35,7 +35,7 @@ struct TrackingFeature: DWReducer {
         case onAppear(UUID)
         case locationsLoaded([Location])
         case requestCCTV([Location])
-        case cctvResponse(Result<[CCTVItem], VWorldError>)
+        case cctvResponse(Result<[CCTVMarker], VWorldError>)
     }
     
     // MARK: - Reducer
@@ -63,7 +63,7 @@ struct TrackingFeature: DWReducer {
         
         case let .requestCCTV(locations):
             guard locations.count >= 3 else {
-                state.cctvItems = []
+                state.cctvMarkers = []
                 return .none
             }
             
@@ -79,15 +79,21 @@ struct TrackingFeature: DWReducer {
                 do {
                     let response = try await cctvService.fetchCCTVByPolygon(dto)
                     
-                    let items: [CCTVItem] = response.features.map { feature in
-                        CCTVItem(
+                    let markers: [CCTVMarker] = response.features.compactMap { feature in
+                        guard feature.geometry.coordinates.count >= 2 else { return nil }
+                        let lon = feature.geometry.coordinates[0]
+                        let lat = feature.geometry.coordinates[1]
+                        
+                        return CCTVMarker(
                             id: feature.id,
                             name: feature.properties.cctvname,
-                            address: feature.properties.locate
+                            location: feature.properties.locate,
+                            latitude: lat,
+                            longitude: lon
                         )
                     }
                     
-                    return .cctvResponse(.success(items))
+                    return .cctvResponse(.success(markers))
                 } catch let error as VWorldError {
                     return .cctvResponse(.failure(error))
                 } catch {
@@ -99,10 +105,10 @@ struct TrackingFeature: DWReducer {
             state.isCCTVLoading = false
             
             switch result {
-            case let .success(items):
-                state.cctvItems = items
+            case let .success(markers):
+                state.cctvMarkers = markers
             case let .failure(error):
-                state.cctvItems = []
+                state.cctvMarkers = []
             }
             
             return .none

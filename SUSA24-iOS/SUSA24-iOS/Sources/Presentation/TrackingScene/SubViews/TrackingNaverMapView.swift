@@ -16,6 +16,9 @@ struct TrackingNaverMapView: UIViewRepresentable {
     /// 현재 선택된 Location ID 모음 (선택 상태 표현에 사용할 수 있음)
     var selectedLocationIDs: Set<UUID>
     
+    /// CCTV 검색 결과
+    var cctvMarkers: [CCTVMarker]
+    
     /// 마커를 탭했을 때 상위로 전달할 콜백
     /// - Parameters:
     ///   - id: Location.id
@@ -34,7 +37,6 @@ struct TrackingNaverMapView: UIViewRepresentable {
         mapView.locationOverlay.hidden = false
         context.coordinator.mapView = mapView
         
-        // 초기 줌만 설정해두고, 실제 중심 좌표는 locations 로딩 후에 맞춘다.
         let cameraUpdate = NMFCameraUpdate(zoomTo: 14)
         cameraUpdate.animation = .none
         mapView.moveCamera(cameraUpdate)
@@ -49,6 +51,11 @@ struct TrackingNaverMapView: UIViewRepresentable {
         context.coordinator.updateLocationMarkers(
             locations: locations,
             selectedIDs: selectedLocationIDs,
+            on: uiView
+        )
+        
+        context.coordinator.updateCCTVMarkers(
+            cctvMarkers: cctvMarkers,
             on: uiView
         )
     }
@@ -73,6 +80,8 @@ extension TrackingNaverMapView {
 
         /// 선택된 위치들로 만드는 폴리곤(삼각형) 오버레이
         private var selectionPolygon: NMFPolygonOverlay?
+        
+        private let infrastructureManager = InfrastructureMarkerManager()
         
         init(parent: TrackingNaverMapView) {
             self.parent = parent
@@ -331,6 +340,18 @@ extension TrackingNaverMapView {
                 
                 polygonOverlay.mapView = mapView
             }
+        }
+        
+        @MainActor
+        func updateCCTVMarkers(
+            cctvMarkers: [CCTVMarker],
+            on mapView: NMFMapView
+        ) {
+            infrastructureManager.updateCCTVs(
+                cctvMarkers,
+                on: mapView,
+                isVisible: !cctvMarkers.isEmpty
+            )
         }
         
         private func selectedPinStyle(for location: Location) -> SelectedPinStyle? {

@@ -29,6 +29,7 @@ struct TrackingSelectionScreen: View {
             TrackingNaverMapView(
                 locations: locations,
                 selectedLocationIDs: selectedLocationIDSet,
+                cctvMarkers: [],
                 onLocationTapped: handleLocationTapped
             )
             .matchedGeometryEffect(id: "trackingMap", in: namespace)

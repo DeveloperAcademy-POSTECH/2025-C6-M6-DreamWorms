@@ -45,7 +45,7 @@ struct TrackingView: View {
                     locations: timeLineStore.state.locations,
                     selectedLocationIDs: selectedLocationIDSet,
                     slots: slots,
-                    cctvItems: timeLineStore.state.cctvItems,
+                    cctvMarkers: timeLineStore.state.cctvMarkers,
                     isCCTVLoading: timeLineStore.state.isCCTVLoading,
                     namespace: mapNamespace,
                     onBack: {
@@ -146,5 +146,3 @@ private extension TrackingView {
         activeSlotIndex = nil
     }
 }
-
-// MARK: - Preview
