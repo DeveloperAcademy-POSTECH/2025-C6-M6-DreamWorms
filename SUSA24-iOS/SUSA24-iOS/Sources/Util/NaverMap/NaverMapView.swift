@@ -15,6 +15,8 @@ struct NaverMapView: UIViewRepresentable {
     
     /// 외부 모듈이 요청한 카메라 목표 좌표입니다. 값이 바뀔 때마다 카메라를 이동합니다.
     var cameraTargetCoordinate: MapCoordinate?
+    /// 카메라 이동 시 애니메이션을 적용할지 여부입니다.
+    var shouldAnimateCameraTarget: Bool = false
     /// 외부 모듈이 현위치를 포커싱해야 함을 알리는 플래그입니다.
     var shouldFocusMyLocation: Bool = false
     
@@ -95,7 +97,11 @@ struct NaverMapView: UIViewRepresentable {
         // 1) 외부에서 요청한 카메라 이동 명령 적용
         if let coordinate = cameraTargetCoordinate, context.coordinator.lastCameraTarget != coordinate {
             context.coordinator.lastCameraTarget = coordinate
-            context.coordinator.moveCamera(to: coordinate)
+            if shouldAnimateCameraTarget {
+                context.coordinator.moveCamera(to: coordinate, animated: true, duration: 0.7)
+            } else {
+                context.coordinator.moveCamera(to: coordinate)
+            }
             Task { @MainActor in
                 onCameraMoveConsumed?()
             }
@@ -105,7 +111,14 @@ struct NaverMapView: UIViewRepresentable {
         
         // 2) 현위치 포커싱 명령 적용
         if shouldFocusMyLocation {
-            let success = context.coordinator.focusCameraOnMyLocation()
+            let mapView = uiView
+            mapView.positionMode = .normal
+            let overlay = mapView.locationOverlay
+            if overlay.hidden == false {
+                let currentLocation = overlay.location
+                let coordinate = MapCoordinate(latitude: currentLocation.lat, longitude: currentLocation.lng)
+                context.coordinator.moveCamera(to: coordinate, animated: true, duration: 0.7)
+            }
             Task { @MainActor in
                 if success {
                     onMyLocationFocusConsumed?()
@@ -329,26 +342,20 @@ struct NaverMapView: UIViewRepresentable {
         }
         
         /// 전달받은 좌표로 네이버 지도 카메라를 이동시킵니다.
-        /// - Parameter coordinate: 이동할 지도 좌표
-        func moveCamera(to coordinate: MapCoordinate) {
+        /// - Parameters:
+        ///   - coordinate: 이동할 지도 좌표
+        ///   - animated: 애니메이션 적용 여부. nil이면 애니메이션을 적용하지 않습니다.
+        ///   - duration: 애니메이션 지속 시간 (초). animated가 true일 때만 유효합니다.
+        func moveCamera(to coordinate: MapCoordinate, animated: Bool? = nil, duration: Double? = nil) {
             guard let mapView else { return }
             let target = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
             let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: defaultZoomLevel))
-            cameraUpdate.animation = .none
+            if let animated, animated, let duration {
+                cameraUpdate.animation = .easeOut
+                cameraUpdate.animationDuration = duration
+            } else { cameraUpdate.animation = .none }
+
             mapView.moveCamera(cameraUpdate)
-        }
-        
-        /// 네이버 지도에서 제공하는 위치 추적 정보를 이용해 현위치로 카메라를 이동합니다.
-        /// - Returns: 위치 정보를 활용해 카메라 이동을 수행했다면 `true`, 아니면 `false`를 반환합니다.
-        func focusCameraOnMyLocation() -> Bool {
-            guard let mapView else { return false }
-            mapView.positionMode = .normal
-            let overlay = mapView.locationOverlay
-            guard overlay.hidden == false else { return false }
-            let currentLocation = overlay.location
-            let coordinate = MapCoordinate(latitude: currentLocation.lat, longitude: currentLocation.lng)
-            moveCamera(to: coordinate)
-            return true
         }
         
         func mapViewCameraIdle(_ mapView: NMFMapView) {

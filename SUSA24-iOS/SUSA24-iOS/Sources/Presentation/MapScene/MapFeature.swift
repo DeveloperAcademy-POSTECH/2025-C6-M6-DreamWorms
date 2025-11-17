@@ -64,6 +64,8 @@ struct MapFeature: DWReducer {
         /// 명령 디스패처로부터 전달된 지도 이동 명령을 반영할 목표 좌표입니다.
         /// `MapView`가 해당 좌표를 소비하면 `.clearCameraTarget` 액션으로 다시 nil로 초기화합니다.
         var cameraTargetCoordinate: MapCoordinate?
+        /// 카메라 이동 시 애니메이션을 적용할지 여부입니다.
+        var shouldAnimateCameraTarget: Bool = false
         /// 현위치를 포커싱해야 하는지 여부입니다.
         var shouldFocusMyLocation: Bool = false
         /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
@@ -480,6 +482,7 @@ struct MapFeature: DWReducer {
         case .clearCameraTarget:
             // 지도 카메라 이동이 완료되었음을 반영합니다.
             state.cameraTargetCoordinate = nil
+            state.shouldAnimateCameraTarget = false
             return .none
             
         case .requestFocusMyLocation:
@@ -668,6 +671,7 @@ private extension MapFeature {
             latitude: latestCell.pointLatitude,
             longitude: latestCell.pointLongitude
         )
+        state.shouldAnimateCameraTarget = true
     }
 
     // MARK: - PlaceInfo Helpers
