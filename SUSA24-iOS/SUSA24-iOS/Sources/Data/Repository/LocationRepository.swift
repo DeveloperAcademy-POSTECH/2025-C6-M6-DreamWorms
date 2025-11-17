@@ -255,11 +255,12 @@ struct LocationRepository: LocationRepositoryProtocol {
     /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
     /// - Parameter caseId: 저장할 Case의 UUID
     /// - Throws: JSONLoaderError, CoreData 저장 에러
-    func loadMockDataIfNeeded(caseId: UUID) async throws {
-        let existingLocations = try await fetchLocations(caseId: caseId)
-        guard existingLocations.isEmpty else { return }
-        try await LocationMockLoader.loadAndSaveToCoreData(caseId: caseId, context: context)
-    }
+    /// 기존 목 데이터 가져오는 방식 주석 처리
+//    func loadMockDataIfNeeded(caseId: UUID) async throws {
+//        let existingLocations = try await fetchLocations(caseId: caseId)
+//        guard existingLocations.isEmpty else { return }
+//        try await LocationMockLoader.loadAndSaveToCoreData(caseId: caseId, context: context)
+//    }
     
     /// AppIntent에서 사용: 메시지로부터 Location 생성
     func createLocationFromMessage(

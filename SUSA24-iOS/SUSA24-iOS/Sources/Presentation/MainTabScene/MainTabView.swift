@@ -23,6 +23,10 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
     
     @State var timeLineStore: DWStore<TimeLineFeature>
     
+    // MARK: - Map Store (데이터 동기화를 위해 보관)
+    
+    @State var mapStore: DWStore<MapFeature>
+    
     // MARK: - Properties
     
     @State private var selectedDetent: PresentationDetent
@@ -57,6 +61,7 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
     init(
         store: DWStore<MainTabFeature>,
         timeLineStore: DWStore<TimeLineFeature>,
+        mapStore: DWStore<MapFeature>,
         dispatcher: MapDispatcher,
         @ViewBuilder mapView: @escaping () -> MapView,
         @ViewBuilder trackingView: @escaping () -> TrackingView,
@@ -64,6 +69,7 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
     ) {
         self._store = State(initialValue: store)
         self._timeLineStore = State(initialValue: timeLineStore)
+        self._mapStore = State(initialValue: mapStore)
         self._dispatcher = Bindable(dispatcher)
         self.mapView = mapView
         self.trackingView = trackingView
@@ -120,14 +126,19 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
                 caseInfo: caseInfo,
                 locations: store.state.locations
             ))
+            // MapView에도 전달 (Timeline과 동일한 패턴)
+            mapStore.send(.loadLocations(store.state.locations))
         }
         .onChange(of: store.state.locations) { _, newLocations in
             print("📍 [MainTabView] locations changed: count=\(newLocations.count), caseInfo: \(store.state.caseInfo?.name ?? "nil")")
             guard let caseInfo = store.state.caseInfo else { return }
+            // Timeline에 전달
             timeLineStore.send(.updateData(
                 caseInfo: caseInfo,
                 locations: newLocations
             ))
+            // MapView에도 전달 (Timeline과 동일한 패턴)
+            mapStore.send(.loadLocations(newLocations))
         }
         .onChange(of: selectedDetent) { _, newDetent in
             // 시트를 최소 높이로 내렸을 때는 셀 타임라인 모드를 해제합니다.
@@ -155,6 +166,9 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             default:
                 break
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
+            selectedDetent = mapMidDetnet
         }
     }
 }

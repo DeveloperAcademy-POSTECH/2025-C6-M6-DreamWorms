@@ -127,7 +127,22 @@ final class ModuleFactory: ModuleFactoryProtocol {
             )
         )
         
-        let mapView = makeMapView(caseID: caseID, context: context)
+        // MapView와 store를 함께 생성 (Timeline과 동일한 패턴)
+        let mapStore = DWStore(
+            initialState: MapFeature.State(caseId: caseID),
+            reducer: MapFeature(
+                repository: LocationRepository(context: context),
+                searchService: searchService,
+                cctvService: cctvService,
+                dispatcher: mapDispatcher
+            )
+        )
+        let mapView = MapView(
+            store: mapStore,
+            dispatcher: mapDispatcher,
+            infrastructureManager: infrastructureMarkerManager,
+            caseLocationMarkerManager: caseLocationMarkerManager
+        )
         let trackingView = makeTrackingView(caseID: caseID, context: context)
         let dashboardView = makeDashboardView(caseID: caseID, context: context)
         
@@ -143,6 +158,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         let view = MainTabView(
             store: store,
             timeLineStore: timeLineStore,
+            mapStore: mapStore,
             dispatcher: mapDispatcher,
             mapView: { mapView },
             trackingView: { trackingView },

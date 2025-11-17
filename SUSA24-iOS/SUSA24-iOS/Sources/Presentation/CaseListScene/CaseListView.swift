@@ -54,7 +54,10 @@ struct CaseListView: View {
                             CaseCard(
                                 item: item,
                                 onEdit: { coordinator.push(.caseAddScene(caseID: item.id)) },
-                                onDelete: { store.send(.deleteTapped(item: item)) }
+                                onDelete: { store.send(.deleteTapped(item: item)) },
+                                onAddCellLog: {
+                                    store.send(.cellLogMenuTapped(caseID: item.id))
+                                }
                             )
                             .padding(.horizontal, 16)
                             .onTapGesture { coordinator.push(.mainTabScene(caseID: item.id)) }
@@ -73,6 +76,31 @@ struct CaseListView: View {
         }
         .task { store.send(.onAppear) }
         .ignoresSafeArea(edges: .bottom)
+        // 1116 목데이터 추가 - 덮어쓰기 Alert
+        .dwAlert(
+            isPresented: Binding(
+                get: { store.state.isShowingOverwriteAlert },
+                set: { _ in store.send(.dismissOverwriteAlert) }
+            ),
+            title: "기지국 데이터 덮어쓰기",
+            message: "기존 기지국 데이터가 있습니다. 덮어쓰시겠습니까?",
+            primaryButton: DWAlertButton(title: "덮어쓰기", style: .destructive) {
+                if let caseID = store.state.targetCaseIdForCellLog {
+                    store.send(.addCellLog(caseID: caseID, overwrite: true))
+                }
+            },
+            secondaryButton: DWAlertButton(title: "취소", style: .cancel)
+        )
+        
+        // 1116 목데이터 추가 - 성공 Alert
+        .dwAlert(
+            isPresented: Binding(
+                get: { store.state.isShowingSuccessAlert },
+                set: { _ in store.send(.dismissSuccessAlert) }
+            ),
+            title: "데이터 추가 완료",
+            message: "기지국 위치 데이터가 성공적으로 추가되었습니다."
+        )
     }
 }
 
