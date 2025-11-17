@@ -51,8 +51,11 @@ struct TrackingView: View {
                 },
                 onBack: { coordinator.pop() },
                 onDone: {
-                    // 완료 시점에 선택된 Location 들을 사용
+                    // TODO: - 완료시 화면 전환 코드 추가
                     print("완료: \(slotLocationIds)")
+                },
+                onClearSlot: { index in
+                    clearSlot(at: index)
                 }
             )
         }
@@ -84,6 +87,37 @@ private extension TrackingView {
             slotLocationIds[emptyIndex] = id
             return
         }
+    }
+    
+    /// 슬롯 하나 비우고, 선택된 항목들을 앞으로 당겨주는 로직
+    func clearSlot(at index: Int) {
+        guard slots.indices.contains(index) else { return }
+        
+        // 1) 해당 슬롯 비우기
+        slots[index] = nil
+        slotLocationIds[index] = nil
+        
+        // 2) 남아 있는 것들만 순서대로 모으기
+        var newTitles: [String?] = []
+        var newIds: [UUID?] = []
+        
+        for i in slots.indices {
+            if let id = slotLocationIds[i],
+               let title = slots[i]
+            {
+                newTitles.append(title)
+                newIds.append(id)
+            }
+        }
+        
+        // 3) 나머지는 nil 로 채워서 길이 유지
+        while newTitles.count < slots.count {
+            newTitles.append(nil)
+            newIds.append(nil)
+        }
+        
+        slots = newTitles
+        slotLocationIds = newIds
     }
 }
 

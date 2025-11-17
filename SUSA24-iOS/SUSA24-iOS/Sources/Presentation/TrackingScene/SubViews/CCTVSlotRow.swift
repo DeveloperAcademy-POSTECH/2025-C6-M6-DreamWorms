@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CCTVSlotRow: View {
     @Binding var title: String?
+    var onClear: (() -> Void)?
     
     var body: some View {
         HStack(spacing: 12) {
@@ -23,7 +24,7 @@ struct CCTVSlotRow: View {
             Spacer()
             
             if title != nil {
-                Button(action: { title = nil }) {
+                Button(action: { onClear?() }) {
                     Image(.minus)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.labelNeutral)

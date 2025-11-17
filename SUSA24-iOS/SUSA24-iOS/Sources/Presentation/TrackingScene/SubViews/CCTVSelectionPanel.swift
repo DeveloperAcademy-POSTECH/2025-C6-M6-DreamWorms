@@ -20,6 +20,9 @@ struct CCTVSelectionPanel: View {
     /// 완료 버튼 탭 콜백
     var onDone: () -> Void
     
+    /// 특정 Slot 삭제 콜백
+    var onClearSlot: (Int) -> Void
+    
     // 하나라도 선택되어 있어야 완료 버튼 활성화
     private var canFinish: Bool {
         slotTitles.allSatisfy { $0 != nil }
@@ -53,7 +56,8 @@ struct CCTVSelectionPanel: View {
                         title: Binding(
                             get: { slotTitles[index] },
                             set: { slotTitles[index] = $0 }
-                        )
+                        ),
+                        onClear: { onClearSlot(index) }
                     )
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -67,7 +71,7 @@ struct CCTVSelectionPanel: View {
             DWButton(
                 isEnabled: .constant(canFinish),
                 title: String(localized: .mapviewPinCreateButton),
-                action: {}
+                action: onDone
             )
             .setupVerticalPadding(13.5)
             .setupFont(.titleSemiBold14)
