@@ -114,7 +114,8 @@ struct NaverMapView: UIViewRepresentable {
             let mapView = uiView
             mapView.positionMode = .normal
             let overlay = mapView.locationOverlay
-            if overlay.hidden == false {
+            let success = overlay.hidden == false
+            if success {
                 let currentLocation = overlay.location
                 let coordinate = MapCoordinate(latitude: currentLocation.lat, longitude: currentLocation.lng)
                 context.coordinator.moveCamera(to: coordinate, animated: true, duration: 0.7)
