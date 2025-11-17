@@ -98,7 +98,8 @@ struct MainTabFeature: DWReducer {
                 // 초기 데이터 로드
                 .task {
                     do {
-                        try await repository.loadMockDataIfNeeded(caseId: caseId)
+                        // 1116 목데이터 사용으로 주석 처리
+//                        try await repository.loadMockDataIfNeeded(caseId: caseId)
 
                         let (caseInfo, locations) = try await repository.fetchAllDataOfSpecificCase(for: caseId)
                         return .loadCaseInfoDetail(case: caseInfo, locations: locations)

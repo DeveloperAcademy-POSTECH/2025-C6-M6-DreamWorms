@@ -251,22 +251,23 @@ struct MapFeature: DWReducer {
 
             // 병렬로 데이터 로드
             return .merge(
-                .task { [repository] in
-                    do {
-                        // NOTE: 테스트용 목데이터 저장 로직
-                        // 케이스 선택 시 해당 케이스의 빈 문자열("") suspect에 Location 목데이터 저장
-                        // 실제 데이터가 없을 경우를 대비한 테스트 데이터
-                        // 프로토콜에는 포함되지 않으므로 타입 캐스팅 사용
-                        if let locationRepository = repository as? LocationRepository {
-                            try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
-                        }
-                        
-                        let locations = try await repository.fetchLocations(caseId: caseId)
-                        return .loadLocations(locations)
-                    } catch {
-                        return .loadLocations([])
-                    }
-                },
+                // 기존 목데이터 가져오는 방식 주석 처리
+//                .task { [repository] in
+//                    do {
+//                        // NOTE: 테스트용 목데이터 저장 로직
+//                        // 케이스 선택 시 해당 케이스의 빈 문자열("") suspect에 Location 목데이터 저장
+//                        // 실제 데이터가 없을 경우를 대비한 테스트 데이터
+//                        // 프로토콜에는 포함되지 않으므로 타입 캐스팅 사용
+//                        if let locationRepository = repository as? LocationRepository {
+//                            try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
+//                        }
+//
+//                        let locations = try await repository.fetchLocations(caseId: caseId)
+//                        return .loadLocations(locations)
+//                    } catch {
+//                        return .loadLocations([])
+//                    }
+//                },
                 
                 // NOTE: API 붙으면 불러오는 로직 수정 필요.
                 .task {
