@@ -156,6 +156,10 @@ struct MapFeature: DWReducer {
         /// 위치정보 시트를 표시하고 Kakao API를 호출하여 위치정보를 조회합니다.
         /// - Parameter latlng: 터치한 좌표
         case mapTapped(NMGLatLng)
+        /// 사용자 위치 마커(home/work/custom)를 탭했을 때 발생하는 액션입니다.
+        /// Location ID를 통해 해당 Location을 찾고, 좌표로 PlaceInfo를 조회합니다.
+        /// - Parameter locationId: Location의 UUID
+        case userLocationMarkerTapped(UUID)
         /// 위치정보를 표시하는 액션입니다.
         /// API 호출 완료 후 위치정보 데이터를 시트에 표시합니다.
         /// - Parameter placeInfo: 표시할 위치정보 데이터
@@ -241,28 +245,41 @@ struct MapFeature: DWReducer {
         switch action {
         case .onAppear:
             guard let caseId = state.caseId else { return .none }
-            if state.didSetInitialCamera == false {
-                focusLatestCellLocation(&state)
-                if state.cameraTargetCoordinate == nil {
-                    state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
+            
+            return .merge(
+                .task { [repository] in
+                    do {
+                        let locations = try await repository.fetchLocations(caseId: caseId)
+                        return .loadLocations(locations)
+                    } catch {
+                        return .loadLocations([])
+                    }
+                },
+                .task {
+                    do {
+                        let cellMarkers = try await CellStationLoader.loadFromJSON()
+                        return .loadCellMarkers(cellMarkers)
+                    } catch {
+                        return .loadCellMarkers([])
+                    }
                 }
-                state.didSetInitialCamera = true
-            }
-
-            // NOTE: 위치 데이터는 MainTabFeature에서 fetch하고 MainTabView를 통해 전달받음
-            // Timeline과 동일한 패턴으로 loadLocations 액션을 통해 데이터를 받음
-            // 여기서는 기지국 데이터만 로드
-            return .task {
-                do {
-                    let cellMarkers = try await CellStationLoader.loadFromJSON()
-                    return .loadCellMarkers(cellMarkers)
-                } catch {
-                    return .loadCellMarkers([])
-                }
-            }
+            )
             
         case let .loadLocations(locations):
             state.locations = locations
+            
+            // existingLocation을 최신 데이터로 동기화
+            // MainTabFeature에서 받은 최신 locations와 동일한 데이터 유지!!
+            if let existingId = state.existingLocation?.id {
+                if let updatedLocation = locations.first(where: { $0.id == existingId }) {
+                    // locations에 있으면 최신 데이터로 업데이트
+                    state.existingLocation = updatedLocation
+                } else {
+                    // locations에 없으면 삭제된 것이므로 nil로 설정하고 시트 닫기
+                    state.existingLocation = nil
+                    state.isPlaceInfoSheetPresented = false
+                }
+            }
             
             if state.didSetInitialCamera == false {
                 focusLatestCellLocation(&state)
@@ -350,36 +367,44 @@ struct MapFeature: DWReducer {
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
             
-            // - roadAddress 또는 jibunAddress 가 동일한 경우 핀 존재
-            // - title 은 변동 가능성이 있으므로 비교에서 제외
-            let incomingRoad = placeInfo.roadAddress
-            let incomingJibun = placeInfo.jibunAddress
-            
-            state.existingLocation = state.locations.first { loc in
-                // 도로명 주소 매칭
-                if !incomingRoad.isEmpty, loc.address == incomingRoad {
-                    return true
-                }
-                // 지번 주소 매칭
-                if !incomingJibun.isEmpty, loc.address == incomingJibun {
-                    return true
-                }
-                return false
-            }
-            
-            // 추후 좌표로 매칭
-            /*
-             if let lat = placeInfo.latitude,
-             let lng = placeInfo.longitude {
-             state.existingLocation = state.locations.first { loc in
-             loc.pointLatitude == lat && loc.pointLongitude == lng
-             }
-             } else {
-             state.existingLocation = nil
-             }
-             */
+            // existingLocation 찾기 (주소 매칭)
+            state.existingLocation = findExistingLocation(for: placeInfo, in: state.locations)
             
             return .none
+            
+        case let .userLocationMarkerTapped(locationId):
+            // 사용자 위치 마커 탭: Location을 찾아서 PlaceInfoSheet 표시
+            guard let location = state.locations.first(where: { $0.id == locationId }) else {
+                return .none
+            }
+            
+            state.existingLocation = location
+            state.isEditMode = false
+            state.selectedCoordinate = MapCoordinate(
+                latitude: location.pointLatitude,
+                longitude: location.pointLongitude
+            )
+            
+            state.isPlaceInfoLoading = true
+            state.isPlaceInfoSheetPresented = true
+            state.selectedPlaceInfo = nil
+            
+            let latlng = NMGLatLng(lat: location.pointLatitude, lng: location.pointLongitude)
+            let requestDTO = latlng.toKakaoRequestDTO()
+            
+            return .task {
+                do {
+                    let placeInfo = try await fetchPlaceInfo(from: requestDTO)
+                    return .showPlaceInfo(placeInfo)
+                } catch {
+                    return .showPlaceInfo(PlaceInfo(
+                        title: "",
+                        jibunAddress: "",
+                        roadAddress: "",
+                        phoneNumber: ""
+                    ))
+                }
+            }
             
         case .hidePlaceInfo:
             // 위치정보 시트 닫기 및 상태 초기화
@@ -434,9 +459,13 @@ struct MapFeature: DWReducer {
             state.cameraTargetCoordinate = coordinate
             // 검색 진입 시에도 선택된 좌표 컨텍스트를 맞춰둡니다.
             state.selectedCoordinate = coordinate
+            
+            // PlaceInfoSheet 표시 (showPlaceInfo 재사용)
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
+            state.existingLocation = findExistingLocation(for: placeInfo, in: state.locations)
+            
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none
@@ -507,10 +536,10 @@ struct MapFeature: DWReducer {
             }
 
         case .deletePinCompleted:
-            guard let deleteId = state.existingLocation?.id else { return .none }
-
-            // 새 배열로 재할당하여 SwiftUI 변경 감지 보장
-            state.locations = state.locations.filter { $0.id != deleteId }
+            // CoreData는 이미 삭제됨 (confirmDeletePin에서)
+            // watchLocations가 자동으로 감지해서 MainTabFeature에 전달
+            // MainTabFeature → MainTabView → loadLocations로 자동 업데이트됨
+            // UI 상태만 정리
             state.existingLocation = nil
             state.isPlaceInfoSheetPresented = false
             state.selectedPlaceInfo = nil
@@ -533,17 +562,16 @@ struct MapFeature: DWReducer {
             }
             
         case let .savePinCompleted(location):
-            state.existingLocation = location
-
-            // 배열 복사 후 수정하고 마지막에 재할당하여 변경 감지 보장
-            var newLocations = state.locations
-            if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
-                newLocations[index] = location
+            // 즉시 UI에 반영하기 위해 state.locations를 업데이트
+            // watchLocations가 나중에 MainTabFeature에 전달하지만, 즉시 반영을 위해 여기서도 업데이트
+            if let existingIndex = state.locations.firstIndex(where: { $0.id == location.id }) {
+                // 기존 location 업데이트
+                state.locations[existingIndex] = location
             } else {
-                newLocations.append(location)
+                // 새 location 추가
+                state.locations.append(location)
             }
-            state.locations = newLocations
-
+            state.existingLocation = location
             state.isPinWritePresented = false
             return .none
             
@@ -589,24 +617,18 @@ struct MapFeature: DWReducer {
             }
             
         case let .memoSaveCompleted(updatedLocation):
+            // watchLocations가 자동으로 감지해서 MainTabFeature에 전달
+            // MainTabFeature → MainTabView → loadLocations로 자동 업데이트됨
+            // existingLocation은 loadLocations에서 최신 데이터로 동기화됨
             state.existingLocation = updatedLocation
-
-            // 메모 수정도 새 배열로 재할당하여 변경 감지 보장
-            var newLocations = state.locations
-            if let index = newLocations.firstIndex(where: { $0.id == updatedLocation.id }) {
-                newLocations[index] = updatedLocation
-            }
-            state.locations = newLocations
 
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
             }
-
             return .none
             
         case .closeMemoEdit:
             state.isMemoEditPresented = false
-            
             return .send(.reopenPlaceInfoAfterMemo)
             
         case .reopenPlaceInfoAfterMemo:
@@ -628,9 +650,7 @@ private extension MapFeature {
         let wasSelected = state.isRecentBaseStationSelected
         state.isRecentBaseStationSelected = false
         // TODO: 버튼으로 전환하여 토글 상태를 유지하지 않도록 설계 변경 필요
-        if !wasSelected {
-            focusLatestCellLocation(&state)
-        }
+        if !wasSelected { focusLatestCellLocation(&state) }
     }
 
     func focusLatestCellLocation(_ state: inout State) {
@@ -648,6 +668,31 @@ private extension MapFeature {
             latitude: latestCell.pointLatitude,
             longitude: latestCell.pointLongitude
         )
+    }
+
+    // MARK: - PlaceInfo Helpers
+    
+    /// PlaceInfo에 해당하는 기존 Location을 찾습니다.
+    /// - Parameters:
+    ///   - placeInfo: 찾을 위치 정보
+    ///   - locations: 검색할 Location 배열
+    /// - Returns: 주소 매칭으로 찾은 Location (없으면 nil)
+    /// - Note: 도로명 주소 또는 지번 주소가 일치하는 Location을 반환합니다.
+    func findExistingLocation(for placeInfo: PlaceInfo, in locations: [Location]) -> Location? {
+        let incomingRoad = placeInfo.roadAddress
+        let incomingJibun = placeInfo.jibunAddress
+        
+        return locations.first { loc in
+            // 도로명 주소 매칭
+            if !incomingRoad.isEmpty, loc.address == incomingRoad {
+                return true
+            }
+            // 지번 주소 매칭
+            if !incomingJibun.isEmpty, loc.address == incomingJibun {
+                return true
+            }
+            return false
+        }
     }
 
     // MARK: - Kakao Place Helpers
