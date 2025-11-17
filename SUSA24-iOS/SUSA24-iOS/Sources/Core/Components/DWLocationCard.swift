@@ -65,6 +65,8 @@ struct DWLocationCard: View {
                         Text(title)
                             .font(.titleSemiBold16)
                             .foregroundColor(.labelNormal)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(2)
                      
                         Text(description)
                             .font(.bodyRegular14)

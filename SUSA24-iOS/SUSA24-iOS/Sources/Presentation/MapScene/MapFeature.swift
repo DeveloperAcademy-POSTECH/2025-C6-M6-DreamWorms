@@ -68,6 +68,9 @@ struct MapFeature: DWReducer {
         var shouldFocusMyLocation: Bool = false
         /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
         var didSetInitialCamera: Bool = false
+        /// 사용자가 지도에서 마지막으로 탭한 좌표입니다.
+        /// - 새 핀 생성 시 Location.pointLatitude / pointLongitude 로 사용됩니다.
+        var selectedCoordinate: MapCoordinate?
         
         // MARK: 지도 레이어/필터 UI 상태
         
@@ -246,36 +249,17 @@ struct MapFeature: DWReducer {
                 state.didSetInitialCamera = true
             }
 
-            // 병렬로 데이터 로드
-            return .merge(
-                // 기존 목데이터 가져오는 방식 주석 처리
-//                .task { [repository] in
-//                    do {
-//                        // NOTE: 테스트용 목데이터 저장 로직
-//                        // 케이스 선택 시 해당 케이스의 빈 문자열("") suspect에 Location 목데이터 저장
-//                        // 실제 데이터가 없을 경우를 대비한 테스트 데이터
-//                        // 프로토콜에는 포함되지 않으므로 타입 캐스팅 사용
-//                        if let locationRepository = repository as? LocationRepository {
-//                            try await locationRepository.loadMockDataIfNeeded(caseId: caseId)
-//                        }
-//
-//                        let locations = try await repository.fetchLocations(caseId: caseId)
-//                        return .loadLocations(locations)
-//                    } catch {
-//                        return .loadLocations([])
-//                    }
-//                },
-                
-                // NOTE: API 붙으면 불러오는 로직 수정 필요.
-                .task {
-                    do {
-                        let cellMarkers = try await CellStationLoader.loadFromJSON()
-                        return .loadCellMarkers(cellMarkers)
-                    } catch {
-                        return .loadCellMarkers([])
-                    }
+            // NOTE: 위치 데이터는 MainTabFeature에서 fetch하고 MainTabView를 통해 전달받음
+            // Timeline과 동일한 패턴으로 loadLocations 액션을 통해 데이터를 받음
+            // 여기서는 기지국 데이터만 로드
+            return .task {
+                do {
+                    let cellMarkers = try await CellStationLoader.loadFromJSON()
+                    return .loadCellMarkers(cellMarkers)
+                } catch {
+                    return .loadCellMarkers([])
                 }
-            )
+            }
             
         case let .loadLocations(locations):
             state.locations = locations
@@ -335,6 +319,11 @@ struct MapFeature: DWReducer {
             // 새 위치 탭하면 기존 핀 정보는 즉시 비워야 함
             state.existingLocation = nil
             state.isEditMode = false
+            // 사용자가 탭한 좌표를 저장해 핀 추가 시 활용합니다.
+            state.selectedCoordinate = MapCoordinate(
+                latitude: latlng.lat,
+                longitude: latlng.lng
+            )
             
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
@@ -443,6 +432,8 @@ struct MapFeature: DWReducer {
         case let .moveToSearchResult(coordinate, placeInfo):
             // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
             state.cameraTargetCoordinate = coordinate
+            // 검색 진입 시에도 선택된 좌표 컨텍스트를 맞춰둡니다.
+            state.selectedCoordinate = coordinate
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
@@ -474,9 +465,10 @@ struct MapFeature: DWReducer {
             
         case .addPinTapped:
             guard let placeInfo = state.selectedPlaceInfo,
+                  let coordinate = state.selectedCoordinate,
                   state.caseId != nil
             else {
-                print("❌ Cannot add pin: Missing placeInfo or caseId")
+                print("❌ Cannot add pin: Missing placeInfo, coordinate, or caseId")
                 return .none
             }
             
@@ -517,7 +509,8 @@ struct MapFeature: DWReducer {
         case .deletePinCompleted:
             guard let deleteId = state.existingLocation?.id else { return .none }
 
-            state.locations.removeAll { $0.id == deleteId }
+            // 새 배열로 재할당하여 SwiftUI 변경 감지 보장
+            state.locations = state.locations.filter { $0.id != deleteId }
             state.existingLocation = nil
             state.isPlaceInfoSheetPresented = false
             state.selectedPlaceInfo = nil
@@ -542,11 +535,14 @@ struct MapFeature: DWReducer {
         case let .savePinCompleted(location):
             state.existingLocation = location
 
-            if let index = state.locations.firstIndex(where: { $0.id == location.id }) {
-                state.locations[index] = location
+            // 배열 복사 후 수정하고 마지막에 재할당하여 변경 감지 보장
+            var newLocations = state.locations
+            if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
+                newLocations[index] = location
             } else {
-                state.locations.append(location)
+                newLocations.append(location)
             }
+            state.locations = newLocations
 
             state.isPinWritePresented = false
             return .none
@@ -594,14 +590,18 @@ struct MapFeature: DWReducer {
             
         case let .memoSaveCompleted(updatedLocation):
             state.existingLocation = updatedLocation
-            if let index = state.locations.firstIndex(where: { $0.id == updatedLocation.id }) {
-                state.locations[index] = updatedLocation
+
+            // 메모 수정도 새 배열로 재할당하여 변경 감지 보장
+            var newLocations = state.locations
+            if let index = newLocations.firstIndex(where: { $0.id == updatedLocation.id }) {
+                newLocations[index] = updatedLocation
             }
-            
+            state.locations = newLocations
+
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
             }
-            
+
             return .none
             
         case .closeMemoEdit:

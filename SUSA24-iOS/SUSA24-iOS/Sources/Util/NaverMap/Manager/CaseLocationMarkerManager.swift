@@ -31,9 +31,9 @@ final class CaseLocationMarkerManager {
         _ locations: [Location],
         on mapView: NMFMapView,
         onCellTapped: @escaping (String) -> Void
-    ) -> [String: Int] {
+    ) async -> [String: Int] {
         let (markers, cellCounts) = buildMarkers(from: locations)
-        applyMarkers(markers, on: mapView, onCellTapped: onCellTapped)
+        await applyMarkers(markers, on: mapView, onCellTapped: onCellTapped)
         return cellCounts
     }
     
@@ -50,33 +50,27 @@ final class CaseLocationMarkerManager {
     /// - Parameters:
     ///   - cellCounts: 좌표 키와 방문 횟수 매핑
     ///   - mapView: 네이버 지도 뷰
-    func applyVisitFrequency(with cellCounts: [String: Int], on mapView: NMFMapView) {
+    func applyVisitFrequency(with cellCounts: [String: Int], on mapView: NMFMapView) async {
         guard !cellCounts.isEmpty else { return }
         
-        Task {
-            for (id, count) in cellCounts {
-                guard let overlay = self.markers[id] else { continue }
-                let icon = await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
-                overlay.iconImage = NMFOverlayImage(image: icon)
-                overlay.hidden = false
-                overlay.mapView = mapView
-                markerTypes[id] = .cellWithCount(count: count)
-            }
+        for (id, count) in cellCounts {
+            guard let overlay = markers[id] else { continue }
+            let icon = await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
+            overlay.iconImage = NMFOverlayImage(image: icon)
+            overlay.mapView = mapView
+            markerTypes[id] = .cellWithCount(count: count)
         }
     }
     
     /// 방문 빈도 배지를 기본 상태로 복원합니다.
     /// - Parameter mapView: 네이버 지도 뷰
-    func resetVisitFrequency(on mapView: NMFMapView) {
-        Task {
-            for (id, overlay) in markers {
-                guard case .cellWithCount = markerTypes[id] else { continue }
-                let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true))
-                overlay.iconImage = NMFOverlayImage(image: icon)
-                overlay.hidden = false
-                overlay.mapView = mapView
-                markerTypes[id] = .cell(isVisited: true)
-            }
+    func resetVisitFrequency(on mapView: NMFMapView) async {
+        for (id, overlay) in markers {
+            guard case .cellWithCount = markerTypes[id] else { continue }
+            let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true))
+            overlay.iconImage = NMFOverlayImage(image: icon)
+            overlay.mapView = mapView
+            markerTypes[id] = .cell(isVisited: true)
         }
     }
     
@@ -91,6 +85,8 @@ final class CaseLocationMarkerManager {
     private struct MarkerModel {
         let id: String
         let coordinate: MapCoordinate
+        /// 사용자 위치 마커의 색상 (home / work / custom 에서만 사용)
+        let pinColor: PinColorType?
         
         var markerType: MarkerType
     }
@@ -106,11 +102,14 @@ final class CaseLocationMarkerManager {
             lat: marker.coordinate.latitude,
             lng: marker.coordinate.longitude
         )
-        let icon = await MarkerImageCache.shared.image(for: marker.markerType)
+        let icon: UIImage = if marker.markerType.isUserLocation, let color = marker.pinColor {
+            await MarkerImageCache.shared.userLocationImage(for: marker.markerType, color: color)
+        } else {
+            await MarkerImageCache.shared.image(for: marker.markerType)
+        }
         overlay.iconImage = NMFOverlayImage(image: icon)
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.height = CGFloat(NMF_MARKER_SIZE_AUTO)
-        overlay.hidden = false
         overlay.mapView = mapView
         return overlay
     }
@@ -126,24 +125,28 @@ final class CaseLocationMarkerManager {
             guard latitude != 0, longitude != 0 else { continue }
             
             let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
+            let pinColor = PinColorType(location.colorType)
             
             switch LocationType(location.locationType) {
             case .home:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
+                    pinColor: pinColor,
                     markerType: .home
                 ))
             case .work:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
+                    pinColor: pinColor,
                     markerType: .work
                 ))
             case .custom:
                 markers.append(MarkerModel(
                     id: location.id.uuidString,
                     coordinate: coordinate,
+                    pinColor: pinColor,
                     markerType: .custom
                 ))
             case .cell:
@@ -162,6 +165,7 @@ final class CaseLocationMarkerManager {
                 MarkerModel(
                     id: key,
                     coordinate: coordinate,
+                    pinColor: nil,
                     markerType: .cell(isVisited: true)
                 )
             )
@@ -181,7 +185,7 @@ final class CaseLocationMarkerManager {
         _ markerModels: [MarkerModel],
         on mapView: NMFMapView,
         onCellTapped: @escaping (String) -> Void
-    ) {
+    ) async {
         let currentIds = Set(markerModels.map(\.id))
         let existingIds = Set(markers.keys)
         let idsToRemove = existingIds.subtracting(currentIds)
@@ -192,44 +196,50 @@ final class CaseLocationMarkerManager {
             markerTypes.removeValue(forKey: markerId)
         }
         
-        Task {
-            for markerInfo in markerModels {
-                if let overlay = self.markers[markerInfo.id] {
-                    overlay.position = NMGLatLng(
-                        lat: markerInfo.coordinate.latitude,
-                        lng: markerInfo.coordinate.longitude
-                    )
-                    if overlay.mapView == nil {
-                        overlay.mapView = mapView
+        for markerInfo in markerModels {
+            if let overlay = markers[markerInfo.id] {
+                overlay.position = NMGLatLng(
+                    lat: markerInfo.coordinate.latitude,
+                    lng: markerInfo.coordinate.longitude
+                )
+                if overlay.mapView == nil {
+                    overlay.mapView = mapView
+                }
+                
+                // 사용자 위치 마커(home / work / custom)는 색(pinColor)이 변경될 수 있으므로
+                // 타입이 같아도 항상 아이콘을 갱신한다.
+                // 셀 / CCTV 등 인프라 마커는 타입이 바뀐 경우에만 갱신한다.
+                let isUserLocation = markerInfo.markerType.isUserLocation
+                let typeChanged = markerTypes[markerInfo.id] != markerInfo.markerType
+                
+                if isUserLocation || typeChanged {
+                    let icon: UIImage = if isUserLocation, let color = markerInfo.pinColor {
+                        await MarkerImageCache.shared.userLocationImage(for: markerInfo.markerType, color: color)
+                    } else {
+                        await MarkerImageCache.shared.image(for: markerInfo.markerType)
                     }
-                    
-                    if markerTypes[markerInfo.id] != markerInfo.markerType {
-                        let icon = await MarkerImageCache.shared.image(for: markerInfo.markerType)
-                        overlay.iconImage = NMFOverlayImage(image: icon)
-                        markerTypes[markerInfo.id] = markerInfo.markerType
+                    overlay.iconImage = NMFOverlayImage(image: icon)
+                    markerTypes[markerInfo.id] = markerInfo.markerType
+                }
+                
+                if case .cell = markerInfo.markerType {
+                    overlay.touchHandler = { _ in
+                        onCellTapped(markerInfo.id)
+                        return true
                     }
-                    
-                    overlay.hidden = false
-                    
-                    if case .cell = markerInfo.markerType {
-                        overlay.touchHandler = { _ in
-                            onCellTapped(markerInfo.id)
-                            return true
-                        }
-                    }
-                } else {
-                    let overlay = await self.createMarker(
-                        for: markerInfo,
-                        on: mapView
-                    )
-                    self.markers[markerInfo.id] = overlay
-                    self.markerTypes[markerInfo.id] = markerInfo.markerType
-                    
-                    if case .cell = markerInfo.markerType {
-                        overlay.touchHandler = { _ in
-                            onCellTapped(markerInfo.id)
-                            return true
-                        }
+                }
+            } else {
+                let overlay = await createMarker(
+                    for: markerInfo,
+                    on: mapView
+                )
+                markers[markerInfo.id] = overlay
+                markerTypes[markerInfo.id] = markerInfo.markerType
+                
+                if case .cell = markerInfo.markerType {
+                    overlay.touchHandler = { _ in
+                        onCellTapped(markerInfo.id)
+                        return true
                     }
                 }
             }
@@ -240,32 +250,5 @@ final class CaseLocationMarkerManager {
         let latString = String(format: "%.6f", latitude)
         let lngString = String(format: "%.6f", longitude)
         return "\(latString)_\(lngString)"
-    }
-    
-    private func desiredMarkerType(
-        for markerInfo: MarkerModel,
-        visitFrequencyEnabled: Bool,
-        cellCounts: [String: Int]
-    ) -> MarkerType {
-        switch markerInfo.markerType {
-        case .cell:
-            if visitFrequencyEnabled {
-                let count = cellCounts[markerInfo.id] ?? 1
-                return .cellWithCount(count: count)
-            } else {
-                return .cell(isVisited: true)
-            }
-        default:
-            return markerInfo.markerType
-        }
-    }
-    
-    /// 셀 마커의 방문 횟수를 정수로 반환합니다.
-    /// - Parameters:
-    ///   - markerInfo: 평가할 마커 모델 정보
-    ///   - cellCounts: 좌표 키와 방문 횟수 매핑
-    /// - Returns: 방문 횟수 (디폴트는 1)
-    private func cellVisitCount(for markerInfo: MarkerModel, cellCounts: [String: Int]) -> Int {
-        cellCounts[markerInfo.id] ?? 1
     }
 }
