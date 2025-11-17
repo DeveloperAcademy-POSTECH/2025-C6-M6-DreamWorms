@@ -132,8 +132,9 @@ struct CaseCard: View {
         }
     }
 }
+
 //
-//#Preview {
+// #Preview {
 //    CaseCard(
 //        item: Case(
 //            id: UUID(),
@@ -147,4 +148,4 @@ struct CaseCard: View {
 //        onAddCellLog: {}
 //    )
 //    .padding(.horizontal, 16)
-//}
+// }
