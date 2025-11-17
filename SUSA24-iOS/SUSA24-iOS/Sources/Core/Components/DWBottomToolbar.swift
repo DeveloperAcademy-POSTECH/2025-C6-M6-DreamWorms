@@ -33,7 +33,7 @@ struct DWBottomToolbarItem: Identifiable {
     // MARK: - Configurable Params
     
     var isEnabled: Bool = true
-    var iconSize: CGFloat = 20
+    var iconSize: CGFloat = 16
     var frameSize: CGFloat = 44
     var iconColor: Color = .black
     var padding: EdgeInsets = .init()
@@ -251,7 +251,7 @@ struct DWBottomToolbarModifier: ViewModifier {
 extension View {
     func dwBottomToolBar(
         alignment: Alignment = .bottom,
-        padding: EdgeInsets = EdgeInsets(top: 12, leading: 0, bottom: 0, trailing: 16),
+        padding: EdgeInsets = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 8),
         items: [DWBottomToolbarItem]
     ) -> some View {
         modifier(
@@ -266,12 +266,11 @@ extension View {
 
 // MARK: - Preview
 
-//
-// #Preview("Custom Size Buttons") {
+//#Preview("Custom Size Buttons") {
 //    MapWithCustomSizesPreview()
-// }
+//}
 //
-// private struct MapWithCustomSizesPreview: View {
+//private struct MapWithCustomSizesPreview: View {
 //    var body: some View {
 //        ZStack {
 //            Rectangle()
@@ -282,26 +281,26 @@ extension View {
 //            .button(image: Image(.pin), action: {
 //                print("pin tapped")
 //            })
-//            .iconSize(16)
+//            .iconSize(12)
 //            .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3)
 //            .iconColor(.black),
 //
 //            .button(image: Image(.ellipsis), action: {
 //                print("ellipsis tapped")
 //            })
-//            .iconSize(16)
+//            .iconSize(12)
 //            .setupPadding(top: 4, leading: 3, bottom: 4, trailing: 6)
 //            .iconColor(.black),
 //
 //        ])
 //    }
-// }
+//}
 //
-// #Preview("Bottom Toolbar on Sheet - Simple") {
+//#Preview("Bottom Toolbar on Sheet - Simple") {
 //    SimpleToolbarOnSheetPreview()
-// }
+//}
 //
-// private struct SimpleToolbarOnSheetPreview: View {
+//private struct SimpleToolbarOnSheetPreview: View {
 //    @State private var showSheet = true
 //
 //    var body: some View {
@@ -318,9 +317,9 @@ extension View {
 //                .presentationDragIndicator(.visible)
 //        }
 //    }
-// }
+//}
 //
-// private struct SimpleSheetView: View {
+//private struct SimpleSheetView: View {
 //    var body: some View {
 //        Color(.systemBackground)
 //            .ignoresSafeArea()
@@ -341,4 +340,4 @@ extension View {
 //                ]
 //            )
 //    }
-// }
+//}

@@ -298,12 +298,12 @@ struct CategoryCard: View {
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .foregroundStyle(selectedColor.color)
+                            .foregroundStyle(isSelected ? .primaryNormal : .labelNeutral)
                             .frame(width: category.iconWidth, height: category.iconHeight, alignment: .center)
                         
                         Text(category.text)
                             .font(.titleSemiBold16)
-                            .foregroundStyle(selectedColor.color)
+                            .foregroundStyle(isSelected ? .primaryNormal : .labelNeutral)
                     }
                     
                     Text(category.description)
@@ -316,11 +316,11 @@ struct CategoryCard: View {
                 Group {
                     if isSelected {
                         Image(.radioSelected)
-                            .foregroundStyle(selectedColor.color)
+                            .foregroundStyle(.primaryNormal)
                             .font(.system(size: 18))
                     } else {
                         Image(.radioDeselected)
-                            .foregroundStyle(.labelAssistive)
+                            .foregroundStyle(.labelNeutral)
                             .font(.system(size: 18))
                     }
                 }
