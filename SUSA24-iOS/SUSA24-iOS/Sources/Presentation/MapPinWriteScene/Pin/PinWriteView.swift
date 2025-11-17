@@ -294,12 +294,12 @@ struct CategoryCard: View {
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .foregroundStyle(selectedColor.color)
+                            .foregroundStyle(isSelected ? .primaryNormal : .labelNeutral)
                             .frame(width: category.iconWidth, height: category.iconHeight, alignment: .center)
                         
                         Text(category.text)
                             .font(.titleSemiBold16)
-                            .foregroundStyle(selectedColor.color)
+                            .foregroundStyle(isSelected ? .primaryNormal : .labelNeutral)
                     }
                     
                     Text(category.description)
@@ -312,11 +312,11 @@ struct CategoryCard: View {
                 Group {
                     if isSelected {
                         Image(.radioSelected)
-                            .foregroundStyle(selectedColor.color)
+                            .foregroundStyle(.primaryNormal)
                             .font(.system(size: 18))
                     } else {
                         Image(.radioDeselected)
-                            .foregroundStyle(.labelAssistive)
+                            .foregroundStyle(.labelNeutral)
                             .font(.system(size: 18))
                     }
                 }
@@ -362,48 +362,48 @@ extension CharacterSet {
 
 // MARK: - Preview
 
-#Preview("핀 추가") {
-    PinWriteView(
-        placeInfo: PlaceInfo(
-            title: "선택한 위치",
-            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-            roadAddress: "대구광역시 달서구 상원로 27",
-            phoneNumber: "-"
-        ),
-        existingLocation: nil,
-        caseId: UUID(),
-        isEditMode: false,
-        onSave: { _ in },
-        onCancel: {}
-    )
-}
-
-#Preview("핀 수정") {
-    PinWriteView(
-        placeInfo: PlaceInfo(
-            title: "선택한 위치",
-            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-            roadAddress: "대구광역시 달서구 상원로 27",
-            phoneNumber: "-"
-        ),
-        existingLocation: Location(
-            id: UUID(),
-            address: "대구광역시 달서구 상인동 1453-7",
-            title: "2동 304호",
-            note: nil,
-            pointLatitude: 35.8563,
-            pointLongitude: 128.5557,
-            boxMinLatitude: nil,
-            boxMinLongitude: nil,
-            boxMaxLatitude: nil,
-            boxMaxLongitude: nil,
-            locationType: 0,
-            colorType: 2,
-            receivedAt: Date()
-        ),
-        caseId: UUID(),
-        isEditMode: true,
-        onSave: { _ in },
-        onCancel: {}
-    )
-}
+// #Preview("핀 추가") {
+//    PinWriteView(
+//        placeInfo: PlaceInfo(
+//            title: "선택한 위치",
+//            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+//            roadAddress: "대구광역시 달서구 상원로 27",
+//            phoneNumber: "-"
+//        ),
+//        existingLocation: nil,
+//        caseId: UUID(),
+//        isEditMode: false,
+//        onSave: { _ in },
+//        onCancel: {}
+//    )
+// }
+//
+// #Preview("핀 수정") {
+//    PinWriteView(
+//        placeInfo: PlaceInfo(
+//            title: "선택한 위치",
+//            jibunAddress: "대구광역시 달서구 상인동 1453-7",
+//            roadAddress: "대구광역시 달서구 상원로 27",
+//            phoneNumber: "-"
+//        ),
+//        existingLocation: Location(
+//            id: UUID(),
+//            address: "대구광역시 달서구 상인동 1453-7",
+//            title: "2동 304호",
+//            note: nil,
+//            pointLatitude: 35.8563,
+//            pointLongitude: 128.5557,
+//            boxMinLatitude: nil,
+//            boxMinLongitude: nil,
+//            boxMaxLatitude: nil,
+//            boxMaxLongitude: nil,
+//            locationType: 0,
+//            colorType: 2,
+//            receivedAt: Date()
+//        ),
+//        caseId: UUID(),
+//        isEditMode: true,
+//        onSave: { _ in },
+//        onCancel: {}
+//    )
+// }
