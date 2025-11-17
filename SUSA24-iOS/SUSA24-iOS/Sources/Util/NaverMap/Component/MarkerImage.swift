@@ -301,6 +301,53 @@ enum SelectedPinStyle: Hashable, Sendable {
     }
 }
 
+// MARK: - SelectedPinStyle Extension
+
+extension SelectedPinStyle {
+    /// PinColorType을 이미지셋 이름으로 변환
+    private static func pinColorAssetName(_ color: PinColorType) -> String {
+        switch color {
+        case .black: "black"
+        case .red: "red"
+        case .orange: "orange"
+        case .yellow: "yellow"
+        case .lightGreen: "lightGreen"
+        case .darkGreen: "darkGreen"
+        case .purple: "purple"
+        }
+    }
+    
+    /// 선택된 핀 이미지셋 이미지 반환
+    var pinImage: Image {
+        let colorName = Self.pinColorAssetName(pinColor)
+        let assetName: String = switch self {
+        case .home: "pin_home_\(colorName)"
+        case .work: "pin_work_\(colorName)"
+        case .custom: "pin_custom_\(colorName)"
+        case .cell: "pin_custom_\(colorName)" // cell은 custom과 동일한 이미지셋 사용
+        }
+        return Image(assetName)
+    }
+    
+    /// 선택된 홈 핀 이미지 (이미지셋 사용)
+    static func selectedHomePin(color: PinColorType) -> Image {
+        let assetName = "pin_home_\(pinColorAssetName(color))"
+        return Image(assetName)
+    }
+    
+    /// 선택된 직장 핀 이미지 (이미지셋 사용)
+    static func selectedWorkPin(color: PinColorType) -> Image {
+        let assetName = "pin_work_\(pinColorAssetName(color))"
+        return Image(assetName)
+    }
+    
+    /// 선택된 커스텀 핀 이미지 (이미지셋 사용)
+    static func selectedCustomPin(color: PinColorType) -> Image {
+        let assetName = "pin_custom_\(pinColorAssetName(color))"
+        return Image(assetName)
+    }
+}
+
 /// 선택된 위치를 나타내는 큰 핀 이미지
 struct SelectedPinImage: View {
     let style: SelectedPinStyle
@@ -331,44 +378,74 @@ struct SelectedPinImage: View {
     }
 }
 
-// MARK: - Selected Pin Preview
-
-// #Preview("Selected Pins") {
-//    VStack(spacing: 16) {
-//        HStack(spacing: 16) {
-//            SelectedPinImage(style: .home(.black))
-//            SelectedPinImage(style: .home(.yellow))
-//            SelectedPinImage(style: .home(.red))
-//        }
-//        HStack(spacing: 16) {
-//            SelectedPinImage(style: .work(.black))
-//            SelectedPinImage(style: .custom(.orange))
-//            SelectedPinImage(style: .cell(.darkGreen))
-//        }
-//    }
-//    .padding()
-//    .background(Color.gray.opacity(0.2))
-// }
-
-// MARK: - Preview
-
-// #Preview("기본 마커 - Static 메서드") {
-//    VStack {
-//        HStack {
-//            MarkerImage.home()
-//            MarkerImage.work()
-//            MarkerImage.cell()
-//            MarkerImage.visitedCell()
+// #Preview("선택된 핀 이미지셋") {
+//    VStack(spacing: 24) {
+//        // Static 메서드 사용
+//        VStack(spacing: 12) {
+//            Text("Static 메서드")
+//                .font(.headline)
+//
+//            VStack(spacing: 8) {
+//                Text("홈 핀")
+//                    .font(.subheadline)
+//                HStack(spacing: 16) {
+//                    SelectedPinStyle.selectedHomePin(color: .black)
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 32, height: 42)
+//                    SelectedPinStyle.selectedHomePin(color: .lightGreen)
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 32, height: 42)
+//                }
+//            }
+//
+//            VStack(spacing: 8) {
+//                Text("직장 핀")
+//                    .font(.subheadline)
+//                SelectedPinStyle.selectedWorkPin(color: .red)
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 32, height: 42)
+//            }
+//
+//            VStack(spacing: 8) {
+//                Text("커스텀 핀")
+//                    .font(.subheadline)
+//                SelectedPinStyle.selectedCustomPin(color: .orange)
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 32, height: 42)
+//            }
 //        }
 //
-//        HStack {
-//            MarkerImage.visitedCell()
-//            MarkerImage.cellWithCount(5)
-//            MarkerImage.cellWithCount(50)
-//            MarkerImage.custom()
-//            MarkerImage.cctv()
+//        Divider()
+//
+//        // 인스턴스 프로퍼티 사용
+//        VStack(spacing: 12) {
+//            Text("인스턴스 프로퍼티")
+//                .font(.headline)
+//
+//            HStack(spacing: 16) {
+//                SelectedPinStyle.home(.black).pinImage
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 32, height: 42)
+//                SelectedPinStyle.home(.yellow).pinImage
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 32, height: 42)
+//                SelectedPinStyle.work(.red).pinImage
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 32, height: 42)
+//                SelectedPinStyle.custom(.orange).pinImage
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 32, height: 42)
+//            }
 //        }
 //    }
 //    .padding()
-//    .background(.gray)
+//    .background(Color.gray.opacity(0.1))
 // }
