@@ -27,14 +27,15 @@ enum PinColorType: Int16, CaseIterable, Codable {
     }
     
     var pinImage: Image {
-        switch self {
-        case .black: Image(.pinBlack)
-        case .red: Image(.pinRed)
-        case .orange: Image(.pinOrange)
-        case .yellow: Image(.pinYellow)
-        case .lightGreen: Image(.pinLightGreen)
-        case .darkGreen: Image(.pinDarkGreen)
-        case .purple: Image(.pinPurple)
+        let colorName: String = switch self {
+        case .black: "black"
+        case .red: "red"
+        case .orange: "orange"
+        case .yellow: "yellow"
+        case .lightGreen: "lightGreen"
+        case .darkGreen: "darkGreen"
+        case .purple: "purple"
         }
+        return Image("pin_custom_\(colorName)")
     }
 }
