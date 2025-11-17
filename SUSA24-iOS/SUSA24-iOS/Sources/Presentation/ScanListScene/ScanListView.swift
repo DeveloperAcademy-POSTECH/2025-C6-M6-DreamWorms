@@ -3,6 +3,7 @@
 //  SUSA24-iOS
 //
 //  Created by taeni on 11/9/25.
+//  Updated: 11/17/25 - Pass roadAddress and jibunAddress to ScanResultCard
 //
 
 import CoreData
@@ -155,7 +156,8 @@ private extension ScanListView {
             VStack(spacing: 12) {
                 ForEach(Array(store.state.scanResults.enumerated()), id: \.offset) { index, result in
                     ScanResultCard(
-                        address: result.address,
+                        roadAddress: result.roadAddress,
+                        jibunAddress: result.jibunAddress,
                         duplicateCount: result.duplicateCount,
                         isSelected: store.state.selectedIndex.contains(index),
                         selectedCategory: store.state.typeSelections[index],
@@ -176,7 +178,6 @@ private extension ScanListView {
 
 // MARK: - Preview
 
-//
 // #Preview {
 //    let context = PersistenceController.preview.container.viewContext
 //    let repository = LocationRepository(context: context)
@@ -184,14 +185,20 @@ private extension ScanListView {
 //
 //    let mockResults = [
 //        ScanResult(
-//            address: "서울특별시 강남구 테헤란로 123",
+//            roadAddress: "서울특별시 강남구 테헤란로 123",
+//            jibunAddress: "서울 강남구 역삼동 789-12",
 //            duplicateCount: 3,
-//            sourcePhotoIds: [UUID(), UUID(), UUID()]
+//            sourcePhotoIds: [UUID(), UUID(), UUID()],
+//            latitude: 37.5665,
+//            longitude: 126.9780
 //        ),
 //        ScanResult(
-//            address: "서울특별시 서초구 반포대로 45",
+//            roadAddress: "서울특별시 서초구 반포대로 45",
+//            jibunAddress: "",
 //            duplicateCount: 1,
-//            sourcePhotoIds: [UUID()]
+//            sourcePhotoIds: [UUID()],
+//            latitude: 37.5043,
+//            longitude: 127.0044
 //        ),
 //    ]
 //
