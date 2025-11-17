@@ -224,49 +224,42 @@ private extension Array<Location> {
     /// - Parameter sampleIntervalMinutes: 한 샘플이 의미하는 시간(분 단위, 기본값 5분)
     /// - Returns: 주소별 요약 정보 `StayAddress` 배열
     func summarizedStays(sampleIntervalMinutes: Int = 5) -> [StayAddress] {
+        // 1. 기지국만 필터링
         let cellLocations = filter { $0.locationType == 2 }
         guard !cellLocations.isEmpty else { return [] }
         
-        // 수신 시각 기준으로 정렬해 "연속 구간"을 판별할 수 있도록 준비
-        let sortedByTime = cellLocations.sorted { left, right in
-            (left.receivedAt ?? .distantPast) < (right.receivedAt ?? .distantPast)
-        }
+        // 2. 주소별 체류 시간(샘플 수) + 좌표 합계 계산
+        //    - visitCount는 VisitFrequencyCalculator(연속 그룹 방식)에서 가져온다.
+        var bucket: [String: (sampleCount: Int, latitudeSum: Double, longitudeSum: Double)] = [:]
         
-        // [주소: (샘플 수, 위도 합, 경도 합, 방문 빈도)] 형태로 누적
-        var bucket: [String: (sampleCount: Int, latitudeSum: Double, longitudeSum: Double, visitCount: Int)] = [:]
-        var lastAddress: String?
-        
-        for location in sortedByTime {
+        for location in cellLocations {
             let addressKey = location.address.isEmpty ? "기지국 주소" : location.address
             
             var entry = bucket[addressKey]
-                ?? (sampleCount: 0, latitudeSum: 0, longitudeSum: 0, visitCount: 0)
+                ?? (sampleCount: 0, latitudeSum: 0, longitudeSum: 0)
             
-            // 전체 샘플 수 → 체류 시간 추정에 사용
             entry.sampleCount += 1
             entry.latitudeSum += location.pointLatitude
             entry.longitudeSum += location.pointLongitude
             
-            // 바로 직전 주소와 다를 때만 "방문 빈도"로 카운트
-            if lastAddress != addressKey {
-                entry.visitCount += 1
-                lastAddress = addressKey
-            }
-            
             bucket[addressKey] = entry
         }
         
-        // 평균 좌표와 체류 시간(분), 방문 빈도로 StayAddress 생성
+        // 3. 연속 그룹 기준 방문 빈도 계산 (VisitFrequencyCalculator 활용)
+        let visitFrequency = visitFrequencyByAddress() // [주소: 방문 횟수]
+        
+        // 4. 평균 좌표, 체류 시간(분), 방문 빈도를 사용해 StayAddress 배열 생성
         return bucket.map { address, value in
             let averageLatitude = value.latitudeSum / Double(value.sampleCount)
             let averageLongitude = value.longitudeSum / Double(value.sampleCount)
+            let visitCount = visitFrequency[address] ?? 0
             
             return StayAddress(
                 address: address,
                 totalMinutes: value.sampleCount * sampleIntervalMinutes,
                 latitude: averageLatitude,
                 longitude: averageLongitude,
-                visitCount: value.visitCount
+                visitCount: visitCount
             )
         }
     }
@@ -283,7 +276,7 @@ private extension Array<Location> {
     }
     
     /// 방문 빈도 기준으로 상위 N개의 기지국을 반환합니다.
-    /// 방문 빈도는 "연속 구간"을 한 번으로 보는 방식입니다.
+    /// 방문 빈도는 VisitFrequencyCalculator의 "연속 그룹" 방식을 사용합니다.
     func topVisitFrequency(
         sampleIntervalMinutes: Int = 5,
         maxCount: Int = 3

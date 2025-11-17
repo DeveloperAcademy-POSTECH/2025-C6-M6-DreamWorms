@@ -396,19 +396,8 @@ struct NaverMapView: UIViewRepresentable {
         
         /// 방문 데이터에서 셀 위치만 추출해 기지국 마커 스냅샷으로 변환합니다.
         func makeVisitedCellMarkers(from locations: [Location]) -> [CellMarker] {
-            var cellGroups: [String: (latitude: Double, longitude: Double, count: Int)] = [:]
-            
-            for location in locations where LocationType(location.locationType) == .cell {
-                let latitude = location.pointLatitude
-                let longitude = location.pointLongitude
-                guard latitude != 0, longitude != 0 else { continue }
-                
-                let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
-                let key = coordinate.coordinateKey
-                var entry = cellGroups[key] ?? (latitude: coordinate.latitude, longitude: coordinate.longitude, count: 0)
-                entry.count += 1
-                cellGroups[key] = entry
-            }
+            // TAENI : calculator 사용
+            let cellGroups = locations.visitFrequencyByCoordinate()
             
             return cellGroups
                 .sorted { $0.key < $1.key }
