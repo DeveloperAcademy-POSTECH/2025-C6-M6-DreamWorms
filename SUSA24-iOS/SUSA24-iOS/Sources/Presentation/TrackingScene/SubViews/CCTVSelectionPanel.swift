@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+// MARK: - CCTV Selection Panel
+
 struct CCTVSelectionPanel: View {
     /// 각 슬롯에 들어갈 핀 이름 (nil 이면 아직 선택 안 된 상태)
     @Binding var slotTitles: [String?]
@@ -84,6 +86,47 @@ struct CCTVSelectionPanel: View {
                 .shadow(color: .black.opacity(0.25), radius: 16)
         )
         .ignoresSafeArea()
+    }
+}
+
+// MARK: - CCTV Slot Row
+
+struct CCTVSlotRow: View {
+    @Binding var title: String?
+    var onClear: (() -> Void)?
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(title ?? "지도에서 핀을 선택해 주세요")
+                .font(.bodyRegular14)
+                .foregroundStyle(
+                    title == nil ? Color.labelAlternative : Color.labelNormal
+                )
+                .lineLimit(1)
+                .truncationMode(.tail)
+            
+            Spacer()
+            
+            if title != nil {
+                Button(action: { onClear?() }) {
+                    Image(.minus)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.labelNeutral)
+                        .frame(width: 22, height: 22)
+                        .background(
+                            Circle()
+                                .stroke(.labelCoolNormal, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.leading, 16)
+        .padding(.trailing, 12)
+        .frame(height: 42)
+        .overlay(
+            Capsule().stroke(.labelCoolNormal, lineWidth: 1)
+        )
     }
 }
 

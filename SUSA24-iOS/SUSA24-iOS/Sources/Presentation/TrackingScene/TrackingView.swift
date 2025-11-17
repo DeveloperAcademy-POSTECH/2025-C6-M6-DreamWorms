@@ -12,7 +12,7 @@ struct TrackingView: View {
     private var coordinator
     
     // MARK: - Dependencies
-    
+
     @State var timeLineStore: DWStore<TrackingFeature>
     
     // MARK: - Properties
@@ -26,6 +26,12 @@ struct TrackingView: View {
     /// 사용자가 지금 선택 중인 슬롯 인덱스
     @State private var activeSlotIndex: Int? = nil
     
+    /// 완료 눌렀을 때 결과 화면으로 전환 여부
+    @State private var isResultMode: Bool = false
+    
+    /// 맵 크기 전환용 네임스페이스
+    @Namespace private var mapNamespace
+    
     private var selectedLocationIDSet: Set<UUID> {
         Set(slotLocationIds.compactMap(\.self))
     }
@@ -33,31 +39,36 @@ struct TrackingView: View {
     // MARK: - View
     
     var body: some View {
-        ZStack {
-            // 배경: 네이버 지도
-            TrackingNaverMapView(
-                locations: timeLineStore.state.locations,
-                selectedLocationIDs: selectedLocationIDSet,
-                onLocationTapped: handleLocationTapped
-            )
-            .ignoresSafeArea()
-        }
-        // 상단 CCTV 선택 패널
-        .safeAreaInset(edge: .top) {
-            CCTVSelectionPanel(
-                slotTitles: $slots,
-                onSelectSlot: { index in
-                    activeSlotIndex = index
-                },
-                onBack: { coordinator.pop() },
-                onDone: {
-                    // TODO: - 완료시 화면 전환 코드 추가
-                    print("완료: \(slotLocationIds)")
-                },
-                onClearSlot: { index in
-                    clearSlot(at: index)
-                }
-            )
+        Group {
+            if isResultMode {
+                TrackingResultScreen(
+                    locations: timeLineStore.state.locations,
+                    selectedLocationIDs: selectedLocationIDSet,
+                    slots: slots,
+                    namespace: mapNamespace,
+                    onBack: {
+                        resetTrackingState()
+                        isResultMode = false
+                    }
+                )
+            } else {
+                TrackingSelectionScreen(
+                    locations: timeLineStore.state.locations,
+                    slots: $slots,
+                    slotLocationIds: $slotLocationIds,
+                    activeSlotIndex: $activeSlotIndex,
+                    namespace: mapNamespace,
+                    onBack: { coordinator.pop() },
+                    onDone: {
+                        guard slots.contains(where: { $0 != nil }) else { return }
+                        withAnimation(
+                            .spring(response: 0.5, dampingFraction: 0.85)
+                        ) {
+                            isResultMode = true
+                        }
+                    }
+                )
+            }
         }
         .task {
             timeLineStore.send(.onAppear(caseID))
@@ -118,6 +129,13 @@ private extension TrackingView {
         
         slots = newTitles
         slotLocationIds = newIds
+    }
+    
+    /// 가장 처음 상태로 돌아가는 메서드
+    func resetTrackingState() {
+        slots = [nil, nil, nil]
+        slotLocationIds = [nil, nil, nil]
+        activeSlotIndex = nil
     }
 }
 
