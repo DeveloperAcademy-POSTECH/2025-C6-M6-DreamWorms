@@ -9,8 +9,14 @@ import SwiftUI
 
 struct TrackingFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
-    init(repository: LocationRepositoryProtocol) {
+    private let cctvService: CCTVAPIService
+    
+    init(
+        repository: LocationRepositoryProtocol,
+        cctvService: CCTVAPIService
+    ) {
         self.repository = repository
+        self.cctvService = cctvService
     }
     
     // MARK: - State
@@ -19,6 +25,8 @@ struct TrackingFeature: DWReducer {
         var caseId: UUID?
         var locations: [Location] = []
         var isLoading: Bool = false
+        var cctvItems: [CCTVItem] = []
+        var isCCTVLoading: Bool = false
     }
     
     // MARK: - Action
@@ -26,6 +34,8 @@ struct TrackingFeature: DWReducer {
     enum Action: DWAction {
         case onAppear(UUID)
         case locationsLoaded([Location])
+        case requestCCTV([Location])
+        case cctvResponse(Result<[CCTVItem], VWorldError>)
     }
     
     // MARK: - Reducer
@@ -50,6 +60,69 @@ struct TrackingFeature: DWReducer {
             state.locations = locations
             state.isLoading = false
             return .none
+        
+        case let .requestCCTV(locations):
+            guard locations.count >= 3 else {
+                state.cctvItems = []
+                return .none
+            }
+            
+            state.isCCTVLoading = true
+            let polygonCoordinates = makeClosedPolygonCoordinates(from: locations)
+            let dto = VWorldPolygonRequestDTO(
+                coordinates: polygonCoordinates,
+                size: 100,
+                page: 1
+            )
+            
+            return .task { [cctvService] in
+                do {
+                    let response = try await cctvService.fetchCCTVByPolygon(dto)
+                    
+                    let items: [CCTVItem] = response.features.map { feature in
+                        CCTVItem(
+                            id: feature.id,
+                            name: feature.properties.cctvname,
+                            address: feature.properties.locate
+                        )
+                    }
+                    
+                    return .cctvResponse(.success(items))
+                } catch let error as VWorldError {
+                    return .cctvResponse(.failure(error))
+                } catch {
+                    return .cctvResponse(.failure(.unknown(error)))
+                }
+            }
+            
+        case let .cctvResponse(result):
+            state.isCCTVLoading = false
+            
+            switch result {
+            case let .success(items):
+                state.cctvItems = items
+            case let .failure(error):
+                state.cctvItems = []
+            }
+            
+            return .none
         }
+    }
+}
+
+private extension TrackingFeature {
+    /// Location 배열로부터 VWorld POLYGON용 좌표 배열을 만듭니다.
+    /// - Note: VWorld는 `POLYGON((x1 y1, x2 y2, ..., x1 y1))` 형태로 **닫힌 폴리곤**을 요구하므로 첫 번째 좌표를 마지막에 한 번 더 추가합니다.
+    func makeClosedPolygonCoordinates(from locations: [Location]) -> [MapCoordinate] {
+        // 1) Location → MapCoordinate 변환
+        var coords: [MapCoordinate] = locations.map {
+            MapCoordinate(
+                latitude: $0.pointLatitude,
+                longitude: $0.pointLongitude
+            )
+        }
+        if let first = coords.first { coords.append(first) }
+        
+        return coords
     }
 }

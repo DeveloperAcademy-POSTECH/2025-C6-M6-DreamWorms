@@ -45,6 +45,8 @@ struct TrackingView: View {
                     locations: timeLineStore.state.locations,
                     selectedLocationIDs: selectedLocationIDSet,
                     slots: slots,
+                    cctvItems: timeLineStore.state.cctvItems,
+                    isCCTVLoading: timeLineStore.state.isCCTVLoading,
                     namespace: mapNamespace,
                     onBack: {
                         resetTrackingState()
@@ -60,7 +62,13 @@ struct TrackingView: View {
                     namespace: mapNamespace,
                     onBack: { coordinator.pop() },
                     onDone: {
-                        guard slots.contains(where: { $0 != nil }) else { return }
+                        guard slots.allSatisfy({ $0 != nil }) else { return }
+                        
+                        let selectedLocations = timeLineStore.state.locations.filter {
+                            selectedLocationIDSet.contains($0.id)
+                        }
+                        timeLineStore.send(.requestCCTV(selectedLocations))
+                        
                         withAnimation(
                             .spring(response: 0.5, dampingFraction: 0.85)
                         ) {
@@ -140,16 +148,3 @@ private extension TrackingView {
 }
 
 // MARK: - Preview
-
-#Preview {
-    NavigationStack {
-        TrackingView(
-            timeLineStore: DWStore(
-                initialState: TrackingFeature.State(),
-                reducer: TrackingFeature(repository: MockLocationRepository())
-            ),
-            caseID: UUID()
-        )
-        .environment(AppCoordinator())
-    }
-}

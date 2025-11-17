@@ -295,7 +295,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
         context: NSManagedObjectContext
     ) -> TrackingView {
         let repository = LocationRepository(context: context)
-        let feature = TrackingFeature(repository: repository)
+        let feature = TrackingFeature(repository: repository, cctvService: cctvService)
         let store = DWStore(
             initialState: TrackingFeature.State(),
             reducer: feature

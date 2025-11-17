@@ -11,6 +11,8 @@ struct TrackingResultScreen: View {
     let locations: [Location]
     let selectedLocationIDs: Set<UUID>
     let slots: [String?]
+    let cctvItems: [CCTVItem]
+    let isCCTVLoading: Bool
     
     let namespace: Namespace.ID
     let onBack: () -> Void
@@ -73,22 +75,26 @@ struct TrackingResultScreen: View {
                     .foregroundStyle(.labelNormal)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 12)
                 
-                ScrollView {
-                    LazyVStack(spacing: 8) {
-                        ForEach(Array(zip(slots.indices, slots)), id: \.0) { _, title in
-                            if let title {
+                if isCCTVLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(cctvItems) { item in
                                 DWLocationCard(
                                     type: .cctv,
-                                    title: title,
-                                    description: "주소"
+                                    title: item.name,
+                                    description: item.address
                                 )
                                 .setupAsButton(false)
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 90)
                     }
-                    .padding(.horizontal, 16)
                 }
             }
             
