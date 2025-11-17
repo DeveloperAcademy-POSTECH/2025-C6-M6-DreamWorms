@@ -77,27 +77,97 @@ import Foundation
 //    try await repository.createLocations(data: locations, caseId: caseId)
 // }
 
-private nonisolated struct CellLogRootDTO: Decodable, Sendable {
-    let locations: [CellLogDTO]
-}
+// private nonisolated struct CellLogRootDTO: Decodable, Sendable {
+//    let locations: [CellLogDTO]
+// }
+//
+// private nonisolated struct CellLogDTO: Decodable, Sendable {
+//    let timestamp: String
+//    let message: String
+//    let address: String
+//    let notes: String?
+// }
+//
+// enum LocationMockLoader {
+//    /// cell_logs.json → [Location] 변환
+//    /// - timestamp 파싱
+//    /// - 주소 → 네이버 지오코딩 변환
+//    /// - 실패 시 fallback (0,0)
+//    /// - LocationType = 2(cell) 고정
+//    static func loadCellLogSampleWithGeocode() async throws -> [Location] {
+//        let root: CellLogRootDTO = try await JSONLoader.loadAsync(
+//            "celllog_cleaned.json",
+//            as: CellLogRootDTO.self
+//        )
+//
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "MM/dd/yyyy hh:mm:ss a"
+//        formatter.locale = Locale(identifier: "en_US_POSIX")
+//
+//        var results: [Location] = []
+//
+//        for dto in root.locations {
+//            let timestamp = formatter.date(from: dto.timestamp) ?? Date()
+//
+//            var lat: Double = 0
+//            var lon: Double = 0
+//            var resolvedAddress = dto.address
+//
+//            // Geocode
+//            do {
+//                let geocode = try await NaverGeocodeAPIService.shared.geocode(address: dto.address)
+//
+//                if let gLat = geocode.latitude,
+//                   let gLon = geocode.longitude
+//                {
+//                    lat = gLat
+//                    lon = gLon
+//                    resolvedAddress = geocode.fullAddress
+//                } else {
+//                    print("[MockLoader] Geocode 결과 없음 → fallback: \(dto.address)")
+//                }
+//            } catch {
+//                print("[MockLoader] Geocode 실패 → fallback (0,0): \(dto.address)")
+//            }
+//            // ----------------------------------------------------------
+//
+//            let location = Location(
+//                id: UUID(),
+//                address: resolvedAddress,
+//                title: nil,
+//                note: dto.notes,
+//                pointLatitude: lat,
+//                pointLongitude: lon,
+//                boxMinLatitude: nil,
+//                boxMinLongitude: nil,
+//                boxMaxLatitude: nil,
+//                boxMaxLongitude: nil,
+//                locationType: 2, // 기지국 데이터 고정
+//                colorType: 0,
+//                receivedAt: timestamp
+//            )
+//
+//            results.append(location)
+//        }
+//
+//        return results
+//    }
+// }
 
 private nonisolated struct CellLogDTO: Decodable, Sendable {
     let timestamp: String
-    let message: String
     let address: String
+    let latitude: Double
+    let longitude: Double
+    let message: String
     let notes: String?
 }
 
 enum LocationMockLoader {
-    /// cell_logs.json → [Location] 변환
-    /// - timestamp 파싱
-    /// - 주소 → 네이버 지오코딩 변환
-    /// - 실패 시 fallback (0,0)
-    /// - LocationType = 2(cell) 고정
     static func loadCellLogSampleWithGeocode() async throws -> [Location] {
-        let root: CellLogRootDTO = try await JSONLoader.loadAsync(
-            "cell_logs.json",
-            as: CellLogRootDTO.self
+        let dtos: [CellLogDTO] = try await JSONLoader.loadAsync(
+            "celllog_cleaned.json",
+            as: [CellLogDTO].self
         )
         
         let formatter = DateFormatter()
@@ -105,32 +175,14 @@ enum LocationMockLoader {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         
         var results: [Location] = []
-
-        for dto in root.locations {
+        
+        for dto in dtos {
             let timestamp = formatter.date(from: dto.timestamp) ?? Date()
-
-            var lat: Double = 0
-            var lon: Double = 0
-            var resolvedAddress = dto.address
-
-            // Geocode
-            do {
-                let geocode = try await NaverGeocodeAPIService.shared.geocode(address: dto.address)
-                
-                if let gLat = geocode.latitude,
-                   let gLon = geocode.longitude
-                {
-                    lat = gLat
-                    lon = gLon
-                    resolvedAddress = geocode.fullAddress
-                } else {
-                    print("[MockLoader] Geocode 결과 없음 → fallback: \(dto.address)")
-                }
-            } catch {
-                print("[MockLoader] Geocode 실패 → fallback (0,0): \(dto.address)")
-            }
-            // ----------------------------------------------------------
-
+            
+            let lat = dto.latitude
+            let lon = dto.longitude
+            let resolvedAddress = dto.address
+            
             let location = Location(
                 id: UUID(),
                 address: resolvedAddress,
@@ -142,7 +194,7 @@ enum LocationMockLoader {
                 boxMinLongitude: nil,
                 boxMaxLatitude: nil,
                 boxMaxLongitude: nil,
-                locationType: 2, // 기지국 데이터 고정
+                locationType: 2,
                 colorType: 0,
                 receivedAt: timestamp
             )
