@@ -204,4 +204,58 @@ enum LocationMockLoader {
         
         return results
     }
+    
+    // MARK: - 핀 데이터 로드
+    
+    /// 핀 데이터를 로드합니다 (locationType = 0, 1, 3)
+    /// - Returns: Location 배열 (핀 타입)
+    /// - Throws: JSON 로딩 에러
+    static func loadPinDataSample() async throws -> [Location] {
+        let dtos: [PinDataDTO] = try await JSONLoader.loadAsync(
+            "locations_geocoded.json",
+            as: [PinDataDTO].self
+        )
+        
+        var results: [Location] = []
+        
+        for dto in dtos {
+            // UUID 변환 (실패 시 새로 생성)
+            let locationId = UUID(uuidString: dto.id) ?? UUID()
+            
+            print(dto)
+            
+            let location = Location(
+                id: locationId,
+                address: dto.address,
+                title: dto.title.isEmpty ? nil : dto.title,
+                note: dto.note.isEmpty ? nil : dto.note,
+                pointLatitude: dto.pointLatitude,
+                pointLongitude: dto.pointLongitude,
+                boxMinLatitude: nil,
+                boxMinLongitude: nil,
+                boxMaxLatitude: nil,
+                boxMaxLongitude: nil,
+                locationType: Int16(dto.locationType),
+                colorType: Int16(dto.colorType),
+                receivedAt: nil // 핀 데이터는 시간 정보 없음
+            )
+            
+            results.append(location)
+        }
+        
+        print("✅ [LocationMockLoader] 핀 데이터 로드 완료 → \(results.count)개")
+        return results
+    }
+}
+
+private nonisolated struct PinDataDTO: Decodable, Sendable {
+    let id: String
+    let locationType: Int
+    let pointLatitude: Double
+    let pointLongitude: Double
+    let address: String
+    let title: String
+    let note: String
+    let colorType: Int
+    let geocodeSource: String
 }

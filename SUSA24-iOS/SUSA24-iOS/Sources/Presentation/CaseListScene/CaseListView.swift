@@ -14,11 +14,11 @@ struct CaseListView: View {
     // MARK: - Dependencies
     
     @State var store: DWStore<CaseListFeature>
-
+    
     // MARK: - Properties
     
     // MARK: - View
-
+    
     var body: some View {
         VStack(spacing: 0) {
             Text(.caseListNavigationTitle)
@@ -30,22 +30,22 @@ struct CaseListView: View {
                 .padding(.trailing, 16)
             
             // TODO: - 지원되지 않는 기능임에 따라 뷰에서 보이지 않게 처리
-//            CaseListHeader(
-//                onSettingTapped: { coordinator.push(.settingScene) }
-//            )
-//            .padding(.bottom, 24)
+            //            CaseListHeader(
+            //                onSettingTapped: { coordinator.push(.settingScene) }
+            //            )
+            //            .padding(.bottom, 24)
             
-//            Picker("", selection: Binding(
-//                get: { store.state.selectedTab },
-//                set: { store.send(.setTab($0)) }
-//            )) {
-//                ForEach(CaseListPickerTab.allCases, id: \.title) { tab in
-//                    Text(tab.title).tag(tab)
-//                }
-//            }
-//            .pickerStyle(.segmented)
-//            .padding(.horizontal, 16)
-//            .padding(.bottom, 20)
+            //            Picker("", selection: Binding(
+            //                get: { store.state.selectedTab },
+            //                set: { store.send(.setTab($0)) }
+            //            )) {
+            //                ForEach(CaseListPickerTab.allCases, id: \.title) { tab in
+            //                    Text(tab.title).tag(tab)
+            //                }
+            //            }
+            //            .pickerStyle(.segmented)
+            //            .padding(.horizontal, 16)
+            //            .padding(.bottom, 20)
             
             if store.state.selectedTab == .allCase, !store.state.cases.isEmpty {
                 ScrollView {
@@ -57,6 +57,9 @@ struct CaseListView: View {
                                 onDelete: { store.send(.deleteTapped(item: item)) },
                                 onAddCellLog: {
                                     store.send(.cellLogMenuTapped(caseID: item.id))
+                                },
+                                onAddPinData: {
+                                    store.send(.pinDataMenuTapped(caseID: item.id))
                                 }
                             )
                             .padding(.horizontal, 16)
@@ -100,6 +103,28 @@ struct CaseListView: View {
             ),
             title: "데이터 추가 완료",
             message: "기지국 위치 데이터가 성공적으로 추가되었습니다."
+        )
+        .dwAlert(
+            isPresented: Binding(
+                get: { store.state.isShowingPinDataOverwriteAlert },
+                set: { _ in store.send(.dismissPinDataOverwriteAlert) }
+            ),
+            title: "핀 데이터 덮어쓰기",
+            message: "기존 핀 데이터가 있습니다. 덮어쓰시겠습니까?",
+            primaryButton: DWAlertButton(title: "덮어쓰기", style: .destructive) {
+                if let caseID = store.state.targetCaseIdForPinData {
+                    store.send(.addPinData(caseID: caseID, overwrite: true))
+                }
+            },
+            secondaryButton: DWAlertButton(title: "취소", style: .cancel)
+        )
+        .dwAlert(
+            isPresented: Binding(
+                get: { store.state.isShowingPinDataSuccessAlert },
+                set: { _ in store.send(.dismissPinDataSuccessAlert) }
+            ),
+            title: "데이터 추가 완료",
+            message: "핀 위치 데이터가 성공적으로 추가되었습니다."
         )
     }
 }

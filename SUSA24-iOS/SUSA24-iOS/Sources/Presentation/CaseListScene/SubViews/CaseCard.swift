@@ -13,6 +13,7 @@ struct CaseCard: View {
     let onEdit: () -> Void
     let onDelete: () -> Void
     let onAddCellLog: () -> Void
+    let onAddPinData: () -> Void
     
     @State private var showMenu = false
     @State private var showDeleteAlert = false
@@ -87,8 +88,17 @@ struct CaseCard: View {
                         onAddCellLog()
                     } label: {
                         Label(
-                            "기지국데이터 추가",
+                            "기지국 데이터 추가",
                             systemImage: "antenna.radiowaves.left.and.right"
+                        )
+                    }
+                    
+                    Button {
+                        onAddPinData()
+                    } label: {
+                        Label(
+                            "핀 데이터 추가",
+                            systemImage: "mappin.and.ellipse"
                         )
                     }
                     
@@ -145,7 +155,8 @@ struct CaseCard: View {
 //        ),
 //        onEdit: {},
 //        onDelete: {},
-//        onAddCellLog: {}
+//        onAddCellLog: {},
+//        onAddPinData: {}
 //    )
 //    .padding(.horizontal, 16)
 // }
