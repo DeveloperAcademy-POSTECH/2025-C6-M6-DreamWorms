@@ -266,11 +266,11 @@ extension View {
 
 // MARK: - Preview
 
-//#Preview("Custom Size Buttons") {
+// #Preview("Custom Size Buttons") {
 //    MapWithCustomSizesPreview()
-//}
+// }
 //
-//private struct MapWithCustomSizesPreview: View {
+// private struct MapWithCustomSizesPreview: View {
 //    var body: some View {
 //        ZStack {
 //            Rectangle()
@@ -294,13 +294,13 @@ extension View {
 //
 //        ])
 //    }
-//}
+// }
 //
-//#Preview("Bottom Toolbar on Sheet - Simple") {
+// #Preview("Bottom Toolbar on Sheet - Simple") {
 //    SimpleToolbarOnSheetPreview()
-//}
+// }
 //
-//private struct SimpleToolbarOnSheetPreview: View {
+// private struct SimpleToolbarOnSheetPreview: View {
 //    @State private var showSheet = true
 //
 //    var body: some View {
@@ -317,9 +317,9 @@ extension View {
 //                .presentationDragIndicator(.visible)
 //        }
 //    }
-//}
+// }
 //
-//private struct SimpleSheetView: View {
+// private struct SimpleSheetView: View {
 //    var body: some View {
 //        Color(.systemBackground)
 //            .ignoresSafeArea()
@@ -340,4 +340,4 @@ extension View {
 //                ]
 //            )
 //    }
-//}
+// }

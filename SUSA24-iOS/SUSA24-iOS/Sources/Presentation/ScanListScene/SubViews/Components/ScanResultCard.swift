@@ -61,7 +61,7 @@ struct ScanResultCard: View {
                                     Image(systemName: isShowingJibunAddress ? "chevron.down" : "chevron.up")
                                         .font(.system(size: 12))
                                         .foregroundStyle(.labelAlternative)
-                                 }
+                                }
                                 .buttonStyle(.borderless)
                                 .padding(.bottom, 4)
                             }
