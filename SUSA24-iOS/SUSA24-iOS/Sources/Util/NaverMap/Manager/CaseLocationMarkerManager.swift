@@ -120,6 +120,8 @@ final class CaseLocationMarkerManager {
         let coordinate: MapCoordinate
         /// 사용자 위치 마커의 색상 (home / work / custom 에서만 사용)
         let pinColor: PinColorType?
+        /// 핀 이름 (캡션으로 표시)
+        let title: String?
         
         var markerType: MarkerType
     }
@@ -145,6 +147,13 @@ final class CaseLocationMarkerManager {
         overlay.iconImage = NMFOverlayImage(image: icon)
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        
+        // 핀 이름을 캡션으로 표시
+        if let title = marker.title, !title.isEmpty {
+            overlay.captionText = title
+            overlay.captionRequestedWidth = 100
+        }
+        
         overlay.mapView = mapView
         
         // 탭 핸들러 등록 (선택 가능한 마커만)
@@ -256,6 +265,7 @@ final class CaseLocationMarkerManager {
                     id: location.id.uuidString,
                     coordinate: coordinate,
                     pinColor: pinColor,
+                    title: location.title,
                     markerType: .home
                 ))
             case .work:
@@ -263,6 +273,7 @@ final class CaseLocationMarkerManager {
                     id: location.id.uuidString,
                     coordinate: coordinate,
                     pinColor: pinColor,
+                    title: location.title,
                     markerType: .work
                 ))
             case .custom:
@@ -270,6 +281,7 @@ final class CaseLocationMarkerManager {
                     id: location.id.uuidString,
                     coordinate: coordinate,
                     pinColor: pinColor,
+                    title: location.title,
                     markerType: .custom
                 ))
             case .cell:
@@ -288,6 +300,7 @@ final class CaseLocationMarkerManager {
                     id: key,
                     coordinate: coordinate,
                     pinColor: nil,
+                    title: nil,
                     markerType: .cell(isVisited: true)
                 )
             )
@@ -348,6 +361,11 @@ final class CaseLocationMarkerManager {
                             markerColors[markerInfo.id] = markerInfo.pinColor
                         }
                     }
+                    // 핀 이름 캡션 업데이트
+                    if let title = markerInfo.title, !title.isEmpty {
+                        overlay.captionText = title
+                        overlay.captionRequestedWidth = 100
+                    } else { overlay.captionText = "" }
                     // 색상이 동일하면 큰 핀 유지 (continue)
                     continue
                 }
@@ -368,6 +386,14 @@ final class CaseLocationMarkerManager {
                     markerTypes[markerInfo.id] = markerInfo.markerType
                     // 색상 정보 저장 (선택 해제 시 복원용)
                     markerColors[markerInfo.id] = markerInfo.pinColor
+                }
+                
+                // 핀 이름 캡션 업데이트
+                if let title = markerInfo.title, !title.isEmpty {
+                    overlay.captionText = title
+                    overlay.captionRequestedWidth = 100
+                } else {
+                    overlay.captionText = ""
                 }
                 
                 // 탭 핸들러 등록

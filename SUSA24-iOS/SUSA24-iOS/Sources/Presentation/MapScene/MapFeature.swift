@@ -107,7 +107,7 @@ struct MapFeature: DWReducer {
         /// 타임라인 시트가 최소 높이인지 여부입니다.
         /// - `true`: 타임라인 시트가 최소 높이 (PlaceInfoSheet 표시 가능)
         /// - `false`: 타임라인 시트가 올라와 있음 (PlaceInfoSheet 표시 안 함)
-        var isTimelineSheetMinimized: Bool = false
+        var isTimelineSheetMinimized: Bool = true
         /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
         var deselectMarkerTrigger: UUID?
         
