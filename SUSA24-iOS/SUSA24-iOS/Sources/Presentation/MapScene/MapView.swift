@@ -75,6 +75,9 @@ struct MapView: View {
                 onCellMarkerTapped: { cellKey, title in
                     dispatcher.send(.focusCellTimeline(cellKey: cellKey, title: title))
                 },
+                onUserLocationMarkerTapped: { locationId in
+                    store.send(.userLocationMarkerTapped(locationId))
+                },
                 onMapTapped: { latlng in
                     store.send(.mapTapped(latlng))
                 },
@@ -204,9 +207,9 @@ struct MapView: View {
             [
                 .button(image: Image(systemName: "pin.fill"), action: {
                     // 핀이 이미 있으므로 아무 동작 안함
-                })
-                .iconSize(16)
-                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3),
+                }),
+                //                .iconSize(16)
+                //                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3)
                 
                 .menu(
                     image: Image(systemName: "ellipsis"),
@@ -224,18 +227,19 @@ struct MapView: View {
                             action: { store.send(.showDeleteAlert) }
                         ),
                     ]
-                )
-                .iconSize(20)
-                .setupPadding(top: 4, leading: 3, bottom: 4, trailing: 6),
+                ),
+                //                .iconSize(20)
+                //                .setupPadding(top: 4, leading: 3, bottom: 4, trailing: 6)
             ]
         } else {
             // 핀이 없는 경우: pin만 표시
             [
                 .button(image: Image(.pin), action: {
                     store.send(.addPinTapped)
-                })
-                .iconSize(20)
-                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3),
+                }),
+                //                .iconSize(20)
+                //                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3)
+                
 //                .menu(
 //                    image: Image(.ellipsis),
 //                    items: [

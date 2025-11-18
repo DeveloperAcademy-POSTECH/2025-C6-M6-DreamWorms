@@ -24,7 +24,7 @@ struct ScanListFeature: DWReducer {
     // MARK: - State
 
     struct State: DWState {
-        /// 분석 결과 목록
+        /// 분석 결과 목록 (Geocode 검증 완료)
         var scanResults: [ScanResult]
 
         /// 선택된 인덱스
@@ -140,17 +140,16 @@ struct ScanListFeature: DWReducer {
             // MARK: Duplicate Check
 
         case let .checkDuplicateLocations(locations, caseID):
-            // Repository에서 해당 케이스의 기존 Locations 가져오기
+            // CoreData에서 기존 Location 조회
             return .task { [repository] in
                 do {
                     let existingLocations = try await repository.fetchLocations(caseId: caseID)
 
-                    // 주소 중복 체크
-                    for newLocation in locations {
-                        if existingLocations.contains(where: { $0.address == newLocation.address }) {
-                            // 중복 발견
+                    // 중복 체크 (displayAddress 기준)
+                    for location in locations {
+                        if existingLocations.contains(where: { $0.address == location.address }) {
                             return .duplicateFound(
-                                address: newLocation.address,
+                                address: location.address,
                                 locations: locations,
                                 caseID: caseID
                             )
@@ -159,6 +158,7 @@ struct ScanListFeature: DWReducer {
 
                     // 중복 없음
                     return .noDuplicatesFound(locations: locations, caseID: caseID)
+
                 } catch {
                     return .saveFailed(error)
                 }
@@ -204,18 +204,18 @@ struct ScanListFeature: DWReducer {
             state.isSaving = true
             state.errorMessage = nil
 
-            // ScanResult → Location 변환
+            // ScanResult → Location 변환 (좌표는 이미 검증됨)
             let locations: [Location] = state.selectedIndex.map { index in
                 let result = state.scanResults[index]
                 let type = state.typeSelections[index]!
 
                 return Location(
                     id: UUID(),
-                    address: result.address,
+                    address: result.displayAddress, // 신주소 우선, 없으면 구주소
                     title: nil,
                     note: nil,
-                    pointLatitude: 0.0, // TODO: Geocoding
-                    pointLongitude: 0.0,
+                    pointLatitude: result.latitude,
+                    pointLongitude: result.longitude,
                     boxMinLatitude: nil,
                     boxMinLongitude: nil,
                     boxMaxLatitude: nil,

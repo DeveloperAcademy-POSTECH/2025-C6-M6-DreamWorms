@@ -8,8 +8,6 @@
 import Foundation
 
 /// 문서 스캔 분석 Feature
-///
-/// BatchAddressAnalyzer를 사용하여 여러 이미지를 순차적으로 분석합니다.
 struct ScanLoadFeature: DWReducer {
     // MARK: - Dependencies
 
@@ -34,7 +32,7 @@ struct ScanLoadFeature: DWReducer {
         /// 현재 사진 ID
         var currentPhotoId: UUID?
 
-        /// 분석 완료된 주소 결과
+        /// 분석 완료된 주소 결과 (좌표 검증 완료)
         var scanResults: [ScanResult] = []
 
         /// 성공한 이미지 개수
@@ -72,8 +70,11 @@ struct ScanLoadFeature: DWReducer {
         /// 진행 상태 업데이트
         case updateProgress(progress: BatchAddressAnalyzer.AnalysisProgress)
 
-        /// 스캔 완료
-        case scanningCompleted(result: BatchAddressAnalyzer.BatchAnalysisResult)
+        /// Vision 분석 완료 (아직 geocode 검증 전)
+        case visionAnalysisCompleted(addresses: [String: Int], successCount: Int, failedCount: Int)
+        
+        /// Geocode 검증 완료 (최종 결과)
+        case geocodeValidationCompleted(scanResults: [ScanResult], failedAddressCount: Int)
 
         /// 스캔 실패
         case scanningFailed(errorMessage: String)
@@ -93,8 +94,13 @@ struct ScanLoadFeature: DWReducer {
             state.errorMessage = nil
 
             return .task { [batchAnalyzer] in
+                // 1단계: Vision 분석
                 let result = await batchAnalyzer.analyzePhotos(photos, progressHandler: nil)
-                return .scanningCompleted(result: result)
+                return .visionAnalysisCompleted(
+                    addresses: result.addresses,
+                    successCount: result.successCount,
+                    failedCount: result.failedCount
+                )
             }
 
         case let .updateProgress(progress):
@@ -103,28 +109,30 @@ struct ScanLoadFeature: DWReducer {
             state.currentPhotoId = progress.currentPhoto.id
             return .none
 
-        case let .scanningCompleted(result):
+        case let .visionAnalysisCompleted(addresses, successCount, failedCount):
+            // Vision 분석 결과 저장
+            state.successCount = successCount
+            state.failedCount = failedCount
+            
+            // 2단계: Geocode 검증 시작
+            return .task {
+                await validateAddressesWithGeocode(addresses: addresses)
+            }
+            
+        case let .geocodeValidationCompleted(scanResults, _):
+            // 최종 결과 저장
             state.isScanning = false
-            state.currentIndex = result.totalCount
-            state.successCount = result.successCount
-            state.failedCount = result.failedCount
-
-            // [String: Int] → [ScanResult] 변환
-            state.scanResults = result.addresses
-                .map { address, count in
-                    ScanResult(
-                        address: address,
-                        duplicateCount: count,
-                        sourcePhotoIds: []
-                    )
-                }
-                .sorted { $0.duplicateCount > $1.duplicateCount }
-
+            state.scanResults = scanResults.sorted { $0.duplicateCount > $1.duplicateCount }
+            state.currentIndex = state.totalCount
+            
+            // TODO: 실패한 주소 개수 출력 (추후 고도화용)
+//            print("[ScanLoad] Geocode 검증 완료")
+//            print("   성공: \(scanResults.count)개")
+//            print("   실패: \(failedAddressCount)개 (좌표 검증 실패)")
+            
             // 에러 처리
             if state.scanResults.isEmpty {
-                state.errorMessage = "추출된 주소가 없습니다."
-            } else if result.failedCount > 0 {
-                state.errorMessage = "\(result.failedCount)개 이미지 분석 실패"
+                state.errorMessage = "좌표 검증에 성공한 주소가 없습니다."
             }
 
             return .none
@@ -133,9 +141,67 @@ struct ScanLoadFeature: DWReducer {
             state.isScanning = false
             state.errorMessage = errorMessage
             return .none
-            //        case .retry:
-            //            state.errorMessage = nil
-            //            return .none
         }
+    }
+    
+    // MARK: - Private Methods
+    
+    /// 주소 목록을 Geocode API로 검증하여 좌표를 가져옵니다.
+    /// - Parameter addresses: 중복 제거된 주소 목록 [주소: 중복횟수]
+    /// - Returns: 검증된 ScanResult 배열과 실패 개수
+    private func validateAddressesWithGeocode(addresses: [String: Int]) async -> Action {
+        // 중복 제거된 주소 리스트
+        let uniqueAddresses = Array(addresses.keys)
+        
+        // 병렬 처리로 각 주소 검증
+        let results = await withTaskGroup(of: (String, Int, Address?)?.self) { group in
+            for address in uniqueAddresses {
+                let duplicateCount = addresses[address] ?? 1
+                
+                group.addTask {
+                    do {
+                        let geocode = try await NaverGeocodeAPIService.shared.geocode(address: address)
+                        return (address, duplicateCount, geocode)
+                    } catch {
+                        // 실패한 주소는 nil 반환
+                        return nil
+                    }
+                }
+            }
+            
+            // 결과 수집
+            var validResults: [(String, Int, Address)] = []
+            for await result in group {
+                if let result {
+                    validResults.append((result.0, result.1, result.2!))
+                }
+            }
+            return validResults
+        }
+        
+        // ScanResult로 변환 (좌표 검증 성공한 것만)
+        let scanResults = results.compactMap { _, duplicateCount, geocode -> ScanResult? in
+            guard let latitude = geocode.latitude,
+                  let longitude = geocode.longitude
+            else {
+                return nil
+            }
+            
+            return ScanResult(
+                roadAddress: geocode.roadAddress, // 신주소
+                jibunAddress: geocode.jibunAddress, // 구주소
+                duplicateCount: duplicateCount,
+                sourcePhotoIds: [],
+                latitude: latitude,
+                longitude: longitude
+            )
+        }
+        
+        let failedCount = uniqueAddresses.count - results.count
+        
+        return .geocodeValidationCompleted(
+            scanResults: scanResults,
+            failedAddressCount: failedCount
+        )
     }
 }

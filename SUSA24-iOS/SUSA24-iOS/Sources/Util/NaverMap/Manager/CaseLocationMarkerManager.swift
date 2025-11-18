@@ -18,6 +18,10 @@ final class CaseLocationMarkerManager {
     private var markers: [String: NMFMarker] = [:]
     /// 마커 타입 캐시 (markerId -> MarkerType)
     private var markerTypes: [String: MarkerType] = [:]
+    /// 마커 색상 캐시 (markerId -> PinColorType) - 선택 해제 시 원래 색상 복원용
+    private var markerColors: [String: PinColorType] = [:]
+    /// 현재 선택된 마커 ID
+    private var selectedMarkerId: String?
     
     // MARK: - Public Methods
     
@@ -25,15 +29,19 @@ final class CaseLocationMarkerManager {
     /// - Parameters:
     ///   - locations: 표시할 위치 데이터 배열
     ///   - mapView: 네이버 지도 뷰
+    ///   - onCellTapped: 셀 마커 탭 콜백
+    ///   - onUserLocationTapped: 사용자 위치 마커(home/work/custom) 탭 콜백 (Location ID 전달)
     /// - Returns: 좌표 키와 방문 횟수 매핑 (셀 타입에 한함)
     @discardableResult
     func updateMarkers(
         _ locations: [Location],
         on mapView: NMFMapView,
-        onCellTapped: @escaping (String) -> Void
+        onCellTapped: @escaping (String) -> Void,
+        onUserLocationTapped: @escaping (UUID) -> Void
     ) async -> [String: Int] {
         let (markers, cellCounts) = buildMarkers(from: locations)
-        await applyMarkers(markers, on: mapView, onCellTapped: onCellTapped)
+        await applyMarkers(markers, on: mapView, onCellTapped: onCellTapped, onUserLocationTapped: onUserLocationTapped)
+        
         return cellCounts
     }
     
@@ -44,6 +52,8 @@ final class CaseLocationMarkerManager {
         }
         markers.removeAll()
         markerTypes.removeAll()
+        markerColors.removeAll()
+        selectedMarkerId = nil
     }
     
     /// 방문 빈도 배지를 셀 마커에 적용합니다.
@@ -55,6 +65,10 @@ final class CaseLocationMarkerManager {
         
         for (id, count) in cellCounts {
             guard let overlay = markers[id] else { continue }
+            
+            // 선택된 마커는 큰 핀 유지
+            if id == selectedMarkerId { continue }
+            
             let icon = await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
             overlay.iconImage = NMFOverlayImage(image: icon)
             overlay.mapView = mapView
@@ -67,6 +81,10 @@ final class CaseLocationMarkerManager {
     func resetVisitFrequency(on mapView: NMFMapView) async {
         for (id, overlay) in markers {
             guard case .cellWithCount = markerTypes[id] else { continue }
+            
+            // 선택된 마커는 큰 핀 유지
+            if id == selectedMarkerId { continue }
+            
             let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true))
             overlay.iconImage = NMFOverlayImage(image: icon)
             overlay.mapView = mapView
@@ -82,6 +100,21 @@ final class CaseLocationMarkerManager {
         }
     }
     
+    /// 마커 선택 해제
+    func deselectMarker(on _: NMFMapView) async {
+        guard let selectedId = selectedMarkerId,
+              let marker = markers[selectedId],
+              let markerType = markerTypes[selectedId] else { return }
+        
+        // 원래 작은 마커로 복원 (원래 색상 포함)
+        let pinColor = markerColors[selectedId]
+        let smallIcon = await getSmallMarkerIcon(for: markerType, pinColor: pinColor)
+        marker.iconImage = NMFOverlayImage(image: smallIcon)
+        marker.zIndex = 0
+        
+        selectedMarkerId = nil
+    }
+    
     private struct MarkerModel {
         let id: String
         let coordinate: MapCoordinate
@@ -95,7 +128,9 @@ final class CaseLocationMarkerManager {
     
     private func createMarker(
         for marker: MarkerModel,
-        on mapView: NMFMapView
+        on mapView: NMFMapView,
+        onCellTapped: @escaping (String) -> Void,
+        onUserLocationTapped: @escaping (UUID) -> Void
     ) async -> NMFMarker {
         let overlay = NMFMarker()
         overlay.position = NMGLatLng(
@@ -111,7 +146,95 @@ final class CaseLocationMarkerManager {
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.height = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.mapView = mapView
+        
+        // 탭 핸들러 등록 (선택 가능한 마커만)
+        if isSelectableMarker(marker.markerType) {
+            overlay.touchHandler = { [weak self] _ in
+                guard let self else { return false }
+                Task { @MainActor in
+                    await self.handleMarkerTap(
+                        markerId: marker.id,
+                        markerType: marker.markerType,
+                        pinColor: marker.pinColor,
+                        on: mapView,
+                        onCellTapped: onCellTapped,
+                        onUserLocationTapped: onUserLocationTapped
+                    )
+                }
+                return true
+            }
+        }
+        
         return overlay
+    }
+    
+    /// 마커 탭 처리
+    private func handleMarkerTap(
+        markerId: String,
+        markerType: MarkerType,
+        pinColor: PinColorType?,
+        on mapView: NMFMapView,
+        onCellTapped: @escaping (String) -> Void,
+        onUserLocationTapped: @escaping (UUID) -> Void
+    ) async {
+        // 이전 선택 해제
+        await deselectMarker(on: mapView)
+        
+        // 새 마커 선택
+        guard let marker = markers[markerId] else { return }
+        
+        // 큰 핀으로 변경 (MarkerType Extension 사용)
+        let color = pinColor ?? .black
+        guard let selectedStyle = markerType.toSelectedPinStyle(pinColor: color) else { return }
+        let largeIcon = await MarkerImageCache.shared.selectedPinImage(for: selectedStyle)
+        marker.iconImage = NMFOverlayImage(image: largeIcon)
+        marker.zIndex = 1000 // 다른 마커 위에 표시
+        
+        selectedMarkerId = markerId
+        
+        // 마커 타입에 따라 콜백 호출
+        switch markerType {
+        case .cell:
+            // 셀 마커면 타임라인 콜백 호출
+            onCellTapped(markerId)
+        case .home, .work, .custom:
+            // 사용자 위치 마커면 Location ID를 UUID로 변환하여 콜백 호출
+            if let locationId = UUID(uuidString: markerId) {
+                onUserLocationTapped(locationId)
+            }
+        default:
+            break
+        }
+    }
+    
+    /// 선택 가능한 마커인지 확인
+    private func isSelectableMarker(_ type: MarkerType) -> Bool {
+        switch type {
+        case .home, .work, .custom:
+            true
+        case let .cell(isVisited):
+            isVisited // visited cell만 선택 가능
+        case .cellWithCount, .cctv:
+            false
+        }
+    }
+    
+    /// 작은 마커 아이콘 가져오기 (선택 해제 시 복원용)
+    private func getSmallMarkerIcon(for type: MarkerType, pinColor: PinColorType?) async -> UIImage {
+        // 사용자 위치 마커는 원래 색상으로 복원
+        if type.isUserLocation, let color = pinColor {
+            return await MarkerImageCache.shared.userLocationImage(for: type, color: color)
+        }
+        
+        // 셀 마커나 기타 마커는 타입에 따라 복원
+        switch type {
+        case let .cell(isVisited):
+            return await MarkerImageCache.shared.image(for: .cell(isVisited: isVisited))
+        case let .cellWithCount(count):
+            return await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
+        default:
+            return await MarkerImageCache.shared.image(for: type)
+        }
     }
     
     /// Location 배열을 마커 모델과 셀 좌표 카운트로 변환합니다.
@@ -155,7 +278,6 @@ final class CaseLocationMarkerManager {
         }
         
         // 2. 기지국 방문 빈도 계산 (유틸리티 사용)
-        // TAENI : 계산로직을 visitFrequencyByCoordinate 에서 처리
         let cellGroups = locations.visitFrequencyByCoordinate()
         
         // 3. 기지국 마커 생성
@@ -181,10 +303,12 @@ final class CaseLocationMarkerManager {
     ///   - markerModels: 생성한 마커 모델 배열
     ///   - mapView: 갱신할 네이버 지도 뷰
     ///   - onCellTapped: 셀 타입 마커 탭 이벤트 콜백 (id == coordinateKey)
+    ///   - onUserLocationTapped: 사용자 위치 마커 탭 콜백
     private func applyMarkers(
         _ markerModels: [MarkerModel],
         on mapView: NMFMapView,
-        onCellTapped: @escaping (String) -> Void
+        onCellTapped: @escaping (String) -> Void,
+        onUserLocationTapped: @escaping (UUID) -> Void
     ) async {
         let currentIds = Set(markerModels.map(\.id))
         let existingIds = Set(markers.keys)
@@ -194,6 +318,12 @@ final class CaseLocationMarkerManager {
             markers[markerId]?.mapView = nil
             markers.removeValue(forKey: markerId)
             markerTypes.removeValue(forKey: markerId)
+            markerColors.removeValue(forKey: markerId)
+            
+            // 삭제된 마커가 선택된 마커였다면 선택 해제
+            if markerId == selectedMarkerId {
+                selectedMarkerId = nil
+            }
         }
         
         for markerInfo in markerModels {
@@ -205,6 +335,9 @@ final class CaseLocationMarkerManager {
                 if overlay.mapView == nil {
                     overlay.mapView = mapView
                 }
+                
+                // 선택된 마커는 큰 핀 유지
+                if markerInfo.id == selectedMarkerId { continue }
                 
                 // 사용자 위치 마커(home / work / custom)는 색(pinColor)이 변경될 수 있으므로
                 // 타입이 같아도 항상 아이콘을 갱신한다.
@@ -220,35 +353,39 @@ final class CaseLocationMarkerManager {
                     }
                     overlay.iconImage = NMFOverlayImage(image: icon)
                     markerTypes[markerInfo.id] = markerInfo.markerType
+                    // 색상 정보 저장 (선택 해제 시 복원용)
+                    markerColors[markerInfo.id] = markerInfo.pinColor
                 }
                 
-                if case .cell = markerInfo.markerType {
-                    overlay.touchHandler = { _ in
-                        onCellTapped(markerInfo.id)
+                // 탭 핸들러 등록
+                if isSelectableMarker(markerInfo.markerType) {
+                    overlay.touchHandler = { [weak self] _ in
+                        guard let self else { return false }
+                        Task { @MainActor in
+                            await self.handleMarkerTap(
+                                markerId: markerInfo.id,
+                                markerType: markerInfo.markerType,
+                                pinColor: markerInfo.pinColor,
+                                on: mapView,
+                                onCellTapped: onCellTapped,
+                                onUserLocationTapped: onUserLocationTapped
+                            )
+                        }
                         return true
                     }
                 }
             } else {
                 let overlay = await createMarker(
                     for: markerInfo,
-                    on: mapView
+                    on: mapView,
+                    onCellTapped: onCellTapped,
+                    onUserLocationTapped: onUserLocationTapped
                 )
                 markers[markerInfo.id] = overlay
                 markerTypes[markerInfo.id] = markerInfo.markerType
-                
-                if case .cell = markerInfo.markerType {
-                    overlay.touchHandler = { _ in
-                        onCellTapped(markerInfo.id)
-                        return true
-                    }
-                }
+                // 색상 정보 저장 (선택 해제 시 복원용)
+                markerColors[markerInfo.id] = markerInfo.pinColor
             }
         }
-    }
-    
-    private func coordinateKey(latitude: Double, longitude: Double) -> String {
-        let latString = String(format: "%.6f", latitude)
-        let lngString = String(format: "%.6f", longitude)
-        return "\(latString)_\(lngString)"
     }
 }

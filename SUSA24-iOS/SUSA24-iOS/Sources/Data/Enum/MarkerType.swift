@@ -63,3 +63,29 @@ extension MarkerType {
         }
     }
 }
+
+// MARK: - SelectedPinStyle Conversion
+
+extension MarkerType {
+    /// MarkerType을 SelectedPinStyle로 변환합니다.
+    /// - 작은 마커에서 선택된 큰 핀으로 변환할 때 사용합니다.
+    /// - Parameters:
+    ///   - pinColor: 핀 색상 (기본값: .black)
+    /// - Returns: 변환된 SelectedPinStyle (선택 불가능한 마커는 nil 반환)
+    func toSelectedPinStyle(pinColor: PinColorType = .black) -> SelectedPinStyle? {
+        switch self {
+        case .home:
+            .home(pinColor)
+        case .work:
+            .work(pinColor)
+        case .custom:
+            .custom(pinColor)
+        case .cell:
+            // 셀은 고정 색상 사용
+            .cell(.black)
+        case .cellWithCount, .cctv:
+            // 선택 불가능한 마커는 nil 반환
+            nil
+        }
+    }
+}
