@@ -81,10 +81,7 @@ struct MapView: View {
                 },
                 isTimelineSheetMinimized: store.state.isTimelineSheetMinimized,
                 onMapTapped: { latlng in
-                    // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함
-                    if !store.state.isTimelineSheetMinimized {
-                        return
-                    }
+                    // MapFeature에서 타임라인 시트 상태를 체크하여 처리
                     store.send(.mapTapped(latlng))
                 },
                 deselectMarkerTrigger: store.state.deselectMarkerTrigger,

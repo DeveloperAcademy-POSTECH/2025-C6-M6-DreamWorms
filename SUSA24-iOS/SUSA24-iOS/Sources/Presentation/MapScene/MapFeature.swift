@@ -343,6 +343,10 @@ struct MapFeature: DWReducer {
         // MARK: - 위치정보 시트 관련 액션 처리
             
         case let .mapTapped(latlng):
+            // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함 (API 요청도 하지 않음)
+            // resetDetentToShort Notification으로 시트는 이미 최소화 요청됨
+            guard state.isTimelineSheetMinimized else { return .none }
+            
             // 위치정보 시트 표시 및 로딩 상태 설정
             // 새 위치 탭하면 기존 핀 정보는 즉시 비워야 함
             state.existingLocation = nil
@@ -381,6 +385,9 @@ struct MapFeature: DWReducer {
             // existingLocation 찾기 (주소 매칭)
             state.existingLocation = findExistingLocation(for: placeInfo, in: state.locations)
             
+            // PlaceInfoSheet 표시 시 타임라인 시트를 최소화
+            NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
+            
             return .none
             
         case let .userLocationMarkerTapped(locationId):
@@ -388,6 +395,9 @@ struct MapFeature: DWReducer {
             guard let location = state.locations.first(where: { $0.id == locationId }) else {
                 return .none
             }
+            
+            // PlaceInfoSheet 표시 시 타임라인 시트를 최소화
+            NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
             
             state.existingLocation = location
             state.isEditMode = false
@@ -424,6 +434,8 @@ struct MapFeature: DWReducer {
             state.selectedPlaceInfo = nil
             // 마커 선택 해제 트리거
             state.deselectMarkerTrigger = UUID()
+            // PlaceInfoSheet 닫힐 때도 타임라인 시트를 최소화 상태로 유지
+            NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
             return .none
             
         case let .updateTimelineSheetState(isMinimized):
