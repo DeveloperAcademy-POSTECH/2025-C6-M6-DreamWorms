@@ -79,9 +79,15 @@ struct MapView: View {
                 onUserLocationMarkerTapped: { locationId in
                     store.send(.userLocationMarkerTapped(locationId))
                 },
+                isTimelineSheetMinimized: store.state.isTimelineSheetMinimized,
                 onMapTapped: { latlng in
+                    // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함
+                    if !store.state.isTimelineSheetMinimized {
+                        return
+                    }
                     store.send(.mapTapped(latlng))
                 },
+                deselectMarkerTrigger: store.state.deselectMarkerTrigger,
                 onCameraIdle: { bounds, zoomLevel in
                     store.send(.cameraIdle(bounds: bounds, zoomLevel: zoomLevel))
                 },

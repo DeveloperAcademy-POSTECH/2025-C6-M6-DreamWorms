@@ -37,11 +37,17 @@ struct NaverMapView: UIViewRepresentable {
     /// - `true`: 지도 터치 이벤트 처리 (시트가 최소 높이일 때)
     /// - `false`: 지도 터치 이벤트 차단 (시트가 중간/최대 높이일 때)
     var isMapTouchEnabled: Bool = true
+    /// 타임라인 시트가 최소 높이인지 여부입니다.
+    /// - `true`: 타임라인 시트가 최소 높이 (PlaceInfoSheet 표시 가능)
+    /// - `false`: 타임라인 시트가 올라와 있음 (PlaceInfoSheet 표시 안 함)
+    var isTimelineSheetMinimized: Bool = true
     
     // MARK: 사용자 상호작용 콜백
     
     /// 지도 터치 이벤트를 상위 모듈로 전달하는 콜백입니다.
     var onMapTapped: ((NMGLatLng) -> Void)?
+    /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
+    var deselectMarkerTrigger: UUID?
     /// 카메라 이동이 멈췄을 때 호출되는 콜백입니다.
     var onCameraIdle: ((MapBounds, Double) -> Void)?
     /// 기지국 데이터
@@ -165,6 +171,14 @@ struct NaverMapView: UIViewRepresentable {
             isCellMarkerVisible: cellLayerVisible,
             isCCTVVisible: cctvLayerVisible
         )
+        
+        // 마커 선택 해제 트리거 처리
+        if let trigger = deselectMarkerTrigger, trigger != context.coordinator.lastDeselectMarkerTrigger {
+            context.coordinator.lastDeselectMarkerTrigger = trigger
+            Task { @MainActor in
+                await context.coordinator.deselectMarker()
+            }
+        }
     }
     
     // MARK: - Coordinator
@@ -179,6 +193,7 @@ struct NaverMapView: UIViewRepresentable {
         
         private let infrastructureManager: InfrastructureMarkerManager
         private let caseLocationMarkerManager: CaseLocationMarkerManager
+        var lastDeselectMarkerTrigger: UUID?
         private var lastCellStationsHash: Int?
         private var lastLocationsHash: Int?
         private var lastCellRangeConfig: CellRangeConfig?
@@ -273,16 +288,30 @@ struct NaverMapView: UIViewRepresentable {
         }
         
         /// 지도 터치 이벤트를 SwiftUI 상위 모듈로 전달합니다.
-        func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
+        func mapView(_: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
             // 지도 터치가 비활성화되어 있으면 이벤트를 처리하지 않습니다.
             guard parent.isMapTouchEnabled else { return }
             
             // 마커 선택 해제
             Task { @MainActor in
-                await caseLocationMarkerManager.deselectMarker(on: mapView)
+                await deselectMarker()
             }
+            
+            // 타임라인 시트를 최소 높이로 내리도록 요청 (detent 제어)
+            NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
+            
+            // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함
+            guard parent.isTimelineSheetMinimized else { return }
+            
             // PlaceInfoSheet 표시를 위한 콜백 호출
             parent.onMapTapped?(latlng)
+        }
+        
+        /// 마커 선택 해제를 수행합니다.
+        @MainActor
+        func deselectMarker() async {
+            guard let mapView else { return }
+            await caseLocationMarkerManager.deselectMarker(on: mapView)
         }
         
         @MainActor

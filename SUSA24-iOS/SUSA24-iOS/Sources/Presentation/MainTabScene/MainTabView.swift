@@ -115,7 +115,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
         .navigationBarBackButtonHidden(true)
         .task {
             // MainTabView가 최상위 route일 때만 TabBar 표시
-            tabBarVisibility.show()
             store.send(.onAppear)
         }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
@@ -146,6 +145,14 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             if isShortDetent {
                 timeLineStore.send(.clearCellFilter)
             }
+            
+            // 타임라인 시트 상태를 MapFeature로 전달 (PlaceInfoSheet 표시 제어용)
+            mapStore.send(.updateTimelineSheetState(isMinimized: isShortDetent))
+        }
+        .onAppear {
+            // 초기 상태를 즉시 전달
+            let isShortDetent = (selectedDetent == mapShortDetent || selectedDetent == otherDetent)
+            mapStore.send(.updateTimelineSheetState(isMinimized: isShortDetent))
         }
         .onChange(of: store.state.selectedTab) { _, newTab in
             if newTab == .map {
@@ -169,6 +176,13 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
         }
         .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
             selectedDetent = mapMidDetnet
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .resetDetentToShort)) { _ in
+            // 타임라인 시트가 올라와 있을 때만 최소화
+            if selectedDetent != mapShortDetent {
+                selectedDetent = mapShortDetent
+                // clearCellFilter는 onChange(of: selectedDetent)에서 자동 호출됨
+            }
         }
     }
 }

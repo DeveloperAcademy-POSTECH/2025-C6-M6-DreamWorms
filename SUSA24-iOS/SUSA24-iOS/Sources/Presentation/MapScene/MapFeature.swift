@@ -104,6 +104,12 @@ struct MapFeature: DWReducer {
         var selectedPlaceInfo: PlaceInfo?
         /// 선택된 위치의 기존 핀 정보가 있는가?
         var existingLocation: Location?
+        /// 타임라인 시트가 최소 높이인지 여부입니다.
+        /// - `true`: 타임라인 시트가 최소 높이 (PlaceInfoSheet 표시 가능)
+        /// - `false`: 타임라인 시트가 올라와 있음 (PlaceInfoSheet 표시 안 함)
+        var isTimelineSheetMinimized: Bool = false
+        /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
+        var deselectMarkerTrigger: UUID?
         
         // MARK: - Pin Add/Edit
 
@@ -168,6 +174,9 @@ struct MapFeature: DWReducer {
         case showPlaceInfo(PlaceInfo)
         /// 위치정보 시트를 닫는 액션입니다. 사용자가 시트를 드래그 내려 닫거나 Close 버튼을 누를 때 호출됩니다.
         case hidePlaceInfo
+        /// 타임라인 시트 상태를 업데이트하는 액션입니다.
+        /// - Parameter isMinimized: 타임라인 시트가 최소 높이인지 여부
+        case updateTimelineSheetState(isMinimized: Bool)
         
         // MARK: - CCTV 데이터 로드
         
@@ -413,6 +422,12 @@ struct MapFeature: DWReducer {
             state.isPlaceInfoSheetPresented = false
             state.isPlaceInfoLoading = false
             state.selectedPlaceInfo = nil
+            // 마커 선택 해제 트리거
+            state.deselectMarkerTrigger = UUID()
+            return .none
+            
+        case let .updateTimelineSheetState(isMinimized):
+            state.isTimelineSheetMinimized = isMinimized
             return .none
             
         case let .cameraIdle(bounds, zoomLevel):
