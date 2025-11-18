@@ -82,6 +82,8 @@ struct TrackingResultScreen: View {
                 if isCCTVLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if cctvMarkers.isEmpty {
+                    TimeLineEmptyState(message: .cctvEmpty)
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 8) {

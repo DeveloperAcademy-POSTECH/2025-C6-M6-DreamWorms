@@ -436,6 +436,17 @@
         }
       }
     },
+    "cctv_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인된 CCTV 정보가 없어요."
+          }
+        }
+      }
+    },
     "cell_station" : {
       "extractionState" : "manual",
       "localizations" : {
