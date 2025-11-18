@@ -16,7 +16,7 @@ enum Category: String, CaseIterable, Identifiable {
         switch self {
         case .all: "전체"
         case .residence: "거주지"
-        case .workplace: "직장"
+        case .workplace: "범행장소"
         case .others: "기타"
         }
     }

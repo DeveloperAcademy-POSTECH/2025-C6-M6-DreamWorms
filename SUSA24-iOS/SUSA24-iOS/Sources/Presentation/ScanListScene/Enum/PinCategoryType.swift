@@ -19,7 +19,7 @@ enum PinCategoryType: Int16, Codable, CaseIterable {
     var text: String {
         switch self {
         case .home: "거주지"
-        case .work: "근무지"
+        case .work: "범행장소"
         case .custom: "기타"
         }
     }

@@ -1,0 +1,123 @@
+[
+  {
+    "locationType" : 0,
+    "pointLatitude" : 36.0827087,
+    "note" : "피의자 주민등록상 주소 7차 308호",
+    "colorType" : 2,
+    "geocodeSource" : "Naver",
+    "id" : "8B9294E2-D294-4E70-9705-70890C994604",
+    "address" : "경상북도 포항시 북구 장성동 1412-11",
+    "pointLongitude" : 129.3945773,
+    "title" : "주민등록주소 7차 308호"
+  },
+  {
+    "locationType" : 0,
+    "pointLatitude" : 36.0827087,
+    "note" : "피의자 부모 자택 121동1104호",
+    "colorType" : 2,
+    "geocodeSource" : "Naver",
+    "id" : "82E2428E-EBE8-462D-9364-A6EDC6165FA8",
+    "address" : "경상북도 포항시 북구 장성동 1412-11",
+    "pointLongitude" : 129.3945773,
+    "title" : "부모 자택 121동1104호"
+  },
+  {
+    "locationType" : 1,
+    "pointLatitude" : 36.0294464,
+    "note" : "카페 비나인, 피해자 집앞 단골카페",
+    "colorType" : 4,
+    "geocodeSource" : "Naver",
+    "id" : "B1A3E33C-9E65-458E-A750-6DCF3C90597B",
+    "address" : "경상북도 포항시 남구 이동 652-8 1층",
+    "pointLongitude" : 129.3392057,
+    "title" : "피해자 단골카페"
+  },
+  {
+    "locationType" : 1,
+    "pointLatitude" : 36.0296347,
+    "note" : "피해자 직장 이동고등학교",
+    "colorType" : 5,
+    "geocodeSource" : "Naver",
+    "id" : "C4B61101-86ED-4041-9FC6-3B7C038BE96F",
+    "address" : "경상북도 포항시 남구 이동 146-1 포항고등학교",
+    "pointLongitude" : 129.334068,
+    "title" : "피해자 직장 이동고"
+  },
+  {
+    "locationType" : 1,
+    "pointLatitude" : 36.0950827,
+    "note" : "투썸플레이스 포항초곡점",
+    "colorType" : 4,
+    "geocodeSource" : "Naver",
+    "id" : "723B3A24-37FC-43D7-B4B9-618132E83B26",
+    "address" : "경상북도 포항시 북구 흥해읍 초곡리 1352",
+    "pointLongitude" : 129.3401432,
+    "title" : "피해자 여동생 직장"
+  },
+  {
+    "locationType" : 1,
+    "pointLatitude" : 36.0165138,
+    "note" : "포항성모병원",
+    "colorType" : 4,
+    "geocodeSource" : "Naver",
+    "id" : "F4561940-F761-42A7-B487-E6211EAED31C",
+    "address" : "경상북도 포항시 남구 대잠동 270-1 포항성모병원",
+    "pointLongitude" : 129.3397229,
+    "title" : "피해자 입원병원"
+  },
+  {
+    "locationType" : 1,
+    "pointLatitude" : 36.028388,
+    "note" : "CU 이동그린빌점",
+    "colorType" : 4,
+    "geocodeSource" : "Naver",
+    "id" : "A4645744-302B-4A3B-8211-8119D5400CDB",
+    "address" : "경상북도 포항시 남구 이동 664-5 1층 106호, 107호 1층",
+    "pointLongitude" : 129.3408909,
+    "title" : "피해자 집앞 편의점"
+  },
+  {
+    "locationType" : 0,
+    "pointLatitude" : 36.0821867,
+    "note" : "뜨돈 포항양덕점",
+    "colorType" : 3,
+    "geocodeSource" : "Naver",
+    "id" : "95948AAE-C1AD-4107-8FA0-FF3E9D5AE7CC",
+    "address" : "경상북도 포항시 북구 양덕동 1828 뜨돈",
+    "pointLongitude" : 129.4041209,
+    "title" : "피의자 운영 가게"
+  },
+  {
+    "locationType" : 0,
+    "pointLatitude" : 36.08215,
+    "note" : "NH농협은행 포항양덕지점, ATM 입출금 다수",
+    "colorType" : 3,
+    "geocodeSource" : "Naver",
+    "id" : "E0BB0A3E-49D2-4A1D-BB6A-C66274E03703",
+    "address" : "경북 포항시 북구 천마로 62",
+    "pointLongitude" : 129.3971919,
+    "title" : "피의자 주거래은행"
+  },
+  {
+    "locationType" : 3,
+    "pointLatitude" : 36.034344,
+    "note" : "경북경찰청 형사기동대",
+    "colorType" : 6,
+    "geocodeSource" : "Naver",
+    "id" : "A5DA63CB-50B0-4166-8BD1-D156B841D064",
+    "address" : "경상북도 포항시 북구 용흥로 32",
+    "pointLongitude" : 129.3558188,
+    "title" : "경상북도경찰청"
+  },
+  {
+    "locationType" : 1,
+    "pointLatitude" : 36.028388,
+    "note" : "이동그린빌명품아파트",
+    "colorType" : 5,
+    "geocodeSource" : "Naver",
+    "id" : "F5D8050A-6400-4878-AD00-67BF78FDB0F5",
+    "address" : "경상북도 포항시 남구 이동 664-5",
+    "pointLongitude" : 129.3408909,
+    "title" : "피해자집 105-1102"
+  }
+]
