@@ -67,21 +67,19 @@ struct ScanLoadView: View {
                 showRetryAlert = true
             }
         }
-        .dwAlert(
+        .alert(
+            String(localized: .scanLoadFailedTitle),
             isPresented: $showRetryAlert,
-            title: String(localized: .scanLoadFailedTitle),
-            message: String(localized: .scanLoadFailedContent),
-            primaryButton: DWAlertButton(
-                title: String(localized: .scanLoadTry),
-                style: .default
-            ) {
-                handleRetry()
+            actions: {
+                Button(String(localized: .scanLoadTry), role: .confirm) {
+                    handleRetry()
+                }
+                Button("취소", role: .cancel) {
+                    handleCancel()
+                }
             },
-            secondaryButton: DWAlertButton(
-                title: "취소",
-                style: .cancel
-            ) {
-                handleCancel()
+            message: {
+                Text(String(localized: .scanLoadFailedContent))
             }
         )
     }
@@ -89,33 +87,21 @@ struct ScanLoadView: View {
 
 private extension ScanLoadView {
     func navigateToScanList() {
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(0.5))
-            coordinator.replaceLast(
-                .scanListScene(
-                    caseID: caseID,
-                    scanResults: store.state.scanResults
-                )
+        coordinator.push(
+            .scanListScene(
+                caseID: caseID,
+                scanResults: store.state.scanResults
             )
-        }
+        )
     }
 
     func handleRetry() {
         camera.clearAllPhotos()
-        
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(0.3))
-            coordinator.pop()
-        }
+        coordinator.pop()
     }
 
     func handleCancel() {
         camera.clearAllPhotos()
-        
-        if coordinator.path.count >= 2 {
-            coordinator.popToDepth(2)
-        } else {
-            coordinator.popToRoot()
-        }
+        coordinator.popToDepth(2)
     }
 }
