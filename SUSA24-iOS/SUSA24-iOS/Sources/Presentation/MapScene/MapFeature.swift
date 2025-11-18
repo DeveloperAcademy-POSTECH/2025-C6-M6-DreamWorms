@@ -64,6 +64,8 @@ struct MapFeature: DWReducer {
         /// 명령 디스패처로부터 전달된 지도 이동 명령을 반영할 목표 좌표입니다.
         /// `MapView`가 해당 좌표를 소비하면 `.clearCameraTarget` 액션으로 다시 nil로 초기화합니다.
         var cameraTargetCoordinate: MapCoordinate?
+        /// 카메라 이동 시 애니메이션을 적용할지 여부입니다.
+        var shouldAnimateCameraTarget: Bool = false
         /// 현위치를 포커싱해야 하는지 여부입니다.
         var shouldFocusMyLocation: Bool = false
         /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
@@ -480,6 +482,7 @@ struct MapFeature: DWReducer {
         case .clearCameraTarget:
             // 지도 카메라 이동이 완료되었음을 반영합니다.
             state.cameraTargetCoordinate = nil
+            state.shouldAnimateCameraTarget = false
             return .none
             
         case .requestFocusMyLocation:
@@ -536,14 +539,13 @@ struct MapFeature: DWReducer {
             }
 
         case .deletePinCompleted:
-            // CoreData는 이미 삭제됨 (confirmDeletePin에서)
-            // watchLocations가 자동으로 감지해서 MainTabFeature에 전달
-            // MainTabFeature → MainTabView → loadLocations로 자동 업데이트됨
-            // UI 상태만 정리
+            guard let deleteId = state.existingLocation?.id else { return .none }
+            // 새 배열로 재할당하여 SwiftUI 변경 감지 보장
+            // watchLocations가 나중에 MainTabFeature에 전달하지만, 즉시 반영을 위해 여기서도 업데이트
+            state.locations = state.locations.filter { $0.id != deleteId }
             state.existingLocation = nil
             state.isPlaceInfoSheetPresented = false
             state.selectedPlaceInfo = nil
-
             return .none
             
         case let .savePin(location):
@@ -562,16 +564,15 @@ struct MapFeature: DWReducer {
             }
             
         case let .savePinCompleted(location):
-            // 즉시 UI에 반영하기 위해 state.locations를 업데이트
-            // watchLocations가 나중에 MainTabFeature에 전달하지만, 즉시 반영을 위해 여기서도 업데이트
-            if let existingIndex = state.locations.firstIndex(where: { $0.id == location.id }) {
-                // 기존 location 업데이트
-                state.locations[existingIndex] = location
-            } else {
-                // 새 location 추가
-                state.locations.append(location)
-            }
             state.existingLocation = location
+            // 배열 복사 후 수정하고 마지막에 재할당하여 변경 감지 보장
+            var newLocations = state.locations
+            if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
+                newLocations[index] = location
+            } else {
+                newLocations.append(location)
+            }
+            state.locations = newLocations
             state.isPinWritePresented = false
             return .none
             
@@ -617,10 +618,13 @@ struct MapFeature: DWReducer {
             }
             
         case let .memoSaveCompleted(updatedLocation):
-            // watchLocations가 자동으로 감지해서 MainTabFeature에 전달
-            // MainTabFeature → MainTabView → loadLocations로 자동 업데이트됨
-            // existingLocation은 loadLocations에서 최신 데이터로 동기화됨
             state.existingLocation = updatedLocation
+            // 메모 수정도 새 배열로 재할당하여 변경 감지 보장
+            var newLocations = state.locations
+            if let index = newLocations.firstIndex(where: { $0.id == updatedLocation.id }) {
+                newLocations[index] = updatedLocation
+            }
+            state.locations = newLocations
 
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
@@ -668,6 +672,7 @@ private extension MapFeature {
             latitude: latestCell.pointLatitude,
             longitude: latestCell.pointLongitude
         )
+        state.shouldAnimateCameraTarget = true
     }
 
     // MARK: - PlaceInfo Helpers
