@@ -75,6 +75,9 @@ struct MapView: View {
                 onCellMarkerTapped: { cellKey, title in
                     dispatcher.send(.focusCellTimeline(cellKey: cellKey, title: title))
                 },
+                onUserLocationMarkerTapped: { locationId in
+                    store.send(.userLocationMarkerTapped(locationId))
+                },
                 onMapTapped: { latlng in
                     store.send(.mapTapped(latlng))
                 },

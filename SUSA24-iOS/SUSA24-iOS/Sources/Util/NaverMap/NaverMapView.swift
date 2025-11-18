@@ -26,6 +26,15 @@ struct NaverMapView: UIViewRepresentable {
     var onMyLocationFocusConsumed: (() -> Void)?
     /// 기지국 셀 마커 탭 이벤트를 상위 모듈로 전달하는 콜백입니다.
     var onCellMarkerTapped: ((String, String?) -> Void)?
+    /// 사용자 위치 마커(home/work/custom) 탭 이벤트를 상위 모듈로 전달하는 콜백입니다.
+    var onUserLocationMarkerTapped: ((UUID) -> Void)?
+    
+    // MARK: 맵 터치 모드
+    
+    /// 지도 터치 활성화 여부입니다.
+    /// - `true`: 지도 터치 이벤트 처리 (시트가 최소 높이일 때)
+    /// - `false`: 지도 터치 이벤트 차단 (시트가 중간/최대 높이일 때)
+    var isMapTouchEnabled: Bool = true
     
     // MARK: 사용자 상호작용 콜백
     
@@ -250,7 +259,15 @@ struct NaverMapView: UIViewRepresentable {
         }
         
         /// 지도 터치 이벤트를 SwiftUI 상위 모듈로 전달합니다.
-        func mapView(_: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
+        func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
+            // 지도 터치가 비활성화되어 있으면 이벤트를 처리하지 않습니다.
+            guard parent.isMapTouchEnabled else { return }
+            
+            // 마커 선택 해제
+            Task { @MainActor in
+                await caseLocationMarkerManager.deselectMarker(on: mapView)
+            }
+            // PlaceInfoSheet 표시를 위한 콜백 호출
             parent.onMapTapped?(latlng)
         }
         
@@ -286,6 +303,11 @@ struct NaverMapView: UIViewRepresentable {
                                 let title = self.cellTitle(for: cellKey)
                                 parent.onCellMarkerTapped?(cellKey, title)
                             }
+                        },
+                        onUserLocationTapped: { [weak self] locationId in
+                            guard let self else { return }
+                            // 사용자 위치 마커 탭 시 Location ID를 전달하여 PlaceInfoSheet 표시
+                            parent.onUserLocationMarkerTapped?(locationId)
                         }
                     )
 

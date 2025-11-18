@@ -324,7 +324,7 @@ extension SelectedPinStyle {
         case .home: "pin_home_\(colorName)"
         case .work: "pin_work_\(colorName)"
         case .custom: "pin_custom_\(colorName)"
-        case .cell: "pin_custom_\(colorName)" // cell은 custom과 동일한 이미지셋 사용
+        case .cell: "pin_cell" // 셀은 색상 이름 없이 고정 에셋 사용
         }
         return Image(assetName)
     }
@@ -346,6 +346,11 @@ extension SelectedPinStyle {
         let assetName = "pin_custom_\(pinColorAssetName(color))"
         return Image(assetName)
     }
+    
+    /// 선택된 셀 핀 이미지 (이미지셋 사용, 고정 색상)
+    static func selectedCellPin() -> Image {
+        Image("pin_cell")
+    }
 }
 
 /// 선택된 위치를 나타내는 큰 핀 이미지
@@ -357,24 +362,11 @@ struct SelectedPinImage: View {
     private let iconSize: CGFloat = 20
     
     var body: some View {
-        ZStack {
-            Image(.pinShape)
-                .resizable()
-                .renderingMode(.template)
-                .scaledToFit()
-                .foregroundStyle(style.pinColor.color)
-                .frame(width: pinSize.width, height: pinSize.height)
-            
-            // 내부 아이콘 (항상 흰색)
-            style.icon
-                .resizable()
-                .renderingMode(.template)
-                .scaledToFit()
-                .foregroundStyle(.white)
-                .frame(width: iconSize, height: iconSize)
-                .padding(.bottom, 12)
-        }
-        .frame(width: pinSize.width, height: pinSize.height)
+        // 이미지셋을 직접 사용 (pin_home, pin_work, pin_custom, pin_cell)
+        style.pinImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: pinSize.width, height: pinSize.height)
     }
 }
 
