@@ -37,11 +37,17 @@ struct NaverMapView: UIViewRepresentable {
     /// - `true`: 지도 터치 이벤트 처리 (시트가 최소 높이일 때)
     /// - `false`: 지도 터치 이벤트 차단 (시트가 중간/최대 높이일 때)
     var isMapTouchEnabled: Bool = true
+    /// 타임라인 시트가 최소 높이인지 여부입니다.
+    /// - `true`: 타임라인 시트가 최소 높이 (PlaceInfoSheet 표시 가능)
+    /// - `false`: 타임라인 시트가 올라와 있음 (PlaceInfoSheet 표시 안 함)
+    var isTimelineSheetMinimized: Bool = true
     
     // MARK: 사용자 상호작용 콜백
     
     /// 지도 터치 이벤트를 상위 모듈로 전달하는 콜백입니다.
     var onMapTapped: ((NMGLatLng) -> Void)?
+    /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
+    var deselectMarkerTrigger: UUID?
     /// 카메라 이동이 멈췄을 때 호출되는 콜백입니다.
     var onCameraIdle: ((MapBounds, Double) -> Void)?
     /// 기지국 데이터
@@ -145,7 +151,8 @@ struct NaverMapView: UIViewRepresentable {
         context.coordinator.updateCaseLocations(
             locations: locations,
             visitFrequencyEnabled: isVisitFrequencyEnabled,
-            isVisible: shouldShowMarkers,
+            isVisible: true, // caseLocation 마커(home, work, 방문 셀)는 줌 레벨과 무관하게 항상 표시
+            zoomLevel: zoomLevel,
             on: uiView
         )
         context.coordinator.updateCellRangeOverlay(
@@ -161,10 +168,18 @@ struct NaverMapView: UIViewRepresentable {
         )
 
         context.coordinator.updateMarkerVisibility(
-            isCaseLocationVisible: shouldShowMarkers,
+            isCaseLocationVisible: true, // caseLocation 마커는 줌 레벨과 무관하게 항상 표시
             isCellMarkerVisible: cellLayerVisible,
             isCCTVVisible: cctvLayerVisible
         )
+        
+        // 마커 선택 해제 트리거 처리
+        if let trigger = deselectMarkerTrigger, trigger != context.coordinator.lastDeselectMarkerTrigger {
+            context.coordinator.lastDeselectMarkerTrigger = trigger
+            Task { @MainActor in
+                await context.coordinator.deselectMarker()
+            }
+        }
     }
     
     // MARK: - Coordinator
@@ -179,6 +194,7 @@ struct NaverMapView: UIViewRepresentable {
         
         private let infrastructureManager: InfrastructureMarkerManager
         private let caseLocationMarkerManager: CaseLocationMarkerManager
+        var lastDeselectMarkerTrigger: UUID?
         private var lastCellStationsHash: Int?
         private var lastLocationsHash: Int?
         private var lastCellRangeConfig: CellRangeConfig?
@@ -273,16 +289,30 @@ struct NaverMapView: UIViewRepresentable {
         }
         
         /// 지도 터치 이벤트를 SwiftUI 상위 모듈로 전달합니다.
-        func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
+        func mapView(_: NMFMapView, didTapMap latlng: NMGLatLng, point _: CGPoint) {
             // 지도 터치가 비활성화되어 있으면 이벤트를 처리하지 않습니다.
             guard parent.isMapTouchEnabled else { return }
             
             // 마커 선택 해제
             Task { @MainActor in
-                await caseLocationMarkerManager.deselectMarker(on: mapView)
+                await deselectMarker()
             }
+            
+            // 타임라인 시트를 최소 높이로 내리도록 요청 (detent 제어)
+            NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
+            
+            // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함
+            guard parent.isTimelineSheetMinimized else { return }
+            
             // PlaceInfoSheet 표시를 위한 콜백 호출
             parent.onMapTapped?(latlng)
+        }
+        
+        /// 마커 선택 해제를 수행합니다.
+        @MainActor
+        func deselectMarker() async {
+            guard let mapView else { return }
+            await caseLocationMarkerManager.deselectMarker(on: mapView)
         }
         
         @MainActor
@@ -290,6 +320,7 @@ struct NaverMapView: UIViewRepresentable {
             locations: [Location],
             visitFrequencyEnabled: Bool,
             isVisible: Bool,
+            zoomLevel: Double,
             on mapView: NMFMapView
         ) {
             var hasher = Hasher()
@@ -333,12 +364,16 @@ struct NaverMapView: UIViewRepresentable {
                     
                     // 마커 업데이트 완료 후 가시성 재적용
                     caseLocationMarkerManager.setVisibility(isVisible)
+                    // 줌 레벨에 따른 캡션 가시성 업데이트
+                    caseLocationMarkerManager.updateCaptionVisibility(locations: locations, zoomLevel: zoomLevel)
                 }
 
                 lastLocationsHash = newHash
             } else {
                 // 해시가 같아도 가시성은 다시 적용 (줌 레벨 변경 시)
                 caseLocationMarkerManager.setVisibility(isVisible)
+                // 줌 레벨에 따른 캡션 가시성 업데이트
+                caseLocationMarkerManager.updateCaptionVisibility(locations: locations, zoomLevel: zoomLevel)
             }
         }
         

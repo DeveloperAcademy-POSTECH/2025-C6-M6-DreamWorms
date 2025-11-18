@@ -64,10 +64,7 @@ final class CaseLocationMarkerManager {
         guard !cellCounts.isEmpty else { return }
         
         for (id, count) in cellCounts {
-            guard let overlay = markers[id] else { continue }
-            
-            // 선택된 마커는 큰 핀 유지
-            if id == selectedMarkerId { continue }
+            guard let overlay = markers[id], !isSelectedMarker(id) else { continue }
             
             let icon = await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
             overlay.iconImage = NMFOverlayImage(image: icon)
@@ -80,10 +77,7 @@ final class CaseLocationMarkerManager {
     /// - Parameter mapView: 네이버 지도 뷰
     func resetVisitFrequency(on mapView: NMFMapView) async {
         for (id, overlay) in markers {
-            guard case .cellWithCount = markerTypes[id] else { continue }
-            
-            // 선택된 마커는 큰 핀 유지
-            if id == selectedMarkerId { continue }
+            guard case .cellWithCount = markerTypes[id], !isSelectedMarker(id) else { continue }
             
             let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true))
             overlay.iconImage = NMFOverlayImage(image: icon)
@@ -97,6 +91,22 @@ final class CaseLocationMarkerManager {
     func setVisibility(_ isVisible: Bool) {
         for marker in markers.values {
             marker.hidden = !isVisible
+        }
+    }
+    
+    /// 줌 레벨에 따라 사용자 위치 마커(home, work, custom)의 캡션 표시 여부를 업데이트합니다.
+    /// - Parameters:
+    ///   - locations: 위치 데이터 배열 (캡션 텍스트 참조용)
+    ///   - zoomLevel: 현재 줌 레벨
+    ///   - threshold: 캡션을 숨길 줌 레벨 임계값 (기본값: 11.5)
+    func updateCaptionVisibility(locations: [Location], zoomLevel: Double, threshold: Double = 11.5) {
+        let shouldShowCaption = zoomLevel > threshold
+        let locationMap = Dictionary(uniqueKeysWithValues: locations.map { ($0.id.uuidString, $0.title) })
+        
+        for (id, marker) in markers {
+            guard let markerType = markerTypes[id], markerType.isUserLocation else { continue }
+            guard let title = locationMap[id], let unwrappedTitle = title, !unwrappedTitle.isEmpty else { continue }
+            marker.captionText = shouldShowCaption ? unwrappedTitle : ""
         }
     }
     
@@ -120,11 +130,47 @@ final class CaseLocationMarkerManager {
         let coordinate: MapCoordinate
         /// 사용자 위치 마커의 색상 (home / work / custom 에서만 사용)
         let pinColor: PinColorType?
+        /// 핀 이름 (캡션으로 표시)
+        let title: String?
         
         var markerType: MarkerType
     }
     
     // MARK: - Private Methods
+    
+    /// 선택된 마커인지 확인합니다.
+    private func isSelectedMarker(_ id: String) -> Bool {
+        id == selectedMarkerId
+    }
+    
+    /// 마커에 캡션을 설정합니다.
+    private func setCaption(on marker: NMFMarker, title: String?) {
+        if let title, !title.isEmpty {
+            marker.captionText = title
+            marker.captionRequestedWidth = 100
+        } else {
+            marker.captionText = ""
+        }
+    }
+    
+    /// 사용자 위치 마커 아이콘을 생성합니다.
+    private func createUserLocationIcon(for markerType: MarkerType, color: PinColorType?) async -> UIImage {
+        if let color {
+            await MarkerImageCache.shared.userLocationImage(for: markerType, color: color)
+        } else {
+            await MarkerImageCache.shared.image(for: markerType)
+        }
+    }
+    
+    /// LocationType을 MarkerType으로 변환합니다.
+    private func markerType(from locationType: LocationType) -> MarkerType? {
+        switch locationType {
+        case .home: .home
+        case .work: .work
+        case .custom: .custom
+        case .cell: nil
+        }
+    }
     
     private func createMarker(
         for marker: MarkerModel,
@@ -137,14 +183,18 @@ final class CaseLocationMarkerManager {
             lat: marker.coordinate.latitude,
             lng: marker.coordinate.longitude
         )
-        let icon: UIImage = if marker.markerType.isUserLocation, let color = marker.pinColor {
-            await MarkerImageCache.shared.userLocationImage(for: marker.markerType, color: color)
+        let icon: UIImage = if marker.markerType.isUserLocation {
+            await createUserLocationIcon(for: marker.markerType, color: marker.pinColor)
         } else {
             await MarkerImageCache.shared.image(for: marker.markerType)
         }
         overlay.iconImage = NMFOverlayImage(image: icon)
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        
+        // 핀 이름을 캡션으로 표시
+        setCaption(on: overlay, title: marker.title)
+        
         overlay.mapView = mapView
         
         // 탭 핸들러 등록 (선택 가능한 마커만)
@@ -247,34 +297,19 @@ final class CaseLocationMarkerManager {
             let longitude = location.pointLongitude
             guard latitude != 0, longitude != 0 else { continue }
             
+            let locationType = LocationType(location.locationType)
+            guard let markerType = markerType(from: locationType) else { continue }
+            
             let coordinate = MapCoordinate(latitude: latitude, longitude: longitude)
             let pinColor = PinColorType(location.colorType)
             
-            switch LocationType(location.locationType) {
-            case .home:
-                markers.append(MarkerModel(
-                    id: location.id.uuidString,
-                    coordinate: coordinate,
-                    pinColor: pinColor,
-                    markerType: .home
-                ))
-            case .work:
-                markers.append(MarkerModel(
-                    id: location.id.uuidString,
-                    coordinate: coordinate,
-                    pinColor: pinColor,
-                    markerType: .work
-                ))
-            case .custom:
-                markers.append(MarkerModel(
-                    id: location.id.uuidString,
-                    coordinate: coordinate,
-                    pinColor: pinColor,
-                    markerType: .custom
-                ))
-            case .cell:
-                break
-            }
+            markers.append(MarkerModel(
+                id: location.id.uuidString,
+                coordinate: coordinate,
+                pinColor: pinColor,
+                title: location.title,
+                markerType: markerType
+            ))
         }
         
         // 2. 기지국 방문 빈도 계산 (유틸리티 사용)
@@ -288,6 +323,7 @@ final class CaseLocationMarkerManager {
                     id: key,
                     coordinate: coordinate,
                     pinColor: nil,
+                    title: nil,
                     markerType: .cell(isVisited: true)
                 )
             )
@@ -348,6 +384,8 @@ final class CaseLocationMarkerManager {
                             markerColors[markerInfo.id] = markerInfo.pinColor
                         }
                     }
+                    // 핀 이름 캡션 업데이트
+                    setCaption(on: overlay, title: markerInfo.title)
                     // 색상이 동일하면 큰 핀 유지 (continue)
                     continue
                 }
@@ -359,8 +397,8 @@ final class CaseLocationMarkerManager {
                 let typeChanged = markerTypes[markerInfo.id] != markerInfo.markerType
                 
                 if isUserLocation || typeChanged {
-                    let icon: UIImage = if isUserLocation, let color = markerInfo.pinColor {
-                        await MarkerImageCache.shared.userLocationImage(for: markerInfo.markerType, color: color)
+                    let icon: UIImage = if isUserLocation {
+                        await createUserLocationIcon(for: markerInfo.markerType, color: markerInfo.pinColor)
                     } else {
                         await MarkerImageCache.shared.image(for: markerInfo.markerType)
                     }
@@ -369,6 +407,9 @@ final class CaseLocationMarkerManager {
                     // 색상 정보 저장 (선택 해제 시 복원용)
                     markerColors[markerInfo.id] = markerInfo.pinColor
                 }
+                
+                // 핀 이름 캡션 업데이트
+                setCaption(on: overlay, title: markerInfo.title)
                 
                 // 탭 핸들러 등록
                 if isSelectableMarker(markerInfo.markerType) {

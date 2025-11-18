@@ -9,4 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let resetDetentToMid = Notification.Name("resetDetentToMid")
+    static let resetDetentToShort = Notification.Name("resetDetentToShort")
 }
