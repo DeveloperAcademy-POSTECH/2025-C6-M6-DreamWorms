@@ -436,6 +436,17 @@
         }
       }
     },
+    "cctv_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인된 CCTV 정보가 없어요."
+          }
+        }
+      }
+    },
     "cell_station" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1226,18 +1237,6 @@
     "Selected Hour" : {
 
     },
-    "summary" : {
-      "comment" : "탭바_원 페이지 뷰 이름",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "요약"
-          }
-        }
-      }
-    },
     "test_analyze" : {
       "comment" : "분석_타이틀 예시 문구",
       "extractionState" : "manual",
@@ -1300,6 +1299,54 @@
     },
     "to" : {
 
+    },
+    "tracking" : {
+      "comment" : "탭바_트라이앵글 뷰 이름",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "추적"
+          }
+        }
+      }
+    },
+    "tracking_navigationTitle" : {
+      "comment" : "추적탭_상단 네비게이션 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV 영역 선택"
+          }
+        }
+      }
+    },
+    "trackingResult_navigationTitle" : {
+      "comment" : "추적탭_검색 이후_상단 네비게이션 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV 리스트"
+          }
+        }
+      }
+    },
+    "trackingResult_sectionTitle" : {
+      "comment" : "추적탭_검색 이후_상단 헤더 타이틀",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "반경 내 CCTV"
+          }
+        }
+      }
     },
     "us_ver" : {
       "comment" : "미국_버전",

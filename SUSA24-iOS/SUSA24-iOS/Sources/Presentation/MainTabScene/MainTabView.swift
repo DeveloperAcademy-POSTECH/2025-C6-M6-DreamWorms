@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View {
+struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View {
     @Environment(TabBarVisibility.self)
     private var tabBarVisibility
     
@@ -50,8 +50,8 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
     }
     
     private let mapView: () -> MapView
+    private let trackingView: () -> TrackingView
     private let dashboardView: () -> DashboardView
-    private let onePageView: () -> OnePageView
     private var timeLineView: some View {
         TimeLineView(store: timeLineStore)
     }
@@ -64,16 +64,16 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         mapStore: DWStore<MapFeature>,
         dispatcher: MapDispatcher,
         @ViewBuilder mapView: @escaping () -> MapView,
-        @ViewBuilder dashboardView: @escaping () -> DashboardView,
-        @ViewBuilder onePageView: @escaping () -> OnePageView
+        @ViewBuilder trackingView: @escaping () -> TrackingView,
+        @ViewBuilder dashboardView: @escaping () -> DashboardView
     ) {
         self._store = State(initialValue: store)
         self._timeLineStore = State(initialValue: timeLineStore)
         self._mapStore = State(initialValue: mapStore)
         self._dispatcher = Bindable(dispatcher)
         self.mapView = mapView
+        self.trackingView = trackingView
         self.dashboardView = dashboardView
-        self.onePageView = onePageView
         self.selectedDetent = mapMidDetnet
     }
     
@@ -83,8 +83,8 @@ struct MainTabView<MapView: View, DashboardView: View, OnePageView: View>: View 
         ZStack {
             switch store.state.selectedTab {
             case .map: mapView()
-            case .dashboard: dashboardView()
-            case .onePage: onePageView()
+            case .tracking: trackingView()
+            case .analyze: dashboardView()
             }
         }
         .sheet(isPresented: Binding(

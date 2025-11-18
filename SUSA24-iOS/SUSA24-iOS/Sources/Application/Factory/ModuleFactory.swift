@@ -21,8 +21,8 @@ protocol ModuleFactoryProtocol {
     ) -> LocationOverviewView
     func makeMainTabView(caseID: UUID, context: NSManagedObjectContext) -> MainTabView<
         MapView,
-        DashboardView,
-        OnePageView
+        TrackingView,
+        DashboardView
     >
     func makeMapView(caseID: UUID, context: NSManagedObjectContext) -> MapView
     func makeOnePageView(caseID: UUID, context: NSManagedObjectContext) -> OnePageView
@@ -33,6 +33,7 @@ protocol ModuleFactoryProtocol {
     func makePhotoDetailsView(photos: [CapturedPhoto], camera: CameraModel) -> PhotoDetailsView
     func makeScanLoadView(caseID: UUID, photos: [CapturedPhoto]) -> ScanLoadView
     func makeScanListView(caseID: UUID, scanResults: [ScanResult], context: NSManagedObjectContext) -> ScanListView
+    func makeTrackingView(caseID: UUID, context: NSManagedObjectContext) -> TrackingView
 }
 
 final class ModuleFactory: ModuleFactoryProtocol {
@@ -114,7 +115,7 @@ final class ModuleFactory: ModuleFactoryProtocol {
     func makeMainTabView(
         caseID: UUID,
         context: NSManagedObjectContext
-    ) -> MainTabView<MapView, DashboardView, OnePageView> {
+    ) -> MainTabView<MapView, TrackingView, DashboardView> {
         let caseRepository = CaseRepository(context: context)
         let locationRepository = LocationRepository(context: context)
 
@@ -142,9 +143,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
             infrastructureManager: infrastructureMarkerManager,
             caseLocationMarkerManager: caseLocationMarkerManager
         )
-        
+        let trackingView = makeTrackingView(caseID: caseID, context: context)
         let dashboardView = makeDashboardView(caseID: caseID, context: context)
-        let onePageView = makeOnePageView(caseID: caseID, context: context)
         
         // 여기서 미리 생성
         let timeLineStore = DWStore(
@@ -161,8 +161,8 @@ final class ModuleFactory: ModuleFactoryProtocol {
             mapStore: mapStore,
             dispatcher: mapDispatcher,
             mapView: { mapView },
-            dashboardView: { dashboardView },
-            onePageView: { onePageView }
+            trackingView: { trackingView },
+            dashboardView: { dashboardView }
         )
         return view
     }
@@ -288,5 +288,19 @@ final class ModuleFactory: ModuleFactoryProtocol {
             reducer: feature
         )
         return ScanListView(caseID: caseID, store: store)
+    }
+    
+    func makeTrackingView(
+        caseID: UUID,
+        context: NSManagedObjectContext
+    ) -> TrackingView {
+        let repository = LocationRepository(context: context)
+        let feature = TrackingFeature(repository: repository, cctvService: cctvService)
+        let store = DWStore(
+            initialState: TrackingFeature.State(),
+            reducer: feature
+        )
+        let view = TrackingView(timeLineStore: store, caseID: caseID)
+        return view
     }
 }

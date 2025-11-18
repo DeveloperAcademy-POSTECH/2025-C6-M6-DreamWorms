@@ -9,7 +9,7 @@ import SwiftUI
 
 enum SymbolLiterals: String {
     case map = "map.fill"
-    case analytics = "chart.pie.fill"
+    case analytics = "chart.bar.fill"
     case people = "person.text.rectangle.fill"
     case setting = "gearshape"
     case person = "person.fill"
@@ -36,6 +36,8 @@ enum SymbolLiterals: String {
     case radioSelected = "button.programmable"
     case radioDeselected = "circle"
     case expand = "arrow.up.left.and.arrow.down.right"
+    case minus
+    case tracking = "point.3.filled.connected.trianglepath.dotted"
 }
 
 extension Image {

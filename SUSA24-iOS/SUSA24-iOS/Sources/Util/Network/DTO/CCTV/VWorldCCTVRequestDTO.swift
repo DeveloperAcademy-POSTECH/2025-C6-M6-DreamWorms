@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct VWorldBoxRequestDTO: Sendable {
+struct VWorldBoxRequestDTO: Sendable, Encodable {
     let minLng: Double
     let minLat: Double
     let maxLng: Double
@@ -16,7 +16,7 @@ struct VWorldBoxRequestDTO: Sendable {
     let page: Int
 }
 
-struct VWorldPolygonRequestDTO: Sendable {
+struct VWorldPolygonRequestDTO: Sendable, Encodable {
     let coordinates: [MapCoordinate]
     let size: Int
     let page: Int

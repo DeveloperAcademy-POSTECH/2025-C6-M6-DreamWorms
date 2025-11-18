@@ -22,6 +22,7 @@ enum AppRoute: Hashable {
     case scanLoadScene(caseID: UUID, photos: [CapturedPhoto])
     case scanListScene(caseID: UUID, scanResults: [ScanResult])
     case photoDetailsScene(photos: [CapturedPhoto], camera: CameraModel)
+    case trackingScene(caseID: UUID)
     //    case timeLineScene
 }
 

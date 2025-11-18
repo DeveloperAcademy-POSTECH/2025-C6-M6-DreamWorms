@@ -5,7 +5,7 @@
 //  Created by Moo on 11/13/25.
 //
 
-struct CCTVMarker: Equatable, Sendable {
+struct CCTVMarker: Equatable, Sendable, Identifiable {
     let id: String
     let name: String
     let location: String

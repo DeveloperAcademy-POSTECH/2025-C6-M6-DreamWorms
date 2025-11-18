@@ -16,6 +16,7 @@ import SwiftUI
 enum DWLocationCardType: Equatable {
     case icon(Image)
     case number(Int)
+    case cctv
 }
 
 // MARK: - View
@@ -118,6 +119,7 @@ struct DWLocationCard: View {
                         .frame(width: 20, height: 20)
                         .foregroundColor(.white)
                 }
+            
         case let .number(num):
             ZStack {
                 Circle()
@@ -127,6 +129,19 @@ struct DWLocationCard: View {
                     .font(.numberSemiBold14)
                     .foregroundColor(.white)
             }
+        
+        case .cctv:
+            Circle()
+                .fill(.labelCoolNormal)
+                .frame(width: 32, height: 32)
+                .overlay {
+                    Image(.icnCctv)
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.labelAlternative)
+                }
         }
     }
 }
@@ -224,6 +239,15 @@ extension DWLocationCard {
 //            type: .icon(Image(.icnPin)),
 //            title: "기지국 주소",
 //            description: "19시간 체류",
+//            isButton: true
+//        )
+//        .setupAsButton(false)
+//        .setupIconBackgroundColor(PinColorType.purple.color)
+//
+//        DWLocationCard(
+//            type: .cctv,
+//            title: "경상북도 포항시청 생활방범",
+//            description: "경상북도 포항시청",
 //            isButton: true
 //        )
 //        .setupAsButton(false)

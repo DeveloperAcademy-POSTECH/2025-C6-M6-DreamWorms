@@ -8,21 +8,21 @@
 import SwiftUI
 
 enum MainTabIdentifier: Hashable, CaseIterable {
-    case map, dashboard, onePage
+    case map, tracking, analyze
     
     var title: String {
         switch self {
         case .map: String(localized: .map)
-        case .dashboard: String(localized: .analyze)
-        case .onePage: String(localized: .summary)
+        case .tracking: String(localized: .tracking)
+        case .analyze: String(localized: .analyze)
         }
     }
     
     var icon: Image {
         switch self {
         case .map: Image(.map)
-        case .dashboard: Image(.analytics)
-        case .onePage: Image(.people)
+        case .tracking: Image(.tracking)
+        case .analyze: Image(.analytics)
         }
     }
 }
