@@ -151,7 +151,8 @@ struct NaverMapView: UIViewRepresentable {
         context.coordinator.updateCaseLocations(
             locations: locations,
             visitFrequencyEnabled: isVisitFrequencyEnabled,
-            isVisible: shouldShowMarkers,
+            isVisible: true, // caseLocation 마커(home, work, 방문 셀)는 줌 레벨과 무관하게 항상 표시
+            zoomLevel: zoomLevel,
             on: uiView
         )
         context.coordinator.updateCellRangeOverlay(
@@ -167,7 +168,7 @@ struct NaverMapView: UIViewRepresentable {
         )
 
         context.coordinator.updateMarkerVisibility(
-            isCaseLocationVisible: shouldShowMarkers,
+            isCaseLocationVisible: true, // caseLocation 마커는 줌 레벨과 무관하게 항상 표시
             isCellMarkerVisible: cellLayerVisible,
             isCCTVVisible: cctvLayerVisible
         )
@@ -319,6 +320,7 @@ struct NaverMapView: UIViewRepresentable {
             locations: [Location],
             visitFrequencyEnabled: Bool,
             isVisible: Bool,
+            zoomLevel: Double,
             on mapView: NMFMapView
         ) {
             var hasher = Hasher()
@@ -362,12 +364,16 @@ struct NaverMapView: UIViewRepresentable {
                     
                     // 마커 업데이트 완료 후 가시성 재적용
                     caseLocationMarkerManager.setVisibility(isVisible)
+                    // 줌 레벨에 따른 캡션 가시성 업데이트
+                    caseLocationMarkerManager.updateCaptionVisibility(locations: locations, zoomLevel: zoomLevel)
                 }
 
                 lastLocationsHash = newHash
             } else {
                 // 해시가 같아도 가시성은 다시 적용 (줌 레벨 변경 시)
                 caseLocationMarkerManager.setVisibility(isVisible)
+                // 줌 레벨에 따른 캡션 가시성 업데이트
+                caseLocationMarkerManager.updateCaptionVisibility(locations: locations, zoomLevel: zoomLevel)
             }
         }
         
