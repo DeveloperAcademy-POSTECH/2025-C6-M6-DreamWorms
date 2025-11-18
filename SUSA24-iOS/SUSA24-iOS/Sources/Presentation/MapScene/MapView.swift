@@ -65,6 +65,7 @@ struct MapView: View {
         ZStack {
             NaverMapView(
                 cameraTargetCoordinate: store.state.cameraTargetCoordinate,
+                shouldAnimateCameraTarget: store.state.shouldAnimateCameraTarget,
                 shouldFocusMyLocation: store.state.shouldFocusMyLocation,
                 onCameraMoveConsumed: {
                     store.send(.clearCameraTarget)

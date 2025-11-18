@@ -336,8 +336,21 @@ final class CaseLocationMarkerManager {
                     overlay.mapView = mapView
                 }
                 
-                // 선택된 마커는 큰 핀 유지
-                if markerInfo.id == selectedMarkerId { continue }
+                // 선택된 마커 처리: 색상이 변경되면 큰 핀 아이콘을 새 색상으로 업데이트
+                if markerInfo.id == selectedMarkerId {
+                    let colorChanged = markerColors[markerInfo.id] != markerInfo.pinColor
+                    if colorChanged {
+                        // 색상이 변경되었으면 큰 핀 아이콘을 새 색상으로 업데이트
+                        let color = markerInfo.pinColor ?? .black
+                        if let selectedStyle = markerInfo.markerType.toSelectedPinStyle(pinColor: color) {
+                            let largeIcon = await MarkerImageCache.shared.selectedPinImage(for: selectedStyle)
+                            overlay.iconImage = NMFOverlayImage(image: largeIcon)
+                            markerColors[markerInfo.id] = markerInfo.pinColor
+                        }
+                    }
+                    // 색상이 동일하면 큰 핀 유지 (continue)
+                    continue
+                }
                 
                 // 사용자 위치 마커(home / work / custom)는 색(pinColor)이 변경될 수 있으므로
                 // 타입이 같아도 항상 아이콘을 갱신한다.
