@@ -71,16 +71,12 @@ struct RootView: View {
                             moduleFactory.makeTrackingView(caseID: caseID, context: context)
                         }
                     }
-                    .onChange(of: coordinator.currentRoute) { _, newRoute in
-                        guard let newRoute else {
+                    .onChange(of: coordinator.path) {
+                        guard let lastRoute = coordinator.path.last else {
                             tabBarVisibility.hide()
                             return
                         }
-                        if newRoute.useTabBar {
-                            tabBarVisibility.show()
-                        } else {
-                            tabBarVisibility.hide()
-                        }
+                        lastRoute.useTabBar ? tabBarVisibility.show() : tabBarVisibility.hide()
                     }
                 }
         }
