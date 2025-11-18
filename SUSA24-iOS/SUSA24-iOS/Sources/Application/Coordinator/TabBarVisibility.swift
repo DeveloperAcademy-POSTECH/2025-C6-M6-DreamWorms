@@ -12,7 +12,7 @@ import SwiftUI
 @Observable
 final class TabBarVisibility {
     /// TabBar의 현재 상태
-    var isVisible: Bool = true
+    private(set) var isVisible: Bool = true
     
     func show() {
         isVisible = true

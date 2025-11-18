@@ -114,8 +114,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
         }
         .navigationBarBackButtonHidden(true)
         .task {
-            // MainTabView가 최상위 route일 때만 TabBar 표시
-            tabBarVisibility.show()
             store.send(.onAppear)
         }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
