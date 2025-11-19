@@ -377,15 +377,9 @@ struct SelectedPinImage: View {
     let style: SelectedPinStyle
     
     /// 전체 핀 크기
-    /// - 일반 핀: 32x42
-    /// - Idle 핀: 40x50 (pin_idle.svg 원본 크기)
+    /// - 모든 핀: 32x42로 통일
     private var pinSize: CGSize {
-        switch style {
-        case .idle:
-            CGSize(width: 40, height: 50)
-        default:
-            CGSize(width: 32, height: 42)
-        }
+        CGSize(width: 32, height: 42)
     }
     
     var body: some View {

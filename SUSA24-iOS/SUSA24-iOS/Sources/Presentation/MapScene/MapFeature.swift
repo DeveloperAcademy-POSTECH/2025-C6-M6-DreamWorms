@@ -588,6 +588,7 @@ struct MapFeature: DWReducer {
             state.existingLocation = nil
             state.isPlaceInfoSheetPresented = false
             state.selectedPlaceInfo = nil
+            state.idlePinCoordinate = nil
             return .none
             
         case let .savePin(location):
@@ -609,10 +610,12 @@ struct MapFeature: DWReducer {
             state.existingLocation = location
             updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
+            state.idlePinCoordinate = nil
             return .none
             
         case .closePinWrite:
             state.isPinWritePresented = false
+            state.idlePinCoordinate = nil
             return .none
             
             // MARK: - Memo Actions
