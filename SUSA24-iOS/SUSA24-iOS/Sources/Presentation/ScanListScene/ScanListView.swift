@@ -34,9 +34,8 @@ struct ScanListView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScanListHeader(
-                onBackTapped: {
-                    coordinator.pop()
-                }
+                // 현재 뷰와 로딩 뷰를 pop해서 카메라 뷰로 돌아감
+                onBackTapped: { coordinator.popToDepth(2) }
             )
             .padding(.bottom, 40)
 
@@ -83,9 +82,9 @@ struct ScanListView: View {
                 title: "확인",
                 style: .default
             ) {
+                // 현재 뷰와 로딩 뷰와 카메라 뷰를 pop해서 핀이 추가된 지도 뷰로 돌아감
                 store.send(.dismissSaveCompletedAlert)
-                // MapView로 이동: CameraView와 ScanListView를 pop
-                coordinator.popToDepth(2)
+                coordinator.popToDepth(3)
             }
         )
         .dwAlert(

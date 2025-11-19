@@ -83,31 +83,32 @@ struct CaseCard: View {
                         )
                     }
                     
-                    // 1116 mock 데이터 추가 버튼
-                    Button {
-                        onAddCellLog()
-                    } label: {
-                        Label(
-                            "기지국 데이터 추가",
-                            systemImage: "antenna.radiowaves.left.and.right"
-                        )
-                    }
-                    
-                    Button {
-                        onAddPinData()
-                    } label: {
-                        Label(
-                            "핀 데이터 추가",
-                            systemImage: "mappin.and.ellipse"
-                        )
-                    }
-                    
                     Button(role: .destructive) {
                         showDeleteAlert = true
                     } label: {
                         Label(
                             String(localized: .buttonDelete),
                             systemImage: SymbolLiterals.delete.rawValue
+                        )
+                    }
+                    
+                    // TODO: - 쇼케이스용 mock 데이터 추가 버튼
+                    Button {
+                        onAddCellLog()
+                    } label: {
+                        Label(
+                            String(localized: .mockAddCellLocation),
+                            systemImage: SymbolLiterals.cell.rawValue
+                        )
+                    }
+                    
+                    // TODO: - 쇼케이스용 pin 데이터 추가 버튼
+                    Button {
+                        onAddPinData()
+                    } label: {
+                        Label(
+                            String(localized: .mockAddPinLocations),
+                            systemImage: SymbolLiterals.mapPin.rawValue
                         )
                     }
                 } label: {

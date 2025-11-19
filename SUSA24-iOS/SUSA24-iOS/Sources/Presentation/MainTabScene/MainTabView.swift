@@ -10,34 +10,26 @@ import SwiftUI
 struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View {
     @Environment(TabBarVisibility.self)
     private var tabBarVisibility
-    
-    @Environment(AppCoordinator.self)
-    private var coordinator
 
     // MARK: - Dependencies
     
-    @State var store: DWStore<MainTabFeature>
     @Bindable private var dispatcher: MapDispatcher
-    
-    // MARK: - TimeLine Store (탭 전환 시에도 유지!)
-    
-    @State var timeLineStore: DWStore<TimeLineFeature>
-    
-    // MARK: - Map Store (데이터 동기화를 위해 보관)
-    
+        
+    @State var store: DWStore<MainTabFeature>
     @State var mapStore: DWStore<MapFeature>
-    
+    @State var timeLineStore: DWStore<TimeLineFeature>
+        
     // MARK: - Properties
     
     @State private var selectedDetent: PresentationDetent
 
     private let mapShortDetent = PresentationDetent.height(73)
-    private let mapMidDetnet = PresentationDetent.fraction(0.4)
+    private let mapMidDetent = PresentationDetent.fraction(0.4)
     private let mapLargeDetent = PresentationDetent.large
     private let otherDetent = PresentationDetent.height(66)
     
     private var showDividerByDetent: Bool {
-        let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetnet, mapLargeDetent]
+        let detentsShowingDivider: Set<PresentationDetent> = [mapMidDetent, mapLargeDetent]
         return detentsShowingDivider.contains(selectedDetent)
     }
     
@@ -74,7 +66,7 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
         self.mapView = mapView
         self.trackingView = trackingView
         self.dashboardView = dashboardView
-        self.selectedDetent = mapMidDetnet
+        self.selectedDetent = mapMidDetent
     }
     
     // MARK: - View
@@ -103,7 +95,7 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             }
             .presentationDetents(
                 store.state.selectedTab == .map
-                    ? [mapShortDetent, mapMidDetnet, mapLargeDetent]
+                    ? [mapShortDetent, mapMidDetent, mapLargeDetent]
                     : [otherDetent],
                 selection: $selectedDetent
             )
@@ -114,8 +106,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
         }
         .navigationBarBackButtonHidden(true)
         .task {
-            // MainTabView가 최상위 route일 때만 TabBar 표시
-            tabBarVisibility.show()
             store.send(.onAppear)
         }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
@@ -158,7 +148,7 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
         .onChange(of: store.state.selectedTab) { _, newTab in
             if newTab == .map {
                 // Map 탭으로 복귀 시 중간 detent로 설정
-                selectedDetent = mapMidDetnet
+                selectedDetent = mapMidDetent
             } else {
                 selectedDetent = otherDetent
             }
@@ -169,20 +159,22 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             case let .focusCellTimeline(cellKey, title):
                 // 먼저 타임라인 상태를 셀 전용으로 바꾼 뒤 시트를 중간 detent로 올립니다.
                 timeLineStore.send(.applyCellFilter(cellKey: cellKey, title: title))
-                selectedDetent = mapMidDetnet
+                selectedDetent = mapMidDetent
                 dispatcher.consume()
             default:
                 break
             }
         }
+        // 외부에서 시트의 높이를 Mid로 맞춰달라는 요청이 왔을 때 수행
         .onReceive(NotificationCenter.default.publisher(for: .resetDetentToMid)) { _ in
-            selectedDetent = mapMidDetnet
+            if selectedDetent != mapMidDetent {
+                selectedDetent = mapMidDetent
+            }
         }
+        // 외부에서 시트의 높이를 Short로 맞춰달라는 요청이 왔을 때 수행
         .onReceive(NotificationCenter.default.publisher(for: .resetDetentToShort)) { _ in
-            // 타임라인 시트가 올라와 있을 때만 최소화
             if selectedDetent != mapShortDetent {
                 selectedDetent = mapShortDetent
-                // clearCellFilter는 onChange(of: selectedDetent)에서 자동 호출됨
             }
         }
     }

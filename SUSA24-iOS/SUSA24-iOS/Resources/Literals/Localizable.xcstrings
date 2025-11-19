@@ -785,6 +785,30 @@
     "min" : {
 
     },
+    "mock_addCellLocation" : {
+      "comment" : "⚠️ 목데이터용 이후 지울 내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기지국 데이터 추가"
+          }
+        }
+      }
+    },
+    "mock_addPinLocations" : {
+      "comment" : "⚠️ 목데이터용 이후 지울 내용",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핀 데이터 추가"
+          }
+        }
+      }
+    },
     "photoDetails_currentIndex" : {
       "comment" : "이미지 상세_현재이미지/총 이미지 수",
       "extractionState" : "manual",
@@ -1391,9 +1415,6 @@
 
     },
     "기지국 위치정보 저장하기" : {
-
-    },
-    "기지국데이터 추가" : {
 
     },
     "메시지 본문" : {
