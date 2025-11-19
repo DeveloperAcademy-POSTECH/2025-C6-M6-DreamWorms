@@ -103,9 +103,7 @@ struct CaseAddView: View {
                 // 추가하기 버튼
                 DWButton(
                     isEnabled: .constant(isPrimaryButtonEnabled),
-                    title: focus == .phone || store.state.isFormComplete
-                        ? String(localized: .buttonAddCase)
-                        : String(localized: .next)
+                    title: buttonTitle
                 ) {
                     handlePrimaryButtonTap()
                 }
@@ -146,6 +144,17 @@ private extension CaseAddView {
         }
         guard let focus else { return store.state.isFormComplete }
         return isFieldFilled(focus)
+    }
+    
+    /// 현재 버튼에 대해 "어떤 네이밍을 보여줘야 하는지" 계산
+    var buttonTitle: String {
+        if store.state.isEditMode {
+            String(localized: .buttonEdit)
+        } else {
+            focus == .phone || store.state.isFormComplete
+                ? String(localized: .buttonAddCase)
+                : String(localized: .next)
+        }
     }
     
     /// 특정 필드가 채워져 있는지 체크
