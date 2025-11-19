@@ -77,7 +77,7 @@ struct MapFeature: DWReducer {
         // MARK: 지도 레이어/필터 UI 상태
         
         /// 기지국 범위 필터의 선택 상태입니다.
-        var isBaseStationRangeSelected: Bool = false
+        var isBaseStationRangeSelected: Bool = true
         /// 누적 빈도 필터의 선택 상태입니다.
         var isVisitFrequencySelected: Bool = false
         /// 최근 기지국 필터의 선택 상태입니다. 최근 기지국 필터 토글 시 사용됩니다.
@@ -110,6 +110,8 @@ struct MapFeature: DWReducer {
         var isTimelineSheetMinimized: Bool = true
         /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
         var deselectMarkerTrigger: UUID?
+        /// Idle 핀 좌표 (빈 공간 선택 시 표시)
+        var idlePinCoordinate: MapCoordinate?
         
         // MARK: - Pin Add/Edit
 
@@ -318,10 +320,12 @@ struct MapFeature: DWReducer {
             state.existingLocation = nil
             state.isEditMode = false
             // 사용자가 탭한 좌표를 저장해 핀 추가 시 활용합니다.
-            state.selectedCoordinate = MapCoordinate(
+            let coordinate = MapCoordinate(
                 latitude: latlng.lat,
                 longitude: latlng.lng
             )
+            state.selectedCoordinate = coordinate
+            state.idlePinCoordinate = coordinate
             
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
@@ -372,6 +376,9 @@ struct MapFeature: DWReducer {
                 longitude: location.pointLongitude
             )
             
+            // Idle 핀 제거 (마커를 탭했으므로 idle 핀 불필요)
+            state.idlePinCoordinate = nil
+            
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
             state.selectedPlaceInfo = nil
@@ -398,6 +405,8 @@ struct MapFeature: DWReducer {
             state.isPlaceInfoSheetPresented = false
             state.isPlaceInfoLoading = false
             state.selectedPlaceInfo = nil
+            // Idle 핀 제거
+            state.idlePinCoordinate = nil
             // 마커 선택 해제 트리거
             state.deselectMarkerTrigger = UUID()
             // PlaceInfoSheet 닫힐 때도 타임라인 시트를 최소화 상태로 유지
@@ -598,14 +607,7 @@ struct MapFeature: DWReducer {
             
         case let .savePinCompleted(location):
             state.existingLocation = location
-            // 배열 복사 후 수정하고 마지막에 재할당하여 변경 감지 보장
-            var newLocations = state.locations
-            if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
-                newLocations[index] = location
-            } else {
-                newLocations.append(location)
-            }
-            state.locations = newLocations
+            updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
             return .none
             
@@ -652,12 +654,7 @@ struct MapFeature: DWReducer {
             
         case let .memoSaveCompleted(updatedLocation):
             state.existingLocation = updatedLocation
-            // 메모 수정도 새 배열로 재할당하여 변경 감지 보장
-            var newLocations = state.locations
-            if let index = newLocations.firstIndex(where: { $0.id == updatedLocation.id }) {
-                newLocations[index] = updatedLocation
-            }
-            state.locations = newLocations
+            updateLocationInState(updatedLocation, state: &state, appendIfNotFound: false)
 
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
@@ -883,5 +880,22 @@ private extension MapFeature {
         let removedIds = state.cctvCacheOrder.prefix(overflow)
         state.cctvCacheOrder.removeFirst(overflow)
         removedIds.forEach { state.cctvCache.removeValue(forKey: $0) }
+    }
+    
+    // MARK: - State Update Helpers
+    
+    /// Location 배열에서 특정 Location을 업데이트하거나 추가합니다.
+    /// - Parameters:
+    ///   - location: 업데이트할 Location
+    ///   - state: 상태 참조
+    ///   - appendIfNotFound: Location이 없을 때 추가할지 여부
+    func updateLocationInState(_ location: Location, state: inout State, appendIfNotFound: Bool) {
+        var newLocations = state.locations
+        if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
+            newLocations[index] = location
+        } else if appendIfNotFound {
+            newLocations.append(location)
+        }
+        state.locations = newLocations
     }
 }

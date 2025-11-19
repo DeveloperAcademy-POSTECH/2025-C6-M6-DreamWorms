@@ -85,6 +85,7 @@ struct MapView: View {
                     store.send(.mapTapped(latlng))
                 },
                 deselectMarkerTrigger: store.state.deselectMarkerTrigger,
+                idlePinCoordinate: store.state.idlePinCoordinate,
                 onCameraIdle: { bounds, zoomLevel in
                     store.send(.cameraIdle(bounds: bounds, zoomLevel: zoomLevel))
                 },
