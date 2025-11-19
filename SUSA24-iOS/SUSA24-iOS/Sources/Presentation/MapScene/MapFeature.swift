@@ -460,7 +460,7 @@ struct MapFeature: DWReducer {
                     minLat: bounds.minLatitude,
                     maxLng: bounds.maxLongitude,
                     maxLat: bounds.maxLatitude,
-                    size: NMConstants.defaultCCTVFetchSize,
+                    size: MapConstants.defaultCCTVFetchSize,
                     page: 1
                 )
                     
@@ -794,7 +794,7 @@ private extension MapFeature {
     /// CCTV fetch가 필요한지 판단하고 fetch할 bounds를 반환합니다.
     func prepareCCTVFetch(bounds: MapBounds, zoomLevel: Double, state: inout State) -> MapBounds? {
         guard state.isCCTVLayerEnabled else { return nil }
-        guard zoomLevel >= NMConstants.minZoomForCCTV else { return nil }
+        guard zoomLevel >= MapConstants.minZoomForCCTV else { return nil }
         
         if let cachedBounds = state.cctvCachedBounds,
            cachedBounds.contains(bounds),
@@ -871,7 +871,7 @@ private extension MapFeature {
     
     /// CCTV 캐시가 상한을 넘으면 오래된 항목을 제거합니다.
     func trimCCTVCacheIfNeeded(_ state: inout State) {
-        let overflow = state.cctvCacheOrder.count - NMConstants.maxCachedCCTVCount
+        let overflow = state.cctvCacheOrder.count - MapConstants.maxCachedCCTVCount
         guard overflow > 0 else { return }
         
         let removedIds = state.cctvCacheOrder.prefix(overflow)

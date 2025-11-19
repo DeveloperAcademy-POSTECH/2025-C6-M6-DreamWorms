@@ -98,8 +98,8 @@ final class CaseLocationMarkerManager {
     /// - Parameters:
     ///   - locations: 위치 데이터 배열 (캡션 텍스트 참조용)
     ///   - zoomLevel: 현재 줌 레벨
-    ///   - threshold: 캡션을 숨길 줌 레벨 임계값 (기본값: 11.5)
-    func updateCaptionVisibility(locations: [Location], zoomLevel: Double, threshold: Double = 11.5) {
+    ///   - threshold: 캡션을 숨길 줌 레벨 임계값 (기본값: MapConstants.markerVisibilityThreshold)
+    func updateCaptionVisibility(locations: [Location], zoomLevel: Double, threshold: Double = MapConstants.markerVisibilityThreshold) {
         let shouldShowCaption = zoomLevel > threshold
         let locationMap = Dictionary(uniqueKeysWithValues: locations.map { ($0.id.uuidString, $0.title) })
         

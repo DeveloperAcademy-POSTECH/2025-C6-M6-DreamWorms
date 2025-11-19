@@ -5,8 +5,33 @@
 //  Created by Moo on 11/13/25.
 //
 
-enum NMConstants {
+import CoreLocation
+
+/// 맵 관련 모든 상수를 관리하는 열거형
+enum MapConstants {
+    // MARK: - CCTV 관련 constans
+    
+    /// CCTV 조회를 위한 최소 줌 레벨
     static let minZoomForCCTV: Double = 15.0
+    /// CCTV 기본 조회 크기
     static let defaultCCTVFetchSize: Int = 1000
+    /// CCTV 최대 캐시 개수
     static let maxCachedCCTVCount: Int = 3000
+    
+    // MARK: - 지도 관련 constants
+    
+    /// 기본 줌 레벨
+    static let defaultZoomLevel: Double = 15.0
+    /// 마커 표시 임계값 (이 값보다 큰 줌 레벨에서 마커 표시)
+    static let markerVisibilityThreshold: Double = 11.5
+
+    // MARK: - Animation
+    
+    /// 카메라 이동 애니메이션 지속 시간 (초)
+    static let cameraAnimationDuration: Double = 0.7
+    
+    // MARK: - Location
+    
+    /// 위치 정확도 (100미터)
+    static let locationAccuracy: CLLocationAccuracy = kCLLocationAccuracyHundredMeters
 }
