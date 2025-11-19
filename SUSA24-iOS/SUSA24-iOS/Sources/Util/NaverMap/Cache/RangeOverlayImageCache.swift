@@ -54,7 +54,7 @@ private extension RangeOverlayImageCache {
                 cgContext.addEllipse(in: rect)
                 cgContext.clip()
                 
-                cgContext.setFillColor(UIColor(red: 55 / 255, green: 110 / 255, blue: 228 / 255, alpha: 0.2).cgColor)
+                cgContext.setFillColor(MapConstants.cellRangeOverlayColor.cgColor)
                 cgContext.fill(rect)
             }
         }

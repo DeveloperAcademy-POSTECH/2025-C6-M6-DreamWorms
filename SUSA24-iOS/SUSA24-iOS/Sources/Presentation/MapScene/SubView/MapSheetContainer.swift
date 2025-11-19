@@ -15,8 +15,8 @@ struct MapSheetContainer: View {
             .sheet(item: activeSheetBinding) { sheet in
                 buildSheet(sheet)
             }
-            // TODO: Alert 창이 뒤에서 뜨는 부분 수정
-            .dwAlert(
+            .alert(
+                String(localized: .buttonDelete),
                 isPresented: Binding(
                     get: { state.isDeleteAlertPresented },
                     set: { newValue in
@@ -24,24 +24,17 @@ struct MapSheetContainer: View {
                             send(.hideDeleteAlert)
                         }
                     }
-                ),
-                title: String(localized: .buttonDelete),
-                message: String(localized: .pinDeleteAlertContent),
-                primaryButton: DWAlertButton(
-                    title: String(localized: .buttonDelete),
-                    style: .destructive,
-                    action: {
-                        send(.confirmDeletePin)
-                    }
-                ),
-                secondaryButton: DWAlertButton(
-                    title: String(localized: .memoDeleteCancel),
-                    style: .cancel,
-                    action: {
-                        send(.hideDeleteAlert)
-                    }
                 )
-            )
+            ) {
+                Button(String(localized: .buttonDelete), role: .destructive) {
+                    send(.confirmDeletePin)
+                }
+                Button(String(localized: .cancelDefault), role: .cancel) {
+                    send(.hideDeleteAlert)
+                }
+            } message: {
+                Text(String(localized: .pinDeleteAlertContent))
+            }
     }
 }
 
