@@ -16,6 +16,7 @@ struct CaseAddScrollForm<Field: Hashable>: View {
     @Binding var suspectName: String
     @Binding var crime: String
     @Binding var suspectPhoneNumber: String
+    @Binding var nextTrigger: Field?
     
     let isEditMode: Bool
     let focus: FocusState<Field?>.Binding
@@ -149,6 +150,14 @@ struct CaseAddScrollForm<Field: Hashable>: View {
                 withAnimation(.snappy(duration: 0.25)) {
                     scrollID = newFocus
                 }
+            }
+        }
+        .onChange(of: nextTrigger) { _, newTrigger in
+            guard let newTrigger else { return }
+            revealNext(after: newTrigger)
+            
+            Task { @MainActor in
+                nextTrigger = nil
             }
         }
         .task {

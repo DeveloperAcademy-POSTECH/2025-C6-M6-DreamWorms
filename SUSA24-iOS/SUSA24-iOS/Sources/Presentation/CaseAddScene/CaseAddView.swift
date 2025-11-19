@@ -24,6 +24,9 @@ struct CaseAddView: View {
     @State private var showPhotoPicker = false
     @State private var selectedImage: Image? = nil
     
+    /// 아래 폼에 "다음" 버튼이 눌렸을 때, 어떤 필드 기준으로 다음을 열지 전달하는 트리거
+    @State private var nextTrigger: Field? = nil
+    
     // MARK: - View
     
     var body: some View {
@@ -85,6 +88,7 @@ struct CaseAddView: View {
                         get: { store.state.suspectPhoneNumber },
                         set: { store.send(.updateSuspectPhoneNumber($0)) }
                     ),
+                    nextTrigger: $nextTrigger,
                     isEditMode: store.state.isEditMode,
                     focus: $focus,
                     nameField: .name,
@@ -94,17 +98,17 @@ struct CaseAddView: View {
                     crimeField: .crime
                 )
                 .scrollIndicators(.hidden)
-                .padding(.bottom, 20)
+                .padding(.bottom, 8)
                 
                 // 추가하기 버튼
                 DWButton(
-                    isEnabled: .constant(store.state.isFormComplete),
-                    title: String(localized: .buttonAddCase)
+                    isEnabled: .constant(isPrimaryButtonEnabled),
+                    title: buttonTitle
                 ) {
-                    store.send(.addCaseButtonTapped)
-                    coordinator.pop()
+                    handlePrimaryButtonTap()
                 }
                 .padding(.horizontal, 16)
+                .padding(.bottom, 8)
             }
         }
         .fullScreenCover(isPresented: $showPhotoPicker) {
@@ -132,7 +136,81 @@ extension CaseAddView {}
 
 // MARK: - Private Extension Methods
 
-private extension CaseAddView {}
+private extension CaseAddView {
+    /// 현재 포커스된 필드에 대해 "버튼을 활성화할 수 있는지" 계산
+    var isPrimaryButtonEnabled: Bool {
+        if store.state.isEditMode {
+            return store.state.isFormComplete
+        }
+        guard let focus else { return store.state.isFormComplete }
+        return isFieldFilled(focus)
+    }
+    
+    /// 현재 버튼에 대해 "어떤 네이밍을 보여줘야 하는지" 계산
+    var buttonTitle: String {
+        if store.state.isEditMode {
+            String(localized: .buttonEdit)
+        } else {
+            focus == .phone || store.state.isFormComplete
+                ? String(localized: .buttonAddCase)
+                : String(localized: .next)
+        }
+    }
+    
+    /// 특정 필드가 채워져 있는지 체크
+    func isFieldFilled(_ field: Field) -> Bool {
+        switch field {
+        case .name:
+            !store.state.caseName.isEmpty
+        case .number:
+            !store.state.caseName.isEmpty
+                && !store.state.caseNumber.isEmpty
+        case .suspect:
+            !store.state.caseName.isEmpty
+                && !store.state.caseNumber.isEmpty
+                && !store.state.suspectName.isEmpty
+        case .crime:
+            !store.state.caseName.isEmpty
+                && !store.state.caseNumber.isEmpty
+                && !store.state.suspectName.isEmpty
+                && !store.state.crime.isEmpty
+        case .phone:
+            !store.state.caseName.isEmpty
+                && !store.state.caseNumber.isEmpty
+                && !store.state.suspectName.isEmpty
+                && !store.state.crime.isEmpty
+                && !store.state.suspectPhoneNumber.isEmpty
+        }
+    }
+    
+    /// 폼 전체에서 "비어 있는 첫 번째 필드" 찾기 (필요시 사용)
+    func firstEmptyField() -> Field? {
+        if store.state.caseName.isEmpty { return .name }
+        if store.state.caseNumber.isEmpty { return .number }
+        if store.state.suspectName.isEmpty { return .suspect }
+        if store.state.crime.isEmpty { return .crime }
+        if store.state.suspectPhoneNumber.isEmpty { return .phone }
+        return nil
+    }
+    
+    /// 메인 버튼 탭 시 동작
+    func handlePrimaryButtonTap() {
+        if focus == .phone || store.state.isFormComplete {
+            guard store.state.isFormComplete else { return }
+            store.send(.addCaseButtonTapped)
+            coordinator.pop()
+        } else {
+            if let current = focus {
+                nextTrigger = current
+            } else {
+                if let empty = firstEmptyField() {
+                    focus = empty
+                    nextTrigger = empty
+                }
+            }
+        }
+    }
+}
 
 // MARK: - Preview
 

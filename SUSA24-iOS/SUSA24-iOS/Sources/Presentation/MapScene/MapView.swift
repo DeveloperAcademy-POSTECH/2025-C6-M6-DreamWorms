@@ -175,8 +175,9 @@ struct MapView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .onAppear {
-            store.send(.onAppear)
+        .task {
+            store.send(.loadCellStations)
+            store.send(.startObservingLocations)
         }
         .onChange(of: dispatcher.request) { _, request in
             guard let request else { return }

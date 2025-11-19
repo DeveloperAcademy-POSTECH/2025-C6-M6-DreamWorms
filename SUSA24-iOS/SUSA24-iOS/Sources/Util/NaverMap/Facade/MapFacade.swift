@@ -127,7 +127,7 @@ final class MapFacade {
         
         // 4) 현위치 포커싱 명령 처리
         if shouldFocusMyLocation {
-            let _ = locationController.focusOnCurrentLocation { [weak self] coordinate in
+            _ = locationController.focusOnCurrentLocation { [weak self] coordinate in
                 guard let self else { return }
                 cameraController.moveCamera(to: coordinate, animated: true, duration: MapConstants.cameraAnimationDuration)
             }
