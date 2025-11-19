@@ -17,8 +17,9 @@ struct TrackingResultScreen: View {
     
     let namespace: Namespace.ID
     let onBack: () -> Void
-
+    
     @State private var isMapExpanded: Bool = false
+    @State private var isShareSheetPresented: Bool = false
     
     // MARK: - View
     
@@ -35,7 +36,7 @@ struct TrackingResultScreen: View {
                     
                     Spacer()
                     
-                    Text(.trackingResultNavigationTitle)
+                    Text(.trackingNavigationTitle)
                         .font(.titleSemiBold16)
                         .foregroundStyle(.labelNormal)
                     
@@ -43,9 +44,7 @@ struct TrackingResultScreen: View {
                     
                     DWGlassEffectCircleButton(
                         image: Image(.share),
-                        action: {
-                            // TODO: - 공유 액션
-                        }
+                        action: { isShareSheetPresented = true }
                     )
                     .setupSize(44)
                     .setupIconSize(18)
@@ -126,6 +125,9 @@ struct TrackingResultScreen: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .sheet(isPresented: $isShareSheetPresented) {
+            ActivityView(activityItems: shareActivityItems)
+        }
     }
 }
 
@@ -190,5 +192,46 @@ struct TrackingResultExpandedMapView: View {
             .padding(.top, 54)
             .padding(.trailing, 16)
         }
+    }
+}
+
+private extension TrackingResultScreen {
+    /// 공유 시 사용할 CCTV 요약 텍스트
+    var cctvShareText: String {
+        guard !cctvMarkers.isEmpty else {
+            return "[CCTV 캔버스]\n공유할 CCTV 정보가 없습니다."
+        }
+        
+        var lines: [String] = []
+        lines.append(
+            """
+            [CCTV 캔버스]
+            
+            선택한 영역 내 CCTV
+            총 개수: \(cctvMarkers.count)개
+            """
+        )
+        
+        for (index, marker) in cctvMarkers.enumerated() {
+            let name = marker.name
+            let location = marker.location
+            let idDescription = marker.id
+            
+            lines.append(
+                """
+                [\(index + 1)]
+                이름: \(name)
+                위치: \(location)
+                CCTV ID: \(idDescription)
+                """
+            )
+        }
+        
+        return lines.joined(separator: "\n\n")
+    }
+    
+    /// Share Sheet에 넘길 activityItems
+    private var shareActivityItems: [Any] {
+        [cctvShareText]
     }
 }
