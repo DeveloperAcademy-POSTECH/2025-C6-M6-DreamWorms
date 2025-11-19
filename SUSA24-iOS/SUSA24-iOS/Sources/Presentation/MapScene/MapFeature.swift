@@ -598,14 +598,7 @@ struct MapFeature: DWReducer {
             
         case let .savePinCompleted(location):
             state.existingLocation = location
-            // 배열 복사 후 수정하고 마지막에 재할당하여 변경 감지 보장
-            var newLocations = state.locations
-            if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
-                newLocations[index] = location
-            } else {
-                newLocations.append(location)
-            }
-            state.locations = newLocations
+            updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
             return .none
             
@@ -652,12 +645,7 @@ struct MapFeature: DWReducer {
             
         case let .memoSaveCompleted(updatedLocation):
             state.existingLocation = updatedLocation
-            // 메모 수정도 새 배열로 재할당하여 변경 감지 보장
-            var newLocations = state.locations
-            if let index = newLocations.firstIndex(where: { $0.id == updatedLocation.id }) {
-                newLocations[index] = updatedLocation
-            }
-            state.locations = newLocations
+            updateLocationInState(updatedLocation, state: &state, appendIfNotFound: false)
 
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
@@ -883,5 +871,22 @@ private extension MapFeature {
         let removedIds = state.cctvCacheOrder.prefix(overflow)
         state.cctvCacheOrder.removeFirst(overflow)
         removedIds.forEach { state.cctvCache.removeValue(forKey: $0) }
+    }
+    
+    // MARK: - State Update Helpers
+    
+    /// Location 배열에서 특정 Location을 업데이트하거나 추가합니다.
+    /// - Parameters:
+    ///   - location: 업데이트할 Location
+    ///   - state: 상태 참조
+    ///   - appendIfNotFound: Location이 없을 때 추가할지 여부
+    func updateLocationInState(_ location: Location, state: inout State, appendIfNotFound: Bool) {
+        var newLocations = state.locations
+        if let index = newLocations.firstIndex(where: { $0.id == location.id }) {
+            newLocations[index] = location
+        } else if appendIfNotFound {
+            newLocations.append(location)
+        }
+        state.locations = newLocations
     }
 }
