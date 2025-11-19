@@ -47,8 +47,6 @@ struct NaverMapView: UIViewRepresentable {
     var onMapTapped: ((NMGLatLng) -> Void)?
     /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
     var deselectMarkerTrigger: UUID?
-    /// Idle 핀 좌표 (빈 공간 선택 시 표시)
-    var idlePinCoordinate: MapCoordinate?
     /// 카메라 이동이 멈췄을 때 호출되는 콜백입니다.
     var onCameraIdle: ((MapBounds, Double) -> Void)?
     /// 기지국 데이터
@@ -124,9 +122,7 @@ struct NaverMapView: UIViewRepresentable {
             layerData: layerData,
             deselectMarkerTrigger: deselectMarkerTrigger,
             lastDeselectMarkerTrigger: &context.coordinator.lastDeselectMarkerTrigger,
-            onDeselectMarker: { await context.coordinator.facade.deselectMarker(on: uiView) },
-            idlePinCoordinate: idlePinCoordinate,
-            lastIdlePinCoordinate: &context.coordinator.lastIdlePinCoordinate
+            onDeselectMarker: { await context.coordinator.facade.deselectMarker(on: uiView) }
         )
     }
     
@@ -141,7 +137,6 @@ struct NaverMapView: UIViewRepresentable {
         let facade: MapFacade
         
         var lastDeselectMarkerTrigger: UUID?
-        var lastIdlePinCoordinate: MapCoordinate?
 
         init(
             parent: NaverMapView,

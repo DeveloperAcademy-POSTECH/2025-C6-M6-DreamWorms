@@ -264,7 +264,6 @@ enum SelectedPinStyle: Hashable, Sendable {
     case work(PinColorType)
     case custom(PinColorType)
     case cell(PinColorType)
-    case idle
     
     /// 캐시 키용 문자열
     var cacheKey: String {
@@ -273,13 +272,10 @@ enum SelectedPinStyle: Hashable, Sendable {
         case let .work(color): "selected_work_\(color.rawValue)"
         case let .custom(color): "selected_custom_\(color.rawValue)"
         case let .cell(color): "selected_cell_\(color.rawValue)"
-        case .idle: "selected_idle"
         }
     }
     
     /// 핀 색상
-    /// - NOTE: `idle` 케이스는 실제로 사용되지 않습니다 (pin_idle.svg 이미지에 색상이 포함되어 있음)
-    ///   원래 색상은 `Color.labelAssistive`이지만, PinColorType enum 일관성을 위해 `.black`을 반환합니다.
     var pinColor: PinColorType {
         switch self {
         case let .home(color),
@@ -287,8 +283,6 @@ enum SelectedPinStyle: Hashable, Sendable {
              let .custom(color),
              let .cell(color):
             color
-        case .idle:
-            .black
         }
     }
     
@@ -303,8 +297,6 @@ enum SelectedPinStyle: Hashable, Sendable {
             Image(.icnPin)
         case .cell:
             Image(.icnCellStationFilter)
-        case .idle:
-            Image(.icnPin) // idle은 기본 핀 아이콘 사용
         }
     }
 }
@@ -327,20 +319,14 @@ extension SelectedPinStyle {
     
     /// 선택된 핀 이미지셋 이미지 반환
     var pinImage: Image {
-        switch self {
-        case .idle:
-            return Image(.pinIdle)
-        default:
-            let colorName = Self.pinColorAssetName(pinColor)
-            let assetName: String = switch self {
-            case .home: "pin_home_\(colorName)"
-            case .work: "pin_work_\(colorName)"
-            case .custom: "pin_custom_\(colorName)"
-            case .cell: "pin_cell" // 셀은 색상 이름 없이 고정 에셋 사용
-            case .idle: "" // 위에서 이미 처리됨
-            }
-            return Image(assetName)
+        let colorName = Self.pinColorAssetName(pinColor)
+        let assetName: String = switch self {
+        case .home: "pin_home_\(colorName)"
+        case .work: "pin_work_\(colorName)"
+        case .custom: "pin_custom_\(colorName)"
+        case .cell: "pin_cell" // 셀은 색상 이름 없이 고정 에셋 사용
         }
+        return Image(assetName)
     }
     
     /// 선택된 홈 핀 이미지 (이미지셋 사용)
@@ -365,31 +351,18 @@ extension SelectedPinStyle {
     static func selectedCellPin() -> Image {
         Image(.pinCell)
     }
-    
-    /// Idle 상태 핀 이미지 (이미지셋 사용)
-    static func selectedIdlePin() -> Image {
-        Image(.pinIdle)
-    }
 }
 
 /// 선택된 위치를 나타내는 큰 핀 이미지
 struct SelectedPinImage: View {
     let style: SelectedPinStyle
     
-    /// 전체 핀 크기
-    /// - 일반 핀: 32x42
-    /// - Idle 핀: 40x50 (pin_idle.svg 원본 크기)
-    private var pinSize: CGSize {
-        switch style {
-        case .idle:
-            CGSize(width: 40, height: 50)
-        default:
-            CGSize(width: 32, height: 42)
-        }
-    }
+    /// 전체 핀 크기 (32x42), 아이콘 크기는 22x22
+    private let pinSize = CGSize(width: 32, height: 42)
+    private let iconSize: CGFloat = 20
     
     var body: some View {
-        // 이미지셋을 직접 사용 (pin_home, pin_work, pin_custom, pin_cell, pin_idle)
+        // 이미지셋을 직접 사용 (pin_home, pin_work, pin_custom, pin_cell)
         style.pinImage
             .resizable()
             .scaledToFit()
