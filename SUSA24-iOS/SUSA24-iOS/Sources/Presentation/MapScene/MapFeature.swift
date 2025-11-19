@@ -77,7 +77,7 @@ struct MapFeature: DWReducer {
         // MARK: 지도 레이어/필터 UI 상태
         
         /// 기지국 범위 필터의 선택 상태입니다.
-        var isBaseStationRangeSelected: Bool = false
+        var isBaseStationRangeSelected: Bool = true
         /// 누적 빈도 필터의 선택 상태입니다.
         var isVisitFrequencySelected: Bool = false
         /// 최근 기지국 필터의 선택 상태입니다. 최근 기지국 필터 토글 시 사용됩니다.
@@ -324,7 +324,7 @@ struct MapFeature: DWReducer {
                 latitude: latlng.lat,
                 longitude: latlng.lng
             )
-            state.selectedCoordinate = coordinate            
+            state.selectedCoordinate = coordinate
             state.idlePinCoordinate = coordinate
             
             state.isPlaceInfoLoading = true
