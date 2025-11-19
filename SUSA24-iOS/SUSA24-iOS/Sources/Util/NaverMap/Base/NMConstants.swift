@@ -6,6 +6,7 @@
 //
 
 import CoreLocation
+import UIKit
 
 /// 맵 관련 모든 상수를 관리하는 열거형
 enum MapConstants {
@@ -34,4 +35,14 @@ enum MapConstants {
     
     /// 위치 정확도 (100미터)
     static let locationAccuracy: CLLocationAccuracy = kCLLocationAccuracyHundredMeters
+    
+    // MARK: - Colors
+    
+    /// 기지국 범위 오버레이 색상 (RGBA: 55, 110, 228, 0.2)
+    static let cellRangeOverlayColor: UIColor = UIColor(
+        red: 55 / 255,
+        green: 110 / 255,
+        blue: 228 / 255,
+        alpha: 0.2
+    )
 }
