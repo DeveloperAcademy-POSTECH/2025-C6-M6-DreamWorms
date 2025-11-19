@@ -38,6 +38,8 @@ enum SymbolLiterals: String {
     case expand = "arrow.up.left.and.arrow.down.right"
     case minus
     case tracking = "point.3.filled.connected.trianglepath.dotted"
+    case cell = "antenna.radiowaves.left.and.right"
+    case mapPin = "mappin.and.ellipse"
 }
 
 extension Image {

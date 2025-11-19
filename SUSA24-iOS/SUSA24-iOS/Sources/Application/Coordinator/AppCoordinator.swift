@@ -10,21 +10,21 @@ import SwiftUI
 @MainActor
 @Observable
 final class AppCoordinator {
-    var path: [AppRoute] = []
+    var paths: [AppRoute] = []
 
     func push(_ route: AppRoute) {
-        path.append(route)
+        paths.append(route)
     }
 
     func pop() {
-        path.removeLast()
+        paths.removeLast()
     }
 
     func popToRoot() {
-        path.removeLast(path.count)
+        paths.removeLast(paths.count)
     }
     
     func popToDepth(_ depth: Int) {
-        path.removeLast(depth)
+        paths.removeLast(depth)
     }
 }
