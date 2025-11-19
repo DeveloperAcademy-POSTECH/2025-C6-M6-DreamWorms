@@ -79,53 +79,60 @@ struct CaseListView: View {
         }
         .task { store.send(.onAppear) }
         .ignoresSafeArea(edges: .bottom)
-        // 1116 목데이터 추가 - 덮어쓰기 Alert
-        .dwAlert(
+        .alert(
+            "기지국 데이터 덮어쓰기",
             isPresented: Binding(
                 get: { store.state.isShowingOverwriteAlert },
                 set: { _ in store.send(.dismissOverwriteAlert) }
-            ),
-            title: "기지국 데이터 덮어쓰기",
-            message: "기존 기지국 데이터가 있습니다. 덮어쓰시겠습니까?",
-            primaryButton: DWAlertButton(title: "덮어쓰기", style: .destructive) {
+            )
+        ) {
+            Button("덮어쓰기", role: .destructive) {
                 if let caseID = store.state.targetCaseIdForCellLog {
                     store.send(.addCellLog(caseID: caseID, overwrite: true))
                 }
-            },
-            secondaryButton: DWAlertButton(title: "취소", style: .cancel)
-        )
-        
-        // 1116 목데이터 추가 - 성공 Alert
-        .dwAlert(
+            }
+            Button(String(localized: .cancelDefault), role: .cancel) {}
+        } message: {
+            Text("기존 기지국 데이터가 있습니다. 덮어쓰시겠습니까?")
+        }
+        .alert(
+            "데이터 추가 완료",
             isPresented: Binding(
                 get: { store.state.isShowingSuccessAlert },
                 set: { _ in store.send(.dismissSuccessAlert) }
-            ),
-            title: "데이터 추가 완료",
-            message: "기지국 위치 데이터가 성공적으로 추가되었습니다."
-        )
-        .dwAlert(
+            )
+        ) {
+            Button(String(localized: .confirmDefault), role: .cancel) {}
+        } message: {
+            Text("기지국 위치 데이터가 성공적으로 추가되었습니다.")
+        }
+        .alert(
+            "핀 데이터 덮어쓰기",
             isPresented: Binding(
                 get: { store.state.isShowingPinDataOverwriteAlert },
                 set: { _ in store.send(.dismissPinDataOverwriteAlert) }
-            ),
-            title: "핀 데이터 덮어쓰기",
-            message: "기존 핀 데이터가 있습니다. 덮어쓰시겠습니까?",
-            primaryButton: DWAlertButton(title: "덮어쓰기", style: .destructive) {
+            )
+        ) {
+            Button("덮어쓰기", role: .destructive) {
                 if let caseID = store.state.targetCaseIdForPinData {
                     store.send(.addPinData(caseID: caseID, overwrite: true))
                 }
-            },
-            secondaryButton: DWAlertButton(title: "취소", style: .cancel)
-        )
-        .dwAlert(
+            }
+            Button(String(localized: .cancelDefault), role: .cancel) {}
+        } message: {
+            Text("기존 핀 데이터가 있습니다. 덮어쓰시겠습니까?")
+        }
+        .alert(
+            "데이터 추가 완료",
             isPresented: Binding(
                 get: { store.state.isShowingPinDataSuccessAlert },
                 set: { _ in store.send(.dismissPinDataSuccessAlert) }
-            ),
-            title: "데이터 추가 완료",
-            message: "핀 위치 데이터가 성공적으로 추가되었습니다."
-        )
+            )
+        ) {
+            Button(String(localized: .confirmDefault), role: .cancel) {}
+        } message: {
+            Text("핀 위치 데이터가 성공적으로 추가되었습니다.")
+        }
     }
 }
 

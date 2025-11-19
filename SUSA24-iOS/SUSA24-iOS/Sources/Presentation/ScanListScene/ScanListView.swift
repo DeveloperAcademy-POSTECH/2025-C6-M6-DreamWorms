@@ -14,23 +14,23 @@ import SwiftUI
 /// - 중복 주소 감지 시 덮어쓰기 Alert 표시
 struct ScanListView: View {
     // MARK: - Dependencies
-
+    
     @Environment(AppCoordinator.self)
     private var coordinator
-
+    
     @State private var store: DWStore<ScanListFeature>
-
+    
     private let caseID: UUID
-
+    
     // MARK: - Initialization
-
+    
     init(caseID: UUID, store: DWStore<ScanListFeature>) {
         self.caseID = caseID
         _store = State(initialValue: store)
     }
-
+    
     // MARK: - Body
-
+    
     var body: some View {
         VStack(spacing: 0) {
             ScanListHeader(
@@ -38,19 +38,19 @@ struct ScanListView: View {
                 onBackTapped: { coordinator.popToDepth(2) }
             )
             .padding(.bottom, 40)
-
+            
             // MARK: - 리스트
-
+            
             if store.state.scanResults.isEmpty {
                 emptyView
             } else {
                 contentView
             }
-
+            
             Spacer()
-
+            
             // MARK: - 하단 버튼
-
+            
             VStack {
                 DWButton(
                     isEnabled: isButtonEnabled,
@@ -63,72 +63,59 @@ struct ScanListView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .dwAlert(
-            isPresented: errorAlertPresented,
-            title: String(localized: .saveFailButton),
-            message: store.state.errorMessage ?? "",
-            primaryButton: DWAlertButton(
-                title: "확인",
-                style: .cancel
-            ) {
+        // 주소 추출 실패
+        .alert(String(localized: .saveFailButton), isPresented: errorAlertPresented) {
+            Button(String(localized: .confirmDefault), role: .cancel) {
                 store.send(.dismissErrorAlert)
             }
-        )
-        .dwAlert(
-            isPresented: saveCompletedAlertPresented,
-            title: String(localized: .saveSuccessButton),
-            message: String(localized: .saveCompletedMessage),
-            primaryButton: DWAlertButton(
-                title: "확인",
-                style: .default
-            ) {
-                // 현재 뷰와 로딩 뷰와 카메라 뷰를 pop해서 핀이 추가된 지도 뷰로 돌아감
+        } message: {
+            Text(store.state.errorMessage ?? "")
+        }
+        // 핀 저장 완료
+        .alert(String(localized: .saveSuccessButton), isPresented: saveCompletedAlertPresented) {
+            Button(String(localized: .confirmDefault), role: .cancel) {
                 store.send(.dismissSaveCompletedAlert)
                 coordinator.popToDepth(3)
             }
-        )
-        .dwAlert(
-            isPresented: duplicateAlertPresented,
-            title: String(localized: .scanListPinAddDuplicateAlertTitle),
-            message: String(format: NSLocalizedString("scanList_pin_add_duplicate_alert_content", comment: ""), store.state.duplicateAddress ?? ""),
-            primaryButton: DWAlertButton(
-                title: String(localized: .scanListPinAddDuplicateAlertButtonConfirm),
-                style: .destructive
-            ) {
+        } message: {
+            Text(String(localized: .saveCompletedMessage))
+        }
+        // 중복 alert
+        .alert(String(localized: .scanListPinAddDuplicateAlertTitle), isPresented: duplicateAlertPresented) {
+            Button(String(localized: .scanListPinAddDuplicateAlertButtonConfirm), role: .destructive) {
                 store.send(.confirmOverwrite)
-            },
-            secondaryButton: DWAlertButton(
-                title: String(localized: .scanListPinAddDuplicateAlertButtonCancel),
-                style: .cancel
-            ) {
+            }
+            Button(String(localized: .cancelDefault), role: .cancel) {
                 store.send(.cancelOverwrite)
             }
-        )
+        } message: {
+            Text(String(format: NSLocalizedString("scanList_pin_add_duplicate_alert_content", comment: ""), store.state.duplicateAddress ?? ""))
+        }
     }
-
+    
     // MARK: - Computed Properties
-
+    
     private var isButtonEnabled: Binding<Bool> {
         Binding(
             get: { store.state.canAddPin && !store.state.isSaving },
             set: { _ in }
         )
     }
-
+    
     private var errorAlertPresented: Binding<Bool> {
         Binding(
             get: { store.state.errorMessage != nil },
             set: { if !$0 { store.send(.dismissErrorAlert) } }
         )
     }
-
+    
     private var saveCompletedAlertPresented: Binding<Bool> {
         Binding(
             get: { store.state.isSaveCompleted },
             set: { if !$0 { store.send(.dismissSaveCompletedAlert) } }
         )
     }
-
+    
     private var duplicateAlertPresented: Binding<Bool> {
         Binding(
             get: { store.state.showDuplicateAlert },
@@ -148,7 +135,7 @@ private extension ScanListView {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-
+    
     var contentView: some View {
         ScrollView {
             VStack(spacing: 12) {

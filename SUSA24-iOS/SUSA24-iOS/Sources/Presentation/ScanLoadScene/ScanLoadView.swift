@@ -74,7 +74,7 @@ struct ScanLoadView: View {
                 Button(String(localized: .scanLoadTry), role: .confirm) {
                     handleRetry()
                 }
-                Button("취소", role: .cancel) {
+                Button(String(localized: .cancelDefault), role: .cancel) {
                     handleCancel()
                 }
             },
