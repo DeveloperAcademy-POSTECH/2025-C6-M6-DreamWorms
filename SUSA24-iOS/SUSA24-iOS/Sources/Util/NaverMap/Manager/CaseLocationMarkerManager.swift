@@ -22,8 +22,6 @@ final class CaseLocationMarkerManager {
     private var markerColors: [String: PinColorType] = [:]
     /// 현재 선택된 마커 ID
     private var selectedMarkerId: String?
-    /// Idle 핀 마커 (빈 공간 선택 시 표시)
-    private var idleMarker: NMFMarker?
     
     // MARK: - Public Methods
     
@@ -56,8 +54,6 @@ final class CaseLocationMarkerManager {
         markerTypes.removeAll()
         markerColors.removeAll()
         selectedMarkerId = nil
-        idleMarker?.mapView = nil
-        idleMarker = nil
     }
     
     /// 방문 빈도 배지를 셀 마커에 적용합니다.
@@ -118,8 +114,7 @@ final class CaseLocationMarkerManager {
     func deselectMarker(on _: NMFMapView) async {
         guard let selectedId = selectedMarkerId,
               let marker = markers[selectedId],
-              let markerType = markerTypes[selectedId]
-        else { await removeIdlePin(); return }
+              let markerType = markerTypes[selectedId] else { return }
         
         // 원래 작은 마커로 복원 (원래 색상 포함)
         let pinColor = markerColors[selectedId]
@@ -128,33 +123,6 @@ final class CaseLocationMarkerManager {
         marker.zIndex = 0
         
         selectedMarkerId = nil
-        await removeIdlePin()
-    }
-    
-    /// Idle 핀을 표시합니다 (빈 공간 선택 시)
-    /// - Parameters:
-    ///   - coordinate: 표시할 좌표
-    ///   - mapView: 네이버 지도 뷰
-    func showIdlePin(at coordinate: MapCoordinate, on mapView: NMFMapView) async {
-        await removeIdlePin()
-        
-        // 새 idle 핀 생성
-        let marker = NMFMarker()
-        marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        let icon = await MarkerImageCache.shared.selectedPinImage(for: .idle)
-        marker.iconImage = NMFOverlayImage(image: icon)
-        marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
-        marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
-        marker.zIndex = 1000 // 다른 마커 위에 표시
-        marker.mapView = mapView
-        
-        idleMarker = marker
-    }
-    
-    /// Idle 핀을 제거합니다
-    func removeIdlePin() async {
-        idleMarker?.mapView = nil
-        idleMarker = nil
     }
     
     private struct MarkerModel {

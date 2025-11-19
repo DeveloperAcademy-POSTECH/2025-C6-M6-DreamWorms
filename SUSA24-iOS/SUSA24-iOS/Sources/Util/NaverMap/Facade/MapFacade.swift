@@ -54,19 +54,6 @@ final class MapFacade {
         await caseLocationMarkerManager.deselectMarker(on: mapView)
     }
     
-    /// Idle 핀을 표시합니다 (빈 공간 선택 시)
-    /// - Parameters:
-    ///   - coordinate: 표시할 좌표
-    ///   - mapView: 네이버 지도 뷰
-    func showIdlePin(at coordinate: MapCoordinate, on mapView: NMFMapView) async {
-        await caseLocationMarkerManager.showIdlePin(at: coordinate, on: mapView)
-    }
-    
-    /// Idle 핀을 제거합니다
-    func removeIdlePin() async {
-        await caseLocationMarkerManager.removeIdlePin()
-    }
-    
     // MARK: - Callback Configuration
     
     /// 콜백을 설정합니다. Coordinator에서 호출하여 parent 참조를 전달합니다.
@@ -109,8 +96,6 @@ final class MapFacade {
     ///   - deselectMarkerTrigger: 마커 선택 해제 트리거
     ///   - lastDeselectMarkerTrigger: 마지막 마커 선택 해제 트리거 (inout)
     ///   - onDeselectMarker: 마커 선택 해제 콜백
-    ///   - idlePinCoordinate: Idle 핀 좌표 (빈 공간 선택 시 표시)
-    ///   - lastIdlePinCoordinate: 마지막 Idle 핀 좌표 (inout, 변경 감지용)
     func update(
         mapView: NMFMapView,
         cameraTarget: MapCoordinate?,
@@ -123,9 +108,7 @@ final class MapFacade {
         layerData: LayerData,
         deselectMarkerTrigger: UUID?,
         lastDeselectMarkerTrigger: inout UUID?,
-        onDeselectMarker: @escaping () async -> Void,
-        idlePinCoordinate: MapCoordinate?,
-        lastIdlePinCoordinate: inout MapCoordinate?
+        onDeselectMarker: @escaping () async -> Void
     ) {
         // 1) 의존성 주입
         cameraController.mapView = mapView
@@ -193,20 +176,6 @@ final class MapFacade {
             lastDeselectMarkerTrigger = trigger
             Task { @MainActor in
                 await onDeselectMarker()
-            }
-        }
-        
-        // 7) Idle 핀 표시 처리 (변경 감지)
-        if idlePinCoordinate != lastIdlePinCoordinate {
-            lastIdlePinCoordinate = idlePinCoordinate
-            if let coordinate = idlePinCoordinate {
-                Task { @MainActor in
-                    await showIdlePin(at: coordinate, on: mapView)
-                }
-            } else {
-                Task { @MainActor in
-                    await removeIdlePin()
-                }
             }
         }
     }
