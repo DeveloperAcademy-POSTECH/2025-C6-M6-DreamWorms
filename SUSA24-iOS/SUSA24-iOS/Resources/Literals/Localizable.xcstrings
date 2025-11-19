@@ -116,18 +116,6 @@
         }
       }
     },
-    "camera_back_sheet_action_cancel" : {
-      "comment" : "카메라 나가기_액션시트_취소",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "취소"
-          }
-        }
-      }
-    },
     "camera_back_sheet_action_confirm" : {
       "comment" : "카메라 나가기_액션시트_모두 삭제",
       "extractionState" : "manual",
@@ -699,18 +687,6 @@
     "max" : {
 
     },
-    "memo_delete_cancel" : {
-      "comment" : "메모 삭제 취소",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "취소"
-          }
-        }
-      }
-    },
     "memo_delete_confirm" : {
       "comment" : "메모 삭제",
       "extractionState" : "manual",
@@ -1101,18 +1077,6 @@
         }
       }
     },
-    "scanList_pin_add_duplicate_alert_button_cancel" : {
-      "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_취소",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "취소"
-          }
-        }
-      }
-    },
     "scanList_pin_add_duplicate_alert_button_confirm" : {
       "comment" : "스캔 목록_핀 추가 시 중복 주소 알람_버튼_덮어쓰기",
       "extractionState" : "manual",
@@ -1425,7 +1389,25 @@
     "Week" : {
 
     },
+    "기존 기지국 데이터가 있습니다. 덮어쓰시겠습니까?" : {
+
+    },
+    "기존 핀 데이터가 있습니다. 덮어쓰시겠습니까?" : {
+
+    },
+    "기지국 데이터 덮어쓰기" : {
+
+    },
+    "기지국 위치 데이터가 성공적으로 추가되었습니다." : {
+
+    },
     "기지국 위치정보 저장하기" : {
+
+    },
+    "덮어쓰기" : {
+
+    },
+    "데이터 추가 완료" : {
 
     },
     "메시지 본문" : {
@@ -1470,7 +1452,10 @@
     "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
 
     },
-    "취소" : {
+    "핀 데이터 덮어쓰기" : {
+
+    },
+    "핀 위치 데이터가 성공적으로 추가되었습니다." : {
 
     }
   },
