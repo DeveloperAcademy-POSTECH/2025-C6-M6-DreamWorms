@@ -49,8 +49,7 @@ struct TrackingFeature: DWReducer {
             return .task { [repository] in
                 do {
                     let locations = try await repository.fetchLocations(caseId: caseId)
-                    let filtered = locations.filter { [0, 1, 3].contains($0.locationType) }
-                    return .locationsLoaded(filtered)
+                    return .locationsLoaded(locations)
                 } catch {
                     return .locationsLoaded([])
                 }
@@ -120,7 +119,6 @@ private extension TrackingFeature {
     /// Location 배열로부터 VWorld POLYGON용 좌표 배열을 만듭니다.
     /// - Note: VWorld는 `POLYGON((x1 y1, x2 y2, ..., x1 y1))` 형태로 **닫힌 폴리곤**을 요구하므로 첫 번째 좌표를 마지막에 한 번 더 추가합니다.
     func makeClosedPolygonCoordinates(from locations: [Location]) -> [MapCoordinate] {
-        // 1) Location → MapCoordinate 변환
         var coords: [MapCoordinate] = locations.map {
             MapCoordinate(
                 latitude: $0.pointLatitude,

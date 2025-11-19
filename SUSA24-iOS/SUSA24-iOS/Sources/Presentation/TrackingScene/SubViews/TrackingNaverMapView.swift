@@ -261,7 +261,7 @@ extension TrackingNaverMapView {
             case .home: .home
             case .work: .work
             case .custom: .custom
-            case .cell: .custom
+            case .cell: .cell(isVisited: true)
             }
             
             let image: UIImage = if markerType.isUserLocation {
@@ -387,8 +387,8 @@ extension TrackingNaverMapView {
             let assetName: String = switch style {
             case .home: "pin_home_\(colorName)"
             case .work: "pin_work_\(colorName)"
+            case .cell: "pin_cell"
             case .custom: "pin_custom_\(colorName)"
-            default: "pin_custom_\(colorName)"
             }
             
             return UIImage(named: assetName)
