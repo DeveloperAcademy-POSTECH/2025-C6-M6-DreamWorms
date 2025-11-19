@@ -110,6 +110,8 @@ struct MapFeature: DWReducer {
         var isTimelineSheetMinimized: Bool = true
         /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
         var deselectMarkerTrigger: UUID?
+        /// Idle 핀 좌표 (빈 공간 선택 시 표시)
+        var idlePinCoordinate: MapCoordinate?
         
         // MARK: - Pin Add/Edit
 
@@ -318,10 +320,12 @@ struct MapFeature: DWReducer {
             state.existingLocation = nil
             state.isEditMode = false
             // 사용자가 탭한 좌표를 저장해 핀 추가 시 활용합니다.
-            state.selectedCoordinate = MapCoordinate(
+            let coordinate = MapCoordinate(
                 latitude: latlng.lat,
                 longitude: latlng.lng
             )
+            state.selectedCoordinate = coordinate            
+            state.idlePinCoordinate = coordinate
             
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
@@ -372,6 +376,9 @@ struct MapFeature: DWReducer {
                 longitude: location.pointLongitude
             )
             
+            // Idle 핀 제거 (마커를 탭했으므로 idle 핀 불필요)
+            state.idlePinCoordinate = nil
+            
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
             state.selectedPlaceInfo = nil
@@ -398,6 +405,8 @@ struct MapFeature: DWReducer {
             state.isPlaceInfoSheetPresented = false
             state.isPlaceInfoLoading = false
             state.selectedPlaceInfo = nil
+            // Idle 핀 제거
+            state.idlePinCoordinate = nil
             // 마커 선택 해제 트리거
             state.deselectMarkerTrigger = UUID()
             // PlaceInfoSheet 닫힐 때도 타임라인 시트를 최소화 상태로 유지
