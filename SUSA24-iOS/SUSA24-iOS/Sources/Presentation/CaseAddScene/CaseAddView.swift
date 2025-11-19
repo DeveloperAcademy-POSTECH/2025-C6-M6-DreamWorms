@@ -141,11 +141,9 @@ extension CaseAddView {}
 private extension CaseAddView {
     /// 현재 포커스된 필드에 대해 "버튼을 활성화할 수 있는지" 계산
     var isPrimaryButtonEnabled: Bool {
-        // 수정 모드에서는 전체 폼이 다 채워져야 활성화
         if store.state.isEditMode {
             return store.state.isFormComplete
         }
-        
         guard let focus else { return store.state.isFormComplete }
         return isFieldFilled(focus)
     }
@@ -188,20 +186,14 @@ private extension CaseAddView {
     
     /// 메인 버튼 탭 시 동작
     func handlePrimaryButtonTap() {
-        // 수정 모드이든 신규 모드이든,
-        // 버튼이 활성화된 상태에서만 들어오므로 별도 guard는 선택사항이지만,
-        // 방어적으로 한 번 더 검증해도 됨
-        if focus == .phone {
-            // 마지막 필드 => 생성/수정 실행
+        if focus == .phone || store.state.isFormComplete {
             guard store.state.isFormComplete else { return }
             store.send(.addCaseButtonTapped)
             coordinator.pop()
         } else {
-            // 아직 마지막 필드가 아니라면 "다음 필드 열기" 트리거
             if let current = focus {
                 nextTrigger = current
             } else {
-                // 포커스가 없다면 비어 있는 첫 필드를 찾아서 이동
                 if let empty = firstEmptyField() {
                     focus = empty
                     nextTrigger = empty
