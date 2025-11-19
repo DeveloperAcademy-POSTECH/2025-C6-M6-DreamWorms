@@ -809,6 +809,17 @@
         }
       }
     },
+    "next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음"
+          }
+        }
+      }
+    },
     "photoDetails_currentIndex" : {
       "comment" : "이미지 상세_현재이미지/총 이미지 수",
       "extractionState" : "manual",
