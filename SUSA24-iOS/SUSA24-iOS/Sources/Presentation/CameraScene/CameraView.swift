@@ -133,18 +133,20 @@ struct CameraView: View {
                 break
             }
         }
-        .alert(
-            String(localized: .cameraBackSheetTitle),
-            isPresented: $showExitConfirmation
-        ) {
-            Button(String(localized: .cameraBackSheetActionConfirm), role: .destructive) {
-                Task {
-                    camera.clearAllPhotos()
-                }
-                coordinator.pop()
-            }
-            Button(String(localized: .cancelDefault), role: .cancel) {}
-        }
+        .dwActionSheet(
+            isPresented: $showExitConfirmation,
+            title: String(localized: .cameraBackSheetTitle),
+            message: nil,
+            items: [
+                .destructive(String(localized: .cameraBackSheetActionConfirm)) {
+                    Task {
+                        camera.clearAllPhotos()
+                    }
+                    coordinator.pop()
+                },
+                .cancel(String(localized: .cameraBackSheetActionCancel)),
+            ]
+        )
     }
 }
 

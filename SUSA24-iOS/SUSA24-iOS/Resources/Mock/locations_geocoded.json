@@ -94,14 +94,14 @@
     "colorType" : 3,
     "geocodeSource" : "Naver",
     "id" : "E0BB0A3E-49D2-4A1D-BB6A-C66274E03703",
-    "address" : "경상북도 포항시 북구 천마로 62",
+    "address" : "경북 포항시 북구 천마로 62",
     "pointLongitude" : 129.3971919,
     "title" : "피의자 주거래은행"
   },
   {
     "locationType" : 3,
     "pointLatitude" : 36.034344,
-    "note" : "경상북도경찰청 형사기동대",
+    "note" : "경북경찰청 형사기동대",
     "colorType" : 6,
     "geocodeSource" : "Naver",
     "id" : "A5DA63CB-50B0-4166-8BD1-D156B841D064",

@@ -99,14 +99,20 @@ struct MemoWriteView: View {
                 }
             }
         }
-        .alert(String(localized: .memoDeleteTitle), isPresented: $showDeleteConfirmation) {
-            Button(String(localized: .memoDeleteConfirm), role: .destructive) {
-                deleteNote()
-            }
-            Button(String(localized: .cancelDefault), role: .cancel) {}
-        } message: {
-            Text(String(localized: .memoDeleteMessage))
-        }
+        .dwAlert(
+            isPresented: $showDeleteConfirmation,
+            title: String(localized: .memoDeleteTitle),
+            message: String(localized: .memoDeleteMessage),
+            primaryButton: DWAlertButton(
+                title: String(localized: .memoDeleteConfirm),
+                style: .destructive,
+                action: { deleteNote() }
+            ),
+            secondaryButton: DWAlertButton(
+                title: String(localized: .memoDeleteCancel),
+                style: .cancel
+            )
+        )
         .onAppear {
             noteText = existingNote ?? ""
 
