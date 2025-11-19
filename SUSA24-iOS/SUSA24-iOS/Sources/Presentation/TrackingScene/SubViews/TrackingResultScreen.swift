@@ -72,7 +72,7 @@ struct TrackingResultScreen: View {
                 .padding(.top, 26)
                 .padding(.bottom, 24)
                 
-                Text(.trackingResultSectionTitle)
+                Text("\(.trackingResultSectionTitle) (\(cctvMarkers.count))")
                     .font(.titleSemiBold18)
                     .foregroundStyle(.labelNormal)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -91,7 +91,7 @@ struct TrackingResultScreen: View {
                                 DWLocationCard(
                                     type: .cctv,
                                     title: item.name,
-                                    description: item.location
+                                    description: "\(item.location), \(item.id)"
                                 )
                                 .setupAsButton(false)
                             }

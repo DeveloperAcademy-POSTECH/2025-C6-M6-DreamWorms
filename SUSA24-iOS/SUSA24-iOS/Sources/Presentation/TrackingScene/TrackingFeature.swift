@@ -70,7 +70,7 @@ struct TrackingFeature: DWReducer {
             let polygonCoordinates = makeClosedPolygonCoordinates(from: locations)
             let dto = VWorldPolygonRequestDTO(
                 coordinates: polygonCoordinates,
-                size: 100,
+                size: 1000,
                 page: 1
             )
             
