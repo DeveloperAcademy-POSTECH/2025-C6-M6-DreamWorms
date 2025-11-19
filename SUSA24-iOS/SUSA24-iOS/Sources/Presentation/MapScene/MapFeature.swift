@@ -136,11 +136,8 @@ struct MapFeature: DWReducer {
     
     /// 지도 화면에서 발생할 수 있는 액션입니다.
     enum Action: DWAction {
-        /// 화면이 나타날 때 발생하는 액션입니다.
-        case onAppear
-        /// 위치 데이터를 로드하는 액션입니다.
-        /// - Parameter locations: 로드할 위치 데이터 배열
-        case loadLocations([Location])
+        /// 기지국 데이터를 로드하는 액션입니다.
+        case loadCellStations
         /// 기지국 데이터를 로드하는 액션입니다.
         /// - Parameter cellStations: 로드할 기지국 데이터 배열
         case loadCellMarkers([CellMarker])
@@ -212,6 +209,12 @@ struct MapFeature: DWReducer {
         case requestFocusMyLocation
         /// 현위치 포커싱 명령을 소비합니다.
         case clearFocusMyLocationFlag
+        /// Location 실시간 감지 시작
+        case startObservingLocations
+        /// Location 실시간 감지 중지
+        case stopObservingLocations
+        /// Location 변경사항 수신 (watchLocations로부터)
+        case locationsUpdated([Location])
         
         // MARK: - Pin Actions
         
@@ -254,54 +257,17 @@ struct MapFeature: DWReducer {
     
     func reduce(into state: inout State, action: Action) -> DWEffect<Action> {
         switch action {
-        case .onAppear:
-            guard let caseId = state.caseId else { return .none }
-            
-            return .merge(
-                .task { [repository] in
-                    do {
-                        let locations = try await repository.fetchLocations(caseId: caseId)
-                        return .loadLocations(locations)
-                    } catch {
-                        return .loadLocations([])
-                    }
-                },
-                .task {
-                    do {
-                        let cellMarkers = try await CellStationLoader.loadFromJSON()
-                        return .loadCellMarkers(cellMarkers)
-                    } catch {
-                        return .loadCellMarkers([])
-                    }
-                }
-            )
-            
-        case let .loadLocations(locations):
-            state.locations = locations
-            
-            // existingLocation을 최신 데이터로 동기화
-            // MainTabFeature에서 받은 최신 locations와 동일한 데이터 유지!!
-            if let existingId = state.existingLocation?.id {
-                if let updatedLocation = locations.first(where: { $0.id == existingId }) {
-                    // locations에 있으면 최신 데이터로 업데이트
-                    state.existingLocation = updatedLocation
-                } else {
-                    // locations에 없으면 삭제된 것이므로 nil로 설정하고 시트 닫기
-                    state.existingLocation = nil
-                    state.isPlaceInfoSheetPresented = false
+        case .loadCellStations:
+            // locations는 watchLocations로 실시간 감지 (startObservingLocations에서 구독)
+            // cellMarkers만 로드 (정적 데이터)
+            return .task {
+                do {
+                    let cellMarkers = try await CellStationLoader.loadFromJSON()
+                    return .loadCellMarkers(cellMarkers)
+                } catch {
+                    return .loadCellMarkers([])
                 }
             }
-            
-            if state.didSetInitialCamera == false {
-                focusLatestCellLocation(&state)
-                
-                if state.cameraTargetCoordinate == nil {
-                    state.cameraTargetCoordinate = MapCoordinate(latitude: 36.019, longitude: 129.343)
-                }
-                
-                state.didSetInitialCamera = true
-            }
-            return .none
             
         case let .loadCellMarkers(cellStations):
             state.cellStations = cellStations
@@ -520,7 +486,47 @@ struct MapFeature: DWReducer {
             state.shouldFocusMyLocation = false
             return .none
             
-            // MARK: - Pin Actions
+        case .startObservingLocations:
+            guard let caseId = state.caseId else { return .none }
+            
+            // 타임라인에서 사용하는 방법과 동일한 방법 사용.
+            // downstream 클로저를 통해 CoreData 변경사항마다 .locationsUpdated 액션 방출
+            return DWEffect { [repository] downstream in
+                // 1. viewContext는 MainActor에 격리되므로 MainActor에서 AsyncStream 생성
+                let stream = await MainActor.run { repository.watchLocations(caseId: caseId) }
+                for await locations in stream {
+                    downstream(.locationsUpdated(locations))
+                }
+                // AsyncStream 종료 시 observer 정리 완료 신호
+                downstream(.stopObservingLocations)
+            }
+            
+        case .stopObservingLocations:
+            return .none
+            
+        case let .locationsUpdated(locations):
+            // watchLocations로부터 받은 최신 locations로 업데이트
+            state.locations = locations
+            if let existingId = state.existingLocation?.id {
+                if let updatedLocation = locations.first(where: { $0.id == existingId }) {
+                    state.existingLocation = updatedLocation
+                } else {
+                    state.existingLocation = nil
+                    state.isPlaceInfoSheetPresented = false
+                }
+            }
+            
+            // 맵뷰 실행 시점에 항상 현재 위치로 이동 (디폴트)
+            if !state.didSetInitialCamera {
+                state.shouldFocusMyLocation = true
+                state.didSetInitialCamera = true
+            }
+            
+            // state.locations가 변경되면 SwiftUI가 NaverMapView.updateUIView를 호출
+            // → MapFacade.update가 실행되어 마커가 자동으로 업데이트됨
+            return .none
+            
+        // MARK: - Pin Actions
             
         case .addPinTapped:
             guard let placeInfo = state.selectedPlaceInfo,

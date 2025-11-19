@@ -116,8 +116,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
                 caseInfo: caseInfo,
                 locations: store.state.locations
             ))
-            // MapView에도 전달 (Timeline과 동일한 패턴)
-            mapStore.send(.loadLocations(store.state.locations))
         }
         .onChange(of: store.state.locations) { _, newLocations in
             print("📍 [MainTabView] locations changed: count=\(newLocations.count), caseInfo: \(store.state.caseInfo?.name ?? "nil")")
@@ -127,8 +125,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
                 caseInfo: caseInfo,
                 locations: newLocations
             ))
-            // MapView에도 전달 (Timeline과 동일한 패턴)
-            mapStore.send(.loadLocations(newLocations))
         }
         .onChange(of: selectedDetent) { _, newDetent in
             // 시트를 최소 높이로 내렸을 때는 셀 타임라인 모드를 해제합니다.
