@@ -56,7 +56,7 @@ struct TrackingFeature: DWReducer {
             }
             
         case let .locationsLoaded(locations):
-            state.locations = locations
+            state.locations = locations.deduplicatedByCoordinate()
             state.isLoading = false
             return .none
         
@@ -128,5 +128,38 @@ private extension TrackingFeature {
         if let first = coords.first { coords.append(first) }
         
         return coords
+    }
+}
+
+private extension Array<Location> {
+    /// pointLatitude + pointLongitude 기준 중복 제거 (Dictionary 사용 안함)
+    /// 동일 좌표가 여러 개 있는 경우 가장 최신 receivedAt Location만 남김
+    func deduplicatedByCoordinate() -> [Location] {
+        var result: [Location] = []
+        
+        for loc in self {
+            // 좌표가 없는 경우 스킵
+            guard loc.pointLatitude != 0, loc.pointLongitude != 0 else { continue }
+            
+            if let existingIndex = result.firstIndex(where: {
+                $0.pointLatitude == loc.pointLatitude &&
+                    $0.pointLongitude == loc.pointLongitude
+            }) {
+                // 이미 같은 좌표가 있을 때 → 더 최신 것으로 교체
+                let existing = result[existingIndex]
+                
+                let existingDate = existing.receivedAt ?? .distantPast
+                let newDate = loc.receivedAt ?? .distantPast
+                
+                if newDate > existingDate {
+                    result[existingIndex] = loc
+                }
+            } else {
+                // 최초 발견된 좌표 → 추가
+                result.append(loc)
+            }
+        }
+        
+        return result
     }
 }
