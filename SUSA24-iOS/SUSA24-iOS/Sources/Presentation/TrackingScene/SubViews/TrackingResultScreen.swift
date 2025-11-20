@@ -19,7 +19,6 @@ struct TrackingResultScreen: View {
     let onBack: () -> Void
     
     @State private var isMapExpanded: Bool = false
-    @State private var isShareSheetPresented: Bool = false
     
     // MARK: - View
     
@@ -42,12 +41,15 @@ struct TrackingResultScreen: View {
                     
                     Spacer()
                     
-                    DWGlassEffectCircleButton(
-                        image: Image(.share),
-                        action: { isShareSheetPresented = true }
-                    )
-                    .setupSize(44)
-                    .setupIconSize(18)
+                    ShareLink(item: cctvShareText) {
+                        DWGlassEffectCircleButton(
+                            image: Image(.share),
+                            action: {}
+                        )
+                        .setupSize(44)
+                        .setupIconSize(18)
+                        .allowsHitTesting(false)
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 6)
@@ -59,9 +61,11 @@ struct TrackingResultScreen: View {
                     namespace: namespace,
                     onExpand: {
                         withAnimation(
-                            .spring(response: 0.45,
-                                    dampingFraction: 0.82,
-                                    blendDuration: 0.15)
+                            .spring(
+                                response: 0.45,
+                                dampingFraction: 0.82,
+                                blendDuration: 0.15
+                            )
                         ) {
                             isMapExpanded = true
                         }
@@ -125,9 +129,6 @@ struct TrackingResultScreen: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
-        .sheet(isPresented: $isShareSheetPresented) {
-            ActivityView(activityItems: shareActivityItems)
-        }
     }
 }
 
