@@ -19,11 +19,15 @@ struct TrackingNaverMapView: UIViewRepresentable {
     /// CCTV 검색 결과
     var cctvMarkers: [CCTVMarker]
     
+    /// 결과 화면에서 선택 영역(마지막 선택 핀)에 맞춰 카메라를 이동할지 여부
+    var shouldFocusOnSelection: Bool
+    
     /// 마커를 탭했을 때 상위로 전달할 콜백
     /// - Parameters:
     ///   - id: Location.id
     ///   - name: 슬롯에 표시할 이름 (title 없으면 address)
-    var onLocationTapped: (UUID, String) -> Void
+    ///   - isSelected: 현재 이 Location이 이미 선택된 상태인지 여부
+    var onLocationTapped: (UUID, String, Bool) -> Void
     
     // MARK: - UIViewRepresentable
     
@@ -74,6 +78,9 @@ extension TrackingNaverMapView {
         
         /// 가장 최근 위치로 카메라를 한 번이라도 맞췄는지 여부
         private var didSetInitialCamera = false
+        
+        /// Result 화면에서 "선택된 핀" 기준으로 카메라를 한 번이라도 맞췄는지 여부
+        private var didFocusOnSelection = false
         
         /// 선택된 위치들을 연결할 Path 오버레이
         private var selectionPath: NMFPath?
@@ -141,6 +148,19 @@ extension TrackingNaverMapView {
             
             // Path를 선택했을 때 라인 그리기
             updateSelectionPath(selectedIDs: selectedIDs, on: mapView)
+            
+            // Result 모드에서, 마지막으로 선택된 핀 기준으로 카메라 이동 (한 번만)
+            if parent.shouldFocusOnSelection,
+               !didFocusOnSelection,
+               !selectedIDs.isEmpty
+            {
+                focusCameraOnLastSelected(
+                    locations: locations,
+                    selectedIDs: selectedIDs,
+                    on: mapView
+                )
+                didFocusOnSelection = true
+            }
         }
         
         // MARK: - Private: Camera
@@ -166,6 +186,33 @@ extension TrackingNaverMapView {
             let position = NMFCameraPosition(target, zoom: 15)
             let update = NMFCameraUpdate(position: position)
             update.animation = .none
+            mapView.moveCamera(update)
+        }
+        
+        /// 선택된 Location들 중 "마지막" Location을 기준으로 카메라 이동
+        @MainActor
+        private func focusCameraOnLastSelected(
+            locations: [Location],
+            selectedIDs: Set<UUID>,
+            on mapView: NMFMapView
+        ) {
+            // locations 배열의 뒤에서부터 보면서, selectedIDs에 포함된 마지막 Location 찾기
+            guard let lastSelected = locations.reversed().first(where: {
+                selectedIDs.contains($0.id) &&
+                    $0.pointLatitude != 0 &&
+                    $0.pointLongitude != 0
+            }) else {
+                return
+            }
+            
+            let target = NMGLatLng(
+                lat: lastSelected.pointLatitude,
+                lng: lastSelected.pointLongitude
+            )
+            
+            let position = NMFCameraPosition(target, zoom: 12.5)
+            let update = NMFCameraUpdate(position: position)
+            update.animation = .easeIn
             mapView.moveCamera(update)
         }
         
@@ -196,12 +243,6 @@ extension TrackingNaverMapView {
             let id = location.id
             marker.touchHandler = { [weak self] _ in
                 guard let self else { return true }
-                
-                // 중복 선택 방지
-                if parent.selectedLocationIDs.contains(id) {
-                    return true
-                }
-                
                 guard let tappedLocation = locationCache[id] else { return true }
                 
                 let name: String = if let title = tappedLocation.title, !title.isEmpty {
@@ -210,7 +251,8 @@ extension TrackingNaverMapView {
                     tappedLocation.address
                 }
                 
-                parent.onLocationTapped(id, name)
+                let isCurrentlySelected = parent.selectedLocationIDs.contains(id)
+                parent.onLocationTapped(id, name, isCurrentlySelected)
                 return true
             }
             
@@ -261,7 +303,7 @@ extension TrackingNaverMapView {
             case .home: .home
             case .work: .work
             case .custom: .custom
-            case .cell: .custom
+            case .cell: .cell(isVisited: true)
             }
             
             let image: UIImage = if markerType.isUserLocation {
@@ -370,7 +412,6 @@ extension TrackingNaverMapView {
 
         /// SelectedPinStyle을 이미지셋 이름 → UIImage 로 변환
         private func selectedPinUIImage(for style: SelectedPinStyle) -> UIImage? {
-            // MarkerImage.swift 의 SelectedPinStyle.pinColorAssetName 를 그대로 복붙해도 OK
             func pinColorAssetName(_ color: PinColorType) -> String {
                 switch color {
                 case .black: "black"
@@ -387,8 +428,8 @@ extension TrackingNaverMapView {
             let assetName: String = switch style {
             case .home: "pin_home_\(colorName)"
             case .work: "pin_work_\(colorName)"
+            case .cell: "pin_cell"
             case .custom: "pin_custom_\(colorName)"
-            default: "pin_custom_\(colorName)"
             }
             
             return UIImage(named: assetName)

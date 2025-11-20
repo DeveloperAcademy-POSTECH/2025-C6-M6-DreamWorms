@@ -7,6 +7,16 @@
     "%@" : {
 
     },
+    "%@ (%lld)" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ (%2$lld)"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -1318,19 +1328,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CCTV 영역 선택"
-          }
-        }
-      }
-    },
-    "trackingResult_navigationTitle" : {
-      "comment" : "추적탭_검색 이후_상단 네비게이션 타이틀",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CCTV 리스트"
+            "value" : "CCTV 캔버스"
           }
         }
       }

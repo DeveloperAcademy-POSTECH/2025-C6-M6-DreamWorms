@@ -49,15 +49,14 @@ struct TrackingFeature: DWReducer {
             return .task { [repository] in
                 do {
                     let locations = try await repository.fetchLocations(caseId: caseId)
-                    let filtered = locations.filter { [0, 1, 3].contains($0.locationType) }
-                    return .locationsLoaded(filtered)
+                    return .locationsLoaded(locations)
                 } catch {
                     return .locationsLoaded([])
                 }
             }
             
         case let .locationsLoaded(locations):
-            state.locations = locations
+            state.locations = locations.deduplicatedByCoordinate()
             state.isLoading = false
             return .none
         
@@ -71,7 +70,7 @@ struct TrackingFeature: DWReducer {
             let polygonCoordinates = makeClosedPolygonCoordinates(from: locations)
             let dto = VWorldPolygonRequestDTO(
                 coordinates: polygonCoordinates,
-                size: 100,
+                size: 1000,
                 page: 1
             )
             
@@ -120,7 +119,6 @@ private extension TrackingFeature {
     /// Location 배열로부터 VWorld POLYGON용 좌표 배열을 만듭니다.
     /// - Note: VWorld는 `POLYGON((x1 y1, x2 y2, ..., x1 y1))` 형태로 **닫힌 폴리곤**을 요구하므로 첫 번째 좌표를 마지막에 한 번 더 추가합니다.
     func makeClosedPolygonCoordinates(from locations: [Location]) -> [MapCoordinate] {
-        // 1) Location → MapCoordinate 변환
         var coords: [MapCoordinate] = locations.map {
             MapCoordinate(
                 latitude: $0.pointLatitude,
@@ -130,5 +128,38 @@ private extension TrackingFeature {
         if let first = coords.first { coords.append(first) }
         
         return coords
+    }
+}
+
+private extension Array<Location> {
+    /// pointLatitude + pointLongitude 기준 중복 제거 (Dictionary 사용 안함)
+    /// 동일 좌표가 여러 개 있는 경우 가장 최신 receivedAt Location만 남김
+    func deduplicatedByCoordinate() -> [Location] {
+        var result: [Location] = []
+        
+        for loc in self {
+            // 좌표가 없는 경우 스킵
+            guard loc.pointLatitude != 0, loc.pointLongitude != 0 else { continue }
+            
+            if let existingIndex = result.firstIndex(where: {
+                $0.pointLatitude == loc.pointLatitude &&
+                    $0.pointLongitude == loc.pointLongitude
+            }) {
+                // 이미 같은 좌표가 있을 때 → 더 최신 것으로 교체
+                let existing = result[existingIndex]
+                
+                let existingDate = existing.receivedAt ?? .distantPast
+                let newDate = loc.receivedAt ?? .distantPast
+                
+                if newDate > existingDate {
+                    result[existingIndex] = loc
+                }
+            } else {
+                // 최초 발견된 좌표 → 추가
+                result.append(loc)
+            }
+        }
+        
+        return result
     }
 }

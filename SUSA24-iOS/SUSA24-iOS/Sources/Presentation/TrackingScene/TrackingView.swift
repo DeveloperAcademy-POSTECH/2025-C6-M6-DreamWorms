@@ -11,6 +11,9 @@ struct TrackingView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
     
+    @Environment(TabBarVisibility.self)
+    private var tabBarVisibility
+    
     // MARK: - Dependencies
 
     @State var timeLineStore: DWStore<TrackingFeature>
@@ -80,6 +83,9 @@ struct TrackingView: View {
         }
         .task {
             timeLineStore.send(.onAppear(caseID))
+        }
+        .onChange(of: isResultMode) { _, isResult in
+            isResult ? tabBarVisibility.hide() : tabBarVisibility.show()
         }
     }
 }
