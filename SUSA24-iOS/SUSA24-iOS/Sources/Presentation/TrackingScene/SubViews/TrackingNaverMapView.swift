@@ -427,7 +427,7 @@ extension TrackingNaverMapView {
             let colorName = pinColorAssetName(style.pinColor)
             let assetName: String = switch style {
             case .home: "pin_home_\(colorName)"
-            case .work: "pin_work_\(colorName)"
+            case .work: "pin_crime_\(colorName)"
             case .cell: "pin_cell"
             case .custom: "pin_custom_\(colorName)"
             }

@@ -35,7 +35,7 @@ enum PinCategoryType: Int16, Codable, CaseIterable {
     var icon: Image {
         switch self {
         case .home: Image(.icnHome)
-        case .work: Image(.icnWork)
+        case .work: Image(.icnCrime)
         case .custom: Image(.icnPin)
         }
     }
