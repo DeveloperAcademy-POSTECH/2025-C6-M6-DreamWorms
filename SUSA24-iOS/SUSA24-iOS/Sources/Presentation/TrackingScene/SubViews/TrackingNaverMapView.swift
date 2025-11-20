@@ -26,7 +26,8 @@ struct TrackingNaverMapView: UIViewRepresentable {
     /// - Parameters:
     ///   - id: Location.id
     ///   - name: 슬롯에 표시할 이름 (title 없으면 address)
-    var onLocationTapped: (UUID, String) -> Void
+    ///   - isSelected: 현재 이 Location이 이미 선택된 상태인지 여부
+    var onLocationTapped: (UUID, String, Bool) -> Void
     
     // MARK: - UIViewRepresentable
     
@@ -242,12 +243,6 @@ extension TrackingNaverMapView {
             let id = location.id
             marker.touchHandler = { [weak self] _ in
                 guard let self else { return true }
-                
-                // 중복 선택 방지
-                if parent.selectedLocationIDs.contains(id) {
-                    return true
-                }
-                
                 guard let tappedLocation = locationCache[id] else { return true }
                 
                 let name: String = if let title = tappedLocation.title, !title.isEmpty {
@@ -256,7 +251,8 @@ extension TrackingNaverMapView {
                     tappedLocation.address
                 }
                 
-                parent.onLocationTapped(id, name)
+                let isCurrentlySelected = parent.selectedLocationIDs.contains(id)
+                parent.onLocationTapped(id, name, isCurrentlySelected)
                 return true
             }
             

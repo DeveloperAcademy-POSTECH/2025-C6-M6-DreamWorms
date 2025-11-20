@@ -55,8 +55,14 @@ struct TrackingSelectionScreen: View {
 // MARK: - Private Methods
 
 private extension TrackingSelectionScreen {
-    func handleLocationTapped(id: UUID, name: String) {
-        // 1) 사용자가 특정 슬롯을 선택해 둔 경우 그 슬롯에 채우기
+    func handleLocationTapped(id: UUID, name: String, isSelected: Bool) {
+        if isSelected {
+            if let index = slotLocationIds.firstIndex(where: { $0 == id }) {
+                clearSlot(at: index)
+            }
+            return
+        }
+        
         if let index = activeSlotIndex {
             slots[index] = name
             slotLocationIds[index] = id
@@ -64,7 +70,6 @@ private extension TrackingSelectionScreen {
             return
         }
         
-        // 2) 아니면 첫 번째 비어있는 슬롯에 채우기
         if let emptyIndex = slots.firstIndex(where: { $0 == nil }) {
             slots[emptyIndex] = name
             slotLocationIds[emptyIndex] = id

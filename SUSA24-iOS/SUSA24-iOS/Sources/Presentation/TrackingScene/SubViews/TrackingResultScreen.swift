@@ -146,7 +146,7 @@ struct TrackingResultMapPreview: View {
                 selectedLocationIDs: selectedLocationIDs,
                 cctvMarkers: cctvMarkers,
                 shouldFocusOnSelection: true,
-                onLocationTapped: { _, _ in }
+                onLocationTapped: { _, _, _ in }
             )
             .matchedGeometryEffect(id: "trackingMap", in: namespace)
             .frame(height: 206)
@@ -179,7 +179,7 @@ struct TrackingResultExpandedMapView: View {
                 selectedLocationIDs: selectedLocationIDs,
                 cctvMarkers: cctvMarkers,
                 shouldFocusOnSelection: false,
-                onLocationTapped: { _, _ in }
+                onLocationTapped: { _, _, _ in }
             )
             .matchedGeometryEffect(id: "trackingMap", in: namespace)
             .ignoresSafeArea()
