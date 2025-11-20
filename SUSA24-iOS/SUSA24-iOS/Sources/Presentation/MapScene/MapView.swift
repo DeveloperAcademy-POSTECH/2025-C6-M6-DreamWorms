@@ -191,73 +191,47 @@ struct MapView: View {
                 break
             }
         }
-
-        // MARK: - sheet(item:)로 통합
-
-        .overlay {
-            MapSheetContainer(
+        .sheet(isPresented: isMapPanelPresentedBinding) {
+            MapSheetPanel(
                 state: store.state,
-                send: store.send,
-                createToolbarItems: { createToolbarItems() }
+                send: store.send
             )
+            .presentationDetents(currentDetents)
+            .presentationDragIndicator(.visible)
         }
     }
+}
+
+private extension MapView {
+    /// Map 전용 패널(MapSheetPanel)을 위한 표시 여부 바인딩
+    var isMapPanelPresentedBinding: Binding<Bool> {
+        Binding(
+            get: { store.state.isAnyMapBottomPanelVisible },
+            set: { newValue in
+                if newValue == false {
+                    store.send(.setMapLayerSheetPresented(false))
+                    store.send(.hidePlaceInfo)
+                    store.send(.closePinWrite)
+                    store.send(.closeMemoEdit)
+                }
+            }
+        )
+    }
     
-    // MARK: - Private Methods
-    
-    // TODO: 로직 더 효율있게 바꿀 것. 버튼의 상태 값에 따라 구분하도록 수정해야함.
-    private func createToolbarItems() -> [DWBottomToolbarItem] {
-        if store.state.hasExistingPin {
-            // 핀이 있는 경우: pin.fill + ellipsis (메뉴)
-            [
-                .button(image: Image(systemName: "pin.fill"), action: {
-                    // 핀이 이미 있으므로 아무 동작 안함
-                }),
-                //                .iconSize(16)
-                //                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3)
-                
-                .menu(
-                    image: Image(systemName: "ellipsis"),
-                    items: [
-                        DWBottomToolbarItem.MenuItem(
-                            title: String(localized: .buttonEdit),
-                            systemImage: "pencil",
-                            role: nil,
-                            action: { store.send(.editPinTapped) }
-                        ),
-                        DWBottomToolbarItem.MenuItem(
-                            title: String(localized: .buttonDelete),
-                            systemImage: "trash",
-                            role: .destructive,
-                            action: { store.send(.showDeleteAlert) }
-                        ),
-                    ]
-                ),
-                //                .iconSize(20)
-                //                .setupPadding(top: 4, leading: 3, bottom: 4, trailing: 6)
-            ]
+    /// 현재 열려있는 패널 종류에 따라 다른 detent 세트를 리턴
+    var currentDetents: Set<PresentationDetent> {
+        let state = store.state
+        
+        if state.isMapLayerSheetPresented {
+            return [.height(410)]
+        } else if state.isPlaceInfoSheetPresented {
+            return [state.hasExistingPin ? .height(416) : .height(294)]
+        } else if state.isPinWritePresented {
+            return [.height(620)]
+        } else if state.isMemoEditPresented {
+            return [.large]
         } else {
-            // 핀이 없는 경우: pin만 표시
-            [
-                .button(image: Image(.pin), action: {
-                    store.send(.addPinTapped)
-                }),
-                //                .iconSize(20)
-                //                .setupPadding(top: 4, leading: 6, bottom: 4, trailing: 3)
-                
-//                .menu(
-//                    image: Image(.ellipsis),
-//                    items: [
-//                        DWBottomToolbarItem.MenuItem(
-//                            title: String(localized: .buttonShare),
-//                            systemImage: "square.and.arrow.up",
-//                            role: nil,
-//                            action: {}
-//                        ),
-//                    ]
-//                )
-//                .iconSize(16),
-            ]
+            return [.medium]
         }
     }
 }
