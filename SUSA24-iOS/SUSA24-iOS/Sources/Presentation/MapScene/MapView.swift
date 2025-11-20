@@ -198,6 +198,8 @@ struct MapView: View {
             )
             .presentationDetents(currentDetents)
             .presentationDragIndicator(.visible)
+            .presentationDragIndicator(.hidden)
+            .presentationBackgroundInteraction(store.state.isPlaceInfoSheetPresented ? .enabled : .disabled)
         }
     }
 }
