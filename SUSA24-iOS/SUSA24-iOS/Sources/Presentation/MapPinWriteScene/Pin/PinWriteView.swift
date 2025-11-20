@@ -20,6 +20,7 @@ struct PinWriteView: View {
     @State private var pinName: String = ""
     @State private var selectedColor: PinColorType = .black
     @State private var selectedCategory: PinCategoryType = .home
+    @FocusState private var isPinNameFocused: Bool
     
     /// 유효성 검사: 한글자 이상, 20자 이하, 숫자/기호(이모지 제외) 불가
     private var isValidPinName: Bool {
@@ -53,7 +54,8 @@ struct PinWriteView: View {
                 // 핀 이름 입력
                 PinNameInputSection(
                     pinName: $pinName,
-                    isValid: isValidPinName
+                    isValid: isValidPinName,
+                    isFocused: $isPinNameFocused
                 )
                 .padding(.bottom, 24)
                 
@@ -88,6 +90,7 @@ struct PinWriteView: View {
                 selectedColor = PinColorType(rawValue: location.colorType) ?? .black
                 selectedCategory = PinCategoryType(rawValue: location.locationType) ?? .home
             }
+            isPinNameFocused = true
         }
     }
     
@@ -126,6 +129,7 @@ struct PinWriteView: View {
 struct PinNameInputSection: View {
     @Binding var pinName: String
     let isValid: Bool
+    let isFocused: FocusState<Bool>.Binding
     
     var characterCount: Int {
         pinName.count
@@ -140,6 +144,7 @@ struct PinNameInputSection: View {
                     .font(.bodyMedium14)
                     .foregroundStyle(.labelNormal)
                     .padding(.leading, 8)
+                    .focused(isFocused)
                     .onChange(of: pinName) { _, newValue in
                         pinName = validateInput(newValue)
                     }
