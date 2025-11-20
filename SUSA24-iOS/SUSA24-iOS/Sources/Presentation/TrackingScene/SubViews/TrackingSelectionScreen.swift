@@ -30,6 +30,7 @@ struct TrackingSelectionScreen: View {
                 locations: locations,
                 selectedLocationIDs: selectedLocationIDSet,
                 cctvMarkers: [],
+                shouldFocusOnSelection: false,
                 onLocationTapped: handleLocationTapped
             )
             .matchedGeometryEffect(id: "trackingMap", in: namespace)
