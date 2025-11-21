@@ -43,7 +43,7 @@ enum MapConstants {
         red: 55 / 255,
         green: 110 / 255,
         blue: 228 / 255,
-        alpha: 0.2
+        alpha: 0.08
     )
     
     // MARK: - Content Inset
