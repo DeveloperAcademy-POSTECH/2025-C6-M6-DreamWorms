@@ -323,4 +323,8 @@ struct MockCaseRepository: CaseRepositoryProtocol {
     func updateCase(model _: Case, imageData _: Data?, phoneNumber _: String?) async throws {}
 
     func findCase(byCaseNumber _: String) async throws -> UUID? { nil }
+    
+    
+    /// Test Code For PhoneNumber
+    func findCaseTest(byCasePhoneNumber phoneNumber: String) async throws -> UUID? { nil }
 }
