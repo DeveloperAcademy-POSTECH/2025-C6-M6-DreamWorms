@@ -18,14 +18,14 @@ struct ReceiveMessageIntent: AppIntent {
     var messageBody: String
     
     @Parameter(title: "피의자 추적 전화번호")
-    var caseNumber: String
+    var senderPhoneNumber: String
     
     static var parameterSummary: some ParameterSummary {
-        Summary("본문: \(\.$messageBody), 사건번호: \(\.$caseNumber)")
+        Summary("본문: \(\.$messageBody), 피의자 추적 전화번호: \(\.$senderPhoneNumber)")
     }
     
     @MainActor
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         print("========================================")
         print("**** [AppIntent] 기지국 위치정보 저장 시작")
 
@@ -33,29 +33,36 @@ struct ReceiveMessageIntent: AppIntent {
         let context = PersistenceController.shared.container.viewContext
         let caseRepository = CaseRepository(context: context)
         let locationRepository = LocationRepository(context: context)
+            
+        // 1. 정규화 시키기
+        let normalizePhoneNumber = senderPhoneNumber
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "+82", with: "0")
 
-        // 1. 사건번호로 케이스 찾기
-        print("🔍 사건번호: \(caseNumber)")
+        print("🔍 전화번호: \(senderPhoneNumber)")
+        print(" 정규화된 휴대전화 번호: \(normalizePhoneNumber)")
 
-        guard let caseID = try await caseRepository.findCase(byCaseNumber: caseNumber) else {
-            print(" X [AppIntent] 사건을 찾을 수 없습니다: \(caseNumber)")
+        // 2. 전화번호로 케이스 찾기
+        guard let caseID = try await caseRepository.findCaseTest(byCasePhoneNumber: normalizePhoneNumber) else {
+            print(" X [AppIntent] 해당 전화번호로 등록된 사건을 찾을수 없습니다.")
             print("========================================\n")
-            return .result()
+            return .result(dialog: "등록되지 않은 전화번호입니다.")
         }
 
         print("***** 매칭된 케이스 ID: \(caseID)")
 
-        // 2. 주소 추출
+        // 3. 주소 추출
         guard let address = MessageParser.extractAddress(from: messageBody) else {
             print(" X [AppIntent] 주소를 추출할 수 없습니다.")
             print("   본문: \(messageBody)")
             print("========================================\n")
-            return .result()
+            return .result(dialog: "문자에서 주소를 추출할 수 없습니다.")
         }
 
         print(" *** 추출된 주소: \(address)")
 
-        // 3. 좌표 변환 및 저장
+        // 4. 좌표 변환 및 저장
         do {
             let geocodeResult = try await NaverGeocodeAPIService.shared.geocode(address: address)
 
@@ -64,7 +71,7 @@ struct ReceiveMessageIntent: AppIntent {
             else {
                 print(" X [AppIntent] 좌표 변환 실패")
                 print("========================================\n")
-                return .result()
+                return .result(dialog: "좌표 변환 실패")
             }
 
             print("***  좌표: (\(latitude), \(longitude))")
@@ -79,12 +86,13 @@ struct ReceiveMessageIntent: AppIntent {
 
             print("*** [AppIntent] 위치 정보 저장 완료")
             print("========================================\n")
+            
+            return .result(dialog: "위치 저장 완료.")
 
         } catch {
             print(" X [AppIntent] 오류 발생: \(error)")
             print("========================================\n")
+            return .result(dialog: "위치 저장 실패")
         }
-
-        return .result()
     }
 }
