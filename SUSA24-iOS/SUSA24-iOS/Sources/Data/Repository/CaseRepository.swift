@@ -295,7 +295,7 @@ struct CaseRepository: CaseRepositoryProtocol {
     /// - Note: Suspectentity -> CaseEntity 로 추적합니다.
     func findCaseTest(byCasePhoneNumber phoneNumber: String) async throws -> UUID? {
         try await context.perform {
-            let request = NSFecthRequest<SuspectEntity>(entityName: "SuspectEntity")
+            let request = NSFetchRequest<SuspectEntity>(entityName: "SuspectEntity")
             request.predicate = NSPredicate(format: "phoneNumber == %@", phoneNumber)
             request.fetchLimit = 1
             
@@ -324,7 +324,6 @@ struct MockCaseRepository: CaseRepositoryProtocol {
 
     func findCase(byCaseNumber _: String) async throws -> UUID? { nil }
     
-    
     /// Test Code For PhoneNumber
-    func findCaseTest(byCasePhoneNumber phoneNumber: String) async throws -> UUID? { nil }
+    func findCaseTest(byCasePhoneNumber _: String) async throws -> UUID? { nil }
 }
