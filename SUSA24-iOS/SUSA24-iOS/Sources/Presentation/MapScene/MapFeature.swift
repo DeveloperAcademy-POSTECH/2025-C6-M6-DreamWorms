@@ -113,8 +113,6 @@ struct MapFeature: DWReducer {
         
         // MARK: - Pin Add/Edit
 
-        var isDeleteAlertPresented: Bool = false
-        /// 핀 추가/수정 화면 표시 여부
         var isPinWritePresented: Bool = false
         /// 수정 모드 여부 (true: 수정, false: 추가)
         var isEditMode: Bool = false
@@ -223,13 +221,7 @@ struct MapFeature: DWReducer {
         /// 핀 수정 버튼 탭
         case editPinTapped
         
-        /// 핀 삭제 버튼 탭
-        case deletePinTapped
-        
-        /// 삭제 Alert
-        case showDeleteAlert
-        case hideDeleteAlert
-        
+        /// Delete Alert 관련 액션
         case confirmDeletePin
         case deletePinCompleted
         
@@ -539,24 +531,22 @@ struct MapFeature: DWReducer {
             
             state.isEditMode = false
             state.existingLocation = nil
+
+            state.isMapLayerSheetPresented = false
+            state.isPlaceInfoSheetPresented = false
+            state.isMemoEditPresented = false
+
             state.isPinWritePresented = true
+            
             return .none
             
         case .editPinTapped:
+            state.isMapLayerSheetPresented = false
+            state.isPlaceInfoSheetPresented = false
+            state.isMemoEditPresented = false
+
             state.isEditMode = true
             state.isPinWritePresented = true
-            return .none
-            
-        // TODO: DWAlert 연동
-        case .deletePinTapped:
-            return .send(.confirmDeletePin)
-            
-        case .showDeleteAlert:
-            state.isDeleteAlertPresented = true
-            return .none
-
-        case .hideDeleteAlert:
-            state.isDeleteAlertPresented = false
             return .none
 
         case .confirmDeletePin:
@@ -573,8 +563,6 @@ struct MapFeature: DWReducer {
 
         case .deletePinCompleted:
             guard let deleteId = state.existingLocation?.id else { return .none }
-            // 새 배열로 재할당하여 SwiftUI 변경 감지 보장
-            // watchLocations가 나중에 MainTabFeature에 전달하지만, 즉시 반영을 위해 여기서도 업데이트
             state.locations = state.locations.filter { $0.id != deleteId }
             state.existingLocation = nil
             state.isPlaceInfoSheetPresented = false
@@ -600,15 +588,21 @@ struct MapFeature: DWReducer {
             state.existingLocation = location
             updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
+            if let info = state.selectedPlaceInfo {
+                return .send(.showPlaceInfo(info))
+            }
             return .none
             
         case .closePinWrite:
             state.isPinWritePresented = false
+            if let info = state.selectedPlaceInfo {
+                return .send(.showPlaceInfo(info))
+            }
             return .none
-            
-            // MARK: - Memo Actions
-            
+                        
         case .memoButtonTapped:
+            state.isMapLayerSheetPresented = false
+            state.isPinWritePresented = false
             state.isPlaceInfoSheetPresented = false
             state.isMemoEditPresented = true
             return .none
@@ -663,6 +657,19 @@ struct MapFeature: DWReducer {
                 return .showPlaceInfo(info)
             }
         }
+    }
+}
+
+// MARK: - Extensions (Computed Property)
+
+extension MapFeature.State {
+    /// 맵 탭일 때, 타임라인 대신 MapBottomPanel을 보여줘야 하는지 여부
+    /// MapView에서 사용하는 패널(레이어, 장소정보, 핀 작성, 메모 작성) 중 하나라도 열려 있으면 true
+    var isAnyMapBottomPanelVisible: Bool {
+        isMapLayerSheetPresented
+            || isPlaceInfoSheetPresented
+            || isPinWritePresented
+            || isMemoEditPresented
     }
 }
 

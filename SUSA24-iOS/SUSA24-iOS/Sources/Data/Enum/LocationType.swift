@@ -14,7 +14,7 @@ enum LocationType: Int16, Codable {
     var icon: Image {
         switch self {
         case .home: Image(.icnHome)
-        case .work: Image(.icnWork)
+        case .work: Image(.icnCrime)
         case .cell: Image(.icnCellStationFilter)
         case .custom: Image(.icnPin)
         }

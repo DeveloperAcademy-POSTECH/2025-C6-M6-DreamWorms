@@ -41,15 +41,11 @@ enum VisitFrequencyCalculator {
         _ locations: [Location],
         precision: Int = 6
     ) -> [String: (latitude: Double, longitude: Double, count: Int)] {
-        print("   🟡 [VisitFrequencyCalculator] 방문빈도 계산 시작")
-        
         // 1. 기지국만 필터링 후 시간순 정렬
         let cellLocations = locations
             .filter { $0.locationType == 2 }
             .sorted { ($0.receivedAt ?? Date.distantPast) < ($1.receivedAt ?? Date.distantPast) }
-        
-        print("      📌 기지국 데이터 개수: \(cellLocations.count)")
-        
+                
         // 2. 연속 방문 감지
         var groups: [String: (latitude: Double, longitude: Double, count: Int)] = [:]
         var lastKey: String?
@@ -66,7 +62,6 @@ enum VisitFrequencyCalculator {
             // 핵심: 이전 위치와 다를 때만 카운트 증가
             if key != lastKey {
                 if lastKey != nil {
-                    print("      🔄 위치 변경: \(consecutiveCount)개 연속 → 새 위치")
                     visitGroupCount += 1
                 }
                 
@@ -79,10 +74,6 @@ enum VisitFrequencyCalculator {
                 consecutiveCount += 1
             }
         }
-        
-        print("      ✅ 총 \(visitGroupCount)개의 방문 그룹 감지")
-        print("      ✅ 고유 좌표: \(groups.count)개")
-        print("   🟡 [VisitFrequencyCalculator] 방문빈도 계산 완료")
         
         return groups
     }

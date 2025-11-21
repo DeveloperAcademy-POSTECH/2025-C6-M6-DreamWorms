@@ -109,7 +109,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             store.send(.onAppear)
         }
         .onChange(of: store.state.caseInfo) { _, newCaseInfo in
-            print("📍 [MainTabView] caseInfo changed: \(newCaseInfo?.name ?? "nil"), locations count: \(store.state.locations.count)")
             guard let caseInfo = newCaseInfo else { return }
             // caseInfo 로드 시점에 locations도 함께 업데이트 (초기 바인딩 포함)
             timeLineStore.send(.updateData(
@@ -118,7 +117,6 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             ))
         }
         .onChange(of: store.state.locations) { _, newLocations in
-            print("📍 [MainTabView] locations changed: count=\(newLocations.count), caseInfo: \(store.state.caseInfo?.name ?? "nil")")
             guard let caseInfo = store.state.caseInfo else { return }
             // Timeline에 전달
             timeLineStore.send(.updateData(

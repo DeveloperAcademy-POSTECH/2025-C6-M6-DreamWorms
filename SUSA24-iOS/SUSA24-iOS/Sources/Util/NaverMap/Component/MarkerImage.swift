@@ -154,7 +154,7 @@ extension MarkerImage {
         iconColor: Color = .white
     ) -> MarkerImage {
         MarkerImage(
-            icon: Image(.icnWork),
+            icon: Image(.icnCrime),
             borderColor: borderColor,
             backgroundColor: backgroundColor,
             iconColor: iconColor
@@ -292,7 +292,7 @@ enum SelectedPinStyle: Hashable, Sendable {
         case .home:
             Image(.icnHome)
         case .work:
-            Image(.icnWork)
+            Image(.icnCrime)
         case .custom:
             Image(.icnPin)
         case .cell:
@@ -322,7 +322,7 @@ extension SelectedPinStyle {
         let colorName = Self.pinColorAssetName(pinColor)
         let assetName: String = switch self {
         case .home: "pin_home_\(colorName)"
-        case .work: "pin_work_\(colorName)"
+        case .work: "pin_crime_\(colorName)"
         case .custom: "pin_custom_\(colorName)"
         case .cell: "pin_cell" // 셀은 색상 이름 없이 고정 에셋 사용
         }
@@ -337,7 +337,7 @@ extension SelectedPinStyle {
     
     /// 선택된 직장 핀 이미지 (이미지셋 사용)
     static func selectedWorkPin(color: PinColorType) -> Image {
-        let assetName = "pin_work_\(pinColorAssetName(color))"
+        let assetName = "pin_crime_\(pinColorAssetName(color))"
         return Image(assetName)
     }
     
@@ -362,7 +362,7 @@ struct SelectedPinImage: View {
     private let iconSize: CGFloat = 20
     
     var body: some View {
-        // 이미지셋을 직접 사용 (pin_home, pin_work, pin_custom, pin_cell)
+        // 이미지셋을 직접 사용 (pin_home, pin_crime, pin_custom, pin_cell)
         style.pinImage
             .resizable()
             .scaledToFit()
