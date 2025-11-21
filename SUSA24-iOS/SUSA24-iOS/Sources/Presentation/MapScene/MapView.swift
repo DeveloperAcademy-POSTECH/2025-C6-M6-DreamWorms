@@ -79,7 +79,8 @@ struct MapView: View {
                 onUserLocationMarkerTapped: { locationId in
                     store.send(.userLocationMarkerTapped(locationId))
                 },
-                isTimelineSheetMinimized: store.state.isTimelineSheetMinimized,
+                isTimelineSheetPresented: store.state.isTimelineSheetPresented,
+                isPlaceInfoSheetPresented: store.state.isPlaceInfoSheetPresented,
                 onMapTapped: { latlng in
                     // MapFeature에서 타임라인 시트 상태를 체크하여 처리
                     store.send(.mapTapped(latlng))
@@ -96,6 +97,7 @@ struct MapView: View {
                 cellCoverageRange: store.state.mapLayerCoverageRange,
                 cctvMarkers: store.state.cctvMarkers,
                 isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
+                idlePinCoordinate: store.state.idlePinCoordinate,
                 infrastructureManager: infrastructureManager,
                 caseLocationMarkerManager: caseLocationMarkerManager
             )
@@ -212,7 +214,7 @@ private extension MapView {
             set: { newValue in
                 if newValue == false {
                     store.send(.setMapLayerSheetPresented(false))
-                    store.send(.hidePlaceInfo)
+                    store.send(.hidePlaceInfo())
                     store.send(.closePinWrite)
                     store.send(.closeMemoEdit)
                 }
