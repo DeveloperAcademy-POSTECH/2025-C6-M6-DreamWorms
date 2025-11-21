@@ -16,10 +16,10 @@ struct ReceiveMessageIntent: AppIntent {
 
     @Parameter(title: "메시지 본문")
     var messageBody: String
-
-    @Parameter(title: "사건번호")
+    
+    @Parameter(title: "피의자 추적 전화번호")
     var caseNumber: String
-
+    
     static var parameterSummary: some ParameterSummary {
         Summary("본문: \(\.$messageBody), 사건번호: \(\.$caseNumber)")
     }

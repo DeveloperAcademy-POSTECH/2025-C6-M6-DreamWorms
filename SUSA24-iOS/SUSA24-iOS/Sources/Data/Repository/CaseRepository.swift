@@ -39,6 +39,13 @@ protocol CaseRepositoryProtocol: Sendable {
     /// - Returns: 매칭되는 케이스 ID. 없으면 nil
     /// - Throws: CoreData 조회 에러
     func findCase(byCaseNumber caseNumber: String) async throws -> UUID?
+    
+    /// Test 코드
+    /// 휴대폰 전화번호로 케이스를 찾습니다.
+    /// - Parameter casePhoneNumber: 용의자 추적 전화번호 ( SuspectEntity.phoneNumber)
+    /// - Returns: 매칭되는 케이스ID. 없으면 nil
+    /// - Throws: CoreData 조회 에러
+    func findCaseTest(byCasePhoneNumber phoneNumber: String) async throws -> UUID?
 }
 
 // MARK: - Repository Implementation
@@ -276,6 +283,24 @@ struct CaseRepository: CaseRepositoryProtocol {
 
             let results = try context.fetch(request)
             return results.first?.id
+        }
+    }
+    
+    /// 휴대전화 번호로 케이스ID를 찾습니다.
+    /// Suspect의 phoneNumber: 용의자 휴대전화번호
+    /// - Parameter phoneNumber: 용의자 휴대전화번호
+    /// - Returns: 매칭되는 케이스 ID , 없으면 nil
+    /// - Throws: CoreData 조회 에러
+    /// - Complexity: O(N) where n is the number of suspects
+    /// - Note: Suspectentity -> CaseEntity 로 추적합니다.
+    func findCaseTest(byCasePhoneNumber phoneNumber: String) async throws -> UUID? {
+        try await context.perform {
+            let request = NSFecthRequest<SuspectEntity>(entityName: "SuspectEntity")
+            request.predicate = NSPredicate(format: "phoneNumber == %@", phoneNumber)
+            request.fetchLimit = 1
+            
+            let results = try context.fetch(request)
+            return results.first?.relateCase?.id // Optional Chaining
         }
     }
 }
