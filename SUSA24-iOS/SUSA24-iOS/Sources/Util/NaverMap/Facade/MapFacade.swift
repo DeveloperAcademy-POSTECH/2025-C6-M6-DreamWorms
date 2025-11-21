@@ -290,7 +290,7 @@ private extension MapFacade {
         lastIdlePinCoordinate = idlePinCoordinate
         if let coordinate = idlePinCoordinate {
             Task { @MainActor in
-                await caseLocationMarkerManager.showIdlePin(at: coordinate, on: mapView)
+                await caseLocationMarkerManager.makeIdlePin(at: coordinate, on: mapView)
             }
         } else {
             Task { @MainActor in
