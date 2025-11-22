@@ -115,6 +115,10 @@ struct MainTabFeature: DWReducer {
             return .none
 
         case let .selectTab(tab):
+            // 같은 탭을 다시 탭한 경우 (맵 탭만)
+            if state.selectedTab == tab, tab == .map {
+                NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
+            }
             state.selectedTab = tab
             return .none
 
