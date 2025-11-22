@@ -32,7 +32,7 @@ struct DashboardFeature: DWReducer {
         var topVisitDurationLocations: [StayAddress] = []
         
         /// 상단 TOP3 방문 빈도 기지국 카드 데이터
-        var visitFrequencyLocations: [StayAddress] = []
+        var topVisitFrequencyLocations: [StayAddress] = []
         
         /// 시간대별 기지국 차트 카드 데이터
         var cellCharts: [CellChartData] = []
@@ -95,8 +95,17 @@ struct DashboardFeature: DWReducer {
         switch action {
         case let .setTab(tab):
             state.tab = tab
-            return .none
+            guard state.hasLoaded, !state.locations.isEmpty else { return .none }
             
+            switch tab {
+            case .visitDuration:
+                guard state.visitDurationSummary.isEmpty else { return .none }
+                return .task { .analyzeWithFoundationModel }
+            case .visitFrequency:
+                guard state.visitFrequencySummary.isEmpty else { return .none }
+                return .task { .analyzeWithFoundationModel }
+            }
+
         case let .onAppear(caseID):
             if state.caseID == caseID, state.hasLoaded { return .none }
             
@@ -124,9 +133,15 @@ struct DashboardFeature: DWReducer {
         case let .setInitialData(locations, topDuration, topFrequency, charts):
             state.locations = locations
             state.topVisitDurationLocations = topDuration
-            state.visitFrequencyLocations = topFrequency
+            state.topVisitFrequencyLocations = topFrequency
             state.cellCharts = charts
             state.hasLoaded = true
+            
+            state.isAnalyzingWithFM = false
+            state.visitDurationSummary = ""
+            state.visitFrequencySummary = ""
+
+            guard !locations.isEmpty else { return .none }
             return .task { .analyzeWithFoundationModel }
             
         case let .setChartWeekday(id, weekday):
@@ -138,57 +153,23 @@ struct DashboardFeature: DWReducer {
             
         case .analyzeWithFoundationModel:
             guard !state.locations.isEmpty else { return .none }
-            
-            state.isAnalyzingWithFM = true
-            state.visitDurationSummary = "체류시간을 분석하고 있어요..."
-            state.visitFrequencySummary = "방문 빈도를 분석하고 있어요..."
-            
-            let locations = state.locations
-            let topDuration = state.topVisitDurationLocations
-            let topFrequency = state.visitFrequencyLocations
-            
-            return DWEffect { [analysisService] downstream in
-                do {
-                    let stream = await analysisService.streamDashboardHeaderAnalysis(
-                        locations: locations,
-                        topDuration: topDuration,
-                        topFrequency: topFrequency
-                    )
-                    
-                    var lastPartialDuration: String?
-                    var lastPartialFrequency: String?
-                    
-                    for try await partial in stream {
-                        if let partialDuration = partial.visitDurationSummary {
-                            lastPartialDuration = partialDuration
-                        }
-                        if let partialFrequency = partial.visitFrequencySummary {
-                            lastPartialFrequency = partialFrequency
-                        }
-                        
-                        downstream(
-                            .updatePartialAnalysis(
-                                visitDurationSummary: partial.visitDurationSummary,
-                                visitFrequencySummary: partial.visitFrequencySummary
-                            )
-                        )
-                    }
-                    
-                    if let finalDuration = lastPartialDuration,
-                       let finalFrequency = lastPartialFrequency
-                    {
-                        downstream(
-                            .setAnalysisResult(
-                                visitDurationSummary: finalDuration,
-                                visitFrequencySummary: finalFrequency
-                            )
-                        )
-                    } else {
-                        downstream(.analysisFailed)
-                    }
-                } catch {
-                    downstream(.analysisFailed)
-                }
+            switch state.tab {
+            case .visitDuration:
+                state.isAnalyzingWithFM = true
+                state.visitDurationSummary = "체류시간을 분석하고 있어요..."
+                return makeVisitDurationEffect(
+                    locations: state.locations,
+                    topDuration: state.topVisitDurationLocations,
+                    currentFrequencySummary: state.visitFrequencySummary
+                )
+            case .visitFrequency:
+                state.isAnalyzingWithFM = true
+                state.visitFrequencySummary = "방문 빈도를 분석하고 있어요..."
+                return makeVisitFrequencyEffect(
+                    locations: state.locations,
+                    topFrequency: state.topVisitFrequencyLocations,
+                    currentDurationSummary: state.visitDurationSummary
+                )
             }
             
         case let .updatePartialAnalysis(visitDurationSummary, visitFrequencySummary):
@@ -215,7 +196,93 @@ struct DashboardFeature: DWReducer {
 
 // MARK: - Private Extensions
 
-private extension DashboardFeature {}
+private extension DashboardFeature {
+    /// 체류시간 탭용 Foundation Model 스트림 Effect
+    func makeVisitDurationEffect(
+        locations: [Location],
+        topDuration: [StayAddress],
+        currentFrequencySummary: String
+    ) -> DWEffect<Action> {
+        DWEffect { [analysisService] downstream in
+            do {
+                let stream = await analysisService.streamVisitDurationAnalysis(
+                    locations: locations,
+                    topDuration: topDuration
+                )
+                
+                var lastPartialDuration: String?
+                
+                for try await partial in stream {
+                    let text = partial.title
+                    lastPartialDuration = text
+                    
+                    downstream(
+                        .updatePartialAnalysis(
+                            visitDurationSummary: text,
+                            visitFrequencySummary: nil
+                        )
+                    )
+                }
+                
+                if let lastPartialDuration {
+                    downstream(
+                        .setAnalysisResult(
+                            visitDurationSummary: lastPartialDuration,
+                            visitFrequencySummary: currentFrequencySummary
+                        )
+                    )
+                } else {
+                    downstream(.analysisFailed)
+                }
+            } catch {
+                downstream(.analysisFailed)
+            }
+        }
+    }
+    
+    /// 방문빈도 탭용 Foundation Model 스트림 Effect
+    func makeVisitFrequencyEffect(
+        locations: [Location],
+        topFrequency: [StayAddress],
+        currentDurationSummary: String
+    ) -> DWEffect<Action> {
+        DWEffect { [analysisService] downstream in
+            do {
+                let stream = await analysisService.streamVisitFrequencyAnalysis(
+                    locations: locations,
+                    topFrequency: topFrequency
+                )
+                
+                var lastPartialFrequency: String?
+                
+                for try await partial in stream {
+                    let text = partial.title
+                    lastPartialFrequency = text
+                    
+                    downstream(
+                        .updatePartialAnalysis(
+                            visitDurationSummary: nil,
+                            visitFrequencySummary: text
+                        )
+                    )
+                }
+                
+                if let lastPartialFrequency {
+                    downstream(
+                        .setAnalysisResult(
+                            visitDurationSummary: currentDurationSummary,
+                            visitFrequencySummary: lastPartialFrequency
+                        )
+                    )
+                } else {
+                    downstream(.analysisFailed)
+                }
+            } catch {
+                downstream(.analysisFailed)
+            }
+        }
+    }
+}
 
 private extension Array<Location> {
     /// 기지국(LocationType == 2) 데이터만을 대상으로,
