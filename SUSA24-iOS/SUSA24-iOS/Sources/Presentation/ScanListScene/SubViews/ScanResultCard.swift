@@ -41,7 +41,7 @@ struct ScanResultCard: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     // 주소 표시 영역
                     VStack(alignment: .leading, spacing: 6) {
@@ -66,14 +66,18 @@ struct ScanResultCard: View {
                                 .padding(.bottom, 4)
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         
                         // 구주소 표시 (토글 시)
                         if hasBothAddresses, isShowingJibunAddress {
-                            Text(jibunAddress)
-                                .font(.captionRegular12)
-                                .foregroundStyle(.labelAlternative)
-                                .lineLimit(2)
-                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                            VStack {
+                                Text(jibunAddress)
+                                    .font(.captionRegular12)
+                                    .foregroundStyle(.labelAlternative)
+                                    .lineLimit(2)
+                                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                            }
+                            .frame(maxHeight: .infinity, alignment: .center)
                         }
                     }
                     
@@ -81,8 +85,7 @@ struct ScanResultCard: View {
                         .font(.captionRegular12)
                         .foregroundStyle(.labelAlternative)
                 }
-
-                Spacer()
+                .frame(maxWidth: .infinity)
 
                 Button(action: onToggleSelection) {
                     Image(.checkmarkFill)
@@ -95,10 +98,10 @@ struct ScanResultCard: View {
             .padding(.bottom, 12)
 
             if isSelected {
-                VStack(spacing: 8) {
-                    Divider()
-                        .background(.labelCoolNormal)
-                        .padding(.bottom, 2)
+                VStack(spacing: 12) {
+                    Rectangle()
+                        .fill(.alternative)
+                        .frame(height: 2)
 
                     HStack(spacing: 12) {
                         ForEach(PinCategoryType.allCases, id: \.self) { type in
@@ -123,7 +126,7 @@ struct ScanResultCard: View {
         }
         .padding(.horizontal, 20)
         .background(
-            isSelected ? .primaryLight1 : .alternative
+            isSelected ? .primaryLight2 : .alternative
         )
         .cornerRadius(18)
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: isSelected)
@@ -132,41 +135,51 @@ struct ScanResultCard: View {
 
 // MARK: - Preview
 
-#Preview {
-    VStack(spacing: 12) {
-        // 신주소만 있는 카드
-        ScanResultCard(
-            roadAddress: "부산광역시 북구 화명대로 7",
-            jibunAddress: "",
-            duplicateCount: 38,
-            isSelected: false,
-            selectedCategory: nil,
-            onToggleSelection: {},
-            onCategorySelect: { _ in }
-        )
-
-        // 구주소만 있는 카드
-        ScanResultCard(
-            roadAddress: "",
-            jibunAddress: "부산 강서구 대저1동 123-45",
-            duplicateCount: 28,
-            isSelected: false,
-            selectedCategory: nil,
-            onToggleSelection: {},
-            onCategorySelect: { _ in }
-        )
-        
-        // 신주소/구주소 둘 다 있는 카드
-        ScanResultCard(
-            roadAddress: "부산광역시 강서구 공항로 두 줄이 넘어가는 긴 주소 108",
-            jibunAddress: "부산 강서구 대저2동 2350",
-            duplicateCount: 18,
-            isSelected: true,
-            selectedCategory: .custom,
-            onToggleSelection: {},
-            onCategorySelect: { _ in }
-        )
-    }
-    .padding(16)
-    .background(Color(.systemGray6))
-}
+// #Preview {
+//    VStack(spacing: 12) {
+//        // 신주소만 있는 카드
+//        ScanResultCard(
+//            roadAddress: "부산광역시 북구 화명대로 7",
+//            jibunAddress: "sdafasdfa",
+//            duplicateCount: 38,
+//            isSelected: false,
+//            selectedCategory: nil,
+//            onToggleSelection: {},
+//            onCategorySelect: { _ in }
+//        )
+//
+//        ScanResultCard(
+//            roadAddress: "부산광역시 강서구 공항로 두 줄이 ㅎㅎ 넘어가는 긴 주소 108",
+//            jibunAddress: "asdfasdfa",
+//            duplicateCount: 38,
+//            isSelected: false,
+//            selectedCategory: nil,
+//            onToggleSelection: {},
+//            onCategorySelect: { _ in }
+//        )
+//
+//        // 구주소만 있는 카드
+//        ScanResultCard(
+//            roadAddress: "",
+//            jibunAddress: "부산 강서구 대저1동 123-45",
+//            duplicateCount: 28,
+//            isSelected: true,
+//            selectedCategory: nil,
+//            onToggleSelection: {},
+//            onCategorySelect: { _ in }
+//        )
+//
+//        // 신주소/구주소 둘 다 있는 카드
+//        ScanResultCard(
+//            roadAddress: "부산광역시 강서구 공항로 두 줄이 ㅎㅎ 넘어가는 긴 주소 108",
+//            jibunAddress: "부산 강서구 대저2동 2350",
+//            duplicateCount: 18,
+//            isSelected: true,
+//            selectedCategory: .custom,
+//            onToggleSelection: {},
+//            onCategorySelect: { _ in }
+//        )
+//    }
+//    .padding(16)
+//    .background(Color(.systemGray6))
+// }
