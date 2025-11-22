@@ -377,15 +377,20 @@ struct MapFeature: DWReducer {
             // Idle 핀 제거 (마커를 탭했으므로)
             state.idlePinCoordinate = nil
             
+            // 카메라 이동
+            let coordinate = MapCoordinate(
+                latitude: location.pointLatitude,
+                longitude: location.pointLongitude
+            )
+            state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
+            
             // PlaceInfoSheet 표시 시 타임라인 시트를 최소화
             NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
             
             state.existingLocation = location
             state.isEditMode = false
-            state.selectedCoordinate = MapCoordinate(
-                latitude: location.pointLatitude,
-                longitude: location.pointLongitude
-            )
+            state.selectedCoordinate = coordinate
             
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
@@ -497,6 +502,7 @@ struct MapFeature: DWReducer {
         case let .moveToLocation(coordinate):
             // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
             state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none

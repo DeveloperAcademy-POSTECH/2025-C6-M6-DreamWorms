@@ -74,6 +74,15 @@ struct MapView: View {
                     store.send(.clearFocusMyLocationFlag)
                 },
                 onCellMarkerTapped: { cellKey, title in
+                    // cellKey 파싱: "latitude_longitude" 형식 → MapCoordinate
+                    let components = cellKey.split(separator: "_")
+                    if components.count == 2,
+                       let lat = Double(components[0]),
+                       let lng = Double(components[1])
+                    {
+                        let coordinate = MapCoordinate(latitude: lat, longitude: lng)
+                        store.send(.moveToLocation(coordinate))
+                    }
                     dispatcher.send(.focusCellTimeline(cellKey: cellKey, title: title))
                 },
                 onUserLocationMarkerTapped: { locationId in

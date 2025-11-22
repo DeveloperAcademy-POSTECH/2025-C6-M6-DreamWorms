@@ -41,7 +41,9 @@ final class MapCameraController {
     func moveCamera(to coordinate: MapCoordinate, animated: Bool? = nil, duration: Double? = nil) {
         guard let mapView else { return }
         let target = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: defaultZoomLevel))
+        // 현재 줌 레벨 유지 (줌인 방지)
+        let currentZoomLevel = mapView.zoomLevel
+        let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: currentZoomLevel))
         if let animated, animated, let duration {
             cameraUpdate.animation = .easeOut
             cameraUpdate.animationDuration = duration
