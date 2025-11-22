@@ -161,7 +161,7 @@ struct MemoButton: View {
                             .font(.titleSemiBold16)
                             .foregroundStyle(.labelNormal)
                         
-                        Text(.memoWriteEmpty)
+                        Text(.memoWritePlaceHolder)
                             .font(.bodyRegular14)
                             .foregroundStyle(.labelAlternative)
                     }

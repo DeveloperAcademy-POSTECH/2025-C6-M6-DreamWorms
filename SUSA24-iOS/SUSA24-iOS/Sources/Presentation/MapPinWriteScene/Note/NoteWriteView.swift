@@ -53,6 +53,7 @@ struct NoteWriteView: View {
                 ZStack(alignment: .topLeading) {
                     RoundedRectangle(cornerRadius: 18)
                         .fill(Color.white)
+                        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
                     
                     TextEditor(
                         text: Binding(
@@ -70,7 +71,9 @@ struct NoteWriteView: View {
                         Text(String(localized: .memoWritePlaceHolder))
                             .font(.bodyRegular14)
                             .foregroundStyle(.labelAlternative)
-                            .padding(20)
+                            .padding(.horizontal, 21)
+                            .padding(.top, 24)
+                            .allowsHitTesting(false)
                     }
                 }
                 .frame(height: 300)
@@ -90,7 +93,7 @@ struct NoteWriteView: View {
                                 Image(.delete)
                                     .renderingMode(.template)
                                     .foregroundStyle(.pointRed1)
-                                    .frame(width: 21, height: 21, alignment: .center)
+                                    .font(.titleSemiBold18)
                                     .padding(.leading, 24)
                                 
                                 Spacer()
@@ -103,10 +106,10 @@ struct NoteWriteView: View {
                         .padding(.vertical, 16)
                         .frame(maxWidth: .infinity)
                         .background(.pointRed1.opacity(0.1))
-                        .clipShape(Capsule())
+                        .cornerRadius(26)
                     }
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 28)
+                    .padding(.bottom)
                 }
             }
         }
