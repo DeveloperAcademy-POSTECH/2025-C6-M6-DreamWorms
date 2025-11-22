@@ -43,10 +43,6 @@ struct TimeLineFeature: DWReducer {
         
         var scrollTarget: ScrollTarget?
         
-        /// 검색 관련 State
-        var searchText: String = ""
-        var isSearchActive: Bool = false
-        
         /// 케이스 이름
         var caseName: String {
             caseInfo?.name ?? ""
@@ -67,6 +63,26 @@ struct TimeLineFeature: DWReducer {
             let allLocations = groupedLocations.flatMap(\.locations)
             let uniqueAddresses = Set(allLocations.map(\.address))
             return uniqueAddresses.count
+        }
+        
+        /// 검색 관련 State
+        var searchText: String = ""
+        var isSearchActive: Bool = false
+        
+        /// 검색 결과
+        var searchedGroupedLocations: [LocationGroupedByDate] = []
+        
+        /// 디바운스용 Task ID
+        var searchDebounceTaskID: UUID?
+        
+        /// 검색 결과가 비어있는지 여부
+        var isSearchResultEmpty: Bool {
+            isSearchActive && !searchText.isEmpty && searchedGroupedLocations.isEmpty
+        }
+        
+        /// 표시할 그룹 데이터 ( 검색 중이면 필터된 결과, 아니면 전체 데이터 )
+        var displayGroupedLocations: [LocationGroupedByDate] {
+            isSearchActive && !searchText.isEmpty ? searchedGroupedLocations : groupedLocations
         }
         
         /// 초기화 - MainTabFeature.State에서 데이터를 받음
@@ -104,8 +120,11 @@ struct TimeLineFeature: DWReducer {
         /// 검색바 터치
         case searchTextChanged(String)
         
-        /// 검색 시에 기능
+        /// 검색 활성화 상태 변경
         case setSearchActive(Bool)
+        
+        /// 디바운스된 실제 검색 수행
+        case performSearch(String, taskID: UUID)
     }
     
     // MARK: - Reducer
@@ -147,15 +166,6 @@ struct TimeLineFeature: DWReducer {
             state.locations = locations
             state.groupedLocations = LocationGroupedByDate.groupByDate(locations)
             return .none
-
-        case let .searchTextChanged(text):
-            state.searchText = text
-            
-            return .none
-            
-        case let .setSearchActive(isActive):
-            // TODO: 검색 활성/비활성 상태에 따라 필터 로직이 추가되면 연결
-            return .none
             
         case let .applyCellFilter(cellKey, title):
             // 셀 타임라인 모드로 전환하고, 선택한 셀에 해당하는 Location만 필터링
@@ -181,6 +191,64 @@ struct TimeLineFeature: DWReducer {
             state.cellTimelineTitle = nil
             state.groupedLocations = LocationGroupedByDate.groupByDate(state.locations)
             return .none
+            
+        case let .searchTextChanged(text):
+            state.searchText = text
+            
+            // 빈 문자열일 때 즉시 초기화
+            if text.trimmingCharacters(in: .whitespaces).isEmpty {
+                state.searchedGroupedLocations = []
+                state.isSearchActive = false
+                return .none
+            }
+            
+            // 디바운스 0.3초 이후 검색 실행
+            let taskID = UUID()
+            state.searchDebounceTaskID = taskID
+            state.isSearchActive = true
+            
+            return .task {
+                try? await Task.sleep(for: .milliseconds(300))
+                return .performSearch(text, taskID: taskID)
+            }
+            
+        case let .performSearch(searchText, taskID):
+            // 디바운스 검증: 가장 최신 Task만 실행
+            guard state.searchDebounceTaskID == taskID else {
+                return .none
+            }
+            
+            // 검색어 전처리 (공백 제거)
+            let trimmedQuery = searchText.trimmingCharacters(in: .whitespaces)
+            
+            guard !trimmedQuery.isEmpty else {
+                state.searchedGroupedLocations = []
+                return .none
+            }
+            
+            // 주소기준 필터
+            let searchedGroupedLocations = state.locations.filter { location in
+                location.address.contains(trimmedQuery)
+            }
+            
+            // 필터링된 데이터를 날짜별로 그룹화
+            state.searchedGroupedLocations = LocationGroupedByDate.groupByDate(searchedGroupedLocations)
+            
+            return .none
+            
+        case let .setSearchActive(isActive):
+            
+            state.isSearchActive = isActive
+            
+            // 검색 기능 비활성화시 초기화
+            if !isActive {
+                state.searchText = ""
+                state.searchedGroupedLocations = []
+            }
+            
+            return .none
+        
+            
         }
     }
 
