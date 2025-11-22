@@ -74,12 +74,22 @@ struct MapView: View {
                     store.send(.clearFocusMyLocationFlag)
                 },
                 onCellMarkerTapped: { cellKey, title in
+                    // cellKey 파싱: "latitude_longitude" 형식 → MapCoordinate
+                    let components = cellKey.split(separator: "_")
+                    if components.count == 2,
+                       let lat = Double(components[0]),
+                       let lng = Double(components[1])
+                    {
+                        let coordinate = MapCoordinate(latitude: lat, longitude: lng)
+                        store.send(.moveToLocation(coordinate))
+                    }
                     dispatcher.send(.focusCellTimeline(cellKey: cellKey, title: title))
                 },
                 onUserLocationMarkerTapped: { locationId in
                     store.send(.userLocationMarkerTapped(locationId))
                 },
-                isTimelineSheetMinimized: store.state.isTimelineSheetMinimized,
+                isTimelineSheetPresented: store.state.isTimelineSheetPresented,
+                isPlaceInfoSheetPresented: store.state.isPlaceInfoSheetPresented,
                 onMapTapped: { latlng in
                     // MapFeature에서 타임라인 시트 상태를 체크하여 처리
                     store.send(.mapTapped(latlng))
@@ -96,6 +106,7 @@ struct MapView: View {
                 cellCoverageRange: store.state.mapLayerCoverageRange,
                 cctvMarkers: store.state.cctvMarkers,
                 isCCTVLayerEnabled: store.state.isCCTVLayerEnabled,
+                idlePinCoordinate: store.state.idlePinCoordinate,
                 infrastructureManager: infrastructureManager,
                 caseLocationMarkerManager: caseLocationMarkerManager
             )
@@ -212,7 +223,7 @@ private extension MapView {
             set: { newValue in
                 if newValue == false {
                     store.send(.setMapLayerSheetPresented(false))
-                    store.send(.hidePlaceInfo)
+                    store.send(.hidePlaceInfo())
                     store.send(.closePinWrite)
                     store.send(.closeMemoEdit)
                 }

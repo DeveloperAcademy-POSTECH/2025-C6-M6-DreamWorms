@@ -67,7 +67,7 @@ private extension MapSheetPanel {
                     placeInfo: placeInfo,
                     existingLocation: state.existingLocation,
                     isLoading: state.isPlaceInfoLoading,
-                    onClose: { send(.hidePlaceInfo) },
+                    onClose: { send(.hidePlaceInfo()) },
                     onMemoTapped: { send(.memoButtonTapped) }
                 )
                 .dwBottomToolBar(items: createToolbarItems())
