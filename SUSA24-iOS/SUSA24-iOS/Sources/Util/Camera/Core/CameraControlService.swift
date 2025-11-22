@@ -14,7 +14,7 @@ actor CameraControlService {
     private(set) var zoomFactor: CGFloat = 1.0
     private(set) var isTorchOn: Bool = false
     
-    private let minimumZoom: CGFloat = 0.5
+    private let minimumZoom: CGFloat = 1.0
     private let maximumZoom: CGFloat = 12.0
     
     // MARK: - Device Setup
