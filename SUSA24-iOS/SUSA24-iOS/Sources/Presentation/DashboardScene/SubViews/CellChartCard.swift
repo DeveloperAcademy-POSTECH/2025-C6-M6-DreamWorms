@@ -37,7 +37,8 @@ struct CellChartCard: View {
 
             CellChartLegend(
                 series: series,
-                weekStyleScale: weekStyleScale
+                weekStyleScale: weekStyleScale,
+                weekRanges: chart.weekRanges
             )
             .padding(.bottom, series.isEmpty ? 0 : 16)
             .opacity(series.isEmpty ? 0 : 1)
