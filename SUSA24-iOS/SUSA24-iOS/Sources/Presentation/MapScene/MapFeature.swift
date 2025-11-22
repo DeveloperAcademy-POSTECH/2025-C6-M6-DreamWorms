@@ -311,8 +311,7 @@ struct MapFeature: DWReducer {
         case let .mapTapped(latlng):
             // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함 (API 요청도 하지 않음)
             // resetDetentToShort Notification으로 시트는 이미 최소화 요청됨
-            guard !state.isTimelineSheetPresented else { return .none }
-            
+
             // 사용자가 탭한 좌표를 저장해 핀 추가 시 활용합니다.
             let coordinate = MapCoordinate(
                 latitude: latlng.lat,
