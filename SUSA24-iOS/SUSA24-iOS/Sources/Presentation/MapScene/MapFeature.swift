@@ -631,6 +631,8 @@ struct MapFeature: DWReducer {
             state.existingLocation = location
             updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
+            // Idle 핀 제거 (실제 마커가 표시되므로)
+            state.idlePinCoordinate = nil
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
             }
