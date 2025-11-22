@@ -1,15 +1,14 @@
 //
-//  PinWriteHeader.swift
+//  NoteWriteHeader.swift
 //  SUSA24-iOS
 //
-//  Created by taeni on 11/13/25.
+//  Created by taeni on 11/21/25.
 //
 
 import SwiftUI
 
-/// 핀 추가/수정 화면의 상단 헤더 컴포넌트
-struct PinWriteHeader: View {
-    let title: String
+/// 형사 노트 작성/수정 화면의 상단 헤더 컴포넌트
+struct NoteWriteHeader: View {
     let isSaveEnabled: Bool
     let onCloseTapped: () -> Void
     let onSaveTapped: () -> Void
@@ -25,7 +24,7 @@ struct PinWriteHeader: View {
             
             Spacer()
             
-            Text(title)
+            Text(String(localized: .memoWriteTitle))
                 .font(.titleSemiBold16)
                 .foregroundStyle(.labelNormal)
             
@@ -41,16 +40,6 @@ struct PinWriteHeader: View {
             .setupbuttonBackgroundColor(isSaveEnabled ? .primaryNormal : .labelAssistive)
             .disabled(!isSaveEnabled)
         }
-        .padding(.top, 10)
-        .padding(.bottom, 14)
+        .padding(.horizontal, 16)
     }
 }
-
-// #Preview {
-//    PinWriteHeader(
-//        title: "핀 추가",
-//        isSaveEnabled: true,
-//        onCloseTapped: {},
-//        onSaveTapped: {}
-//    )
-// }
