@@ -10,7 +10,6 @@ import SwiftUI
 /// 핀 추가/수정 화면
 struct PinWriteView: View {
     @State private var store: DWStore<PinWriteFeature>
-    @FocusState private var isPinNameFocused: Bool
     let onCancel: () -> Void
     
     // MARK: - Initializer
@@ -42,39 +41,36 @@ struct PinWriteView: View {
             .padding(.bottom, 6)
             
             ScrollView {
-                // 핀 이름 입력
-                PinNameInputSection(
-                    pinName: Binding(
-                        get: { store.state.pinName },
-                        set: { store.send(.updatePinName($0)) }
-                    ),
-                    isValid: store.state.isValidPinName,
-                    isFocused: $isPinNameFocused
-                )
-                .padding(.bottom, 24)
-                
-                // 핀 색상 선택
-                PinColorSelectionSection(
-                    selectedColor: Binding(
-                        get: { store.state.selectedColor },
-                        set: { store.send(.selectColor($0)) }
+                VStack(spacing: 24) {
+                    // 핀 이름 입력
+                    PinNameInputSection(
+                        pinName: Binding(
+                            get: { store.state.pinName },
+                            set: { store.send(.updatePinName($0)) }
+                        ),
+                        isValid: store.state.isValidPinName
                     )
-                )
-                .padding(.bottom, 24)
-                
-                // 핀 아이콘 선택
-                PinCategorySelectionSection(
-                    selectedCategory: Binding(
-                        get: { store.state.selectedCategory },
-                        set: { store.send(.selectCategory($0)) }
-                    ),
-                    selectedColor: store.state.selectedColor
-                )
+                    
+                    // 핀 색상 선택
+                    PinColorSelectionSection(
+                        selectedColor: Binding(
+                            get: { store.state.selectedColor },
+                            set: { store.send(.selectColor($0)) }
+                        )
+                    )
+                    
+                    // 핀 아이콘 선택
+                    PinCategorySelectionSection(
+                        selectedCategory: Binding(
+                            get: { store.state.selectedCategory },
+                            set: { store.send(.selectCategory($0)) }
+                        ),
+                        selectedColor: store.state.selectedColor
+                    )
+                }
             }
-            .padding(.bottom, 6)
-            .scrollIndicators(.hidden)
-            .scrollDismissesKeyboard(.interactively)
-                        
+            .padding(.bottom, 24)
+            
             DWButton(
                 isEnabled: .constant(store.state.isValidPinName),
                 title: String(localized: .mapviewPinCreateButton)
@@ -86,7 +82,6 @@ struct PinWriteView: View {
         .background(.labelAssistive)
         .task {
             store.send(.onAppear)
-            isPinNameFocused = true
         }
     }
 }
@@ -98,7 +93,6 @@ struct PinWriteView: View {
 struct PinNameInputSection: View {
     @Binding var pinName: String
     let isValid: Bool
-    let isFocused: FocusState<Bool>.Binding
     
     var characterCount: Int {
         pinName.count
@@ -111,7 +105,6 @@ struct PinNameInputSection: View {
                     .font(.bodyMedium14)
                     .foregroundStyle(.labelNormal)
                     .padding(.leading, 8)
-                    .focused(isFocused)
                     .onChange(of: pinName) { _, newValue in
                         pinName = validateInput(newValue)
                     }
@@ -132,6 +125,7 @@ struct PinNameInputSection: View {
                         .font(.numberMedium12)
                         .foregroundStyle(.labelAlternative)
                 }
+                .padding(.trailing, 10)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 18)
@@ -191,17 +185,23 @@ struct PinColorSelectionSection: View {
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
             
-            HStack(spacing: 12) {
-                ForEach(PinColorType.allCases, id: \.rawValue) { color in
+            HStack(spacing: 0) {
+                ForEach(Array(PinColorType.allCases.enumerated()), id: \.1.rawValue) { index, color in
                     ColorCircleButton(
                         color: color,
                         isSelected: selectedColor == color,
                         onTap: { selectedColor = color }
                     )
+                    
+                    // 마지막 요소가 아닐 때만 Spacer 추가
+                    if index != PinColorType.allCases.count - 1 {
+                        Spacer()
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .center)
+            .frame(maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
@@ -217,8 +217,8 @@ struct ColorCircleButton: View {
             Circle()
                 .fill(color.color)
                 .frame(
-                    width: isSelected ? 42 : 36,
-                    height: isSelected ? 42 : 36
+                    width: isSelected ? 34 : 28,
+                    height: isSelected ? 34 : 28
                 )
                 .overlay {
                     if isSelected {
@@ -229,7 +229,7 @@ struct ColorCircleButton: View {
                     }
                 }
         }
-        .frame(width: 42, height: 42)
+        .frame(width: 36, height: 36)
     }
 }
 
@@ -245,7 +245,7 @@ struct PinCategorySelectionSection: View {
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
             
-            VStack(spacing: 4) {
+            VStack {
                 // Int16 기준으로 정렬 (home=0, work=1, custom=3)
                 ForEach(
                     PinCategoryType.allCases.sorted(by: { $0.rawValue < $1.rawValue }),

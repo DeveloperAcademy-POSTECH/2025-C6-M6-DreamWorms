@@ -20,6 +20,7 @@ struct PinWriteHeader: View {
                 image: Image(.xmark),
                 action: onCloseTapped
             )
+            .setupbuttonBackgroundColor(.white)
             .setupSize(36)
             .setupIconSize(14)
             
@@ -38,7 +39,7 @@ struct PinWriteHeader: View {
             .setupSize(36)
             .setupIconSize(14)
             .setupIconColor(.white)
-            .setupbuttonBackgroundColor(isSaveEnabled ? .primaryNormal : .labelAssistive)
+            .setupbuttonBackgroundColor(isSaveEnabled ? .primaryNormal : .gray99)
             .disabled(!isSaveEnabled)
         }
         .padding(.top, 10)
@@ -46,11 +47,11 @@ struct PinWriteHeader: View {
     }
 }
 
-// #Preview {
-//    PinWriteHeader(
-//        title: "핀 추가",
-//        isSaveEnabled: true,
-//        onCloseTapped: {},
-//        onSaveTapped: {}
-//    )
-// }
+#Preview {
+    PinWriteHeader(
+        title: "핀 추가",
+        isSaveEnabled: false,
+        onCloseTapped: {},
+        onSaveTapped: {}
+    )
+}
