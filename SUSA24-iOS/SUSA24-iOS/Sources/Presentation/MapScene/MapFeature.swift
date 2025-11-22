@@ -326,15 +326,14 @@ struct MapFeature: DWReducer {
             // Idle 핀 표시
             state.idlePinCoordinate = coordinate
             
-            // PlaceInfoSheet가 이미 열려있으면 콘텐츠만 업데이트 (카메라 이동 안 함)
+            // 카메라 이동은 항상 수행 (PlaceInfoSheet 상태와 관계없이)
+            state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
+            
             if state.isPlaceInfoSheetPresented {
                 state.isPlaceInfoLoading = true
                 state.selectedPlaceInfo = nil
             } else {
-                // PlaceInfoSheet가 닫혀있으면 새로 열기 (카메라 이동 포함)
-                // 터치한 위치로 카메라 이동 (contentInset 자동 고려됨)
-                state.cameraTargetCoordinate = coordinate
-                state.shouldAnimateCameraTarget = true
                 state.isPlaceInfoLoading = true
                 state.isPlaceInfoSheetPresented = true
                 state.selectedPlaceInfo = nil
