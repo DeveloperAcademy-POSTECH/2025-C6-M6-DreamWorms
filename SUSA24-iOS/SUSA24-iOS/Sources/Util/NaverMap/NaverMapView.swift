@@ -36,10 +36,14 @@ struct NaverMapView: UIViewRepresentable {
     /// - `true`: 지도 터치 이벤트 처리 (시트가 최소 높이일 때)
     /// - `false`: 지도 터치 이벤트 차단 (시트가 중간/최대 높이일 때)
     var isMapTouchEnabled: Bool = true
-    /// 타임라인 시트가 최소 높이인지 여부입니다.
-    /// - `true`: 타임라인 시트가 최소 높이 (PlaceInfoSheet 표시 가능)
-    /// - `false`: 타임라인 시트가 올라와 있음 (PlaceInfoSheet 표시 안 함)
-    var isTimelineSheetMinimized: Bool = true
+    /// 타임라인 시트의 표시 상태입니다.
+    /// - `true`: 타임라인 시트가 표시됨 (올라와 있음)
+    /// - `false`: 타임라인 시트가 닫힘 (최소화됨)
+    var isTimelineSheetPresented: Bool = false
+    /// PlaceInfoSheet의 표시 상태입니다.
+    /// - `true`: PlaceInfoSheet가 표시됨
+    /// - `false`: PlaceInfoSheet가 닫힘
+    var isPlaceInfoSheetPresented: Bool = false
     
     // MARK: 사용자 상호작용 콜백
     
@@ -65,6 +69,8 @@ struct NaverMapView: UIViewRepresentable {
     var cctvMarkers: [CCTVMarker] = []
     /// CCTV 레이어 표시 여부
     var isCCTVLayerEnabled: Bool = false
+    /// Idle 핀을 표시할 좌표입니다.
+    var idlePinCoordinate: MapCoordinate?
     
     // MARK: - Dependencies
     
@@ -118,11 +124,14 @@ struct NaverMapView: UIViewRepresentable {
             shouldFocusMyLocation: shouldFocusMyLocation,
             onMyLocationFocusConsumed: onMyLocationFocusConsumed,
             isMapTouchEnabled: isMapTouchEnabled,
-            isTimelineSheetMinimized: isTimelineSheetMinimized,
+            isTimelineSheetPresented: isTimelineSheetPresented,
+            isPlaceInfoSheetPresented: isPlaceInfoSheetPresented,
             layerData: layerData,
             deselectMarkerTrigger: deselectMarkerTrigger,
             lastDeselectMarkerTrigger: &context.coordinator.lastDeselectMarkerTrigger,
-            onDeselectMarker: { await context.coordinator.facade.deselectMarker(on: uiView) }
+            onDeselectMarker: { await context.coordinator.facade.deselectMarker(on: uiView) },
+            idlePinCoordinate: idlePinCoordinate,
+            lastIdlePinCoordinate: &context.coordinator.lastIdlePinCoordinate
         )
     }
     
@@ -137,6 +146,7 @@ struct NaverMapView: UIViewRepresentable {
         let facade: MapFacade
         
         var lastDeselectMarkerTrigger: UUID?
+        var lastIdlePinCoordinate: MapCoordinate?
 
         init(
             parent: NaverMapView,

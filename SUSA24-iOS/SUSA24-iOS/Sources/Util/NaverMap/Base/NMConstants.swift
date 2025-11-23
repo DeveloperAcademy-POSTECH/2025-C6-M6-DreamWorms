@@ -43,6 +43,12 @@ enum MapConstants {
         red: 55 / 255,
         green: 110 / 255,
         blue: 228 / 255,
-        alpha: 0.2
+        alpha: 0.08
     )
+    
+    // MARK: - Content Inset
+    
+    /// 바텀시트가 330이고 헤더가 간단하게 계산해봤을 때 120임.
+    /// 총 높이 800 - 330 - 120 = 340이고, 가운데 높이는 170. 고로 170으로 설정.
+    static let timelineSheetBottomInset: CGFloat = 170.0
 }

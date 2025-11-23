@@ -7,6 +7,7 @@
 
 import Foundation
 import NMapsMap
+import UIKit
 
 /// 맵 카메라 제어를 담당하는 컨트롤러
 @MainActor
@@ -40,7 +41,9 @@ final class MapCameraController {
     func moveCamera(to coordinate: MapCoordinate, animated: Bool? = nil, duration: Double? = nil) {
         guard let mapView else { return }
         let target = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: defaultZoomLevel))
+        // 현재 줌 레벨 유지 (줌인 방지)
+        let currentZoomLevel = mapView.zoomLevel
+        let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: currentZoomLevel))
         if let animated, animated, let duration {
             cameraUpdate.animation = .easeOut
             cameraUpdate.animationDuration = duration
@@ -76,5 +79,29 @@ final class MapCameraController {
             return true
         } else if coordinate == nil { lastCameraTarget = nil }
         return false
+    }
+    
+    // MARK: - Content Inset
+    
+    /// 지도 콘텐츠 패딩을 설정합니다.
+    /// UI 요소(시트, 핀 등)가 지도의 일부를 덮을 경우, 카메라 위치를 실제 보이는 지도 중심에 맞추기 위해 사용합니다.
+    /// - Parameter inset: 콘텐츠 패딩 (top, left, bottom, right)
+    func setContentInset(_ inset: UIEdgeInsets) {
+        guard let mapView else { return }
+        mapView.contentInset = inset
+    }
+    
+    /// 시트 상태에 따라 콘텐츠 패딩을 설정합니다.
+    /// - Parameters:
+    ///   - isTimelineSheetPresented: 타임라인 시트가 표시되어 있는지 여부
+    ///   - isPlaceInfoSheetPresented: PlaceInfoSheet가 표시되어 있는지 여부
+    func updateContentInsetForSheet(isTimelineSheetPresented: Bool, isPlaceInfoSheetPresented: Bool) {
+        let isMinimized = !isTimelineSheetPresented && !isPlaceInfoSheetPresented
+        
+        if isMinimized { setContentInset(.zero) }
+        else {
+            let inset = UIEdgeInsets(top: 0, left: 0, bottom: MapConstants.timelineSheetBottomInset, right: 0)
+            setContentInset(inset)
+        }
     }
 }
