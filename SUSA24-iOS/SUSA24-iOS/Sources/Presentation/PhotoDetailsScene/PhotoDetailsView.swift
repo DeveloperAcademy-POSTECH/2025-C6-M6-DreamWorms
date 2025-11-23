@@ -26,7 +26,7 @@ struct PhotoDetailsView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            Color.white.ignoresSafeArea()
+            Color.black.ignoresSafeArea()
             
             TabView(selection: Binding(
                 get: {
@@ -45,9 +45,11 @@ struct PhotoDetailsView: View {
                 ForEach(store.state.photos, id: \.id) { photo in
                     PhotoImageView(photo: photo, zoomState: zoomStateBinding(for: photo.id))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .ignoresSafeArea()
                         .tag(photo.id as UUID?)
                 }
             }
+            .ignoresSafeArea()
             .tabViewStyle(.page(indexDisplayMode: .never))
             
             PhotoDetailsHeader(

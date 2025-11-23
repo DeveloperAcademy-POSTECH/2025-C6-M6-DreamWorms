@@ -14,7 +14,7 @@ actor CameraControlService {
     private(set) var zoomFactor: CGFloat = 1.0
     private(set) var isTorchOn: Bool = false
     
-    private let minimumZoom: CGFloat = 0.5
+    private let minimumZoom: CGFloat = 1.0
     private let maximumZoom: CGFloat = 12.0
     
     // MARK: - Device Setup
@@ -164,8 +164,13 @@ actor CameraControlService {
             device.focusMode = .continuousAutoFocus
         }
         
-        if device.isExposureModeSupported(.continuousAutoExposure) {
-            device.exposureMode = .continuousAutoExposure
+        if device.isExposureModeSupported(.locked) {
+            // 특정 ISO와 Duration 설정
+            device.setExposureModeCustom(
+                duration: CMTime(value: 1, timescale: 1000),
+                iso: AVCaptureDevice.currentISO,
+                completionHandler: nil
+            )
         }
     }
     
