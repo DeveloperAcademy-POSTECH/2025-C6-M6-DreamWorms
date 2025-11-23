@@ -11,27 +11,20 @@ struct CellChartData: Identifiable, Equatable {
     let id = UUID()
     let address: String
     let allSeries: [HourlyVisit]
-
-    let seriesByWeekday: [Weekday: [HourlyVisit]]
-    let summaryByWeekday: [Weekday: String]
-
+    let weekRanges: [Int: String]
+    let initialWeekday: Weekday
     var selectedWeekday: Weekday
+    
+    var seriesByWeekday: [Weekday: [HourlyVisit]] {
+        Dictionary(grouping: allSeries, by: \.weekday)
+    }
 
-    init(address: String, allSeries: [HourlyVisit], initialWeekday: Weekday) {
-        self.address = address
-        self.allSeries = allSeries
-        self.selectedWeekday = initialWeekday
-
-        var seriesDict: [Weekday: [HourlyVisit]] = [:]
-        var summaryDict: [Weekday: String] = [:]
-
-        for weekday in Weekday.allCases {
-            let filtered = allSeries.filter { $0.weekday == weekday }
-            seriesDict[weekday] = filtered
-            summaryDict[weekday] = filtered.makeHourlySummary()
-        }
-
-        self.seriesByWeekday = seriesDict
-        self.summaryByWeekday = summaryDict
+    var summaryByWeekday: [Weekday: String] {
+        Dictionary(
+            uniqueKeysWithValues: Weekday.allCases.map { weekday in
+                let series = seriesByWeekday[weekday] ?? []
+                return (weekday, series.makeHourlySummary())
+            }
+        )
     }
 }
