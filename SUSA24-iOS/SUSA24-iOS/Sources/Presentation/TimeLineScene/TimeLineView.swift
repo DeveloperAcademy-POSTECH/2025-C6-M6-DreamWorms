@@ -31,7 +31,7 @@ struct TimeLineView: View {
                     .font(.titleSemiBold20)
                     .foregroundStyle(.labelNormal)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 18)
                     .transition(.move(edge: .top).combined(with: .opacity))
                 
                 if !store.state.isEmpty {
