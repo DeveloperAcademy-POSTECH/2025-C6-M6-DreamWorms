@@ -28,6 +28,11 @@ struct CellChartGraph: View {
     private var availableHours: [Int] {
         Array(Set(series.map(\.hour))).sorted()
     }
+    
+    /// 현재 시리즈의 차트를 그릴만한 데이터가 있는지 없는지를 판단하는 Bool값
+    private var hasNonZeroData: Bool {
+        series.contains { $0.count > 0 }
+    }
 
     /// chartXSelection(value:)에서 들어온 값을 실제 hour로 스냅
     private var snappedHourBinding: Binding<Int?> {
@@ -114,14 +119,18 @@ struct CellChartGraph: View {
             }
         }
         .chartYAxis {
-            AxisMarks(position: .leading) { _ in AxisGridLine() }
+            if hasNonZeroData {
+                AxisMarks(position: .leading) { _ in AxisGridLine() }
+            }
         }
         .chartYScale(domain: 0 ... 11)
         .chartXSelection(value: snappedHourBinding)
         .overlay {
-            TimeLineEmptyState(message: .dashboardEmptyChartMessage)
-                .setupFont(.bodyMedium12)
-                .opacity(series.isEmpty ? 1 : 0)
+            Text(.dashboardEmptyChartMessage)
+                .font(.bodyMedium12)
+                .foregroundStyle(.labelAlternative)
+                .padding(.bottom, 60)
+                .opacity(hasNonZeroData ? 0 : 1)
         }
         .onChange(of: selectedHour) { triggerMediumHapticFeedback() }
     }
