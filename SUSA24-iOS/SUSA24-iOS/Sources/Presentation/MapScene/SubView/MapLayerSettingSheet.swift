@@ -222,22 +222,22 @@ struct MapLayerToggleIcon: View {
 
 // MARK: - Preview
 
-#Preview {
-    struct PreviewWrapper: View {
-        @State private var selectedRange: CoverageRangeType = .half
-        @State private var isCCTVEnabled = true
-        @State private var isBaseStationEnabled = false
-
-        var body: some View {
-            MapLayerSettingSheet(
-                selectedRange: $selectedRange,
-                isCCTVEnabled: $isCCTVEnabled,
-                isBaseStationEnabled: $isBaseStationEnabled,
-                onClose: {}
-            )
-            .frame(height: 420)
-        }
-    }
-
-    return PreviewWrapper()
-}
+// #Preview {
+//    struct PreviewWrapper: View {
+//        @State private var selectedRange: CoverageRangeType = .half
+//        @State private var isCCTVEnabled = true
+//        @State private var isBaseStationEnabled = false
+//
+//        var body: some View {
+//            MapLayerSettingSheet(
+//                selectedRange: $selectedRange,
+//                isCCTVEnabled: $isCCTVEnabled,
+//                isBaseStationEnabled: $isBaseStationEnabled,
+//                onClose: {}
+//            )
+//            .frame(height: 420)
+//        }
+//    }
+//
+//    return PreviewWrapper()
+// }
