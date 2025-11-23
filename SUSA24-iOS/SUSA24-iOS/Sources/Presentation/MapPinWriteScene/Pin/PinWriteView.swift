@@ -67,9 +67,9 @@ struct PinWriteView: View {
                         ),
                         selectedColor: store.state.selectedColor
                     )
+                    .padding(.bottom, 24)
                 }
             }
-            .padding(.bottom, 24)
             
             DWButton(
                 isEnabled: .constant(store.state.isValidPinName),
@@ -77,9 +77,10 @@ struct PinWriteView: View {
             ) {
                 store.send(.saveTapped)
             }
+            .padding(.bottom)
         }
         .padding(.horizontal, 16)
-        .background(.labelAssistive)
+        .background(.sheetBackground)
         .task {
             store.send(.onAppear)
         }
