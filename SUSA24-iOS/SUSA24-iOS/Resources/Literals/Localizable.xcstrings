@@ -1124,18 +1124,6 @@
         }
       }
     },
-    "scanList_pin_delete_alert_button_confirm" : {
-      "comment" : "스캔 목록_핀 추가 취소 알람_삭제함",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "삭제하기"
-          }
-        }
-      }
-    },
     "scanList_pin_delete_alert_contents" : {
       "comment" : "핀 삭제 Alert_내용",
       "extractionState" : "manual",
