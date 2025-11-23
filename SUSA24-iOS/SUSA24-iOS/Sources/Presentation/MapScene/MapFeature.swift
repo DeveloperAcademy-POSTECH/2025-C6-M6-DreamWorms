@@ -503,6 +503,8 @@ struct MapFeature: DWReducer {
             // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
             state.cameraTargetCoordinate = coordinate
             state.shouldAnimateCameraTarget = true
+            // Idle 핀 제거 (마커를 탭했으므로)
+            state.idlePinCoordinate = nil
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none
