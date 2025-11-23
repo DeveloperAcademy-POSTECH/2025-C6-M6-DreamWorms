@@ -101,11 +101,12 @@ struct ZoomGestureModifier: ViewModifier {
             if abs(value - 1.0) > 0.1 { isPinching = true }
             else { return }
         }
+        
         if isPinching {
-            zoomState.scale = zoomState.lastScale * value
+            zoomState.scale = max(zoomState.lastScale * value, 1.0)
         }
     }
-    
+
     private func handleMagnificationEnded(_: CGFloat) {
         if isPinching {
             zoomState.scale = min(max(zoomState.scale, 1.0), 5.0)
@@ -118,7 +119,6 @@ struct ZoomGestureModifier: ViewModifier {
                     zoomState.anchor = .center
                 }
             } else {
-                // zoom 상태에서도 경계 체크
                 let clampedOffset = clampOffset(zoomState.offset)
                 if clampedOffset != zoomState.offset {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -131,7 +131,7 @@ struct ZoomGestureModifier: ViewModifier {
         isPinching = false
         initialPinchScale = 1.0
     }
-    
+
     private func handleDragForPan(_ value: DragGesture.Value) {
         guard zoomState.scale > 1.0 else { return }
         
