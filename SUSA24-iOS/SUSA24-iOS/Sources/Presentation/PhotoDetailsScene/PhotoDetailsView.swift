@@ -11,23 +11,14 @@ struct PhotoDetailsView: View {
     @Environment(AppCoordinator.self) private var coordinator
     @State private var store: DWStore<PhotoDetailsFeature>
     
-    @State private var zoomStates: [UUID: ZoomState] = [:]
+    @State private var screenSize: CGSize = .zero
     
     init(store: DWStore<PhotoDetailsFeature>) {
         _store = State(initialValue: store)
-        
-        // 각 사진마다 ZoomState 초기화 시킨다.
-        var states: [UUID: ZoomState] = [:]
-        for photo in store.state.photos {
-            states[photo.id] = ZoomState()
-        }
-        _zoomStates = State(initialValue: states)
     }
     
     var body: some View {
         ZStack(alignment: .top) {
-            Color.black.ignoresSafeArea()
-            
             TabView(selection: Binding(
                 get: {
                     store.state.photos.indices.contains(store.state.currentIndex)
@@ -43,10 +34,14 @@ struct PhotoDetailsView: View {
                 }
             )) {
                 ForEach(store.state.photos, id: \.id) { photo in
-                    PhotoImageView(photo: photo, zoomState: zoomStateBinding(for: photo.id))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    if let uiImage = photo.uiImage {
+                        ZoomableImageView(
+                            image: uiImage,
+                            screenSize: screenSize
+                        )
                         .ignoresSafeArea()
                         .tag(photo.id as UUID?)
+                    }
                 }
             }
             .ignoresSafeArea()
@@ -59,9 +54,13 @@ struct PhotoDetailsView: View {
                 onDeleteTapped: handleDelete
             )
             .padding(.top, 6)
-            .padding(.bottom, 54)
         }
         .navigationBarHidden(true)
+        .onScreen { screen in
+            if let screen {
+                screenSize = screen.bounds.size
+            }
+        }
         .onChange(of: store.state.shouldDismiss) { _, shouldDismiss in
             if shouldDismiss {
                 coordinator.pop()
@@ -69,26 +68,7 @@ struct PhotoDetailsView: View {
         }
     }
     
-    private var currentIndexBinding: Binding<Int> {
-        Binding(
-            get: { store.state.currentIndex },
-            set: { newIndex in
-                store.send(.currentIndexChanged(newIndex))
-            }
-        )
-    }
-    
-    private func zoomStateBinding(for photoID: UUID) -> Binding<ZoomState> {
-        Binding(
-            get: { zoomStates[photoID] ?? ZoomState() },
-            set: { zoomStates[photoID] = $0 }
-        )
-    }
-    
     private func handleDelete() {
-        if let currentPhoto = store.state.currentPhoto {
-            zoomStates.removeValue(forKey: currentPhoto.id)
-        }
         store.send(.deleteCurrentPhoto)
     }
 }
