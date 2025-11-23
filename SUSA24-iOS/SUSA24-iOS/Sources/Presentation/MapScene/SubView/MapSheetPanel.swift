@@ -5,11 +5,14 @@
 //  Created by mini on 11/20/25.
 //
 
+import CoreData
 import SwiftUI
 
 struct MapSheetPanel: View {
     let state: MapFeature.State
     let send: (MapFeature.Action) -> Void
+    let context: NSManagedObjectContext
+    let repository: LocationRepositoryProtocol
     
     @State private var isAlertPresented = false
     
@@ -21,8 +24,8 @@ struct MapSheetPanel: View {
                 placeInfoPanel
             } else if state.isPinWritePresented {
                 pinWritePanel
-            } else if state.isMemoEditPresented {
-                memoEditPanel
+            } else if state.isNoteWritePresented {
+                noteWritePanel
             } else {
                 EmptyView()
             }
@@ -68,7 +71,7 @@ private extension MapSheetPanel {
                     existingLocation: state.existingLocation,
                     isLoading: state.isPlaceInfoLoading,
                     onClose: { send(.hidePlaceInfo()) },
-                    onMemoTapped: { send(.memoButtonTapped) }
+                    onMemoTapped: { send(.noteButtonTapped) }
                 )
                 .dwBottomToolBar(items: createToolbarItems())
             }
@@ -80,30 +83,60 @@ private extension MapSheetPanel {
             if let placeInfo = state.selectedPlaceInfo,
                let caseId = state.caseId
             {
+                let pinWriteStore = DWStore(
+                    initialState: PinWriteFeature.State(
+                        caseId: caseId,
+                        placeInfo: placeInfo,
+                        coordinate: state.selectedCoordinate,
+                        existingLocation: state.existingLocation
+                    ),
+                    reducer: PinWriteFeature(
+                        repository: repository,
+                        onSaveCompleted: { location in
+                            send(.pinSaveCompleted(location))
+                        }
+                    )
+                )
+                
                 PinWriteView(
-                    placeInfo: placeInfo,
-                    coordinate: state.selectedCoordinate,
-                    existingLocation: state.existingLocation,
-                    caseId: caseId,
-                    isEditMode: state.isEditMode,
-                    onSave: { send(.savePin($0)) },
-                    onCancel: { send(.closePinWrite) }
+                    store: pinWriteStore,
+                    onCancel: {
+                        send(.closePinWrite)
+                    }
                 )
             }
         }
     }
     
-    var memoEditPanel: some View {
-        MemoWriteView(
-            existingNote: state.existingLocation?.note,
-            onSave: { note in send(.memoSaved(note)) },
-            onCancel: { send(.closeMemoEdit) }
-        )
+    var noteWritePanel: some View {
+        Group {
+            if let existingLocation = state.existingLocation {
+                let noteWriteStore = DWStore(
+                    initialState: NoteWriteFeature.State(
+                        existingNote: existingLocation.note,
+                        existingLocation: existingLocation
+                    ),
+                    reducer: NoteWriteFeature(
+                        repository: repository,
+                        onSaveCompleted: { note in
+                            send(.noteSaveCompleted(note))
+                        }
+                    )
+                )
+                
+                NoteWriteView(
+                    store: noteWriteStore,
+                    onCancel: {
+                        send(.closeNoteWrite)
+                    }
+                )
+            }
+        }
     }
     
     /// MapSheetPanel 하단 툴바 아이템 생성
     func createToolbarItems() -> [DWBottomToolbarItem] {
-        if state.hasExistingPin {
+        if state.existingLocation != nil {
             [
                 .button(image: Image(.pinFill), action: {}),
                 .menu(
@@ -135,6 +168,13 @@ private extension MapSheetPanel {
     }
 }
 
+// MARK: - Preview
+
 // #Preview {
-//    MapSheetPanel()
+//    MapSheetPanel(
+//        state: MapFeature.State(),
+//        send: { _ in },
+//        context: PersistenceController.preview.container.viewContext,
+//        repository: LocationRepository(context: PersistenceController.preview.container.viewContext)
+//    )
 // }
