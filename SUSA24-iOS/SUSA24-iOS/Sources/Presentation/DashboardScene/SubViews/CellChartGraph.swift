@@ -60,7 +60,7 @@ struct CellChartGraph: View {
                     xStart: .value("from", band.lowerBound),
                     xEnd: .value("to", band.upperBound + 1),
                     yStart: .value("min", 0),
-                    yEnd: .value("max", 11)
+                    yEnd: .value("max", 10)
                 )
                 .foregroundStyle(.primaryNormal.opacity(0.15))
                 .zIndex(-2)

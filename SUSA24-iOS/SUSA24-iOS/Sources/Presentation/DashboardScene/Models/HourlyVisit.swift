@@ -15,7 +15,7 @@ struct HourlyVisit: Identifiable, Hashable {
     
     /// 같은 주차(weekIndex), 같은 요일(weekday), 같은 시간(hour) 조합은 동일한 데이터로 취급하기 위한 id 값
     /// Swift Chart ForEach에서 반복 렌더링하기 위함.
-    var id: String { "\(weekIndex)-\(weekday.rawValue)-\(hour)" }
+    var id: String { "\(weekIndex)-\(hour)" }
 }
 
 extension Array<HourlyVisit> {

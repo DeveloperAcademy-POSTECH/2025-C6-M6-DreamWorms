@@ -49,7 +49,6 @@ struct CellChartCard: View {
                 weekStyleScale: weekStyleScale,
                 selectedHour: $selectedHour
             )
-            .id(selectionWeekday)
             .frame(height: 142)
             .padding(.bottom, 18)
 
