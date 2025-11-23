@@ -138,7 +138,7 @@ private extension MapSheetPanel {
     func createToolbarItems() -> [DWBottomToolbarItem] {
         if state.existingLocation != nil {
             [
-                .button(image: Image(.pinFill), action: {}),
+                .button(image: Image(.pinFill), action: { isAlertPresented = true }),
                 .menu(
                     image: Image(.ellipsis),
                     items: [
