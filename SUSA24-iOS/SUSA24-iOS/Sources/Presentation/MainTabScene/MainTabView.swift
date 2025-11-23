@@ -132,12 +132,16 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             }
             
             // 타임라인 시트 상태를 MapFeature로 전달 (PlaceInfoSheet 표시 제어용)
-            mapStore.send(.updateTimelineSheetState(isMinimized: isShortDetent))
+            // isShortDetent = true → isActive = false (최소화 = 비활성화)
+            // isShortDetent = false → isActive = true (올라와 있음 = 활성화)
+            let isActive = !isShortDetent
+            mapStore.send(.updateTimelineSheetState(isActive: isActive))
         }
         .onAppear {
             // 초기 상태를 즉시 전달
             let isShortDetent = (selectedDetent == mapShortDetent || selectedDetent == otherDetent)
-            mapStore.send(.updateTimelineSheetState(isMinimized: isShortDetent))
+            let isActive = !isShortDetent
+            mapStore.send(.updateTimelineSheetState(isActive: isActive))
         }
         .onChange(of: store.state.selectedTab) { _, newTab in
             if newTab == .map {
@@ -151,6 +155,17 @@ struct MainTabView<MapView: View, TrackingView: View, DashboardView: View>: View
             guard let request else { return }
             switch request {
             case let .focusCellTimeline(cellKey, title):
+                // NOTE: 탭or네비게이션 구조 뜯으면 수정될 코드. 현재 코드에 맞게 적용함.
+                // PlaceInfoSheet가 열려있으면 먼저 닫기
+                // shouldMinimizeTimeline: false (타임라인 올리려고 하므로 최소화하지 않음)
+                // shouldDeselectMarker: false (셀 마커 선택을 유지)
+                if mapStore.state.isPlaceInfoSheetPresented {
+                    mapStore.send(.hidePlaceInfo(shouldMinimizeTimeline: false, shouldDeselectMarker: false))
+                }
+                // Idle 핀 제거 (셀 마커를 탭했으므로)
+                if mapStore.state.idlePinCoordinate != nil {
+                    mapStore.send(.clearIdlePin)
+                }
                 // 먼저 타임라인 상태를 셀 전용으로 바꾼 뒤 시트를 중간 detent로 올립니다.
                 timeLineStore.send(.applyCellFilter(cellKey: cellKey, title: title))
                 selectedDetent = mapMidDetent

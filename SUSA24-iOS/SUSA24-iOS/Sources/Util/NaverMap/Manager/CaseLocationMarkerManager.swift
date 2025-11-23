@@ -22,6 +22,8 @@ final class CaseLocationMarkerManager {
     private var markerColors: [String: PinColorType] = [:]
     /// 현재 선택된 마커 ID
     private var selectedMarkerId: String?
+    /// Idle 핀 마커
+    private var idlePinMarker: NMFMarker?
     
     // MARK: - Public Methods
     
@@ -123,6 +125,34 @@ final class CaseLocationMarkerManager {
         marker.zIndex = 0
         
         selectedMarkerId = nil
+    }
+    
+    /// Idle 핀을 표시합니다.
+    /// - Parameters:
+    ///   - coordinate: 표시할 좌표
+    ///   - mapView: 네이버 지도 뷰
+    func makeIdlePin(at coordinate: MapCoordinate, on mapView: NMFMapView) async {
+        // 기존 Idle 핀이 있으면 제거
+        if let existingMarker = idlePinMarker { existingMarker.mapView = nil }
+        
+        // 새 Idle 핀 생성
+        let marker = NMFMarker()
+        marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+        
+        // pin_idle 이미지 사용
+        guard let icon = UIImage(named: "pin_idle") else { return }
+        marker.iconImage = NMFOverlayImage(image: icon)
+        marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
+        marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        marker.mapView = mapView
+        
+        idlePinMarker = marker
+    }
+    
+    /// Idle 핀을 제거합니다.
+    func removeIdlePin() async {
+        idlePinMarker?.mapView = nil
+        idlePinMarker = nil
     }
     
     private struct MarkerModel {

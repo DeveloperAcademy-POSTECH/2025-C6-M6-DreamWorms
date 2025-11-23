@@ -73,6 +73,8 @@ struct MapFeature: DWReducer {
         /// 사용자가 지도에서 마지막으로 탭한 좌표입니다.
         /// - 새 핀 생성 시 Location.pointLatitude / pointLongitude 로 사용됩니다.
         var selectedCoordinate: MapCoordinate?
+        /// Idle 핀을 표시할 좌표입니다. (빈 공간 탭 시 표시되는 임시 핀)
+        var idlePinCoordinate: MapCoordinate?
         
         // MARK: 지도 레이어/필터 UI 상태
         
@@ -97,6 +99,8 @@ struct MapFeature: DWReducer {
         // MARK: - 위치정보 시트 관련 상태
         
         /// 위치정보 시트의 표시 상태입니다.
+        /// - `true`: PlaceInfoSheet가 표시됨
+        /// - `false`: PlaceInfoSheet가 닫힘
         var isPlaceInfoSheetPresented: Bool = false
         /// 위치정보 시트의 로딩 중 여부입니다.
         var isPlaceInfoLoading: Bool = false
@@ -104,10 +108,10 @@ struct MapFeature: DWReducer {
         var selectedPlaceInfo: PlaceInfo?
         /// 선택된 위치의 기존 핀 정보가 있는가?
         var existingLocation: Location?
-        /// 타임라인 시트가 최소 높이인지 여부입니다.
-        /// - `true`: 타임라인 시트가 최소 높이 (PlaceInfoSheet 표시 가능)
-        /// - `false`: 타임라인 시트가 올라와 있음 (PlaceInfoSheet 표시 안 함)
-        var isTimelineSheetMinimized: Bool = true
+        /// 타임라인 시트의 표시 상태입니다.
+        /// - `true`: 타임라인 시트가 표시됨 (올라와 있음)
+        /// - `false`: 타임라인 시트가 닫힘 (최소화됨)
+        var isTimelineSheetPresented: Bool = false
         /// 마커 선택 해제 트리거 (PlaceInfoSheet 닫힐 때 사용)
         var deselectMarkerTrigger: UUID?
         
@@ -168,10 +172,14 @@ struct MapFeature: DWReducer {
         /// - Parameter placeInfo: 표시할 위치정보 데이터
         case showPlaceInfo(PlaceInfo)
         /// 위치정보 시트를 닫는 액션입니다. 사용자가 시트를 드래그 내려 닫거나 Close 버튼을 누를 때 호출됩니다.
-        case hidePlaceInfo
+        /// - Parameter shouldMinimizeTimeline: 타임라인 시트를 최소화할지 여부 (기본값: true)
+        /// - Parameter shouldDeselectMarker: 마커 선택을 해제할지 여부 (기본값: true)
+        case hidePlaceInfo(shouldMinimizeTimeline: Bool = true, shouldDeselectMarker: Bool = true)
+        /// Idle 핀을 제거하는 액션입니다. 마커를 탭했을 때 호출됩니다.
+        case clearIdlePin
         /// 타임라인 시트 상태를 업데이트하는 액션입니다.
-        /// - Parameter isMinimized: 타임라인 시트가 최소 높이인지 여부
-        case updateTimelineSheetState(isMinimized: Bool)
+        /// - Parameter isActive: 타임라인 시트가 활성화되어 있는지 여부
+        case updateTimelineSheetState(isActive: Bool)
         
         // MARK: - CCTV 데이터 로드
         
@@ -303,21 +311,33 @@ struct MapFeature: DWReducer {
         case let .mapTapped(latlng):
             // 타임라인 시트가 올라와 있으면 PlaceInfoSheet 표시 안 함 (API 요청도 하지 않음)
             // resetDetentToShort Notification으로 시트는 이미 최소화 요청됨
-            guard state.isTimelineSheetMinimized else { return .none }
-            
-            // 위치정보 시트 표시 및 로딩 상태 설정
-            // 새 위치 탭하면 기존 핀 정보는 즉시 비워야 함
-            state.existingLocation = nil
-            state.isEditMode = false
+
             // 사용자가 탭한 좌표를 저장해 핀 추가 시 활용합니다.
-            state.selectedCoordinate = MapCoordinate(
+            let coordinate = MapCoordinate(
                 latitude: latlng.lat,
                 longitude: latlng.lng
             )
+            state.selectedCoordinate = coordinate
             
-            state.isPlaceInfoLoading = true
-            state.isPlaceInfoSheetPresented = true
-            state.selectedPlaceInfo = nil
+            // 새 위치 탭하면 기존 핀 정보는 즉시 비워야 함
+            state.existingLocation = nil
+            state.isEditMode = false
+            
+            // Idle 핀 표시
+            state.idlePinCoordinate = coordinate
+            
+            // 카메라 이동은 항상 수행 (PlaceInfoSheet 상태와 관계없이)
+            state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
+            
+            if state.isPlaceInfoSheetPresented {
+                state.isPlaceInfoLoading = true
+                state.selectedPlaceInfo = nil
+            } else {
+                state.isPlaceInfoLoading = true
+                state.isPlaceInfoSheetPresented = true
+                state.selectedPlaceInfo = nil
+            }
             
             let requestDTO = latlng.toKakaoRequestDTO()
             
@@ -354,15 +374,23 @@ struct MapFeature: DWReducer {
                 return .none
             }
             
+            // Idle 핀 제거 (마커를 탭했으므로)
+            state.idlePinCoordinate = nil
+            
+            // 카메라 이동
+            let coordinate = MapCoordinate(
+                latitude: location.pointLatitude,
+                longitude: location.pointLongitude
+            )
+            state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
+            
             // PlaceInfoSheet 표시 시 타임라인 시트를 최소화
             NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
             
             state.existingLocation = location
             state.isEditMode = false
-            state.selectedCoordinate = MapCoordinate(
-                latitude: location.pointLatitude,
-                longitude: location.pointLongitude
-            )
+            state.selectedCoordinate = coordinate
             
             state.isPlaceInfoLoading = true
             state.isPlaceInfoSheetPresented = true
@@ -385,19 +413,30 @@ struct MapFeature: DWReducer {
                 }
             }
             
-        case .hidePlaceInfo:
+        case let .hidePlaceInfo(shouldMinimizeTimeline, shouldDeselectMarker):
             // 위치정보 시트 닫기 및 상태 초기화
             state.isPlaceInfoSheetPresented = false
             state.isPlaceInfoLoading = false
             state.selectedPlaceInfo = nil
-            // 마커 선택 해제 트리거
-            state.deselectMarkerTrigger = UUID()
-            // PlaceInfoSheet 닫힐 때도 타임라인 시트를 최소화 상태로 유지
-            NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
+            // Idle 핀 제거
+            state.idlePinCoordinate = nil
+            
+            // 조건부로 마커 선택 해제 및 타임라인 최소화
+            if shouldDeselectMarker {
+                state.deselectMarkerTrigger = UUID()
+            }
+            if shouldMinimizeTimeline {
+                NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
+            }
             return .none
             
-        case let .updateTimelineSheetState(isMinimized):
-            state.isTimelineSheetMinimized = isMinimized
+        case .clearIdlePin:
+            // Idle 핀 제거
+            state.idlePinCoordinate = nil
+            return .none
+            
+        case let .updateTimelineSheetState(isActive):
+            state.isTimelineSheetPresented = isActive
             return .none
             
         case let .cameraIdle(bounds, zoomLevel):
@@ -444,8 +483,11 @@ struct MapFeature: DWReducer {
         case let .moveToSearchResult(coordinate, placeInfo):
             // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
             state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
             // 검색 진입 시에도 선택된 좌표 컨텍스트를 맞춰둡니다.
             state.selectedCoordinate = coordinate
+            // Idle 핀 표시
+            state.idlePinCoordinate = coordinate
             
             // PlaceInfoSheet 표시 (showPlaceInfo 재사용)
             state.selectedPlaceInfo = placeInfo
@@ -460,6 +502,7 @@ struct MapFeature: DWReducer {
         case let .moveToLocation(coordinate):
             // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
             state.cameraTargetCoordinate = coordinate
+            state.shouldAnimateCameraTarget = true
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none
@@ -588,6 +631,8 @@ struct MapFeature: DWReducer {
             state.existingLocation = location
             updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
+            // Idle 핀 제거 (실제 마커가 표시되므로)
+            state.idlePinCoordinate = nil
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
             }
