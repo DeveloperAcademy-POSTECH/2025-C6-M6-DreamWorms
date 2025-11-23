@@ -68,10 +68,12 @@ final class CaseLocationMarkerManager {
         for (id, count) in cellCounts {
             guard let overlay = markers[id], !isSelectedMarker(id) else { continue }
             
-            let icon = await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
+            let newType = MarkerType.cellWithCount(count: count)
+            let icon = await MarkerImageCache.shared.image(for: newType)
             overlay.iconImage = NMFOverlayImage(image: icon)
             overlay.mapView = mapView
-            markerTypes[id] = .cellWithCount(count: count)
+            markerTypes[id] = newType
+            applyMarkerLayerOptions(to: overlay, markerType: newType)
         }
     }
     
@@ -81,10 +83,12 @@ final class CaseLocationMarkerManager {
         for (id, overlay) in markers {
             guard case .cellWithCount = markerTypes[id], !isSelectedMarker(id) else { continue }
             
-            let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true))
+            let newType = MarkerType.cell(isVisited: true)
+            let icon = await MarkerImageCache.shared.image(for: newType)
             overlay.iconImage = NMFOverlayImage(image: icon)
             overlay.mapView = mapView
-            markerTypes[id] = .cell(isVisited: true)
+            markerTypes[id] = newType
+            applyMarkerLayerOptions(to: overlay, markerType: newType)
         }
     }
     
@@ -122,7 +126,7 @@ final class CaseLocationMarkerManager {
         let pinColor = markerColors[selectedId]
         let smallIcon = await getSmallMarkerIcon(for: markerType, pinColor: pinColor)
         marker.iconImage = NMFOverlayImage(image: smallIcon)
-        marker.zIndex = 0
+        applyMarkerLayerOptions(to: marker, markerType: markerType)
         
         selectedMarkerId = nil
     }
@@ -144,6 +148,13 @@ final class CaseLocationMarkerManager {
         marker.iconImage = NMFOverlayImage(image: icon)
         marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        
+        // Idle 핀은 사용자 위치 마커보다 높지만 선택된 마커보다 낮음
+        marker.zIndex = 200
+        marker.isHideCollidedSymbols = true
+        marker.isHideCollidedMarkers = false // 임시 마커이므로 겹침 처리 불필요
+        marker.isForceShowIcon = false
+        
         marker.mapView = mapView
         
         idlePinMarker = marker
@@ -181,6 +192,18 @@ final class CaseLocationMarkerManager {
         } else {
             marker.captionText = ""
         }
+    }
+    
+    /// 마커에 레이어 옵션을 적용합니다.
+    /// - Parameters:
+    ///   - marker: 레이어 옵션을 적용할 마커
+    ///   - markerType: 마커 타입
+    private func applyMarkerLayerOptions(to marker: NMFMarker, markerType: MarkerType) {
+        marker.zIndex = markerType.zIndex
+        marker.isHideCollidedSymbols = markerType.shouldHideCollidedSymbols
+        marker.isHideCollidedMarkers = markerType.shouldHideCollidedMarkers
+        marker.isForceShowIcon = markerType.shouldForceShowIcon
+        marker.isHideCollidedCaptions = markerType.shouldHideCollidedCaptions
     }
     
     /// 사용자 위치 마커 아이콘을 생성합니다.
@@ -221,6 +244,9 @@ final class CaseLocationMarkerManager {
         overlay.iconImage = NMFOverlayImage(image: icon)
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         overlay.height = CGFloat(NMF_MARKER_SIZE_AUTO)
+        
+        // 레이어 속성 적용
+        applyMarkerLayerOptions(to: overlay, markerType: marker.markerType)
         
         // 핀 이름을 캡션으로 표시
         setCaption(on: overlay, title: marker.title)
@@ -437,6 +463,9 @@ final class CaseLocationMarkerManager {
                     // 색상 정보 저장 (선택 해제 시 복원용)
                     markerColors[markerInfo.id] = markerInfo.pinColor
                 }
+                
+                // 레이어 속성 업데이트
+                applyMarkerLayerOptions(to: overlay, markerType: markerInfo.markerType)
                 
                 // 핀 이름 캡션 업데이트
                 setCaption(on: overlay, title: markerInfo.title)
