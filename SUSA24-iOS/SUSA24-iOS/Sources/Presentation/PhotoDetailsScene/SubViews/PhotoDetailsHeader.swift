@@ -23,9 +23,16 @@ struct PhotoDetailsHeader: View {
                 )
                 Spacer()
                 
-                Text("\(currentIndex)/\(totalCount)")
-                    .font(.bodyMedium16)
-                    .foregroundColor(.labelNormal)
+                HStack {
+                    Text("\(currentIndex)/\(totalCount)")
+                        .font(.bodyMedium16)
+                        .foregroundColor(.labelNormal)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(.white.opacity(0.5))
+                .cornerRadius(100)
+                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 2)
                 
                 Spacer()
                 

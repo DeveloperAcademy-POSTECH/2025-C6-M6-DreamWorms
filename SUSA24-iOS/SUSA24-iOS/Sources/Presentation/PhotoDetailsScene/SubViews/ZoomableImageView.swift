@@ -15,7 +15,9 @@ struct ZoomableImageView: View {
         GeometryReader { geometry in
             Image(uiImage: image)
                 .resizable()
-                // TODO: 촬영 session 비율 조정 문제 검토
+                .aspectRatio(contentMode: .fill)
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped()
                 .scaleEffect(zoomState.scale, anchor: zoomState.anchor)
                 .offset(zoomState.offset)
                 .applyZoomGestures(
