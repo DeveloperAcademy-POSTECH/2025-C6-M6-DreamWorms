@@ -733,17 +733,6 @@
         }
       }
     },
-    "memo_write_empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "장소에 대한 상세정보를 추가하세요."
-          }
-        }
-      }
-    },
     "memo_write_placeHolder" : {
       "comment" : "메모 노트 작성 시 placeholder",
       "extractionState" : "manual",
@@ -751,7 +740,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "장소에 대한 상세정보를 메모하세요."
+            "value" : "장소에 대한 상세정보를 기록하세요."
           }
         }
       }

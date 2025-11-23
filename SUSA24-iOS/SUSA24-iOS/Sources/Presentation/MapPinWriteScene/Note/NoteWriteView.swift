@@ -27,7 +27,7 @@ struct NoteWriteView: View {
     
     var body: some View {
         ZStack {
-            Color(.labelAssistive)
+            Color(.sheetBackground)
                 .ignoresSafeArea()
                 .onTapGesture {
                     hideKeyboard()
