@@ -9,116 +9,80 @@ import SwiftUI
 
 /// 핀 추가/수정 화면
 struct PinWriteView: View {
-    let placeInfo: PlaceInfo
-    let coordinate: MapCoordinate?
-    let existingLocation: Location?
-    let caseId: UUID
-    let isEditMode: Bool
-    let onSave: (Location) -> Void
+    @State private var store: DWStore<PinWriteFeature>
     let onCancel: () -> Void
     
-    @State private var pinName: String = ""
-    @State private var selectedColor: PinColorType = .black
-    @State private var selectedCategory: PinCategoryType = .home
-    @FocusState private var isPinNameFocused: Bool
+    // MARK: - Initializer
     
-    /// 유효성 검사: 한글자 이상, 20자 이하, 숫자/기호(이모지 제외) 불가
-    private var isValidPinName: Bool {
-        let trimmedName = pinName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty, trimmedName.count <= 20 else { return false }
-        
-        // 한글, 영문, 이모지만 허용
-        let allowedCharacterSet = CharacterSet.letters
-            .union(.whitespaces)
-        
-        // 숫자와 일반 기호 제거한 문자열
-        let filtered = trimmedName.unicodeScalars.filter { scalar in
-            allowedCharacterSet.contains(scalar) || scalar.properties.isEmoji
-        }
-        
-        return String(String.UnicodeScalarView(filtered)) == trimmedName
+    init(
+        store: DWStore<PinWriteFeature>,
+        onCancel: @escaping () -> Void
+    ) {
+        self._store = State(initialValue: store)
+        self.onCancel = onCancel
     }
+    
+    // MARK: - Body
     
     var body: some View {
         VStack(spacing: 0) {
             PinWriteHeader(
-                title: isEditMode ? String(localized: .pinModify) : String(localized: .pinAdd),
-                isSaveEnabled: isValidPinName,
-                onCloseTapped: onCancel,
-                onSaveTapped: savePin
+                title: store.state.isEditMode ? String(localized: .pinModify) : String(localized: .pinAdd),
+                isSaveEnabled: store.state.isValidPinName,
+                onCloseTapped: {
+                    store.send(.cancelTapped)
+                    onCancel()
+                },
+                onSaveTapped: {
+                    store.send(.saveTapped)
+                }
             )
             .padding(.top, 8)
             .padding(.bottom, 6)
             
             ScrollView {
-                // 핀 이름 입력
-                PinNameInputSection(
-                    pinName: $pinName,
-                    isValid: isValidPinName,
-                    isFocused: $isPinNameFocused
-                )
-                .padding(.bottom, 24)
-                
-                // 핀 색상 선택
-                PinColorSelectionSection(
-                    selectedColor: $selectedColor
-                )
-                .padding(.bottom, 24)
-                
-                // 핀 아이콘 선택
-                PinCategorySelectionSection(
-                    selectedCategory: $selectedCategory,
-                    selectedColor: selectedColor
-                )
+                VStack(spacing: 24) {
+                    // 핀 이름 입력
+                    PinNameInputSection(
+                        pinName: Binding(
+                            get: { store.state.pinName },
+                            set: { store.send(.updatePinName($0)) }
+                        ),
+                        isValid: store.state.isValidPinName
+                    )
+                    
+                    // 핀 색상 선택
+                    PinColorSelectionSection(
+                        selectedColor: Binding(
+                            get: { store.state.selectedColor },
+                            set: { store.send(.selectColor($0)) }
+                        )
+                    )
+                    
+                    // 핀 아이콘 선택
+                    PinCategorySelectionSection(
+                        selectedCategory: Binding(
+                            get: { store.state.selectedCategory },
+                            set: { store.send(.selectCategory($0)) }
+                        ),
+                        selectedColor: store.state.selectedColor
+                    )
+                }
             }
-            .padding(.bottom, 6)
-            .scrollIndicators(.hidden)
-            .scrollDismissesKeyboard(.interactively)
-                        
+            .padding(.bottom, 24)
+            
             DWButton(
-                isEnabled: .constant(isValidPinName),
+                isEnabled: .constant(store.state.isValidPinName),
                 title: String(localized: .mapviewPinCreateButton)
             ) {
-                savePin()
+                store.send(.saveTapped)
             }
         }
         .padding(.horizontal, 16)
         .background(.labelAssistive)
-        .onAppear {
-            if let location = existingLocation {
-                pinName = location.title ?? ""
-                selectedColor = PinColorType(rawValue: location.colorType) ?? .black
-                selectedCategory = PinCategoryType(rawValue: location.locationType) ?? .home
-            }
-            isPinNameFocused = true
+        .task {
+            store.send(.onAppear)
         }
-    }
-    
-    private func savePin() {
-        // 좌표 결정 로직
-        let coordinateSource = existingLocation.map {
-            MapCoordinate(latitude: $0.pointLatitude, longitude: $0.pointLongitude)
-        } ?? coordinate
-        // 좌표가 없는 예외 상황: 저장을 진행하지 않고 로그만 남깁니다.
-        guard let coordinateSource else { return }
-        
-        let location = Location(
-            id: existingLocation?.id ?? UUID(),
-            address: placeInfo.jibunAddress,
-            title: pinName.trimmingCharacters(in: .whitespacesAndNewlines),
-            note: existingLocation?.note,
-            pointLatitude: coordinateSource.latitude,
-            pointLongitude: coordinateSource.longitude,
-            boxMinLatitude: nil,
-            boxMinLongitude: nil,
-            boxMaxLatitude: nil,
-            boxMaxLongitude: nil,
-            locationType: selectedCategory.rawValue,
-            colorType: selectedColor.rawValue,
-            receivedAt: Date()
-        )
-        
-        onSave(location)
     }
 }
 
@@ -129,13 +93,10 @@ struct PinWriteView: View {
 struct PinNameInputSection: View {
     @Binding var pinName: String
     let isValid: Bool
-    let isFocused: FocusState<Bool>.Binding
     
     var characterCount: Int {
         pinName.count
     }
-    
-    let allowedCharactersRegex = "^[가-힣A-Za-z0-9 \\-_/.,;:!?@#$%^&*()+=<>\\[\\]{}|~`]*$"
     
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
@@ -144,7 +105,6 @@ struct PinNameInputSection: View {
                     .font(.bodyMedium14)
                     .foregroundStyle(.labelNormal)
                     .padding(.leading, 8)
-                    .focused(isFocused)
                     .onChange(of: pinName) { _, newValue in
                         pinName = validateInput(newValue)
                     }
@@ -165,6 +125,7 @@ struct PinNameInputSection: View {
                         .font(.numberMedium12)
                         .foregroundStyle(.labelAlternative)
                 }
+                .padding(.trailing, 10)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 18)
@@ -176,25 +137,35 @@ struct PinNameInputSection: View {
     private func validateInput(_ input: String) -> String {
         var filtered = input
         
-        // 1) 이모지 제거 + 허용 문자만 남기기
+        // 1) 이모지 완전 제거 - 모든 방법 동원
         filtered = filtered.unicodeScalars
             .filter { scalar in
-                // 이모지 범위 차단
-                !CharacterSet.emojis.contains(scalar) &&
-                    // 허용 문자만 허용
-                    CharacterSet.allowedCharacters.contains(scalar)
+                // Emoji 속성 체크
+                if scalar.properties.isEmoji {
+                    return false
+                }
+                // Emoji Presentation 체크
+                if scalar.properties.isEmojiPresentation {
+                    return false
+                }
+                // 알려진 이모지 범위 체크
+                if CharacterSet.emojis.contains(scalar) {
+                    return false
+                }
+                // Variation Selector (이모지 스타일 선택자) 제거
+                if (0xFE00 ... 0xFE0F).contains(scalar.value) {
+                    return false
+                }
+                // Zero Width Joiner (이모지 결합용) 제거
+                if scalar.value == 0x200D {
+                    return false
+                }
+                return true
             }
             .map(String.init)
             .joined()
         
-        // 2) 정규식으로 다시 한번 허용 문자만 필터링
-        if filtered.range(of: allowedCharactersRegex, options: .regularExpression) == nil {
-            filtered = String(filtered.unicodeScalars.filter {
-                CharacterSet.allowedCharacters.contains($0)
-            }.map(String.init).joined())
-        }
-        
-        // 3) 최대 20자 제한
+        // 2) 최대 20자 제한
         if filtered.count > 20 {
             filtered = String(filtered.prefix(20))
         }
@@ -214,17 +185,23 @@ struct PinColorSelectionSection: View {
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
             
-            HStack(spacing: 12) {
-                ForEach(PinColorType.allCases, id: \.rawValue) { color in
+            HStack(spacing: 0) {
+                ForEach(Array(PinColorType.allCases.enumerated()), id: \.1.rawValue) { index, color in
                     ColorCircleButton(
                         color: color,
                         isSelected: selectedColor == color,
                         onTap: { selectedColor = color }
                     )
+                    
+                    // 마지막 요소가 아닐 때만 Spacer 추가
+                    if index != PinColorType.allCases.count - 1 {
+                        Spacer()
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .center)
+            .frame(maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
@@ -240,8 +217,8 @@ struct ColorCircleButton: View {
             Circle()
                 .fill(color.color)
                 .frame(
-                    width: isSelected ? 42 : 36,
-                    height: isSelected ? 42 : 36
+                    width: isSelected ? 34 : 28,
+                    height: isSelected ? 34 : 28
                 )
                 .overlay {
                     if isSelected {
@@ -252,7 +229,7 @@ struct ColorCircleButton: View {
                     }
                 }
         }
-        .frame(width: 42, height: 42)
+        .frame(width: 36, height: 36)
     }
 }
 
@@ -268,7 +245,7 @@ struct PinCategorySelectionSection: View {
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
             
-            VStack(spacing: 4) {
+            VStack {
                 // Int16 기준으로 정렬 (home=0, work=1, custom=3)
                 ForEach(
                     PinCategoryType.allCases.sorted(by: { $0.rawValue < $1.rawValue }),
@@ -336,85 +313,57 @@ struct CategoryCard: View {
             .background(.white)
             .clipShape(RoundedRectangle(cornerRadius: 18))
         }
-        .buttonStyle(.plain) // 깜빡이는 효과 제거 목적
+        .buttonStyle(.plain) // 깜빡이는 효과 제거
     }
 }
 
 // MARK: - CharacterSet 확장
 
 extension CharacterSet {
-    /// 이모지 문자 영역 정의
+    /// 이모지 문자 영역 정의 - 완전 차단을 위한 모든 범위 포함
     static let emojis: CharacterSet = {
         var set = CharacterSet()
-        set.insert(charactersIn: "\u{1F600}" ... "\u{1F64F}") // Emoticons
-        set.insert(charactersIn: "\u{1F300}" ... "\u{1F5FF}") // Misc Symbols and Pictographs
-        set.insert(charactersIn: "\u{1F680}" ... "\u{1F6FF}") // Transport & Map Symbols
-        set.insert(charactersIn: "\u{1F1E6}" ... "\u{1F1FF}") // Flags
-        set.insert(charactersIn: "\u{2600}" ... "\u{26FF}") // Misc
-        set.insert(charactersIn: "\u{2700}" ... "\u{27BF}") // Dingbats
+        
+        // Emoticons (표정)
+        set.insert(charactersIn: "\u{1F600}" ... "\u{1F64F}")
+        
+        // Miscellaneous Symbols and Pictographs (기호와 그림문자)
+        set.insert(charactersIn: "\u{1F300}" ... "\u{1F5FF}")
+        
+        // Transport and Map Symbols (교통 및 지도 기호)
+        set.insert(charactersIn: "\u{1F680}" ... "\u{1F6FF}")
+        
+        // Regional Indicator Symbols (국기)
+        set.insert(charactersIn: "\u{1F1E6}" ... "\u{1F1FF}")
+        
+        // Supplemental Symbols and Pictographs
+        set.insert(charactersIn: "\u{1F900}" ... "\u{1F9FF}")
+        
+        // Symbols and Pictographs Extended-A
+        set.insert(charactersIn: "\u{1FA70}" ... "\u{1FAFF}")
+        
+        // Miscellaneous Symbols (기타 기호)
+        set.insert(charactersIn: "\u{2600}" ... "\u{26FF}")
+        
+        // Dingbats
+        set.insert(charactersIn: "\u{2700}" ... "\u{27BF}")
+        
+        // Enclosed Alphanumeric Supplement
+        set.insert(charactersIn: "\u{1F100}" ... "\u{1F1FF}")
+        
+        // Enclosed Ideographic Supplement
+        set.insert(charactersIn: "\u{1F200}" ... "\u{1F2FF}")
+        
+        // Playing Cards, Mahjong Tiles
+        set.insert(charactersIn: "\u{1F0A0}" ... "\u{1F0FF}")
+        
+        // Miscellaneous Technical (일부 특수 기호)
+        set.insert(charactersIn: "\u{2300}" ... "\u{23FF}")
+        
+        // Enclosed Characters (원 안의 문자)
+        set.insert(charactersIn: "\u{3200}" ... "\u{32FF}")
+        set.insert(charactersIn: "\u{3300}" ... "\u{33FF}")
+        
         return set
     }()
-    
-    /// 허용 문자 (숫자/영문/한글/기본 기호)
-    static let allowedCharacters: CharacterSet = {
-        let letters = CharacterSet.letters
-        let numbers = CharacterSet.decimalDigits
-        let korean = CharacterSet(charactersIn: "가" ... "힣")
-        let symbols = CharacterSet(charactersIn: "-_/.,;:!?@#$%^&*()+=<>[]{}|~` ")
-        
-        return letters
-            .union(numbers)
-            .union(korean)
-            .union(symbols)
-    }()
 }
-
-// MARK: - Preview
-
-// #Preview("핀 추가") {
-//    PinWriteView(
-//        placeInfo: PlaceInfo(
-//            title: "선택한 위치",
-//            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-//            roadAddress: "대구광역시 달서구 상원로 27",
-//            phoneNumber: "-"
-//        ),
-//        coordinate: MapCoordinate(latitude: 35.8563, longitude: 128.5557),
-//        existingLocation: nil,
-//        caseId: UUID(),
-//        isEditMode: false,
-//        onSave: { _ in },
-//        onCancel: {}
-//    )
-// }
-//
-// #Preview("핀 수정") {
-//    PinWriteView(
-//        placeInfo: PlaceInfo(
-//            title: "선택한 위치",
-//            jibunAddress: "대구광역시 달서구 상인동 1453-7",
-//            roadAddress: "대구광역시 달서구 상원로 27",
-//            phoneNumber: "-"
-//        ),
-//        coordinate: MapCoordinate(latitude: 35.8563, longitude: 128.5557),
-//        existingLocation: Location(
-//            id: UUID(),
-//            address: "대구광역시 달서구 상인동 1453-7",
-//            title: "2동 304호",
-//            note: nil,
-//            pointLatitude: 35.8563,
-//            pointLongitude: 128.5557,
-//            boxMinLatitude: nil,
-//            boxMinLongitude: nil,
-//            boxMaxLatitude: nil,
-//            boxMaxLongitude: nil,
-//            locationType: 0,
-//            colorType: 2,
-//            receivedAt: Date()
-//        ),
-//        caseId: UUID(),
-//        isEditMode: true,
-//        onSave: { _ in },
-//        onCancel: {}
-//    )
-// }
