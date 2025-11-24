@@ -142,6 +142,7 @@ struct TimeLineFeature: DWReducer {
             )
             NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
             dispatcher.send(.moveToLocation(coordinate: coordinate))
+            
             return .none
             
         case let .scrollToDate(date):

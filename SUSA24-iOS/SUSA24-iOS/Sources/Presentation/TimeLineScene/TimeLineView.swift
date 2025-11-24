@@ -98,6 +98,7 @@ struct TimeLineView: View {
                     groupedLocations: store.state.displayGroupedLocations,
                     scrollTargetID: store.state.scrollTarget?.dateID,
                     onLocationTapped: { location in
+                        isSearchFocused = false
                         store.send(.locationTapped(location))
                     }
                 )
