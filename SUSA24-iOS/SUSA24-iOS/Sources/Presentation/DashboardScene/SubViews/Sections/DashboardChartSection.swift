@@ -32,10 +32,7 @@ struct DashboardChartSection: View {
                                 )?.selectedWeekday ?? .mon
                             },
                             set: { newValue in
-                                send(.setChartWeekday(
-                                    id: chart.id,
-                                    weekday: newValue
-                                ))
+                                send(.setChartWeekday(id: chart.id, weekday: newValue))
                             }
                         )
 

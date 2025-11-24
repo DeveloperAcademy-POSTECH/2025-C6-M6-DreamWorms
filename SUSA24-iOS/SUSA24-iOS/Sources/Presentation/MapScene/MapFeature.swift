@@ -123,10 +123,10 @@ struct MapFeature: DWReducer {
         /// 수정 모드 여부 (true: 수정, false: 추가)
         var isEditMode: Bool = false
         
-        // MARK: - Memo Edit
+        // MARK: - Note Write
 
         /// 형사 노트 작성/수정 화면 표시 여부
-        var isMemoEditPresented: Bool = false
+        var isNoteWritePresented: Bool = false
         
         // MARK: - Computed Properties
         
@@ -235,24 +235,19 @@ struct MapFeature: DWReducer {
         case confirmDeletePin
         case deletePinCompleted
         
-        /// 핀 저장 (추가/수정)
-        case savePin(Location)
-        case savePinCompleted(Location)
+        /// 핀 저장 완료 (PinWriteFeature로부터 호출)
+        case pinSaveCompleted(Location)
         /// 핀 추가/수정 화면 닫기
         case closePinWrite
         
-        // MARK: - Memo Actions
+        // MARK: - Note Actions
         
         /// 형사 노트 버튼 탭
-        case memoButtonTapped
-        /// 형사 노트 저장
-        case memoSaved(String?)
-        /// 형사 노즈 저장 완료
-        case memoSaveCompleted(Location)
+        case noteButtonTapped
+        /// 형사 노트 저장 완료 (NoteWriteFeature로부터 호출)
+        case noteSaveCompleted(String?)
         /// 형사 노트 화면 닫기
-        case closeMemoEdit
-        /// 형사 노트다 닫히면 다시 PinInfo가 열려야한다
-        case reopenPlaceInfoAfterMemo
+        case closeNoteWrite
     }
     
     // MARK: - Reducer
@@ -440,7 +435,10 @@ struct MapFeature: DWReducer {
         case let .updateTimelineSheetState(isActive):
             state.isTimelineSheetPresented = isActive
             // 시트가 닫힐 때 마커 선택 해제
-            if !isActive { state.deselectMarkerTrigger = UUID() }
+            // 단, PlaceInfoSheet가 표시될 때는 마커를 해제하지 않음 (커스텀 핀 선택 유지)
+            if !isActive, !state.isPlaceInfoSheetPresented {
+                state.deselectMarkerTrigger = UUID()
+            }
             return .none
             
         case let .cameraIdle(bounds, zoomLevel):
@@ -488,6 +486,8 @@ struct MapFeature: DWReducer {
             // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
             state.cameraTargetCoordinate = coordinate
             state.shouldAnimateCameraTarget = true
+            // 검색 결과 선택 시 줌 레벨 15 적용
+            state.cameraTargetZoomLevel = 15
             // 검색 진입 시에도 선택된 좌표 컨텍스트를 맞춰둡니다.
             state.selectedCoordinate = coordinate
             // Idle 핀 표시
@@ -507,6 +507,7 @@ struct MapFeature: DWReducer {
             // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
             state.cameraTargetCoordinate = coordinate
             state.shouldAnimateCameraTarget = true
+            state.idlePinCoordinate = nil
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none
@@ -587,7 +588,7 @@ struct MapFeature: DWReducer {
 
             state.isMapLayerSheetPresented = false
             state.isPlaceInfoSheetPresented = false
-            state.isMemoEditPresented = false
+            state.isNoteWritePresented = false
 
             state.isPinWritePresented = true
             
@@ -596,7 +597,7 @@ struct MapFeature: DWReducer {
         case .editPinTapped:
             state.isMapLayerSheetPresented = false
             state.isPlaceInfoSheetPresented = false
-            state.isMemoEditPresented = false
+            state.isNoteWritePresented = false
 
             state.isEditMode = true
             state.isPinWritePresented = true
@@ -622,27 +623,12 @@ struct MapFeature: DWReducer {
             state.selectedPlaceInfo = nil
             return .none
             
-        case let .savePin(location):
-            return .task { [repository, caseId = state.caseId] in
-                do {
-                    if let _ = try await repository.checkLocationExists(address: location.address, caseId: caseId!) {
-                        try await repository.updateLocation(location)
-                    } else {
-                        try await repository.createLocations(data: [location], caseId: caseId!)
-                    }
-                    return .savePinCompleted(location)
-                } catch {
-                    print("❌ savePin failed: \(error)")
-                    return .none
-                }
-            }
-            
-        case let .savePinCompleted(location):
+        case let .pinSaveCompleted(location):
+            // PinWriteFeature에서 이미 저장 완료
+            // State만 업데이트
             state.existingLocation = location
             updateLocationInState(location, state: &state, appendIfNotFound: true)
             state.isPinWritePresented = false
-            // Idle 핀 제거 (실제 마커가 표시되므로)
-            state.idlePinCoordinate = nil
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
             }
@@ -655,62 +641,37 @@ struct MapFeature: DWReducer {
             }
             return .none
                         
-        case .memoButtonTapped:
+        case .noteButtonTapped:
             state.isMapLayerSheetPresented = false
             state.isPinWritePresented = false
             state.isPlaceInfoSheetPresented = false
-            state.isMemoEditPresented = true
+            state.isNoteWritePresented = true
             return .none
             
-        case let .memoSaved(note):
-            state.isMemoEditPresented = false
-            
-            guard let existingLocation = state.existingLocation else { return .none }
-            
-            let updatedLocation = Location(
-                id: existingLocation.id,
-                address: existingLocation.address,
-                title: existingLocation.title,
-                note: note,
-                pointLatitude: existingLocation.pointLatitude,
-                pointLongitude: existingLocation.pointLongitude,
-                boxMinLatitude: existingLocation.boxMinLatitude,
-                boxMinLongitude: existingLocation.boxMinLongitude,
-                boxMaxLatitude: existingLocation.boxMaxLatitude,
-                boxMaxLongitude: existingLocation.boxMaxLongitude,
-                locationType: existingLocation.locationType,
-                colorType: existingLocation.colorType,
-                receivedAt: existingLocation.receivedAt
-            )
-            
-            return .task { [repository] in
-                do {
-                    try await repository.updateLocation(updatedLocation)
-                    return .memoSaveCompleted(updatedLocation)
-                } catch {
-                    return .none
-                }
+        case let .noteSaveCompleted(note):
+            // NoteWriteFeature에서 이미 저장 완료
+            // State의 existingLocation만 업데이트
+            if var existing = state.existingLocation {
+                existing.note = note
+                state.existingLocation = existing
+                updateLocationInState(existing, state: &state, appendIfNotFound: false)
             }
             
-        case let .memoSaveCompleted(updatedLocation):
-            state.existingLocation = updatedLocation
-            updateLocationInState(updatedLocation, state: &state, appendIfNotFound: false)
-
+            // NoteWrite 닫고 PlaceInfo 다시 표시
+            state.isNoteWritePresented = false
             if let info = state.selectedPlaceInfo {
                 return .send(.showPlaceInfo(info))
             }
             return .none
             
-        case .closeMemoEdit:
-            state.isMemoEditPresented = false
-            return .send(.reopenPlaceInfoAfterMemo)
+        case .closeNoteWrite:
+            state.isNoteWritePresented = false
             
-        case .reopenPlaceInfoAfterMemo:
-            guard let info = state.selectedPlaceInfo else { return .none }
-            return .task {
-                try? await Task.sleep(nanoseconds: 10_000_000)
-                return .showPlaceInfo(info)
+            // PlaceInfo를 다시 표시
+            if let info = state.selectedPlaceInfo {
+                return .send(.showPlaceInfo(info))
             }
+            return .none
         }
     }
 }
@@ -724,7 +685,7 @@ extension MapFeature.State {
         isMapLayerSheetPresented
             || isPlaceInfoSheetPresented
             || isPinWritePresented
-            || isMemoEditPresented
+            || isNoteWritePresented
     }
 }
 

@@ -1,14 +1,14 @@
 //
-//  MemoWriteHeader.swift
+//  NoteWriteHeader.swift
 //  SUSA24-iOS
 //
-//  Created by taeni on 11/13/25.
+//  Created by taeni on 11/21/25.
 //
 
 import SwiftUI
 
 /// 형사 노트 작성/수정 화면의 상단 헤더 컴포넌트
-struct MemoWriteHeader: View {
+struct NoteWriteHeader: View {
     let isSaveEnabled: Bool
     let onCloseTapped: () -> Void
     let onSaveTapped: () -> Void
@@ -43,11 +43,3 @@ struct MemoWriteHeader: View {
         .padding(.horizontal, 16)
     }
 }
-
-// #Preview {
-//    MemoWriteHeader(
-//        isSaveEnabled: true,
-//        onCloseTapped: {},
-//        onSaveTapped: {}
-//    )
-// }

@@ -78,6 +78,18 @@
         }
       }
     },
+    "bottomSheet_SearchBar_isEmpty" : {
+      "comment" : "기지국_검색_결과_없음",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(cellName)@ 검색 결과가 없습니다."
+          }
+        }
+      }
+    },
     "button_addCase" : {
       "comment" : "버튼_사건추가",
       "extractionState" : "manual",
@@ -498,7 +510,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "아직 데이터가 없습니다."
+            "value" : "이 요일의 데이터가 없습니다."
           }
         }
       }
@@ -733,17 +745,6 @@
         }
       }
     },
-    "memo_write_empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "장소에 대한 상세정보를 추가하세요."
-          }
-        }
-      }
-    },
     "memo_write_placeHolder" : {
       "comment" : "메모 노트 작성 시 placeholder",
       "extractionState" : "manual",
@@ -751,7 +752,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "장소에 대한 상세정보를 메모하세요."
+            "value" : "장소에 대한 상세정보를 기록하세요."
           }
         }
       }
@@ -1131,18 +1132,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "계속 추가"
-          }
-        }
-      }
-    },
-    "scanList_pin_delete_alert_button_confirm" : {
-      "comment" : "스캔 목록_핀 추가 취소 알람_삭제함",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "삭제하기"
           }
         }
       }

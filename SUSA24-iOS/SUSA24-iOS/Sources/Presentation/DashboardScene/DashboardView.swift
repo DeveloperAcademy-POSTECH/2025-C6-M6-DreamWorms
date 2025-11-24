@@ -26,11 +26,11 @@ struct DashboardView: View {
             case .visitDuration:
                 store.state.visitDurationSummary.isEmpty
                     ? "체류시간을 분석하고 있어요..."
-                    : normalizeTrailingDots(store.state.visitDurationSummary)
+                    : store.state.visitDurationSummary
             case .visitFrequency:
                 store.state.visitFrequencySummary.isEmpty
                     ? "방문 빈도를 분석하고 있어요..."
-                    : normalizeTrailingDots(store.state.visitFrequencySummary)
+                    : store.state.visitFrequencySummary
             }
         } else {
             // 분석 완료 or 실패 후
@@ -63,7 +63,7 @@ struct DashboardView: View {
                         set: { store.send(.setTab($0)) }
                     ),
                     topVisitDurationLocations: store.state.topVisitDurationLocations,
-                    topVisitFrequencyLocations: store.state.visitFrequencyLocations,
+                    topVisitFrequencyLocations: store.state.topVisitFrequencyLocations,
                     onCardTap: {
                         coordinator.push(
                             .locationOverviewScene(

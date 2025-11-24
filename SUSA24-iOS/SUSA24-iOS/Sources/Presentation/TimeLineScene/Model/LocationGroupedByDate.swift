@@ -128,8 +128,9 @@ extension LocationGroupedByDate {
             } else {
                 // 현재 배치의 시간 범위
                 let receivedTimes = batch.compactMap(\.receivedAt)
-                let startTime = receivedTimes.min() ?? Date()
-                let endTime = batch.count > 1 ? receivedTimes.max() : nil
+                let minTime = receivedTimes.min() ?? Date()
+                let startTime = minTime.addingTimeInterval(-5 * 60) // 첫 메시지 - 5분
+                let endTime = receivedTimes.max() ?? minTime // 마지막 메시지 시간 (단일 메시지도 포함)
 
                 // 그룹 생성
                 let state = stateResolver(addr)
@@ -149,8 +150,9 @@ extension LocationGroupedByDate {
 
         // 마지막 배치 처리
         let receivedTimes = batch.compactMap(\.receivedAt)
-        let startTime = receivedTimes.min() ?? Date()
-        let endTime = batch.count > 1 ? receivedTimes.max() : nil
+        let minTime = receivedTimes.min() ?? Date()
+        let startTime = minTime.addingTimeInterval(-5 * 60) // 첫 메시지 - 5분
+        let endTime = receivedTimes.max() ?? minTime // 마지막 메시지 시간 (단일 메시지도 포함)
         let state = stateResolver(addr)
 
         groups.append(ConsecutiveLocationGroup(

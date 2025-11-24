@@ -26,8 +26,7 @@ struct ReceiveMessageIntent: AppIntent {
     
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        print("========================================")
-        print("**** [AppIntent] 기지국 위치정보 저장 시작")
+        // 기지국 위치정보 저장 시작.
 
         // Repository 생성
         let context = PersistenceController.shared.container.viewContext
@@ -40,13 +39,9 @@ struct ReceiveMessageIntent: AppIntent {
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "+82", with: "0")
 
-        print("🔍 전화번호: \(senderPhoneNumber)")
-        print(" 정규화된 휴대전화 번호: \(normalizePhoneNumber)")
-
         // 2. 전화번호로 케이스 찾기
         guard let caseID = try await caseRepository.findCaseTest(byCasePhoneNumber: normalizePhoneNumber) else {
-            print(" X [AppIntent] 해당 전화번호로 등록된 사건을 찾을수 없습니다.")
-            print("========================================\n")
+            // 찾을 수 없는 전화번호 예외처리
             return .result(dialog: "등록되지 않은 전화번호입니다.")
         }
 
@@ -54,9 +49,7 @@ struct ReceiveMessageIntent: AppIntent {
 
         // 3. 주소 추출
         guard let address = MessageParser.extractAddress(from: messageBody) else {
-            print(" X [AppIntent] 주소를 추출할 수 없습니다.")
-            print("   본문: \(messageBody)")
-            print("========================================\n")
+            // 주소 추출 불가 예외처리
             return .result(dialog: "문자에서 주소를 추출할 수 없습니다.")
         }
 
@@ -69,8 +62,7 @@ struct ReceiveMessageIntent: AppIntent {
             guard let latitude = geocodeResult.latitude,
                   let longitude = geocodeResult.longitude
             else {
-                print(" X [AppIntent] 좌표 변환 실패")
-                print("========================================\n")
+                // 좌표 전환 실패 예외처리
                 return .result(dialog: "좌표 변환 실패")
             }
 
@@ -84,14 +76,11 @@ struct ReceiveMessageIntent: AppIntent {
                 longitude: longitude
             )
 
-            print("*** [AppIntent] 위치 정보 저장 완료")
-            print("========================================\n")
-            
+            // 위치 저장 완료
             return .result(dialog: "위치 저장 완료.")
 
         } catch {
-            print(" X [AppIntent] 오류 발생: \(error)")
-            print("========================================\n")
+            // App Intent 위치 저장 실패
             return .result(dialog: "위치 저장 실패")
         }
     }

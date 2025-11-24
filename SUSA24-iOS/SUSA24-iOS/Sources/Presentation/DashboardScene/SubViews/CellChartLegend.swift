@@ -10,10 +10,15 @@ import SwiftUI
 struct CellChartLegend: View {
     let series: [HourlyVisit]
     let weekStyleScale: KeyValuePairs<String, Color>
+    let weekRanges: [Int: String]
     
     private var availableWeeks: [Int] {
         let set = Set(series.map(\.weekIndex))
         return set.sorted()
+    }
+    
+    private func label(for week: Int) -> String {
+        weekRanges[week] ?? String(localized: .chartLegendWeek(number: week))
     }
     
     var body: some View {
@@ -25,8 +30,9 @@ struct CellChartLegend: View {
                         Capsule()
                             .fill(weekStyleScale.first(where: { $0.key == "\(week)주차" })?.value ?? .labelAssistive)
                             .frame(width: 10, height: 3)
-                        Text(.chartLegendWeek(number: week))
-                            .font(.bodyMedium10)
+                        
+                        Text(label(for: week))
+                            .font(.numberMedium12)
                             .foregroundStyle(.labelNormal)
                     }
                 }
