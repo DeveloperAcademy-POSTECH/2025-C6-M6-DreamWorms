@@ -30,6 +30,6 @@ struct ScanListHeader: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    ScanListHeader(onBackTapped: {})
-//}
+// }
