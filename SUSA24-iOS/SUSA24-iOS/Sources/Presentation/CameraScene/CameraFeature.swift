@@ -294,11 +294,11 @@ struct CameraFeature: DWReducer {
             case let .success(photo):
                 // TODO: - Text Recognition Actions
                 
-//                return .merge(
-//                    .send(.syncPhotoState),
-//                    .send(.validateTextInCapturedPhoto(photo))
-//                )
-
+                //                return .merge(
+                //                    .send(.syncPhotoState),
+                //                    .send(.validateTextInCapturedPhoto(photo))
+                //                )
+                
                 return .send(.syncPhotoState)
                 
             case .failure:
@@ -467,45 +467,38 @@ struct CameraFeature: DWReducer {
             
         case .startDocumentDetectionStream:
             return .init { [camera] downstream in
-                _ = Task {
-                    // Vision 프로세서가 초기화될 때까지 약간 대기
-                    var retryCount = 0
-                    let maxRetries = 5
-                    
-                    while retryCount < maxRetries {
-                        if let stream = await camera.getDocumentDetectionStream() {
-                            for await result in stream {
-                                downstream(.updateDocumentDetection(result))
-                            }
-                            
-                            return
+                var retryCount = 0
+                let maxRetries = 5
+                
+                while retryCount < maxRetries {
+                    // 구독
+                    if let stream = await camera.getDocumentDetectionStream() {
+                        for await result in stream {
+                            downstream(.updateDocumentDetection(result))
                         }
                         
-                        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2초 대기
-                        retryCount += 1
+                        return
                     }
+                    
+                    try? await Task.sleep(nanoseconds: 200_000_000) // 0.2초 대기
+                    retryCount += 1
                 }
             }
             
         case .startLensSmudgeStream:
             return .init { [camera] downstream in
-                _ = Task {
-                    // Vision 프로세서가 초기화될 때까지 약간 대기
-                    var retryCount = 0
-                    let maxRetries = 5
-                    
-                    while retryCount < maxRetries {
-                        if let stream = await camera.getLensSmudgeStream() {
-                            for await result in stream {
-                                downstream(.updateLensSmudgeDetection(result))
-                            }
-                            
-                            return
+                var retryCount = 0
+                let maxRetries = 5
+                
+                while retryCount < maxRetries {
+                    if let stream = await camera.getLensSmudgeStream() {
+                        for await result in stream {
+                            downstream(.updateLensSmudgeDetection(result))
                         }
-                        
-                        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2초 대기
-                        retryCount += 1
+                        return
                     }
+                    try? await Task.sleep(nanoseconds: 200_000_000) // 0.2초 대기
+                    retryCount += 1
                 }
             }
             
@@ -517,7 +510,7 @@ struct CameraFeature: DWReducer {
             state.lensSmudgeDetection = result
             
             // MARK: - 1. 얼룩 감지 시 토스트 표시 (이미 구현됨)
-
+            
             if let smudge = result,
                smudge.isSmudged,
                !state.hasShownLensSmudgeToast
@@ -536,17 +529,17 @@ struct CameraFeature: DWReducer {
             // TODO: - Text Recognition Actions
             /*
              case let .validateTextInCapturedPhoto(photo):
-                 return .task {
-                     let hasText = await recognizeText(in: photo.image)
-                     return .textRecognitionCompleted(hasText)
-                 }
-            
+             return .task {
+             let hasText = await recognizeText(in: photo.image)
+             return .textRecognitionCompleted(hasText)
+             }
+             
              case let .textRecognitionCompleted(hasText):
-                 if !hasText {
-                     return .send(.showToast("촬영된 이미지에서 문서를 인식하지 못했습니다"))
-                 }
-                 return .none
-                 */
+             if !hasText {
+             return .send(.showToast("촬영된 이미지에서 문서를 인식하지 못했습니다"))
+             }
+             return .none
+             */
         }
     }
     
@@ -555,36 +548,36 @@ struct CameraFeature: DWReducer {
     /*
      /// 이미지에서 텍스트를 인식합니다
      private func recognizeText(in image: UIImage) async -> Bool {
-         guard let cgImage = image.cgImage else {
-             return false
-         }
-        
-         let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-         let request = VNRecognizeTextRequest()
-         request.recognitionLevel = .accurate
-         request.usesLanguageCorrection = true
-        
-         do {
-             try requestHandler.perform([request])
-            
-             guard let observations = request.results, !observations.isEmpty else {
-                 return false
-             }
-            
-             // 신뢰도 0.5 이상인 텍스트가 있는지 확인
-             let recognizedText = observations.compactMap { observation in
-                 observation.topCandidates(1).first
-             }.filter { candidate in
-                 candidate.confidence > 0.5
-             }
-            
-             // 최소 1개 이상의 텍스트가 인식되어야 함
-             return !recognizedText.isEmpty
-            
-         } catch {
-             print("[CameraFeature] 텍스트 인식 실패: \(error)")
-             return false
-         }
+     guard let cgImage = image.cgImage else {
+     return false
+     }
+     
+     let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+     let request = VNRecognizeTextRequest()
+     request.recognitionLevel = .accurate
+     request.usesLanguageCorrection = true
+     
+     do {
+     try requestHandler.perform([request])
+     
+     guard let observations = request.results, !observations.isEmpty else {
+     return false
+     }
+     
+     // 신뢰도 0.5 이상인 텍스트가 있는지 확인
+     let recognizedText = observations.compactMap { observation in
+     observation.topCandidates(1).first
+     }.filter { candidate in
+     candidate.confidence > 0.5
+     }
+     
+     // 최소 1개 이상의 텍스트가 인식되어야 함
+     return !recognizedText.isEmpty
+     
+     } catch {
+     print("[CameraFeature] 텍스트 인식 실패: \(error)")
+     return false
+     }
      }
      */
 }
