@@ -108,7 +108,6 @@ actor DocumentDetectionProcessor {
         do {
             try requestHandler.perform([request])
 
-            // VNDetectDocumentSegmentationRequest는 VNRectangleObservation을 반환
             guard let results = request.results,
                   let observation = results.first
             else {
@@ -139,8 +138,7 @@ actor DocumentDetectionProcessor {
         }
     }
 
-    /// 렌즈 얼룩을 감지합니다 (iOS 26+, async/await API)
-    /// - Note: DetectLensSmudgeRequest는 async/await 패턴 사용
+    /// 렌즈 얼룩을 감지
     private func detectLensSmudge(
         _ buffer: CVImageBuffer,
         timestamp: TimeInterval
@@ -148,7 +146,6 @@ actor DocumentDetectionProcessor {
         let ciImage = CIImage(cvImageBuffer: buffer)
 
         do {
-            // iOS 26+: DetectLensSmudgeRequest 사용 (async/await)
             let request = DetectLensSmudgeRequest(.revision1)
             let smudgeObservation = try await request.perform(on: ciImage, orientation: .up)
 
