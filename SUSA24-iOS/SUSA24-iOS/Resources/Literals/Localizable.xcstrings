@@ -498,7 +498,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "아직 데이터가 없습니다."
+            "value" : "이 요일의 데이터가 없습니다."
           }
         }
       }

@@ -38,12 +38,13 @@ final class MapCameraController {
     ///   - coordinate: 이동할 지도 좌표
     ///   - animated: 애니메이션 적용 여부. nil이면 애니메이션을 적용하지 않습니다.
     ///   - duration: 애니메이션 지속 시간 (초). animated가 true일 때만 유효합니다.
-    func moveCamera(to coordinate: MapCoordinate, animated: Bool? = nil, duration: Double? = nil) {
+    ///   - zoomLevel: 적용할 줌 레벨. nil이면 현재 줌 레벨을 유지합니다.
+    func moveCamera(to coordinate: MapCoordinate, animated: Bool? = nil, duration: Double? = nil, zoomLevel: Double? = nil) {
         guard let mapView else { return }
         let target = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        // 현재 줌 레벨 유지 (줌인 방지)
-        let currentZoomLevel = mapView.zoomLevel
-        let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: currentZoomLevel))
+        // 줌 레벨이 지정되면 사용, 아니면 현재 줌 레벨 유지
+        let targetZoomLevel = zoomLevel ?? mapView.zoomLevel
+        let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(target, zoom: targetZoomLevel))
         if let animated, animated, let duration {
             cameraUpdate.animation = .easeOut
             cameraUpdate.animationDuration = duration
@@ -65,14 +66,15 @@ final class MapCameraController {
     /// - Parameters:
     ///   - coordinate: 이동할 좌표 (nil이면 목표 좌표 초기화)
     ///   - shouldAnimate: 애니메이션 적용 여부
+    ///   - zoomLevel: 적용할 줌 레벨. nil이면 현재 줌 레벨을 유지합니다.
     ///   - onConsumed: 명령 소비 콜백
     /// - Returns: 카메라 이동이 수행되었는지 여부
     @discardableResult
-    func processCameraTarget(coordinate: MapCoordinate?, shouldAnimate: Bool, onConsumed: (() -> Void)?) -> Bool {
+    func processCameraTarget(coordinate: MapCoordinate?, shouldAnimate: Bool, zoomLevel: Double? = nil, onConsumed: (() -> Void)?) -> Bool {
         if let coordinate, lastCameraTarget != coordinate {
             lastCameraTarget = coordinate
-            if shouldAnimate { moveCamera(to: coordinate, animated: true, duration: MapConstants.cameraAnimationDuration) }
-            else { moveCamera(to: coordinate) }
+            if shouldAnimate { moveCamera(to: coordinate, animated: true, duration: MapConstants.cameraAnimationDuration, zoomLevel: zoomLevel) }
+            else { moveCamera(to: coordinate, zoomLevel: zoomLevel) }
             Task { @MainActor in
                 onConsumed?()
             }

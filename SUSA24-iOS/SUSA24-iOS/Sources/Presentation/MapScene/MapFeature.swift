@@ -66,6 +66,8 @@ struct MapFeature: DWReducer {
         var cameraTargetCoordinate: MapCoordinate?
         /// 카메라 이동 시 애니메이션을 적용할지 여부입니다.
         var shouldAnimateCameraTarget: Bool = false
+        /// 카메라 이동 시 적용할 줌 레벨입니다. nil이면 현재 줌 레벨을 유지합니다.
+        var cameraTargetZoomLevel: Double?
         /// 현위치를 포커싱해야 하는지 여부입니다.
         var shouldFocusMyLocation: Bool = false
         /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
@@ -479,6 +481,8 @@ struct MapFeature: DWReducer {
             // 검색 결과 선택에 따라 지도 카메라를 이동하고, 상세 정보를 표시합니다.
             state.cameraTargetCoordinate = coordinate
             state.shouldAnimateCameraTarget = true
+            // 검색 결과 선택 시 줌 레벨 15 적용
+            state.cameraTargetZoomLevel = 15
             // 검색 진입 시에도 선택된 좌표 컨텍스트를 맞춰둡니다.
             state.selectedCoordinate = coordinate
             // Idle 핀 표시
@@ -498,6 +502,7 @@ struct MapFeature: DWReducer {
             // Timeline에서 선택한 Location으로 지도 카메라를 이동합니다.
             state.cameraTargetCoordinate = coordinate
             state.shouldAnimateCameraTarget = true
+            state.idlePinCoordinate = nil
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
             return .none
@@ -506,6 +511,7 @@ struct MapFeature: DWReducer {
             // 지도 카메라 이동이 완료되었음을 반영합니다.
             state.cameraTargetCoordinate = nil
             state.shouldAnimateCameraTarget = false
+            state.cameraTargetZoomLevel = nil
             return .none
             
         case .requestFocusMyLocation:

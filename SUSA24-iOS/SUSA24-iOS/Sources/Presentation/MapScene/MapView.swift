@@ -69,6 +69,7 @@ struct MapView: View {
             NaverMapView(
                 cameraTargetCoordinate: store.state.cameraTargetCoordinate,
                 shouldAnimateCameraTarget: store.state.shouldAnimateCameraTarget,
+                cameraTargetZoomLevel: store.state.cameraTargetZoomLevel,
                 shouldFocusMyLocation: store.state.shouldFocusMyLocation,
                 onCameraMoveConsumed: {
                     store.send(.clearCameraTarget)
