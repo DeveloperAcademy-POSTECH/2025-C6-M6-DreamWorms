@@ -246,7 +246,7 @@ struct TimeLineFeature: DWReducer {
             }
             
             return .none
-          }
+        }
     }
 
     // MARK: - Helper

@@ -46,12 +46,13 @@ struct PinWriteHeader: View {
         .padding(.bottom, 14)
     }
 }
+
 //
-//#Preview {
+// #Preview {
 //    PinWriteHeader(
 //        title: "핀 추가",
 //        isSaveEnabled: false,
 //        onCloseTapped: {},
 //        onSaveTapped: {}
 //    )
-//}
+// }
