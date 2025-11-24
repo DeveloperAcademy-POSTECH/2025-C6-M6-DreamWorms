@@ -95,8 +95,7 @@ struct TimeLineView: View {
                 .padding(.horizontal, 16)
                 .padding(16)
                 .opacity(0.5)
-            }
-            else {
+            } else {
                 TimeLineScrollContentView(
                     groupedLocations: store.state.displayGroupedLocations,
                     scrollTargetID: store.state.scrollTarget?.dateID,

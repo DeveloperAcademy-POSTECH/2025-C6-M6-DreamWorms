@@ -237,7 +237,6 @@ struct TimeLineFeature: DWReducer {
             return .none
             
         case let .setSearchActive(isActive):
-            
             state.isSearchActive = isActive
             
             // 검색 기능 비활성화시 초기화
@@ -247,9 +246,7 @@ struct TimeLineFeature: DWReducer {
             }
             
             return .none
-        
-            
-        }
+          }
     }
 
     // MARK: - Helper
