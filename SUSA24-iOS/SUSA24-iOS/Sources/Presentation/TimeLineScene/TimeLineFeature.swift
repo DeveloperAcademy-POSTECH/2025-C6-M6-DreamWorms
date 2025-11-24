@@ -202,12 +202,12 @@ struct TimeLineFeature: DWReducer {
                 return .none
             }
             
-            // 디바운스 0.2초 이후 검색 실행
+            // 디바운스 0.25초 이후 검색 실행
             let taskID = UUID()
             state.searchDebounceTaskID = taskID
             
             return .task {
-                try? await Task.sleep(for: .milliseconds(200))
+                try? await Task.sleep(for: .milliseconds(250))
                 return .performSearch(text, taskID: taskID)
             }
             
