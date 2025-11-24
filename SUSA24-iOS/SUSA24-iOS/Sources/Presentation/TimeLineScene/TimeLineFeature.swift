@@ -140,6 +140,11 @@ struct TimeLineFeature: DWReducer {
                 latitude: location.pointLatitude,
                 longitude: location.pointLongitude
             )
+            
+            // 검색 
+            state.searchText = ""
+            state.isSearchActive = false
+                        
             NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
             dispatcher.send(.moveToLocation(coordinate: coordinate))
             return .none
@@ -246,7 +251,7 @@ struct TimeLineFeature: DWReducer {
             }
             
             return .none
-          }
+        }
     }
 
     // MARK: - Helper
