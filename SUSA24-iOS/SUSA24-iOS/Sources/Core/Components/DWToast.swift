@@ -45,7 +45,7 @@ struct DWToastModifier: ViewModifier {
             if isPresented {
                 VStack {
                     DWToast(message: message)
-                        .padding(.top, 108)
+                        .padding(.top, 56)
                     Spacer()
                 }
             }
@@ -98,13 +98,13 @@ extension View {
     }
 }
 
-// #Preview {
-//    @Previewable @State var showToast = false
-//
-//    VStack {
-//        DWCircleButton(image: Image(.camera), action: {
-//            showToast = true
-//        })
-//    }
-//    .toast(isPresented: $showToast, message: "toast sample")
-// }
+#Preview {
+    @Previewable @State var showToast = false
+
+    VStack {
+        DWCircleButton(image: Image(.camera), action: {
+            showToast = true
+        })
+    }
+    .toast(isPresented: $showToast, message: "toast sample")
+}
