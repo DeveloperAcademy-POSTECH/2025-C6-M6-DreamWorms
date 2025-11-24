@@ -140,13 +140,9 @@ struct TimeLineFeature: DWReducer {
                 latitude: location.pointLatitude,
                 longitude: location.pointLongitude
             )
-            
-            // 검색 
-            state.searchText = ""
-            state.isSearchActive = false
-                        
             NotificationCenter.default.post(name: .resetDetentToMid, object: nil)
             dispatcher.send(.moveToLocation(coordinate: coordinate))
+            
             return .none
             
         case let .scrollToDate(date):
@@ -207,13 +203,13 @@ struct TimeLineFeature: DWReducer {
                 return .none
             }
             
-            // 디바운스 0.3초 이후 검색 실행
+            // 디바운스 0.5초 이후 검색 실행
             let taskID = UUID()
             state.searchDebounceTaskID = taskID
             state.isSearchActive = true
             
             return .task {
-                try? await Task.sleep(for: .milliseconds(300))
+                try? await Task.sleep(for: .milliseconds(500))
                 return .performSearch(text, taskID: taskID)
             }
             
