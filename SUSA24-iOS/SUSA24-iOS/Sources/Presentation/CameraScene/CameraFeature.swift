@@ -215,7 +215,6 @@ struct CameraFeature: DWReducer {
         case .viewDidDisappear:
             camera.stopVisionAnalysis()
             camera.pauseCamera()
-            camera.clearAllPhotos()
             return .none
             
         case .sceneDidBecomeActive:
@@ -305,10 +304,7 @@ struct CameraFeature: DWReducer {
             
         case let .updatePhotoCount(count):
             state.photoCount = count
-            
-            if count >= 10 {
-                state.isCaptureAvailable = false
-            }
+            state.isCaptureAvailable = count < 10
             
             return .task { [camera] in
                 let thumbnail = await camera.lastThumbnail

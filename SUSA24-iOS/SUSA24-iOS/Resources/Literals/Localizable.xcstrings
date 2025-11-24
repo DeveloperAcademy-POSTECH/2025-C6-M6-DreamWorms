@@ -498,7 +498,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "아직 데이터가 없습니다."
+            "value" : "이 요일의 데이터가 없습니다."
           }
         }
       }
@@ -733,17 +733,6 @@
         }
       }
     },
-    "memo_write_empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "장소에 대한 상세정보를 추가하세요."
-          }
-        }
-      }
-    },
     "memo_write_placeHolder" : {
       "comment" : "메모 노트 작성 시 placeholder",
       "extractionState" : "manual",
@@ -751,7 +740,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "장소에 대한 상세정보를 메모하세요."
+            "value" : "장소에 대한 상세정보를 기록하세요."
           }
         }
       }
@@ -1135,18 +1124,6 @@
         }
       }
     },
-    "scanList_pin_delete_alert_button_confirm" : {
-      "comment" : "스캔 목록_핀 추가 취소 알람_삭제함",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "삭제하기"
-          }
-        }
-      }
-    },
     "scanList_pin_delete_alert_contents" : {
       "comment" : "핀 삭제 Alert_내용",
       "extractionState" : "manual",
@@ -1408,7 +1385,13 @@
     "데이터 추가 완료" : {
 
     },
+    "등록되지 않은 전화번호입니다." : {
+
+    },
     "메시지 본문" : {
+
+    },
+    "문자에서 주소를 추출할 수 없습니다." : {
 
     },
     "본문: ${messageBody}, 사건번호: ${caseNumber}" : {
@@ -1421,6 +1404,9 @@
           }
         }
       }
+    },
+    "본문: ${messageBody}, 피의자 추적 전화번호: ${senderPhoneNumber}" : {
+
     },
     "분석 결과가 없습니다" : {
       "extractionState" : "manual",
@@ -1447,7 +1433,19 @@
     "사진" : {
 
     },
+    "위치 저장 실패" : {
+
+    },
+    "위치 저장 완료." : {
+
+    },
     "전달된 문자 메시지에 포함된 주소를 추출하여 케이스에 저장합니다." : {
+
+    },
+    "좌표 변환 실패" : {
+
+    },
+    "피의자 추적 전화번호" : {
 
     },
     "핀 데이터 덮어쓰기" : {

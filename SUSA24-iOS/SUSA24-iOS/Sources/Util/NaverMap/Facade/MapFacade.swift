@@ -107,6 +107,7 @@ final class MapFacade {
         mapView: NMFMapView,
         cameraTarget: MapCoordinate?,
         shouldAnimateCamera: Bool,
+        zoomLevel: Double? = nil,
         onCameraMoveConsumed: (() -> Void)?,
         shouldFocusMyLocation: Bool,
         onMyLocationFocusConsumed: (() -> Void)?,
@@ -121,7 +122,7 @@ final class MapFacade {
         lastIdlePinCoordinate: inout MapCoordinate?
     ) {
         syncComponentStates(mapView: mapView, isMapTouchEnabled: isMapTouchEnabled, isTimelineSheetPresented: isTimelineSheetPresented, isPlaceInfoSheetPresented: isPlaceInfoSheetPresented)
-        updateCameraPosition(cameraTarget: cameraTarget, shouldAnimateCamera: shouldAnimateCamera, onCameraMoveConsumed: onCameraMoveConsumed)
+        updateCameraPosition(cameraTarget: cameraTarget, shouldAnimateCamera: shouldAnimateCamera, zoomLevel: zoomLevel, onCameraMoveConsumed: onCameraMoveConsumed)
         focusOnMyLocation(shouldFocusMyLocation: shouldFocusMyLocation, onMyLocationFocusConsumed: onMyLocationFocusConsumed)
         updateAllMarkerLayers(mapView: mapView, layerData: layerData)
         handleDeselectMarkerTrigger(deselectMarkerTrigger: deselectMarkerTrigger, lastDeselectMarkerTrigger: &lastDeselectMarkerTrigger, onDeselectMarker: onDeselectMarker)
@@ -183,11 +184,13 @@ private extension MapFacade {
     /// 외부에서 요청한 카메라 이동 명령을 처리합니다.
     /// - `cameraTarget`이 있으면 해당 좌표로 카메라 이동
     /// - 애니메이션 여부에 따라 부드러운 이동 또는 즉시 이동
+    /// - 줌 레벨이 지정되면 해당 줌 레벨로 이동, nil이면 현재 줌 레벨 유지
     /// - 이동 완료 후 콜백 호출
-    func updateCameraPosition(cameraTarget: MapCoordinate?, shouldAnimateCamera: Bool, onCameraMoveConsumed: (() -> Void)?) {
+    func updateCameraPosition(cameraTarget: MapCoordinate?, shouldAnimateCamera: Bool, zoomLevel: Double? = nil, onCameraMoveConsumed: (() -> Void)?) {
         _ = cameraController.processCameraTarget(
             coordinate: cameraTarget,
             shouldAnimate: shouldAnimateCamera,
+            zoomLevel: zoomLevel,
             onConsumed: onCameraMoveConsumed
         )
     }

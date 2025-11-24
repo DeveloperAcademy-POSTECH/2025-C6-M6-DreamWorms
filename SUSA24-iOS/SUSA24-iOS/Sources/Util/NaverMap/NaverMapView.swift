@@ -16,6 +16,8 @@ struct NaverMapView: UIViewRepresentable {
     var cameraTargetCoordinate: MapCoordinate?
     /// 카메라 이동 시 애니메이션을 적용할지 여부입니다.
     var shouldAnimateCameraTarget: Bool = false
+    /// 카메라 이동 시 적용할 줌 레벨입니다. nil이면 현재 줌 레벨을 유지합니다.
+    var cameraTargetZoomLevel: Double?
     /// 외부 모듈이 현위치를 포커싱해야 함을 알리는 플래그입니다.
     var shouldFocusMyLocation: Bool = false
     
@@ -120,6 +122,7 @@ struct NaverMapView: UIViewRepresentable {
             mapView: uiView,
             cameraTarget: cameraTargetCoordinate,
             shouldAnimateCamera: shouldAnimateCameraTarget,
+            zoomLevel: cameraTargetZoomLevel,
             onCameraMoveConsumed: onCameraMoveConsumed,
             shouldFocusMyLocation: shouldFocusMyLocation,
             onMyLocationFocusConsumed: onMyLocationFocusConsumed,

@@ -14,6 +14,9 @@ struct MapView: View {
     @Environment(AppCoordinator.self)
     private var coordinator
     
+    @Environment(\.managedObjectContext)
+    private var context
+    
     // MARK: - Dependencies
     
     @State private var store: DWStore<MapFeature>
@@ -66,6 +69,7 @@ struct MapView: View {
             NaverMapView(
                 cameraTargetCoordinate: store.state.cameraTargetCoordinate,
                 shouldAnimateCameraTarget: store.state.shouldAnimateCameraTarget,
+                cameraTargetZoomLevel: store.state.cameraTargetZoomLevel,
                 shouldFocusMyLocation: store.state.shouldFocusMyLocation,
                 onCameraMoveConsumed: {
                     store.send(.clearCameraTarget)
@@ -205,12 +209,14 @@ struct MapView: View {
         .sheet(isPresented: isMapPanelPresentedBinding) {
             MapSheetPanel(
                 state: store.state,
-                send: store.send
+                send: store.send,
+                context: context,
+                repository: LocationRepository(context: context)
             )
             .presentationDetents(currentDetents)
             .presentationDragIndicator(.visible)
-            .presentationDragIndicator(.hidden)
             .presentationBackgroundInteraction(store.state.isPlaceInfoSheetPresented ? .enabled : .disabled)
+            .presentationBackground(.sheetBackground)
         }
     }
 }
@@ -225,7 +231,7 @@ private extension MapView {
                     store.send(.setMapLayerSheetPresented(false))
                     store.send(.hidePlaceInfo())
                     store.send(.closePinWrite)
-                    store.send(.closeMemoEdit)
+                    store.send(.closeNoteWrite)
                 }
             }
         )
@@ -241,7 +247,7 @@ private extension MapView {
             return [state.hasExistingPin ? .height(416) : .height(294)]
         } else if state.isPinWritePresented {
             return [.height(620)]
-        } else if state.isMemoEditPresented {
+        } else if state.isNoteWritePresented {
             return [.large]
         } else {
             return [.medium]

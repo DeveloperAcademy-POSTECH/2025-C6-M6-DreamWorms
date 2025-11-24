@@ -42,7 +42,7 @@ struct PlaceInfoSheet: View {
                         onTapped: onMemoTapped
                     )
                     .padding(.horizontal, 16)
-                    .padding(.top, 16)
+                    .padding(.top, 18)
                 }
                 
                 PlaceInfoSheetContent(placeInfo: placeInfo)
@@ -84,54 +84,52 @@ struct PlaceInfoSheetHeader: View {
     let circleHeight: CGFloat = 16
     let headerSize: CGFloat = 36
     let horizontalPadding: CGFloat = 16
-    let topPadding: CGFloat = 2
+    let topPadding: CGFloat = 0
     
     var body: some View {
-        VStack {
-            HStack(alignment: .firstTextBaseline) {
+        // TODO: 쒯, spacing 피그마 상 2인데 아무리 봐도 더 커보임. 추후 확인 필요
+        VStack(spacing: 0) {
+            HStack(alignment: .center) {
                 Circle()
-                    .frame(width: circleWidth, height: circleHeight)
+                    .frame(width: headerSize, height: headerSize)
                     .foregroundStyle(.clear)
                 
                 Spacer()
-                VStack(spacing: 0) {
-                    Text(placeName)
-                        .font(.titleSemiBold20)
-                        .foregroundStyle(.labelNormal)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-                        .padding(.bottom, 2)
-                    
-                    if hasPin, let pinType, let colorType {
-                        HStack(spacing: 4) {
-                            pinType.icon
-                                .resizable()
-                                .renderingMode(.template)
-                                .scaledToFit()
-                                .frame(width: pinType.iconWidth, height: pinType.iconHeight)
-                                .foregroundColor(colorType.color)
-                            
-                            Text(title)
-                                .font(.bodyRegular14)
-                                .foregroundColor(colorType.color)
-                                .lineLimit(1)
-                        }
-                    }
-                }
+                
+                Text(placeName)
+                    .font(.titleSemiBold20)
+                    .foregroundStyle(.labelNormal)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
                 
                 Spacer()
                 
-                VStack {
-                    DWGlassEffectCircleButton(
-                        image: Image(.xmark),
-                        action: onClose
-                    )
-                    .setupSize(headerSize)
-                    .setupIconSize(width: circleWidth, height: circleHeight)
-                    .setupIconColor(.labelNeutral)
-                    .setupbuttonBackgroundColor(.labelAssistive)
-                    .setupInteractiveEffect(false)
+                DWGlassEffectCircleButton(
+                    image: Image(.xmark),
+                    action: onClose
+                )
+                .setupSize(headerSize)
+                .setupIconSize(width: circleWidth, height: circleHeight)
+                .setupIconColor(.labelNeutral)
+                .setupbuttonBackgroundColor(.labelAssistive)
+                .setupInteractiveEffect(false)
+            }
+            
+            if hasPin, let pinType, let colorType {
+                HStack(spacing: 2) {
+                    pinType.icon
+                        .resizable()
+                        .renderingMode(.template)
+                        .scaledToFit()
+                        .frame(width: pinType.iconWidth, height: pinType.iconHeight)
+                        .foregroundColor(colorType.color)
+                    
+                    Text(title)
+                        .font(.bodyRegular14)
+                        .foregroundColor(colorType.color)
+                        .lineLimit(1)
                 }
+                .frame(maxWidth: .infinity)
             }
         }
         .padding(.horizontal, horizontalPadding)
@@ -161,7 +159,7 @@ struct MemoButton: View {
                             .font(.titleSemiBold16)
                             .foregroundStyle(.labelNormal)
                         
-                        Text(.memoWriteEmpty)
+                        Text(.memoWritePlaceHolder)
                             .font(.bodyRegular14)
                             .foregroundStyle(.labelAlternative)
                     }

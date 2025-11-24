@@ -19,16 +19,16 @@ enum PinCategoryType: Int16, Codable, CaseIterable {
     var text: String {
         switch self {
         case .home: "거주지"
-        case .work: "범행장소"
+        case .work: "범행지"
         case .custom: "기타"
         }
     }
     
     var description: String {
         switch self {
-        case .home: "주민등록상 거주지, 실거주지 등 주요 은신처"
-        case .work: "고용보험 취업정보, 실직장 등 주요 수입처"
-        case .custom: "통화내역/주류내역/숙박내역 등 주요 소비처"
+        case .home: "주민등록주소/실거주지/은신처 등 생활거점"
+        case .work: "전과기록/증거물/수사보고서 등 주요 범행기록"
+        case .custom: "직장/단골가게/전화발신주소 등 주요 활동기록"
         }
     }
 

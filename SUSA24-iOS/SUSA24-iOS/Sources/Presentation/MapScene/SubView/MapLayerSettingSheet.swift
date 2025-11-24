@@ -16,11 +16,11 @@ struct MapLayerSettingSheet: View {
     let onClose: () -> Void
         
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             MapLayerSheetHeader(
                 onClose: onClose
             )
-            .padding(.bottom, 24)
+            .padding(.bottom, 14)
             
             CoverageSection(
                 selectedRange: $selectedRange
@@ -31,9 +31,8 @@ struct MapLayerSettingSheet: View {
                 isCCTVEnabled: $isCCTVEnabled,
                 isBaseStationEnabled: $isBaseStationEnabled
             )
-            .padding(.horizontal, 24)
             
-            Spacer()
+//            Spacer()
         }
         .padding(.top, 18)
     }
@@ -77,20 +76,25 @@ struct MapLayerSheetHeader: View {
     }
 }
 
+// MARK: - 커버리지 섹션
+
 struct CoverageSection: View {
     @Binding var selectedRange: CoverageRangeType
     
-    private let itemSize: CGFloat = 75
-    private let itemSpacing: CGFloat = 12
+    // NOTE: 피그마랑 같은 사이즈 먹여도 적용 안됨 이슈로 인해.. 값 변경해서 적용했음.
+    private let itemSize: CGFloat = 82
+    private let itemSpacing: CGFloat = 9
+    private let titleHorizontalPadding: CGFloat = 16
+    private let contentHorizontalPadding: CGFloat = 24
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(String(localized: .layerSettingCoverageTitle))
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
-                .padding(.leading, -8)
+                .padding(.horizontal, titleHorizontalPadding)
             
-            HStack(spacing: itemSpacing) {
+            HStack(alignment: .center, spacing: itemSpacing) {
                 ForEach(CoverageRangeType.allCases) { range in
                     CoverageItem(
                         range: range,
@@ -100,6 +104,8 @@ struct CoverageSection: View {
                     )
                 }
             }
+            .padding(.horizontal, contentHorizontalPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -138,11 +144,15 @@ struct ToggleSection: View {
     @Binding var isCCTVEnabled: Bool
     @Binding var isBaseStationEnabled: Bool
     
+    private let titleHorizontalPadding: CGFloat = 16
+    private let contentHorizontalPadding: CGFloat = 24
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading) {
             Text(String(localized: .layerSettingToggleTitle))
                 .font(.titleSemiBold14)
                 .foregroundStyle(.labelNormal)
+                .padding(.horizontal, titleHorizontalPadding)
             
             VStack(spacing: 0) {
                 ToggleRow(
@@ -162,6 +172,7 @@ struct ToggleSection: View {
                 )
                 .padding(.vertical, 12)
             }
+            .padding(.horizontal, contentHorizontalPadding)
         }
     }
 }
