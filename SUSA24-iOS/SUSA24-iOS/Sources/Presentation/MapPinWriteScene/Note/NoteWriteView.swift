@@ -131,9 +131,6 @@ struct NoteWriteView: View {
         }
         .task {
             store.send(.onAppear)
-            
-            // 딜레이 후 포커스 설정
-            try? await Task.sleep(nanoseconds: 450_000_000)
             isTextEditorFocused = true
         }
     }

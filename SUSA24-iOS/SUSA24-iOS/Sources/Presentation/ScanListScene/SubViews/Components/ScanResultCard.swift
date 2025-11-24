@@ -130,7 +130,7 @@ struct ScanResultCard: View {
 
 // MARK: - Preview
 
-//#Preview {
+// #Preview {
 //    VStack(spacing: 12) {
 //        // 신주소만 있는 카드
 //        ScanResultCard(
@@ -153,7 +153,7 @@ struct ScanResultCard: View {
 //            onToggleSelection: {},
 //            onCategorySelect: { _ in }
 //        )
-//        
+//
 //        // 신주소/구주소 둘 다 있는 카드
 //        ScanResultCard(
 //            roadAddress: "부산광역시 강서구 공항로 두 줄이 넘어가는 긴 주소 108",
@@ -167,4 +167,4 @@ struct ScanResultCard: View {
 //    }
 //    .padding(16)
 //    .background(Color(.systemGray6))
-//}
+// }

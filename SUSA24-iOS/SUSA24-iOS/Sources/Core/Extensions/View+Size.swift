@@ -8,6 +8,9 @@
 import SwiftUI
 
 extension View {
+    /// 현재 뷰가 포함된 **스크린 정보를 읽어올 때** 사용합니다.
+    ///
+    /// - Parameter handler: 화면(Screen) 정보를 전달받는 클로저
     func onScreen(_ handler: @escaping @MainActor (UIScreen?) -> Void) -> some View {
         background(
             ScreenReader(handler: handler)

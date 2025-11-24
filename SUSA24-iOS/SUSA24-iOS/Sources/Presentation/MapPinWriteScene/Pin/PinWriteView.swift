@@ -70,6 +70,7 @@ struct PinWriteView: View {
                     .padding(.bottom, 24)
                 }
             }
+            .scrollIndicators(.hidden)
             
             DWButton(
                 isEnabled: .constant(store.state.isValidPinName),
@@ -77,7 +78,7 @@ struct PinWriteView: View {
             ) {
                 store.send(.saveTapped)
             }
-            .padding(.bottom)
+            .padding(.bottom, 4)
         }
         .padding(.horizontal, 16)
         .background(.sheetBackground)
@@ -200,9 +201,9 @@ struct PinColorSelectionSection: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity)
+            // .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity, alignment: .center)
+        // .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
@@ -218,8 +219,8 @@ struct ColorCircleButton: View {
             Circle()
                 .fill(color.color)
                 .frame(
-                    width: isSelected ? 34 : 28,
-                    height: isSelected ? 34 : 28
+                    width: isSelected ? 36 : 30,
+                    height: isSelected ? 36 : 30
                 )
                 .overlay {
                     if isSelected {
