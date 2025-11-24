@@ -75,10 +75,10 @@ struct CCTVSelectionPanel: View {
                 title: String(localized: .mapviewPinCreateButton),
                 action: onDone
             )
-            .setupVerticalPadding(13.5)
+            .setupVerticalPadding(15)
             .setupFont(.titleSemiBold14)
         }
-        .padding(.top, 58)
+        .padding(.top, 52)
         .padding([.bottom, .horizontal], 16)
         .background(
             RoundedRectangle(cornerRadius: 34, style: .continuous)
@@ -104,6 +104,7 @@ struct CCTVSlotRow: View {
                 )
                 .lineLimit(1)
                 .truncationMode(.tail)
+                .frame(height: 42)
             
             Spacer()
             
