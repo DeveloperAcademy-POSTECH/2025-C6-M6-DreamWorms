@@ -59,7 +59,6 @@ struct ScanListView: View {
                     store.send(.saveButtonTapped(caseID: caseID))
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -89,7 +88,12 @@ struct ScanListView: View {
                 store.send(.cancelOverwrite)
             }
         } message: {
-            Text(String(format: NSLocalizedString("scanList_pin_add_duplicate_alert_content", comment: ""), store.state.duplicateAddress ?? ""))
+            Text(
+                String(
+                    format: NSLocalizedString("scanList_pin_add_duplicate_alert_content", comment: ""),
+                    store.state.duplicateAddress ?? ""
+                )
+            )
         }
     }
     
