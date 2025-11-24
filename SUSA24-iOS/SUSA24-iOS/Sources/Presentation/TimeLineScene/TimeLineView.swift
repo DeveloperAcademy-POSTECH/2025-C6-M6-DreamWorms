@@ -63,7 +63,7 @@ struct TimeLineView: View {
                     
                     if !isSearchFocused {
                         TimeLineDateChipList(
-                            dates: store.state.groupedLocations.map(\.date),
+                            dates: store.state.displayGroupedLocations.map(\.date),
                             onDateTapped: { date in
                                 store.send(.scrollToDate(date))
                             }
@@ -85,9 +85,19 @@ struct TimeLineView: View {
                 .padding(.horizontal, 16)
                 .padding(16)
                 .opacity(0.5)
+            } else if store.state.isSearchResultEmpty {
+                // 검색상태 없음
+                TimeLineEmptyState(
+                    message: .bottomSheetSearchBarIsEmpty(cellName: store.state.searchText)
+                )
+                .setupRadius(18)
+                .setupBackground(.mainBackground)
+                .padding(.horizontal, 16)
+                .padding(16)
+                .opacity(0.5)
             } else {
                 TimeLineScrollContentView(
-                    groupedLocations: store.state.groupedLocations,
+                    groupedLocations: store.state.displayGroupedLocations,
                     scrollTargetID: store.state.scrollTarget?.dateID,
                     onLocationTapped: { location in
                         store.send(.locationTapped(location))

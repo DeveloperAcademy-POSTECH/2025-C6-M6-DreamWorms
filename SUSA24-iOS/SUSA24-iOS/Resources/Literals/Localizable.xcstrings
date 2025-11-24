@@ -78,6 +78,18 @@
         }
       }
     },
+    "bottomSheet_SearchBar_isEmpty" : {
+      "comment" : "기지국_검색_결과_없음",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$(cellName)@ 검색 결과가 없습니다."
+          }
+        }
+      }
+    },
     "button_addCase" : {
       "comment" : "버튼_사건추가",
       "extractionState" : "manual",
