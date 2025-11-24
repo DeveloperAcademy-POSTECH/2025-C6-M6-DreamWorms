@@ -66,6 +66,8 @@ struct MapFeature: DWReducer {
         var cameraTargetCoordinate: MapCoordinate?
         /// 카메라 이동 시 애니메이션을 적용할지 여부입니다.
         var shouldAnimateCameraTarget: Bool = false
+        /// 카메라 이동 시 적용할 줌 레벨입니다. nil이면 현재 줌 레벨을 유지합니다.
+        var cameraTargetZoomLevel: Double?
         /// 현위치를 포커싱해야 하는지 여부입니다.
         var shouldFocusMyLocation: Bool = false
         /// 초기 진입 시 카메라를 한 번만 설정했는지 여부입니다.
@@ -511,6 +513,7 @@ struct MapFeature: DWReducer {
             // 지도 카메라 이동이 완료되었음을 반영합니다.
             state.cameraTargetCoordinate = nil
             state.shouldAnimateCameraTarget = false
+            state.cameraTargetZoomLevel = nil
             return .none
             
         case .requestFocusMyLocation:
@@ -746,6 +749,7 @@ private extension MapFeature {
             longitude: latestCell.pointLongitude
         )
         state.shouldAnimateCameraTarget = true
+        state.cameraTargetZoomLevel = MapConstants.defaultZoomLevel
     }
 
     // MARK: - PlaceInfo Helpers
