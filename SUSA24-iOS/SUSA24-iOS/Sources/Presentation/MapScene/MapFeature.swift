@@ -437,6 +437,11 @@ struct MapFeature: DWReducer {
             
         case let .updateTimelineSheetState(isActive):
             state.isTimelineSheetPresented = isActive
+            // 시트가 닫힐 때 마커 선택 해제
+            // 단, PlaceInfoSheet가 표시될 때는 마커를 해제하지 않음 (커스텀 핀 선택 유지)
+            if !isActive, !state.isPlaceInfoSheetPresented {
+                state.deselectMarkerTrigger = UUID()
+            }
             return .none
             
         case let .cameraIdle(bounds, zoomLevel):
@@ -564,6 +569,11 @@ struct MapFeature: DWReducer {
                 state.shouldFocusMyLocation = true
                 state.didSetInitialCamera = true
             }
+            
+            // 핀 저장 후 locations가 업데이트되면 idle 핀 제거
+            // (savePinCompleted에서 nil로 설정했지만, locationsUpdated가 나중에 호출되면서
+            //  lastIdlePinCoordinate가 이미 nil로 업데이트되어 변경 감지가 안 될 수 있음)
+            if state.idlePinCoordinate != nil { state.idlePinCoordinate = nil }
             
             // state.locations가 변경되면 SwiftUI가 NaverMapView.updateUIView를 호출
             // → MapFacade.update가 실행되어 마커가 자동으로 업데이트됨
@@ -714,6 +724,7 @@ private extension MapFeature {
             longitude: latestCell.pointLongitude
         )
         state.shouldAnimateCameraTarget = true
+        state.cameraTargetZoomLevel = MapConstants.defaultZoomLevel
     }
 
     // MARK: - PlaceInfo Helpers
