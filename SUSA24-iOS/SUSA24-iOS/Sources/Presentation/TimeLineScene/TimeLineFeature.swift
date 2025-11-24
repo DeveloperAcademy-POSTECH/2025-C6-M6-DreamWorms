@@ -203,13 +203,12 @@ struct TimeLineFeature: DWReducer {
                 return .none
             }
             
-            // 디바운스 0.5초 이후 검색 실행
+            // 디바운스 0.25초 이후 검색 실행
             let taskID = UUID()
             state.searchDebounceTaskID = taskID
-            state.isSearchActive = true
             
             return .task {
-                try? await Task.sleep(for: .milliseconds(500))
+                try? await Task.sleep(for: .milliseconds(250))
                 return .performSearch(text, taskID: taskID)
             }
             
@@ -224,8 +223,11 @@ struct TimeLineFeature: DWReducer {
             
             guard !trimmedQuery.isEmpty else {
                 state.searchedGroupedLocations = []
+                state.isSearchActive = false
                 return .none
             }
+            
+            state.isSearchActive = true
             
             // 주소기준 필터
             let searchedGroupedLocations = state.locations.filter { location in
