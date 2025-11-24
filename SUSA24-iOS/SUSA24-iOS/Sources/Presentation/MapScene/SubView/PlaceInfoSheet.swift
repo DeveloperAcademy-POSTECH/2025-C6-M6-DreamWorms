@@ -286,7 +286,7 @@ struct CircleProgressView: View {
 
 // MARK: - Preview
 
-//#Preview("핀 없는 경우") {
+// #Preview("핀 없는 경우") {
 //    struct PreviewWrapper: View {
 //        @State private var isPresented = true
 //
@@ -312,9 +312,9 @@ struct CircleProgressView: View {
 //    }
 //
 //    return PreviewWrapper()
-//}
+// }
 //
-//#Preview("핀 있는 경우") {
+// #Preview("핀 있는 경우") {
 //    struct PreviewWrapper: View {
 //        @State private var isPresented = true
 //
@@ -354,9 +354,9 @@ struct CircleProgressView: View {
 //    }
 //
 //    return PreviewWrapper()
-//}
+// }
 //
-//#Preview("핀 있는데 노트안쓴 경우") {
+// #Preview("핀 있는데 노트안쓴 경우") {
 //    struct PreviewWrapper: View {
 //        @State private var isPresented = true
 //
@@ -396,4 +396,4 @@ struct CircleProgressView: View {
 //    }
 //
 //    return PreviewWrapper()
-//}
+// }

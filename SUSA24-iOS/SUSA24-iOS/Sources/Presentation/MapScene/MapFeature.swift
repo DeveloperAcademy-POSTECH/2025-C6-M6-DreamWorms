@@ -357,8 +357,11 @@ struct MapFeature: DWReducer {
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
             
-            // existingLocation 찾기 (주소 매칭)
-            state.existingLocation = findExistingLocation(for: placeInfo, in: state.locations)
+            // existingLocation 찾기 (좌표 기반 우선, 없으면 주소 매칭)
+            // userLocationMarkerTapped에서 이미 existingLocation이 설정된 경우는 유지
+            if state.existingLocation == nil {
+                state.existingLocation = findExistingLocation(for: placeInfo, in: state.locations, coordinate: state.selectedCoordinate)
+            }
             
             // PlaceInfoSheet 표시 시 타임라인 시트를 최소화
             NotificationCenter.default.post(name: .resetDetentToShort, object: nil)
@@ -497,7 +500,11 @@ struct MapFeature: DWReducer {
             state.selectedPlaceInfo = placeInfo
             state.isPlaceInfoLoading = false
             state.isPlaceInfoSheetPresented = true
-            state.existingLocation = findExistingLocation(for: placeInfo, in: state.locations)
+            state.existingLocation = findExistingLocation(
+                for: placeInfo,
+                in: state.locations,
+                coordinate: coordinate
+            )
             
             // 명령을 수행했으므로 버스에 보관된 값을 초기화합니다.
             dispatcher.consume()
@@ -726,9 +733,21 @@ private extension MapFeature {
     /// - Parameters:
     ///   - placeInfo: 찾을 위치 정보
     ///   - locations: 검색할 Location 배열
-    /// - Returns: 주소 매칭으로 찾은 Location (없으면 nil)
-    /// - Note: 도로명 주소 또는 지번 주소가 일치하는 Location을 반환합니다.
-    func findExistingLocation(for placeInfo: PlaceInfo, in locations: [Location]) -> Location? {
+    ///   - coordinate: 좌표 정보 (있으면 좌표 기반 매칭 우선)
+    /// - Returns: 좌표 또는 주소 매칭으로 찾은 Location (없으면 nil)
+    /// - Note: 좌표 기반 매칭을 우선으로 하고, 없으면 주소 매칭을 시도합니다.
+    func findExistingLocation(for placeInfo: PlaceInfo, in locations: [Location], coordinate: MapCoordinate? = nil) -> Location? {
+        if let coordinate {
+            let threshold: Double = 50.0 // 50m
+            
+            if let matched = locations.first(where: { loc in
+                isLocationWithinRadius(center: coordinate, location: loc, radius: threshold)
+            }) {
+                return matched
+            }
+        }
+        
+        // 2. 주소 매칭 (기존 로직)
         let incomingRoad = placeInfo.roadAddress
         let incomingJibun = placeInfo.jibunAddress
         
@@ -743,6 +762,31 @@ private extension MapFeature {
             }
             return false
         }
+    }
+    
+    /// 중심 좌표에서 주어진 Location까지의 거리가 radius(m) 이하인지 확인합니다.
+    /// - Parameters:
+    ///   - center: 중심 좌표
+    ///   - location: 확인할 Location
+    ///   - radius: 반경 (미터 단위, 기본값 50m)
+    /// - Returns: radius 이내이면 true
+    private func isLocationWithinRadius(center: MapCoordinate, location: Location, radius: Double = 50.0) -> Bool {
+        let lat1 = center.latitude * .pi / 180
+        let lon1 = center.longitude * .pi / 180
+        let lat2 = location.pointLatitude * .pi / 180
+        let lon2 = location.pointLongitude * .pi / 180
+        
+        let dLat = lat2 - lat1
+        let dLon = lon2 - lon1
+        
+        // Haversine formula
+        let a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2)
+        let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        
+        let earthRadius: Double = 6_371_000 // m
+        let distance = earthRadius * c
+        
+        return distance <= radius
     }
 
     // MARK: - Kakao Place Helpers

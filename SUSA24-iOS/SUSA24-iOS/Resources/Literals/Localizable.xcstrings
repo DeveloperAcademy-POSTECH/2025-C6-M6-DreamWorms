@@ -33,9 +33,6 @@
     "%lld/10" : {
 
     },
-    "%lld%%" : {
-
-    },
     "%lld개" : {
 
     },
@@ -85,7 +82,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$(cellName)@ 검색 결과가 없습니다."
+            "value" : "기지국 검색 결과가 없습니다."
           }
         }
       }
