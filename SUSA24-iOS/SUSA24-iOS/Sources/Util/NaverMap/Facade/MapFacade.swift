@@ -91,6 +91,7 @@ final class MapFacade {
     ///   - mapView: 네이버 지도 뷰
     ///   - cameraTarget: 카메라 이동 목표 좌표
     ///   - shouldAnimateCamera: 카메라 이동 애니메이션 여부
+    ///   - zoomLevel: 적용할 줌 레벨. nil이면 현재 줌 레벨을 유지합니다.
     ///   - onCameraMoveConsumed: 카메라 이동 명령 소비 콜백
     ///   - shouldFocusMyLocation: 현위치 포커싱 여부
     ///   - onMyLocationFocusConsumed: 현위치 포커싱 명령 소비 콜백

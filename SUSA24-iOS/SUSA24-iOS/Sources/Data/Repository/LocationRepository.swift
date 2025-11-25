@@ -290,7 +290,6 @@ struct LocationRepository: LocationRepositoryProtocol {
             receivedAt: Date()
         )
 
-        print("✅ [LocationRepository] 새 Location 생성: \(address)")
         try await createLocations(data: [location], caseId: caseID)
     }
     

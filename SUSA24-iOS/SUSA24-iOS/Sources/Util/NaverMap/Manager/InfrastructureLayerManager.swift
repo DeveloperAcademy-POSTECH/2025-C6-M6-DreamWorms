@@ -121,6 +121,18 @@ final class InfrastructureMarkerManager {
     
     // MARK: - Private Methods
     
+    /// 마커에 레이어 옵션을 적용합니다.
+    /// - Parameters:
+    ///   - marker: 레이어 옵션을 적용할 마커
+    ///   - markerType: 마커 타입
+    private func applyMarkerLayerOptions(to marker: NMFMarker, markerType: MarkerType) {
+        marker.zIndex = markerType.zIndex
+        marker.isHideCollidedSymbols = markerType.shouldHideCollidedSymbols
+        marker.isHideCollidedMarkers = markerType.shouldHideCollidedMarkers
+        marker.isForceShowIcon = markerType.shouldForceShowIcon
+        marker.isHideCollidedCaptions = markerType.shouldHideCollidedCaptions
+    }
+    
     /// 기지국 마커를 생성합니다.
     /// - Parameters:
     ///   - station: 기지국 데이터
@@ -139,6 +151,10 @@ final class InfrastructureMarkerManager {
         marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.hidden = !isVisible
+        
+        // 레이어 속성 적용
+        applyMarkerLayerOptions(to: marker, markerType: station.markerType)
+        
         marker.mapView = mapView
         return marker
     }
@@ -155,6 +171,10 @@ final class InfrastructureMarkerManager {
         marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.hidden = !isVisible
+        
+        // 레이어 속성 적용
+        applyMarkerLayerOptions(to: marker, markerType: .cctv)
+        
         marker.mapView = mapView
         return marker
     }
