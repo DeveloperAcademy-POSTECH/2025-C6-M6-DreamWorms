@@ -72,6 +72,8 @@ struct DWLocationCard: View {
                         Text(description)
                             .font(.bodyRegular14)
                             .foregroundColor(.labelAlternative)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                  
