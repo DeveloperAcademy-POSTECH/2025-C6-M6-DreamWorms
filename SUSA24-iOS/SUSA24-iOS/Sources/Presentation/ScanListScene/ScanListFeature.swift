@@ -212,8 +212,8 @@ struct ScanListFeature: DWReducer {
                 return Location(
                     id: UUID(),
                     address: result.displayAddress, // 신주소 우선, 없으면 구주소
-                    title: nil,
-                    note: nil,
+                    title: type.text, // 카테고리의 text로 추가함
+                    note: "카메라 스캔 수사자료",
                     pointLatitude: result.latitude,
                     pointLongitude: result.longitude,
                     boxMinLatitude: nil,
