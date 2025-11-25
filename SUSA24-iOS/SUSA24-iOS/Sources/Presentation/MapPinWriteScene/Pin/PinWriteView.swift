@@ -137,35 +137,8 @@ struct PinNameInputSection: View {
     }
     
     private func validateInput(_ input: String) -> String {
-        var filtered = input
-        
-        // 1) 이모지 완전 제거 - 모든 방법 동원
-        filtered = filtered.unicodeScalars
-            .filter { scalar in
-                // Emoji 속성 체크
-                if scalar.properties.isEmoji {
-                    return false
-                }
-                // Emoji Presentation 체크
-                if scalar.properties.isEmojiPresentation {
-                    return false
-                }
-                // 알려진 이모지 범위 체크
-                if CharacterSet.emojis.contains(scalar) {
-                    return false
-                }
-                // Variation Selector (이모지 스타일 선택자) 제거
-                if (0xFE00 ... 0xFE0F).contains(scalar.value) {
-                    return false
-                }
-                // Zero Width Joiner (이모지 결합용) 제거
-                if scalar.value == 0x200D {
-                    return false
-                }
-                return true
-            }
-            .map(String.init)
-            .joined()
+        // 1) 이모지 제거
+        var filtered = input.removingEmojis
         
         // 2) 최대 20자 제한
         if filtered.count > 20 {
