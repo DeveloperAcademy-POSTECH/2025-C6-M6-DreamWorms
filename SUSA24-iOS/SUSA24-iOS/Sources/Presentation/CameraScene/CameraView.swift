@@ -57,12 +57,16 @@ struct CameraView: View {
                             // 한번 더 검사
                             guard store.state.allPhotos.count > 0 else { return }
                             
+                            let photosToScan = store.state.allPhotos
+                            
                             coordinator.push(
                                 .scanLoadScene(
                                     caseID: store.state.caseID,
-                                    photos: store.state.allPhotos
+                                    photos: photosToScan
                                 )
                             )
+                            
+                            store.send(.deleteAllPhotos)
                         },
                         showScanButton: store.state.photoCount > 0
                     )

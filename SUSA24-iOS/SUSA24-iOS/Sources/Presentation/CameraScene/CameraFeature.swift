@@ -140,12 +140,15 @@ struct CameraFeature: DWReducer {
         // MARK: Photo Capture Actions
         
         case captureButtonTapped
+
         case capturePhotoCompleted(Result<CapturedPhoto, Error>)
         case syncPhotoState
         case updatePhotoCount(Int)
         case updateThumbnail(UIImage?)
         case updateAllPhotos([CapturedPhoto])
         case updateCaptureAvailability(Bool)
+        
+        case deleteAllPhotos
         
         // MARK: UI Actions
         
@@ -336,6 +339,10 @@ struct CameraFeature: DWReducer {
         case let .updateCaptureAvailability(isAvailable):
             state.isCaptureAvailable = isAvailable
             return .none
+            
+        case .deleteAllPhotos:
+            camera.clearAllPhotos()
+            return .send(.syncPhotoState)
             
             // MARK: UI
             
