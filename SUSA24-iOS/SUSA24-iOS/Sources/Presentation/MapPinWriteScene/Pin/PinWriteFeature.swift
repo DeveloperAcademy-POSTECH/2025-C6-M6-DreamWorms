@@ -57,23 +57,8 @@ struct PinWriteFeature: DWReducer {
             let trimmedName = pinName.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmedName.isEmpty, trimmedName.count <= 20 else { return false }
             
-            // 이모지 완전 차단 - 여러 방법으로 체크
-            for scalar in trimmedName.unicodeScalars {
-                // 1. Emoji 속성 체크
-                if scalar.properties.isEmoji {
-                    return false
-                }
-                // 2. Emoji Presentation 체크
-                if scalar.properties.isEmojiPresentation {
-                    return false
-                }
-                // 3. 알려진 이모지 범위 체크
-                if CharacterSet.emojis.contains(scalar) {
-                    return false
-                }
-            }
-            
-            return true
+            // 이모지 포함 여부 확인
+            return !trimmedName.containsEmoji
         }
     }
     
