@@ -15,6 +15,399 @@
 
 <br>
 
+## 👑 Contributors
+
+<div align="center">
+  <div
+    style="
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,64,175,0.85));
+      box-shadow: 0 24px 60px rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.45);
+      backdrop-filter: blur(18px);
+    "
+  >
+    <table>
+      <tr>
+        <!-- 1: Demian -->
+        <td align="center" style="padding: 16px;">
+          <div
+            style="
+              padding: 16px 12px;
+              border-radius: 20px;
+              background: rgba(15,23,42,0.85);
+              border: 1px solid rgba(148,163,184,0.6);
+              box-shadow: 0 18px 45px rgba(15,23,42,0.7);
+            "
+          >
+            <img
+              src="https://github.com/YooGyeongMo.png"
+              width="100px"
+              style="border-radius: 50%; border: 2px solid #38bdf8; margin-bottom: 8px;"
+              alt="Demian Yoo"
+            />
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+              <a
+                href="https://github.com/YooGyeongMo"
+                style="text-decoration: none; color: #e5e7eb;"
+              >
+                Demian Yoo
+              </a>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 10px;
+                  border-radius: 999px;
+                  background: #020617;
+                  color: #e5e7eb;
+                  font-size: 11px;
+                  font-weight: 600;
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+              >
+                iOS Developer
+              </span>
+            </div>
+            <div>
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 12px;
+                  border-radius: 999px;
+                  background: linear-gradient(135deg, #38bdf8, #6366f1);
+                  color: #f9fafb;
+                  font-size: 10px;
+                  font-weight: 600;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                "
+              >
+                DreamWorms
+              </span>
+            </div>
+          </div>
+        </td>
+        <!-- 2: MuchanKim -->
+        <td align="center" style="padding: 16px;">
+          <div
+            style="
+              padding: 16px 12px;
+              border-radius: 20px;
+              background: rgba(15,23,42,0.78);
+              border: 1px solid rgba(148,163,184,0.5);
+              box-shadow: 0 18px 45px rgba(15,23,42,0.65);
+            "
+          >
+            <img
+              src="https://github.com/MuchanKim.png"
+              width="100px"
+              style="border-radius: 50%; border: 2px solid #4ade80; margin-bottom: 8px;"
+              alt="Muchan Kim"
+            />
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+              <a
+                href="https://github.com/MuchanKim"
+                style="text-decoration: none; color: #e5e7eb;"
+              >
+                Muchan Kim
+              </a>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 10px;
+                  border-radius: 999px;
+                  background: #020617;
+                  color: #e5e7eb;
+                  font-size: 11px;
+                  font-weight: 600;
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+              >
+                iOS Developer
+              </span>
+            </div>
+            <div>
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 12px;
+                  border-radius: 999px;
+                  background: linear-gradient(135deg, #22c55e, #2dd4bf);
+                  color: #f9fafb;
+                  font-size: 10px;
+                  font-weight: 600;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                "
+              >
+                DreamWorms
+              </span>
+            </div>
+          </div>
+        </td>
+        <!-- 3: mini-min -->
+        <td align="center" style="padding: 16px;">
+          <div
+            style="
+              padding: 16px 12px;
+              border-radius: 20px;
+              background: rgba(15,23,42,0.78);
+              border: 1px solid rgba(148,163,184,0.5);
+              box-shadow: 0 18px 45px rgba(15,23,42,0.65);
+            "
+          >
+            <img
+              src="https://github.com/mini-min.png"
+              width="100px"
+              style="border-radius: 50%; border: 2px solid #f97316; margin-bottom: 8px;"
+              alt="mini-min"
+            />
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+              <a
+                href="https://github.com/mini-min"
+                style="text-decoration: none; color: #e5e7eb;"
+              >
+                mini-min
+              </a>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 10px;
+                  border-radius: 999px;
+                  background: #020617;
+                  color: #e5e7eb;
+                  font-size: 11px;
+                  font-weight: 600;
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+              >
+                iOS Developer
+              </span>
+            </div>
+            <div>
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 12px;
+                  border-radius: 999px;
+                  background: linear-gradient(135deg, #f97316, #facc15);
+                  color: #0f172a;
+                  font-size: 10px;
+                  font-weight: 700;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                "
+              >
+                DreamWorms
+              </span>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <!-- 4: delightPIP -->
+        <td align="center" style="padding: 16px;">
+          <div
+            style="
+              padding: 16px 12px;
+              border-radius: 20px;
+              background: rgba(15,23,42,0.78);
+              border: 1px solid rgba(148,163,184,0.5);
+              box-shadow: 0 18px 45px rgba(15,23,42,0.65);
+            "
+          >
+            <img
+              src="https://github.com/delightPIP.png"
+              width="100px"
+              style="border-radius: 50%; border: 2px solid #eab308; margin-bottom: 8px;"
+              alt="delightPIP"
+            />
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+              <a
+                href="https://github.com/delightPIP"
+                style="text-decoration: none; color: #e5e7eb;"
+              >
+                delightPIP
+              </a>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 10px;
+                  border-radius: 999px;
+                  background: #020617;
+                  color: #e5e7eb;
+                  font-size: 11px;
+                  font-weight: 600;
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+              >
+                iOS Developer
+              </span>
+            </div>
+            <div>
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 12px;
+                  border-radius: 999px;
+                  background: linear-gradient(135deg, #facc15, #22c55e);
+                  color: #0f172a;
+                  font-size: 10px;
+                  font-weight: 700;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                "
+              >
+                DreamWorms
+              </span>
+            </div>
+          </div>
+        </td>
+        <!-- 5: Jikiim -->
+        <td align="center" style="padding: 16px;">
+          <div
+            style="
+              padding: 16px 12px;
+              border-radius: 20px;
+              background: rgba(15,23,42,0.78);
+              border: 1px solid rgba(148,163,184,0.5);
+              box-shadow: 0 18px 45px rgba(15,23,42,0.65);
+            "
+          >
+            <img
+              src="https://github.com/Jikiim.png"
+              width="100px"
+              style="border-radius: 50%; border: 2px solid #ec4899; margin-bottom: 8px;"
+              alt="Jikiim"
+            />
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+              <a
+                href="https://github.com/Jikiim"
+                style="text-decoration: none; color: #e5e7eb;"
+              >
+                Jikiim
+              </a>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 10px;
+                  border-radius: 999px;
+                  background: #020617;
+                  color: #e5e7eb;
+                  font-size: 11px;
+                  font-weight: 600;
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+              >
+                UI/UX Designer
+              </span>
+            </div>
+            <div>
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 12px;
+                  border-radius: 999px;
+                  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+                  color: #f9fafb;
+                  font-size: 10px;
+                  font-weight: 700;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                "
+              >
+                DreamWorms
+              </span>
+            </div>
+          </div>
+        </td>
+        <!-- 6: youryeony -->
+        <td align="center" style="padding: 16px;">
+          <div
+            style="
+              padding: 16px 12px;
+              border-radius: 20px;
+              background: rgba(15,23,42,0.78);
+              border: 1px solid rgba(148,163,184,0.5);
+              box-shadow: 0 18px 45px rgba(15,23,42,0.65);
+            "
+          >
+            <img
+              src="https://github.com/youryeony.png"
+              width="100px"
+              style="border-radius: 50%; border: 2px solid #38bdf8; margin-bottom: 8px;"
+              alt="youryeony"
+            />
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+              <a
+                href="https://github.com/youryeony"
+                style="text-decoration: none; color: #e5e7eb;"
+              >
+                youryeony
+              </a>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 10px;
+                  border-radius: 999px;
+                  background: #020617;
+                  color: #e5e7eb;
+                  font-size: 11px;
+                  font-weight: 600;
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+              >
+                Product Manager
+              </span>
+            </div>
+            <div>
+              <span
+                style="
+                  display: inline-block;
+                  padding: 3px 12px;
+                  border-radius: 999px;
+                  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+                  color: #f9fafb;
+                  font-size: 10px;
+                  font-weight: 700;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                "
+              >
+                DreamWorms
+              </span>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <p style="margin-top: 16px; font-size: 12px; color: #cbd5f5;">
+      Designed by <b>DreamWorms</b> · 왕꿈틀이
+    </p>
+  </div>
+</div>
+
 ## 📆 프로젝트 기간
 - 전체 기간: `2025.09.01 ~ 진행중`
 - 개발 기간: `2025.11.01 ~ 진행중`
@@ -132,5 +525,5 @@ https://github.com/user-attachments/assets/312d3e54-f710-4a5c-839a-2b13fb9869ab
 
 <br>
 
-## Team Tech Blog
+## 🧑‍💻 Team Tech Blog
 👉 기술의 성장에 대한 자세한 내용은 [Medium Tech Blog](https://medium.com/%EC%99%95%EA%BF%88%ED%8B%80%EC%9D%B4-dreamworms)를 확인하세요!
