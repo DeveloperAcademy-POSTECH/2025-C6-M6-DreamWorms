@@ -13,6 +13,8 @@
 [![Xcode](https://img.shields.io/badge/Xcode-16.0+-007ACC?style=flat&logo=xcode&logoColor=white&labelColor=007ACC&color=007ACC)](https://developer.apple.com/xcode/)
 [![License](https://img.shields.io/badge/License-MIT-4CAF50?style=flat&labelColor=4CAF50&color=4CAF50)](LICENSE)
 
+<br>
+
 ## 📆 프로젝트 기간
 - 전체 기간: `2025.09.01 ~ 진행중`
 - 개발 기간: `2025.11.01 ~ 진행중`
@@ -75,6 +77,10 @@
 > `애플의 AI모델(파운데이션 모델)`이 한 줄로 요약해주는 `피의자 주요 거점` 분석 결과를 통해 잠복해야할 곳의 `장소와 시간`을 신속 정확하게 확인해서 `검거 전략`을 세울 수 있습니다.
 
 <img width="6800" height="4320" alt="메인기능6" src="https://github.com/user-attachments/assets/55d2bb40-666b-41aa-8e5c-21ee065a9725" />
+
+
+https://github.com/user-attachments/assets/312d3e54-f710-4a5c-839a-2b13fb9869ab
+
 
 ----
 
