@@ -74,6 +74,7 @@ protocol LocationRepositoryProtocol: Sendable {
 
 // MARK: - Repository Implementation
 
+@MainActor
 struct LocationRepository: LocationRepositoryProtocol {
     private let context: NSManagedObjectContext
     

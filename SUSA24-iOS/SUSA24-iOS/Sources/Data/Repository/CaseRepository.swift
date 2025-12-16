@@ -42,6 +42,7 @@ protocol CaseRepositoryProtocol: Sendable {
 
 // MARK: - Repository Implementation
 
+@MainActor
 struct CaseRepository: CaseRepositoryProtocol {
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) { self.context = context }
