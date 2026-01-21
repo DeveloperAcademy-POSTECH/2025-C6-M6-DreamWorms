@@ -149,7 +149,7 @@ struct CaseRepository: CaseRepositoryProtocol {
             context.delete(target)
             try context.save()
         }
-     }
+    }
     
     func fetchAllDataOfSpecificCase(for caseId: UUID) async throws -> (case: Case?, location: [Location]) {
         let request = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
@@ -229,7 +229,7 @@ struct CaseRepository: CaseRepositoryProtocol {
         let profileImagePath = primarySuspect?.profileImage
         
         return (caseModel, phoneNumber, profileImagePath)
-     }
+    }
     
     /// 사건번호로 케이스를 찾습니다.
     /// - Parameter caseNumber: 사건번호

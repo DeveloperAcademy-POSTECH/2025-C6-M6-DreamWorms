@@ -294,7 +294,7 @@ struct CameraFeature: DWReducer {
             
         case let .capturePhotoCompleted(result):
             switch result {
-            case let .success(photo):
+            case let .success(_):
                 // TODO: - Text Recognition Actions
                 
                 //                return .merge(

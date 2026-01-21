@@ -118,7 +118,7 @@ struct LocationRepository: LocationRepositoryProtocol {
                 receivedAt: locationEntity.receivedAt
             )
         }
-     }
+    }
     
     /// 특정 Case의 "특정 LocationType"의 Location을 조회합니다.
     /// - Parameters:
@@ -160,7 +160,7 @@ struct LocationRepository: LocationRepositoryProtocol {
                 receivedAt: locationEntity.receivedAt
             )
         }
-     }
+    }
     
     /// Location을 삭제합니다.
     /// - Parameter id: 삭제할 Location의 UUID
@@ -245,7 +245,7 @@ struct LocationRepository: LocationRepositoryProtocol {
         }
             
         try context.save()
-     }
+    }
     
     /// AppIntent에서 사용: 메시지로부터 Location 생성
     func createLocationFromMessage(
@@ -314,7 +314,7 @@ struct LocationRepository: LocationRepositoryProtocol {
             guard let relateCase = suspect.relateCase else { return true }
             return relateCase.id == caseID
         }
-     }
+    }
     
     // MARK: - Pin 관련 처리 메소드
     
@@ -352,7 +352,7 @@ struct LocationRepository: LocationRepositoryProtocol {
         locationEntity.receivedAt = location.receivedAt
            
         try context.save()
-     }
+    }
 }
 
 private extension LocationRepository {
@@ -395,6 +395,7 @@ struct MockLocationRepository: LocationRepositoryProtocol {
     func watchLocations(caseId _: UUID) -> AsyncStream<[Location]> {
         AsyncStream { _ in }
     }
+
     func validateSuspectPhone(caseID _: UUID, phoneNumber _: String) async throws -> Bool { true }
     func checkLocationExists(address _: String, caseId _: UUID) async throws -> Location? { nil }
     func updateLocation(_: Location) async throws {}
