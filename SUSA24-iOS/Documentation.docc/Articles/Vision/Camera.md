@@ -74,7 +74,7 @@ AVFoundation 활용하여 카메라 기능을 제공
 
 >  이미지 활용
 
-![Camera 화면 흐름도](Camera/camera-flow.svg)
+![Camera 화면 흐름도](../../Resources/Camera/camera-flow.svg)
 
 ---
 
@@ -84,7 +84,7 @@ AVFoundation 활용하여 카메라 기능을 제공
 
 > mermaid 활용
 
-![Camera 시퀀스 다이어그램](Camera/camera-sequence.svg)
+![Camera 시퀀스 다이어그램](../../Resources/Camera/camera-sequence.svg)
 
 ### 4.2 흐름 설명
 
@@ -117,10 +117,10 @@ DocumentDetectionProcessor가 프레임 스트림을 구독하여 매 10프레�
 > Mermaid 활용
 
 
-![Camera 상태 다이어그램](Camera/camera-status-state.svg)
+![Camera 상태 다이어그램](../../Resources/Camera/camera-status-state.svg)
 
 
-![Camera 촬영 상태 다이어그램](Camera/camera-capture-state.svg)
+![Camera 촬영 상태 다이어그램](../../Resources/Camera/camera-capture-state.svg)
 
 
 ---
@@ -128,7 +128,7 @@ DocumentDetectionProcessor가 프레임 스트림을 구독하여 매 10프레�
 ## 6. 의존성 다이어그램 (Dependency Diagram)
 
 > Mermaid 활용
-![Camera 의존성 다이어그램](Camera/camera-dependency.svg)
+![Camera 의존성 다이어그램](../../Resources/Camera/camera-dependency.svg)
 
 
 ## 서비스 레이어 역할
