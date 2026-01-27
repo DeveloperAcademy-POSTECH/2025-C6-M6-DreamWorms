@@ -130,7 +130,88 @@ DocumentDetectionProcessor가 프레임 스트림을 구독하여 매 10프레�
 > Mermaid 활용
 ![Camera 의존성 다이어그램](Camera/camera-dependency.svg)
 
+
+## 서비스 레이어 역할
+
+- **CameraPermissionService** (`class`)
+  - 카메라 권한 요청 및 상태 확인 담당
+  - 최초 실행 시 권한 요청 플로우 관리
+  - 권한 거부 / 제한 상태 판별
+
+- **CameraCaptureSession** (`actor`)
+  - `AVCaptureSession` 생명주기 관리
+  - 입력 / 출력 디바이스 구성
+  - 세션 시작 / 중지 및 상태 전환 처리
+
+- **CameraFrameProvider** (`class`)
+  - 카메라 프레임 스트림 제공
+  - `AsyncStream<CVImageBuffer>` 기반 프레임 전달
+  - Vision 및 Preview 레이어에 프레임 공급
+
+- **CameraControlService** (`actor`)
+  - 카메라 하드웨어 제어 전담
+  - 줌(Zoom), 토치(Torch), 포커스(Focus) 제어
+  - 디바이스 기능별 제약 조건 캡슐화
+
+- **PhotoCaptureService** (`@Observable class`)
+  - 사진 촬영 로직 관리
+  - 촬영 결과 저장 및 삭제 처리
+  - 썸네일, 촬영 개수 등 상태 관리
+
+
 ---
+
+### CameraModel
+
+| 카테고리 | 메소드 | 시그니처 | 설명 |
+|---------|--------|----------|------|
+| Lifecycle | start | func start() async | 카메라 시작 (권한 → 디바이스 → 세션 → 프레임) |
+| Lifecycle | stop | func stop() async | 카메라 중지 및 리소스 정리 |
+| Lifecycle | pauseCamera | func pauseCamera() | 카메라 일시정지 |
+| Lifecycle | resumeCamera | func resumeCamera() | 카메라 재개 |
+| Photo | capturePhoto | func capturePhoto() async throws -> CapturedPhoto | 사진 촬영 |
+| Photo | getAllPhotos | func getAllPhotos() -> [CapturedPhoto] | 전체 사진 반환 |
+| Photo | deletePhoto(at:) | func deletePhoto(at index: Int) | 특정 인덱스 사진 삭제 |
+| Photo | clearAllPhotos | func clearAllPhotos() | 전체 사진 삭제 |
+| Photo | getLastThumbnail | func getLastThumbnail() -> UIImage? | 마지막 썸네일 반환 |
+| Control | setZoom(to:) | func setZoom(to factor: CGFloat) async | 줌 설정 (1.0 ~ 12.0) |
+| Control | applyPinchZoom(delta:) | func applyPinchZoom(delta: CGFloat) async | Pinch 줌 적용 |
+| Control | resetZoom | func resetZoom() async | 줌 초기화 (1.0) |
+| Control | getZoomRange | func getZoomRange() async -> ClosedRange<CGFloat> | 줌 범위 반환 |
+| Control | toggleTorch | func toggleTorch() async | Torch 토글 |
+| Control | turnOnTorch | func turnOnTorch() async | Torch 켜기 |
+| Control | turnOffTorch | func turnOffTorch() async | Torch 끄기 |
+| Control | focusOnPoint(_:) | func focusOnPoint(_ point: CGPoint) async | 포인트 포커스 |
+| Stream | getFrameStream | func getFrameStream() -> AsyncStream<CVImageBuffer>? | 프레임 스트림 반환 |
+
+---
+
+### CameraModel + Vision
+
+| 메소드 | 시그니처 | 설명 |
+|-------|----------|------|
+| enableVisionAnalysis | func enableVisionAnalysis() | Vision 분석 활성화, DocumentDetectionProcessor 초기화 |
+| startVisionAnalysis | func startVisionAnalysis() async | 프레임 스트림 구독 시작, Vision 분석 실행 |
+| getDocumentDetectionStream | func getDocumentDetectionStream() -> AsyncStream<DocumentDetectionResult>? | 문서 감지 결과 스트림 반환 |
+| getLensSmudgeStream | func getLensSmudgeStream() -> AsyncStream<LensSmudgeDetectionResult>? | 렌즈 얼룩 감지 스트림 반환 |
+| stopVisionAnalysis | func stopVisionAnalysis() | Vision 분석 중지 및 리소스 정리 |
+
+---
+
+### CameraControlService (actor)
+
+| 메소드 | 시그니처 | 설명 |
+|-------|----------|------|
+| selectBackCamera | func selectBackCamera() | 후면 카메라 선택 (DualWide → Triple → WideAngle 우선순위) |
+| setZoom(to:) | func setZoom(to factor: CGFloat) -> CGFloat | 줌 설정, 실제 적용된 값 반환 |
+| applyPinchZoom(delta:) | func applyPinchZoom(delta: CGFloat) -> CGFloat | 상대적 줌 조절 |
+| turnOnTorch | func turnOnTorch() -> Bool | Torch 켜기 (성공 여부 반환) |
+| turnOffTorch | func turnOffTorch() -> Bool | Torch 끄기 |
+| toggleTorch | func toggleTorch() -> Bool | Torch 토글 (최종 상태 반환) |
+| focusOnPoint(_:) | func focusOnPoint(_ point: CGPoint) | 특정 포인트 포커스 및 노출 설정 |
+
+---
+
 
 ## 7. 파일 구조
 
