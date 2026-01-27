@@ -1,5 +1,6 @@
 # 카메라 촬영 기능 (Camera Feature)
 [기능에 대한 한 줄 설명]
+수사 문서 촬영 및 Vision 연동 실시간 분석 기능
 
 > 📅 **작성일**: 2026.01.22  
 > 👤 **작성자**: Taeni
@@ -15,7 +16,7 @@
 
 >  **작성 가이드**: 심볼 링크(``ClassName``)를 활용해 데이터 흐름을 서술형으로 설명
 
-카메라 기능은 ameraModel 에서 서스 계층을 분리하여 추상화하는 구조 설계되어있으며,
+카메라 기능은 CameraModel 에서 서비스 계층을 분리하여 추상화하는 구조 설계되어있으며,
 State는 문서 이미지를 분석하고 주소를 추출하는 기능이 포함되어 있음
 
 AVFoundation 활용하여 카메라 기능을 제공
@@ -119,6 +120,7 @@ DocumentDetectionProcessor가 프레임 스트림을 구독하여 매 10프레�
 
 ![Camera 상태 다이어그램](../../Resources/Camera/camera-status-state.svg)
 
+---
 
 ![Camera 촬영 상태 다이어그램](../../Resources/Camera/camera-capture-state.svg)
 
@@ -326,17 +328,21 @@ Sources/
 ## Topics
 
 ### Core Components
->  **작성 가이드**: 핵심 컴포넌트를 심볼 링크로 나열
+- ``CameraFeature``
+- ``CameraModel``
+- ``CameraView``
 
-- ``Component1``
-- ``Component2``
+### Service Layer
+- ``CameraPermissionService``
+- ``CameraCaptureSession``
+- ``CameraFrameProvider``
+- ``CameraControlService``
+- ``PhotoCaptureService``
 
-### [카테고리명]
-[카테고리 설명]
-
-- ``Component``
+### Vision Integration
+- ``CameraModel+Vision``
+- ``DocumentDetectionProcessor``
 
 ### Data Models
-[모델 설명]
-
-- ``Model``
+- ``CapturedPhoto``
+- ``CameraStatus``

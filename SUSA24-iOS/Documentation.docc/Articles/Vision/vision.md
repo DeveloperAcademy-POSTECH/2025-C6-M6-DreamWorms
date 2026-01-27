@@ -1,5 +1,6 @@
 # 스캔 기능 (Vision Feature)
 [기능에 대한 한 줄 설명]
+문서 이미지 분석 및 한국 주소 자동 추출 기능
 
 > 📅 **작성일**: 2026.01.24  
 > 👤 **작성자**: Taeni  
@@ -126,6 +127,9 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 > Mermaid 활용
 
 ![Vision load state 다이어그램](../../Resources/Vision/vision-load-state.svg)
+
+---
+
 ![Vision list state 다이어그램](../../Resources/Vision/vision-list-state.svg)
 
 ---
@@ -160,7 +164,7 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 | 변수명 | 타입 | 설명 |
 |------|------|------|
 | scanResults | [ScanResult] | Geocode 검증 완료된 결과 목록 |
-| selectedIndexSet | Set<Int> | 선택된 인덱스 집합 |
+| selectedIndex | Set<Int> | 선택된 인덱스 집합 |
 | typeSelections | [Int: PinCategoryType] | 각 항목의 카테고리 선택 상태 |
 | isSaving | Bool | 저장 중 상태 |
 | errorMessage | String? | 에러 메시지 |
@@ -173,7 +177,7 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 
 ---
 
-## 9. Action 명세
+### Action 명세
 
 ### ScanLoadFeature.Action
 
@@ -369,11 +373,12 @@ Sources/
 - **원인**: 스트림 연결이 실패됐을 경우
 - **대응**: CameraFeature에서 최대 5회 재시도 함
 
-### 예외 상황 2: Vision 프로세스 초기화 실패 시
 
-- **증상**: 문서 감지 오버레이가 표시되지 않음
-- **원인**: 스트림 연결이 실패됐을 경우
-- **대응**: CameraFeature에서 최대 5회 재시도 함
+### 예외 상황 2: Geocode 검증 실패 시
+
+- **증상**: 추출된 주소가 결과 목록에 없음
+- **원인**: 유효하지 않은 주소, API 오류
+- **대응**: 검증 실패 주소 제외, 성공한 주소만 표시
 
 ---
 
@@ -425,17 +430,23 @@ Sources/
 ## Topics
 
 ### Core Components
->  **작성 가이드**: 핵심 컴포넌트를 심볼 링크로 나열
+- ``ScanLoadFeature``
+- ``ScanListFeature``
+- ``BatchAddressAnalyzer``
+- ``DocumentAnalyzer``
 
-- ``Component1``
-- ``Component2``
+### Address Extraction
+- ``AddressExtractor``
+- ``KoreanAddressPattern``
+- ``DuplicateCounter``
 
-### [카테고리명]
-[카테고리 설명]
-
-- ``Component``
+### Realtime Detection
+- ``DocumentDetectionProcessor``
+- ``VisionService``
+- ``CameraModel+Vision``
 
 ### Data Models
-[모델 설명]
-
-- ``Model``
+- ``ScanResult``
+- ``AddressExtractionResult``
+- ``DocumentAnalysisResult``
+- ``PinCategoryType``
