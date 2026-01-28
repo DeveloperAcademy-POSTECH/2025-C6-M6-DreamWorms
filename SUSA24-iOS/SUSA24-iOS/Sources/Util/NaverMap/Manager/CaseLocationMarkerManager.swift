@@ -42,6 +42,7 @@ final class CaseLocationMarkerManager {
         onUserLocationTapped: @escaping (UUID) -> Void
     ) async -> [String: Int] {
         let (markers, cellCounts) = buildMarkers(from: locations)
+        let scale = displayScale(for: mapView)
         await applyMarkers(markers, on: mapView, onCellTapped: onCellTapped, onUserLocationTapped: onUserLocationTapped)
         
         return cellCounts
@@ -64,12 +65,13 @@ final class CaseLocationMarkerManager {
     ///   - mapView: 네이버 지도 뷰
     func applyVisitFrequency(with cellCounts: [String: Int], on mapView: NMFMapView) async {
         guard !cellCounts.isEmpty else { return }
+        let scale = displayScale(for: mapView)
         
         for (id, count) in cellCounts {
             guard let overlay = markers[id], !isSelectedMarker(id) else { continue }
             
             let newType = MarkerType.cellWithCount(count: count)
-            let icon = await MarkerImageCache.shared.image(for: newType)
+            let icon = await MarkerImageCache.shared.image(for: newType, scale: scale)
             overlay.iconImage = NMFOverlayImage(image: icon)
             overlay.mapView = mapView
             markerTypes[id] = newType
@@ -84,7 +86,8 @@ final class CaseLocationMarkerManager {
             guard case .cellWithCount = markerTypes[id], !isSelectedMarker(id) else { continue }
             
             let newType = MarkerType.cell(isVisited: true)
-            let icon = await MarkerImageCache.shared.image(for: newType)
+            let scale = displayScale(for: mapView)
+            let icon = await MarkerImageCache.shared.image(for: newType, scale: scale)
             overlay.iconImage = NMFOverlayImage(image: icon)
             overlay.mapView = mapView
             markerTypes[id] = newType
@@ -117,14 +120,15 @@ final class CaseLocationMarkerManager {
     }
     
     /// 마커 선택 해제
-    func deselectMarker(on _: NMFMapView) async {
+    func deselectMarker(on mapView: NMFMapView) async {
         guard let selectedId = selectedMarkerId,
               let marker = markers[selectedId],
               let markerType = markerTypes[selectedId] else { return }
+        let scale = displayScale(for: mapView)
         
         // 원래 작은 마커로 복원 (원래 색상 포함)
         let pinColor = markerColors[selectedId]
-        let smallIcon = await getSmallMarkerIcon(for: markerType, pinColor: pinColor)
+        let smallIcon = await getSmallMarkerIcon(for: markerType, pinColor: pinColor, scale: scale)
         marker.iconImage = NMFOverlayImage(image: smallIcon)
         applyMarkerLayerOptions(to: marker, markerType: markerType)
         
@@ -179,6 +183,12 @@ final class CaseLocationMarkerManager {
     
     // MARK: - Private Methods
     
+    /// iOS 26 대응: `UIScreen.main` 대신 mapView 컨텍스트 기반 scale
+    private func displayScale(for mapView: NMFMapView) -> CGFloat {
+        mapView.window?.windowScene?.screen.scale
+            ?? mapView.traitCollection.displayScale
+    }
+    
     /// 선택된 마커인지 확인합니다.
     private func isSelectedMarker(_ id: String) -> Bool {
         id == selectedMarkerId
@@ -207,11 +217,15 @@ final class CaseLocationMarkerManager {
     }
     
     /// 사용자 위치 마커 아이콘을 생성합니다.
-    private func createUserLocationIcon(for markerType: MarkerType, color: PinColorType?) async -> UIImage {
+    private func createUserLocationIcon(
+        for markerType: MarkerType,
+        color: PinColorType?,
+        scale: CGFloat
+    ) async -> UIImage {
         if let color {
-            await MarkerImageCache.shared.userLocationImage(for: markerType, color: color)
+            await MarkerImageCache.shared.userLocationImage(for: markerType, color: color, scale: scale)
         } else {
-            await MarkerImageCache.shared.image(for: markerType)
+            await MarkerImageCache.shared.image(for: markerType, scale: scale)
         }
     }
     
@@ -236,10 +250,11 @@ final class CaseLocationMarkerManager {
             lat: marker.coordinate.latitude,
             lng: marker.coordinate.longitude
         )
+        let scale = displayScale(for: mapView)
         let icon: UIImage = if marker.markerType.isUserLocation {
-            await createUserLocationIcon(for: marker.markerType, color: marker.pinColor)
+            await createUserLocationIcon(for: marker.markerType, color: marker.pinColor, scale: scale)
         } else {
-            await MarkerImageCache.shared.image(for: marker.markerType)
+            await MarkerImageCache.shared.image(for: marker.markerType, scale: scale)
         }
         overlay.iconImage = NMFOverlayImage(image: icon)
         overlay.width = CGFloat(NMF_MARKER_SIZE_AUTO)
@@ -292,7 +307,9 @@ final class CaseLocationMarkerManager {
         // 큰 핀으로 변경 (MarkerType Extension 사용)
         let color = pinColor ?? .black
         guard let selectedStyle = markerType.toSelectedPinStyle(pinColor: color) else { return }
-        let largeIcon = await MarkerImageCache.shared.selectedPinImage(for: selectedStyle)
+        
+        let scale = displayScale(for: mapView)
+        let largeIcon = await MarkerImageCache.shared.selectedPinImage(for: selectedStyle, scale: scale)
         marker.iconImage = NMFOverlayImage(image: largeIcon)
         marker.zIndex = 1000 // 다른 마커 위에 표시
         
@@ -326,20 +343,24 @@ final class CaseLocationMarkerManager {
     }
     
     /// 작은 마커 아이콘 가져오기 (선택 해제 시 복원용)
-    private func getSmallMarkerIcon(for type: MarkerType, pinColor: PinColorType?) async -> UIImage {
+    private func getSmallMarkerIcon(
+        for type: MarkerType,
+        pinColor: PinColorType?,
+        scale: CGFloat
+    ) async -> UIImage {
         // 사용자 위치 마커는 원래 색상으로 복원
         if type.isUserLocation, let color = pinColor {
-            return await MarkerImageCache.shared.userLocationImage(for: type, color: color)
+            return await MarkerImageCache.shared.userLocationImage(for: type, color: color, scale: scale)
         }
         
         // 셀 마커나 기타 마커는 타입에 따라 복원
         switch type {
         case let .cell(isVisited):
-            return await MarkerImageCache.shared.image(for: .cell(isVisited: isVisited))
+            return await MarkerImageCache.shared.image(for: .cell(isVisited: isVisited), scale: scale)
         case let .cellWithCount(count):
-            return await MarkerImageCache.shared.image(for: .cellWithCount(count: count))
+            return await MarkerImageCache.shared.image(for: .cellWithCount(count: count), scale: scale)
         default:
-            return await MarkerImageCache.shared.image(for: type)
+            return await MarkerImageCache.shared.image(for: type, scale: scale)
         }
     }
     
@@ -418,6 +439,7 @@ final class CaseLocationMarkerManager {
             }
         }
         
+        let scale = displayScale(for: mapView)
         for markerInfo in markerModels {
             if let overlay = markers[markerInfo.id] {
                 overlay.position = NMGLatLng(
@@ -435,7 +457,7 @@ final class CaseLocationMarkerManager {
                         // 색상이 변경되었으면 큰 핀 아이콘을 새 색상으로 업데이트
                         let color = markerInfo.pinColor ?? .black
                         if let selectedStyle = markerInfo.markerType.toSelectedPinStyle(pinColor: color) {
-                            let largeIcon = await MarkerImageCache.shared.selectedPinImage(for: selectedStyle)
+                            let largeIcon = await MarkerImageCache.shared.selectedPinImage(for: selectedStyle, scale: scale)
                             overlay.iconImage = NMFOverlayImage(image: largeIcon)
                             markerColors[markerInfo.id] = markerInfo.pinColor
                         }
@@ -454,9 +476,9 @@ final class CaseLocationMarkerManager {
                 
                 if isUserLocation || typeChanged {
                     let icon: UIImage = if isUserLocation {
-                        await createUserLocationIcon(for: markerInfo.markerType, color: markerInfo.pinColor)
+                        await createUserLocationIcon(for: markerInfo.markerType, color: markerInfo.pinColor, scale: scale)
                     } else {
-                        await MarkerImageCache.shared.image(for: markerInfo.markerType)
+                        await MarkerImageCache.shared.image(for: markerInfo.markerType, scale: scale)
                     }
                     overlay.iconImage = NMFOverlayImage(image: icon)
                     markerTypes[markerInfo.id] = markerInfo.markerType

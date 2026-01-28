@@ -35,6 +35,8 @@ final class InfrastructureMarkerManager {
         on mapView: NMFMapView,
         isVisible: Bool = false
     ) {
+        let scale = displayScale(for: mapView)
+
         // 1. Diff 계산: 어떤 마커를 추가/삭제할지 결정
         let currentStationIds = Set(cellStations.map(\.id))
         let existingMarkerIds = Set(cellMarkers.keys)
@@ -51,7 +53,7 @@ final class InfrastructureMarkerManager {
         // 3. 새로운 마커 추가 (비동기: UI 블로킹 방지)
         Task {
             for station in cellStations where idsToAdd.contains(station.id) {
-                let marker = await createMarker(for: station, on: mapView, isVisible: isVisible)
+                let marker = await createMarker(for: station, on: mapView, isVisible: isVisible, scale: scale)
                 cellMarkers[station.id] = marker
             }
         }
@@ -67,6 +69,8 @@ final class InfrastructureMarkerManager {
         on mapView: NMFMapView,
         isVisible: Bool
     ) {
+        let scale = displayScale(for: mapView)
+
         let currentIds = Set(cctvMarkers.map(\.id))
         let existingIds = Set(self.cctvMarkers.keys)
         
@@ -80,7 +84,7 @@ final class InfrastructureMarkerManager {
         
         Task {
             for marker in cctvMarkers where idsToAdd.contains(marker.id) {
-                let overlay = await createCCTVMarker(for: marker, on: mapView, isVisible: isVisible)
+                let overlay = await createCCTVMarker(for: marker, on: mapView, isVisible: isVisible, scale: scale)
                 self.cctvMarkers[marker.id] = overlay
             }
         }
@@ -142,11 +146,12 @@ final class InfrastructureMarkerManager {
     private func createMarker(
         for station: CellMarker,
         on mapView: NMFMapView,
-        isVisible: Bool
+        isVisible: Bool,
+        scale: CGFloat
     ) async -> NMFMarker {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: station.latitude, lng: station.longitude)
-        let markerImage = await MarkerImageCache.shared.image(for: station.markerType)
+        let markerImage = await MarkerImageCache.shared.image(for: station.markerType, scale: scale)
         marker.iconImage = NMFOverlayImage(image: markerImage)
         marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
@@ -162,11 +167,12 @@ final class InfrastructureMarkerManager {
     private func createCCTVMarker(
         for info: CCTVMarker,
         on mapView: NMFMapView,
-        isVisible: Bool
+        isVisible: Bool,
+        scale: CGFloat
     ) async -> NMFMarker {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: info.latitude, lng: info.longitude)
-        let markerImage = await MarkerImageCache.shared.image(for: .cctv)
+        let markerImage = await MarkerImageCache.shared.image(for: .cctv, scale: scale)
         marker.iconImage = NMFOverlayImage(image: markerImage)
         marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
@@ -223,5 +229,10 @@ final class InfrastructureMarkerManager {
             overlay.bounds = bounds
             overlay.mapView = mapView
         }
+    }
+    
+    private func displayScale(for mapView: NMFMapView) -> CGFloat {
+        mapView.window?.windowScene?.screen.scale
+            ?? mapView.traitCollection.displayScale
     }
 }

@@ -30,16 +30,24 @@ struct CameraPreview: UIViewRepresentable {
     /// 캡처된 내용을 표시하는 클래스
     /// AVCaptureVideoPreviewLayer를 소유하고 캡처된 내용을 표시합니다.
     class PreviewView: UIView, PreviewTarget {
-        init() {
-            super.init(frame: .zero)
+        private let imageView = UIImageView()
+        
+        override init(frame: CGRect) {
+            super.init(frame: frame)
             #if targetEnvironment(simulator)
                 // 캡처 API는 실제 디바이스에서만 작동합니다.
                 // 시뮬레이터에서는 정적 이미지를 표시합니다.
-                let imageView = UIImageView(frame: UIScreen.main.bounds)
                 imageView.image = UIImage(named: "video_mode")
                 imageView.contentMode = .scaleAspectFill
-                imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                imageView.translatesAutoresizingMaskIntoConstraints = false
                 addSubview(imageView)
+                
+                NSLayoutConstraint.activate([
+                    imageView.topAnchor.constraint(equalTo: topAnchor),
+                    imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                    imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                    imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                ])
             #endif
         }
         
