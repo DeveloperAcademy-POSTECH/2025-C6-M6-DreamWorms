@@ -82,7 +82,7 @@
 - **Sheet**: 지도 컨텍스트를 유지하면서 추가 정보를 제공하는 기능입니다.
   - **``PlaceInfo``**: 빈 곳이나 핀을 터치했을 때 표시되는 장소 상세 정보 시트입니다.
   - **``TimeLineView``**: 기지국 마커를 터치했을 때, 해당 기지국의 로그를 보여주는 타임라인 시트입니다.
-  - **``MapLayerContainer``**: 레이어 버튼을 통헤 호출되며, 지도/인프라 레이어 옵션을 설정합니다.
+  - **``MapLayerContainer``**: 레이어 버튼을 통해 호출되며, 지도/인프라 레이어 옵션을 설정합니다.
 
 > Tip:
 > `MapScene`은 다양한 기능으로 연결되는 **Hub** 역할을 수행합니다. 기능을 추가할 때 전환 방식을 결정하는 기준은 **'지도의 문맥(Context) 유지 필요성'** 으로 보면 되겠죠.
@@ -115,7 +115,7 @@
 ### 4.3 외부 명령 흐름 (Dispatcher Flow)
 검색(``SearchFeature``)이나 타임라인(``TimelineFeature``) 등 외부 모듈에서 지도를 제어할 때는 **직접 참조 대신 ``MapDispatcher``를 통한 간접 제어** 방식을 사용합니다.
 
-![맵 시퀀스 전체](map-sequence-diagram.svg)
+![맵 시퀀스 전체](map-dispatcher-sequence-diagram)
 
 
 ### 흐름 설명
@@ -153,7 +153,7 @@
 
 ### 5.2 상태 다이어그램 (Visual Diagram)
 
-![맵 상태 다이어그램](map-sequence-diagram.svg)
+![맵 상태 다이어그램](map-state-diagram.svg)
 
 ### 5.3 주요 전이 상세 (Transition Details)
 
