@@ -56,7 +56,7 @@ class OverlayUIView: UIView {
         layer.addSublayer(shapeLayer)
     }
 
-    /// 문서 감지 결과로 오버레이를 업데이트합니다
+    /// 문서 감지 결과로 오버레이를 업데이트
     func updateDetection(_ detection: DocumentDetectionResult, screenSize: CGSize) {
         // Vision 좌표 (정규화, 좌하단 원점) → 화면 좌표 (좌상단 원점)
         let screenCorners = detection.toScreenCoordinates(screenSize: screenSize)
@@ -67,7 +67,7 @@ class OverlayUIView: UIView {
         }
 
         // Perspective가 있는 사각형 경로 생성 (4개 꼭짓점 연결)
-        // 메모 앱처럼 사각형이 아닌 사다리꼴 등의 형태로 표시됨
+        // 메모 앱처럼 사각형이 아닌 사다리꼴 등의 형태로 표시
         let path = UIBezierPath()
         path.move(to: screenCorners[0]) // 좌상
         path.addLine(to: screenCorners[1]) // 우상
@@ -94,7 +94,7 @@ class OverlayUIView: UIView {
 // MARK: - Helper Extensions
 
 extension [CGPoint] {
-    /// 포인트 배열의 경계 상자를 계산합니다
+    /// 포인트 배열의 경계 상자를 계산
     func boundingBox() -> CGRect {
         guard !isEmpty else { return .zero }
 

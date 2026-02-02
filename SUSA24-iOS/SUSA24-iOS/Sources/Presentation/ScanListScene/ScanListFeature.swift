@@ -10,8 +10,8 @@ import Foundation
 /// 스캔 결과 목록 Feature
 ///
 /// ScanLoadFeature에서 분석된 주소 목록을 받아
-/// 사용자가 PinCategoryType을 선택하고 CoreData에 저장합니다.
-/// 중복 주소 감지 시 덮어쓰기 여부를 확인합니다.
+/// 사용자가 PinCategoryType을 선택하고 CoreData에 저장
+/// 중복 주소 감지 시 덮어쓰기 여부를 확인
 struct ScanListFeature: DWReducer {
     // MARK: - Dependencies
 

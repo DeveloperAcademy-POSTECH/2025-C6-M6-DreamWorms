@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Reducer
 
-/// 핀 추가/수정 화면의 비즈니스 로직을 담당하는 Reducer입니다.
+/// 핀 추가/수정 화면의 비즈니스 로직
 struct PinWriteFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
     private let onSaveCompleted: (Location) -> Void
@@ -24,7 +24,7 @@ struct PinWriteFeature: DWReducer {
     
     // MARK: - State
     
-    /// 핀 추가/수정 화면의 상태를 나타냅니다.
+    /// 핀 추가/수정 화면의 상태
     struct State: DWState {
         // MARK: 기본 정보
         
@@ -121,7 +121,7 @@ struct PinWriteFeature: DWReducer {
                 MapCoordinate(latitude: $0.pointLatitude, longitude: $0.pointLongitude)
             } ?? state.coordinate
             
-            // 좌표가 없는 예외 상황: 저장을 진행하지 않습니다.
+            // 좌표가 없는 예외 상황: 저장을 진행할 수 없음
             guard let coordinateSource else { return .none }
             
             let location = Location(
