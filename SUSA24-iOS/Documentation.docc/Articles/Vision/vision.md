@@ -14,8 +14,7 @@
 
 ### 기능 정의
 
->  **작성 가이드**: 심볼 링크(``ClassName``)를 활용해 데이터 흐름을 서술형으로 설명
-Vision Framework 의 RecognizeDocumentsRequest를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
+Vision Framework 의 ``RecognizeDocumentsRequest``를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
 VisonModel 에서 관리되는 State에 문서 이미지를 분석하고 주소를 추출하는 기능이 포함되어 있다.
 
 
@@ -39,7 +38,6 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 
 ### 도입 목적
->  **작성 가이드**: 왜 이 기능이 필요한지 작성
 
 - 실시간 감지: 촬영 전 문서 경계를 시각적으로 확인하여 촬영 품질 향상
 - 렌즈 얼룩 감지: 렌즈 오염 시 토스트로 안내하여 선명한 이미지 확보
@@ -53,14 +51,10 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 ### 사용 위치
 
->  **작성 가이드**: 이 기능이 동작하는 화면/상황을 체크
-
 1. MainTab > MapScene > CameraScene > ScanLoadScene
 2. 문서 촬영 후 분석 화면
 
 ### 사용자 관점 동작 조건
-
-> **작성 가이드**: 사용자 행동 → 시스템 반응 순서로 작성
 
 1. 사용자가 **[카메라 스캔 버튼을 탭]**하면 ``[ScanLoadView]``로 [이동]한다.
 2. ``[ScanLoadView]``가 CameraSession 을 이용해 실시간으로 [분석]한다.
@@ -92,11 +86,7 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 ### 4.1 시퀀스 다이어그램
 
-> mermaid 활용
-
 ### 4.2 흐름 설명
-
-> **작성 가이드**: 심볼 링크를 활용해 컴포넌트 간 데이터 흐름을 설명
 
 1. Vision 분석 단계
 ScanLoadView 진입 시 .startScanning(photos) 액션 자동 발생
@@ -124,8 +114,6 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 
 ## 5. 상태 다이어그램 (State Diagram)
 
-> Mermaid 활용
-
 ![Vision load state 다이어그램](../../Resources/Vision/vision-load-state.svg)
 
 ---
@@ -136,7 +124,6 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 
 ## 6. 의존성 다이어그램 (Dependency Diagram)
 
-> Mermaid 활용
 ![Vision 의존성 다이어그램](../../Resources/Vision/vision-dependency.svg)
 
 ---
@@ -365,8 +352,6 @@ Sources/
 
 ## 8. 예외 상황 및 대응 기준
 
->  **작성 가이드**: 에러처리가 되어있는 부분만 작성
-
 ### 예외 상황 1: Vision 프로세스 초기화 실패 시
 
 - **증상**: 문서 감지 오버레이가 표시되지 않음
@@ -384,8 +369,6 @@ Sources/
 
 ## 9. 기능 한계 및 주의사항
 
-> **작성 가이드**: 현재 기능의 한계점이나 주의사항 작성
-
 실시간 문서 감지
 - 현재 실제 구현 기능은 렌즈 얼룩 여부 로직 적용된 상태임
 - Vision 프로세서 초기화 및 에러 처리에 대한 방안 강구
@@ -401,7 +384,6 @@ Sources/
 ## 10. 향후 개선 사항
 
 ### 기능 고도화
-> **작성 가이드**: 추가하고 싶은 기능 작성
 
 - 실시간 문서 경계 감지 및 자동 촬영 기능 검토
 - 더 많은 주소 패턴 지원필요
@@ -410,7 +392,6 @@ Sources/
 - 추출된 주소의 이미지 정보 수집
 
 ### 기술 부채
-> **작성 가이드**: 리팩토링이 필요한 부분 작성
 
 - ScanLoadFeaure, ScanListFeature 전달 방식 개선
 - 주소 정규식 복잡도 개선

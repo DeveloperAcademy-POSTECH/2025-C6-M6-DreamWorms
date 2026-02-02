@@ -66,8 +66,6 @@
 
 ## 3. 화면 흐름도 (Screen Flow)
 
-> 이미지 활용
-
 ![PinWrite 화면 흐름도](../../Resources/PinWrite/pin-flow.svg)
 
 ---
@@ -123,7 +121,6 @@
 ---
 
 ## 6. 의존성 다이어그램 (Dependency Diagram)
-
 
 ![PinWrite Sequence](../../Resources/PinWrite/pin-dependency.svg)
 ---
