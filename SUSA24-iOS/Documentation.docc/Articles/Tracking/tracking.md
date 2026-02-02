@@ -9,6 +9,8 @@
 
 ### 기능명
 
+- **Tracking Feature (추적 기능)**
+
 ### 기능 정의
 
 Tracking Feature는 ``TrackingSelectionScreen``에서 사용자가 지도 위 3개의 위치 핀 (``Location``) 을 선택하면,  
