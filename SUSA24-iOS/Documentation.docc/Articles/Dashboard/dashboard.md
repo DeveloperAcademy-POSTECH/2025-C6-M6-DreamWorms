@@ -23,7 +23,7 @@ Dashboard Feature는 ``DashboardView`` 진입 시 ``DashboardFeature``가 ``Loca
 초기 데이터 세팅이 완료되고 데이터가 존재하면, ``DashboardFeature``는 ``DashboardAnalysisServiceProtocol``을 통해 Foundation Model 스트리밍 분석을 요청합니다.   
 이때 생성되는 요약 문장은 ``VisitDurationSummary`` 또는 ``VisitFrequencySummary``에 담기며, 항상 3줄 (줄바꿈 2개) 형식으로 생성됩니다.  
 
-스트리밍 중간 결과는 DashboardFeature.Action.updatePartialAnalysis로 상태에 반영되고,  
+스트리밍 중간 결과는 ``DashboardFeature/Action/updatePartialAnalysis(visitDurationSummary:visitFrequencySummary:)``로 상태에 반영되고,  
 스트리밍 종료 후 마지막 partial을 setAnalysisResult로 확정하여 UI에 최종 반영합니다.  
 
 ### 도입 목적
@@ -37,12 +37,12 @@ Dashboard Feature는 ``DashboardView`` 진입 시 ``DashboardFeature``가 ``Loca
 
 ### 사용 위치
 
-1. MainTabView > DashboardScene (분석 탭)
+1. ``MainTabView`` > DashboardScene (분석 탭)
 2. 랭킹 카드 탭 시 LocationOverviewScene으로 상세 화면 이동
 
 ### 사용자 관점 동작 조건
 
-1. 사용자가 대시보드 화면에 진입하면 ``DashboardFeature``가 `LocationRepositoryProtocol.fetchLocations(caseId:)`로 위치 데이터를 로드한다.
+1. 사용자가 대시보드 화면에 진입하면 ``DashboardFeature``가 ``LocationRepositoryProtocol/fetchLocations(caseId:)``로 위치 데이터를 로드한다.
 2. 데이터 로딩이 완료되면 랭킹 섹션(``DashboardRankSection``)과 차트 섹션(``DashboardChartSection``)이 표시된다.
 3. 데이터가 존재하면 Foundation Model 분석 스트리밍이 시작되고, 상단 헤더(``DashboardHeader``) 문장이 점진적으로 갱신된다.
 4. 사용자가 상단 탭 (체류시간/방문빈도)을 바꾸면 탭에 맞는 랭킹과 헤더 문장이 렌더링된다.
@@ -65,28 +65,28 @@ Dashboard Feature는 ``DashboardView`` 진입 시 ``DashboardFeature``가 ``Loca
 ### 4.2 흐름 설명
 
 1. 이벤트 감지 (Event Phase)
-    - ``DashboardView``는 .task에서 DashboardFeature.Action.onAppear(_:)를 Store로 보냅니다.
-    - ``DashboardRankSection``의 Segmented Picker 탭 전환은 DashboardFeature.Action.setTab(_:)으로 전달됩니다.
-    - ``DashboardChartSection``의 요일 변경은 DashboardFeature.Action.setChartWeekday(id:weekday:)로 전달됩니다.
+    - ``DashboardView``는 .task에서 ``DashboardFeature/Action/onAppear(_:)``를 Store로 보냅니다.
+    - ``DashboardRankSection``의 Segmented Picker 탭 전환은 ``DashboardFeature/Action/setTab(_:)``으로 전달됩니다.
+    - ``DashboardChartSection``의 요일 변경은 ``DashboardFeature/Action/setChartWeekday(id:weekday:)``로 전달됩니다.
 
 2. 비즈니스 로직 처리 (Business Logic Phase)
-    - ``DashboardFeature``는 .onAppear(caseID) 수신 시:  
-        - LocationRepositoryProtocol.fetchLocations(caseId:)를 호출합니다.
+    - ``DashboardFeature``는 ``DashboardFeature/Action/onAppear(_:)`` 수신 시:  
+        - ``LocationRepositoryProtocol/fetchLocations(caseId:)``를 호출합니다.
         - ``LocationRepository``는 CoreData에서 ``CaseEntity`` → ``SuspectEntity`` → ``LocationEntity`` 관계로 Locations를 모아 ``Location`` 모델로 변환합니다.
-    - 초기 데이터는 .setInitialData로 한 번에 반영됩니다.
-    - 데이터가 존재하면 .analyzeWithFoundationModel을 통해 Foundation Model 분석 스트리밍을 시작합니다.
-        - 체류시간 탭: DashboardAnalysisService.streamVisitDurationAnalysis
+    - 초기 데이터는 ``DashboardFeature/Action/setInitialData(locations:topDuration:topFrequency:chart:)``로 한 번에 반영됩니다.
+    - 데이터가 존재하면 ``DashboardFeature/Action/analyzeWithFoundationModel``을 통해 Foundation Model 분석 스트리밍을 시작합니다.
+        - 체류시간 탭: ``DashboardAnalysisService/streamVisitDurationAnalysis(locations:topDuration:)``
             - 입력: topDuration.first.address + 해당 주소의 “가장 머무를 가능성이 높은 1시간 구간”
-        - 방문빈도 탭: DashboardAnalysisService.streamVisitFrequencyAnalysis
+        - 방문빈도 탭: ``DashboardAnalysisService/streamVisitFrequencyAnalysis(locations:topFrequency:)``
             - 입력: topFrequency.first.address + 해당 주소의 “가장 많이 방문한 날짜/요일”
     - 생성 결과는 ``VisitDurationSummary`` / ``VisitFrequencySummary``의 title에 담기며, 항상 3줄, 줄 구분은 정확히 \n 2개 규칙을 강제합니다.
     - 스트리밍 중간 결과는 updatePartialAnalysis로 반영하고, 마지막 partial을 setAnalysisResult로 확정합니다.
     - 스트리밍 실패/partial 미수신 시 analysisFailed로 전환합니다.
 
 3. 렌더링 동기화 (Rendering Phase)    
-    - State 변경 시 DashboardView는 다음을 동기화합니다.
+    - State 변경 시 ``DashboardView``는 다음을 동기화합니다.
         - ``DashboardHeader``: isAnalyzingWithFM + tab + summary 상태에 따라 진행/완료/부족 문장을 결정
-        - ``DashboardRankSection``: 탭에 따라 Top3 데이터 표시, 비어 있으면 TimeLineEmptyState 노출
+        - ``DashboardRankSection``: 탭에 따라 Top3 데이터 표시, 비어 있으면 ``TimeLineEmptyState`` 노출
         - ``DashboardChartSection``: 차트 데이터가 비어 있으면 TimeLineEmptyState 노출, 있으면 최대 3개 카드 렌더
     - 헤더 문장 품질을 위해 normalizeTrailingDots(_:)로 말미의 ...를 .로 정리합니다.
 
@@ -107,16 +107,16 @@ DashboardFeature.swift / DashboardView.swift의 상태 변수 정의와 화면 �
 
 | Variable Name | Description | Available Interactions |
 | :--- | :--- | :--- |
-| tab | 현재 선택 탭 (visitDuration / visitFrequency) | • Segmented Picker로 전환 |
-| caseID | 분석 대상 케이스 ID | • 화면 진입 시 설정 |
-| hasLoaded | 초기 데이터 세팅 완료 여부 | • 중복 로드 방지 |
-| locations | CoreData에서 로드한 원본 위치 데이터 | • 랭킹/분석/AI 분석 데이터로의 입력 |
-| topVisitDurationLocations | 체류시간 Top3 랭킹 데이터 | • 카드 탭 -> 상세 이동 시 정보 전달용 |
-| topVisitFrequencyLocations | 방문빈도 Top3 랭킹 데이터 | • 카드 탭 -> 상세 이동 시 정보 전달용 |
-| cellCharts | 시간대별 방문 패턴 차트 데이터 | • 요일 Pill Picker 변경 (selectedWeekday) |
-| visitDurationSummary | 체류시간 탭 헤더 요약 문장(3줄) | • 헤더 표시용 |
-| visitFrequencySummary | 방문빈도 탭 헤더 요약 문장(3줄) | • 헤더 표시용 |
-| isAnalyzingWithFM | Foundation Model 분석 진행 여부 | • 진행중 문장 노출 |
+| ``DashboardFeature/State/tab`` | 현재 선택 탭 (visitDuration / visitFrequency) | • Segmented Picker로 전환 |
+| ``DashboardFeature/State/caseID`` | 분석 대상 케이스 ID | • 화면 진입 시 설정 |
+| ``DashboardFeature/State/hasLoaded`` | 초기 데이터 세팅 완료 여부 | • 중복 로드 방지 |
+| ``DashboardFeature/State/locations`` | CoreData에서 로드한 원본 위치 데이터 | • 랭킹/분석/AI 분석 데이터로의 입력 |
+| ``DashboardFeature/State/topVisitDurationLocations`` | 체류시간 Top3 랭킹 데이터 | • 카드 탭 -> 상세 이동 시 정보 전달용 |
+| ``DashboardFeature/State/topVisitFrequencyLocations`` | 방문빈도 Top3 랭킹 데이터 | • 카드 탭 -> 상세 이동 시 정보 전달용 |
+| ``DashboardFeature/State/cellCharts`` | 시간대별 방문 패턴 차트 데이터 | • 요일 Pill Picker 변경 (selectedWeekday) |
+| ``DashboardFeature/State/visitDurationSummary`` | 체류시간 탭 헤더 요약 문장(3줄) | • 헤더 표시용 |
+| ``DashboardFeature/State/visitFrequencySummary`` | 방문빈도 탭 헤더 요약 문장(3줄) | • 헤더 표시용 |
+| ``DashboardFeature/State/isAnalyzingWithFM`` | Foundation Model 분석 진행 여부 | • 진행중 문장 노출 |
 
 > Note:
 > - 로딩 UI는 별도 표시하지 않음: “로딩 상태”는 헤더 문장으로만 표현됩니다.  
@@ -128,16 +128,16 @@ DashboardFeature.swift / DashboardView.swift의 상태 변수 정의와 화면 �
 
 ### 5.3 주요 전이 상세 (Transition Details)
 - **진입 → 초기 로드**
-    - **Action**: DashboardFeature/Action/onAppear(UUID)
+    - **Action**: ``DashboardFeature/Action/onAppear(_:)``
     - **Effect**: caseID 설정, repository fetch → .setInitialData
 - **초기 데이터 세팅 완료 → 분석 트리거**
-    - **Action**: DashboardFeature/Action/setInitialData(...)
+    - **Action**: ``DashboardFeature/Action/setInitialData(locations:topDuration:topFrequency:chart:)``
     - **Effect**: locations/top/chart 반영, summary 초기화 → locations가 비어있지 않으면 .analyzeWithFoundationModel
 - **탭 전환 → 필요 시 분석**
-    - **Action**: DashboardFeature/Action/setTab(DashboardPickerTab)
+    - **Action**: ``DashboardFeature/Action/setTab(_:)``
     - **Effect**: hasLoaded == true && locations 존재 && 해당 탭 summary가 비어있으면 .analyzeWithFoundationModel
 - **스트리밍 partial 수신**
-    - **Action**: DashboardFeature/Action/updatePartialAnalysis(...)
+    - **Action**: ``DashboardFeature/Action/updatePartialAnalysis(visitDurationSummary:visitFrequencySummary:)``
     - **Effect**: 헤더 문장 실시간 갱신
 - **스트리밍 종료/실패**
     - **Action**: setAnalysisResult / analysisFailed
@@ -192,15 +192,15 @@ Sources/
 
 ### 예외 상황 1: 위치 데이터 로드 실패
 - **증상**: 랭킹/차트에 데이터가 표시되지 않고 EmptyState가 노출됨
-- **원인**: LocationRepository.fetchLocations(caseId:)에서 CoreData fetch 실패(throw)
+- **원인**: ``LocationRepository/fetchLocations(caseId:)``에서 CoreData fetch 실패(throw)
 - **대응**: DashboardFeature.onAppear catch에서 .none 반환 → 초기값 유지  
   → UI는 섹션 내부에서 TimeLineEmptyState(message: .bottomSheetNoCellData)로 폴백
 
 ### 예외 상황 2: 위치 데이터가 없음
 - **증상**: Top3 및 차트가 비어 있고 EmptyState만 표시됨
 - **원인**: 해당 Case에 연결된 Suspect/Location 관계가 비어 있음  
-  (LocationRepository에서 Case 또는 Suspect/Location이 없으면 [] 반환)
-- **대응**: DashboardFeature.setInitialData에서 locations.isEmpty면 분석 미수행, UI는 EmptyState 노출
+  (``LocationRepository``에서 Case 또는 Suspect/Location이 없으면 [] 반환)
+- **대응**: ``DashboardFeature/Action/setInitialData(locations:topDuration:topFrequency:chart:)``에서 locations.isEmpty면 분석 미수행, UI는 EmptyState 노출
 
 ### 예외 상황 3: AI 분석 실패
 - **증상**: 헤더가 “분석중…”에서 갱신되지 않거나, 탭에 따라 “데이터가 충분하지 않아요.” 상태로 보임
