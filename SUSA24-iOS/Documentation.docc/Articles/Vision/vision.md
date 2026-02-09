@@ -391,9 +391,9 @@ Sources/
 
 ### 기술 부채
 
-- ScanLoadFeaure, ScanListFeature 전달 방식 개선
+- ``ScanLoadFeature``, ``ScanListFeature`` 전달 방식 개선
 - 주소 정규식 복잡도 개선
-- BatchAddressAnalyzer 병렬 처리 검토
+- ``BatchAddressAnalyzer`` 병렬 처리 검토
 
 ---
 

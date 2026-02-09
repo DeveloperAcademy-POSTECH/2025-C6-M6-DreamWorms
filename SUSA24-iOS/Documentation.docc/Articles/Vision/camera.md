@@ -253,7 +253,7 @@ Sources/
 - **원인**: 사용자의 권한 거부
 - **대응**: 설정 앱으로 이동 안내 기능 추가 필요
 
-### 예외 상황 2: CameraSession 구성 실패 시
+### 예외 상황 2: ``CameraSession`` 구성 실패 시
 
 - **증상**: 카메라 시작 되지 않음
 - **원인**: 디바이스 출력 실패 시
@@ -263,7 +263,7 @@ Sources/
 
 - **증상**: 촬영 버튼이 비활성화 됨
 - **원인**: 최대 촬영 가능 장수 10장 제한
-- **대응**: PhotoCaptureErro.maxPhotosExceeded 에러 처리, Toast 메세지 표시
+- **대응**: ``PhotoCaptureError/maxPhotosExceeded`` 에러 처리, Toast 메세지 표시
 
 ---
 
