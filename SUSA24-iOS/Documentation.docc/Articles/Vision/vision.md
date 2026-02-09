@@ -1,4 +1,5 @@
 # 스캔 기능 (Vision Feature)
+
 문서 이미지 분석 및 한국 주소 자동 추출 기능
 
 > 📅 **작성일**: 2026.01.24  
@@ -14,7 +15,7 @@
 ### 기능 정의
 
 Vision Framework 의 ``RecognizeDocumentsRequest``를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
-VisonModel 에서 관리되는 State에 문서 이미지를 분석하고 주소를 추출하는 기능이 포함되어 있다.
+``VisionModel`` 에서 관리되는 State에 문서 이미지를 분석하고 주소를 추출하는 기능이 포함되어 있다.
 
 
 Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
@@ -22,12 +23,12 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 2. 문서 이미지를 분석하여 한국 주소 추출 및 API를 이용한 검증 
 
 핵심 아키텍쳐
-- ScanLoadFeature: 분석 진행 상태 관리
-- ScanListFeature: 결과 목록 및 저장 관리
-- BatchAddressAnalyzer: 다중 이미지 순차 분석
-- DocumentAnalyzer: Vision Framework 기반 문서 구조 분석
-- AddressExtractor: 테이블/텍스트에서 주소 추출
-- KoreanAddressPattern: 한국 주소 정규식 매칭
+- ``ScanLoadFeature``: 분석 진행 상태 관리
+- ``ScanListFeature``: 결과 목록 및 저장 관리
+- ``BatchAddressAnalyzer``: 다중 이미지 순차 분석
+- ``DocumentAnalyzer``: Vision Framework 기반 문서 구조 분석
+- ``AddressExtractor``: 테이블/텍스트에서 주소 추출
+- ``KoreanAddressPattern``: 한국 주소 정규식 매칭
 
 주요 기능
 - 실시간 감지: 카메라 프리뷰에서 문서 경계 및 렌즈 얼룩 감지 (3fps)
@@ -55,17 +56,17 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 ### 사용자 관점 동작 조건
 
-1. 사용자가 **[카메라 스캔 버튼을 탭]**하면 ``[ScanLoadView]``로 [이동]한다.
-2. ``[ScanLoadView]``가 CameraSession 을 이용해 실시간으로 [분석]한다.
+1. 사용자가 **[카메라 스캔 버튼을 탭]**하면 [``ScanLoadView]``로 [이동]한다.
+2. [``ScanLoadView``]가 [``CameraSession``] 을 이용해 실시간으로 [분석]한다.
 3. 분석 중 로딩 애니메이션을 표시한다.
-4. 분석 완료 후 ``[ScanListView]`` 로 이동하여 추출된 주소 목록을 표시한다.
+4. 분석 완료 후 [``ScanListView``] 로 이동하여 추출된 주소 목록을 표시한다.
 5. 사용자가 주소 목록 중 추가할 리스트를 선택하고 카테고리를 지정하여 핀을 추가한다.
 
 | 인터랙션 | 동작 | 결과 |
 |----------|------|------|
-| 스캔 버튼 탭 | ScanLoadView로 이동 | Vision 분석 자동 시작 |
+| 스캔 버튼 탭 | [``ScanLoadView``]로 이동 | Vision 분석 자동 시작 |
 | 분석 완료 대기 | 로딩 애니메이션 표시 | 진행률 업데이트 |
-| 분석 완료 | ScanListView로 자동 이동 | 추출된 주소 목록 표시 |
+| 분석 완료 | [``ScanListView``]로 자동 이동 | 추출된 주소 목록 표시 |
 | 주소 체크박스 탭 | 선택 / 해제 토글 | 선택된 주소 강조 |
 | 카테고리 선택 | 핀 카테고리 지정 | 거주지 / 직장 / 기타 선택 |
 | 핀 추가 버튼 탭 | 중복 확인 후 저장 | CoreData에 Location 저장 |
@@ -75,9 +76,7 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 ## 3. 화면 흐름도 (Screen Flow)
 
->  이미지 활용
-
-![Vision 흐름도](../../Resources/Vision/vision-flow.svg)
+![Vision 흐름도](vision-flow.svg)
 
 ---
 
@@ -88,21 +87,21 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 ### 4.2 흐름 설명
 
 1. Vision 분석 단계
-ScanLoadView 진입 시 .startScanning(photos) 액션 자동 발생
-BatchAddressAnalyzer.analyzePhotos()가 각 사진을 순차적으로 분석
-DocumentAnalyzer.analyzeDocument()가 RecognizeDocumentsRequest로 테이블/리스트/텍스트 추출
+[``ScanLoadView``] 진입 시 .startScanning(photos) 액션 자동 발생
+``BatchAddressAnalyzer/analyzePhotos``가 각 사진을 순차적으로 분석
+``DocumentAnalyzer/analyzeDocument``가 ``RecognizeDocumentsRequest``로 테이블/리스트/텍스트 추출
 추출 우선순위: 테이블 → 리스트 → 텍스트 (Fallback)
 
 2. 주소 추출 단계
-AddressExtractor.extractAddressColumnFromTable()이 테이블에서 "주소" 컬럼 탐색
+``AddressExtractor/extractAddressColumnFromTable``이 테이블에서 "주소" 컬럼 탐색
 헤더 탐색 실패 시 테이블 행열 전치 후 재시도
 최종 실패 시 fallbackScan()으로 전체 셀 스캔
-KoreanAddressPattern이 도로명/지번 주소 정규식 매칭
+``KoreanAddressPattern``이 도로명/지번 주소 정규식 매칭
 
 3. 좌표 검증 단계
 .visionAnalysisCompleted 후 validateAddressesWithGeocode() 호출
 TaskGroup으로 모든 주소를 병렬 Geocode 검증
-검증 성공한 주소만 ScanResult로 변환
+검증 성공한 주소만 ``ScanResult``로 변환
 
 4. 저장 단계
 사용자가 주소 선택 + 카테고리(거주지/직장/기타) 지정
@@ -113,17 +112,17 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 
 ## 5. 상태 다이어그램 (State Diagram)
 
-![Vision load state 다이어그램](../../Resources/Vision/vision-load-state.svg)
+![Vision load state 다이어그램](vision-load-state.svg)
 
 ---
 
-![Vision list state 다이어그램](../../Resources/Vision/vision-list-state.svg)
+![Vision list state 다이어그램](vision-list-state.svg)
 
 ---
 
 ## 6. 의존성 다이어그램 (Dependency Diagram)
 
-![Vision 의존성 다이어그램](../../Resources/Vision/vision-dependency.svg)
+![Vision 의존성 다이어그램](vision-dependency.svg)
 
 ---
 
@@ -135,7 +134,7 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 | currentIndex | Int | 현재 진행 중인 사진 인덱스 (1-based) |
 | totalCount | Int | 전체 사진 개수 |
 | currentPhotoId | UUID? | 현재 분석 중인 사진 ID |
-| scanResults | [ScanResult] | 좌표 검증 완료된 결과 배열 |
+| scanResults | [``ScanResult``] | 좌표 검증 완료된 결과 배열 |
 | successCount | Int | Vision 분석 성공 개수 |
 | failedCount | Int | Vision 분석 실패 개수 |
 | errorMessage | String? | 에러 메시지 |
@@ -149,15 +148,15 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 
 | 변수명 | 타입 | 설명 |
 |------|------|------|
-| scanResults | [ScanResult] | Geocode 검증 완료된 결과 목록 |
+| scanResults | [``ScanResult``] | Geocode 검증 완료된 결과 목록 |
 | selectedIndex | Set<Int> | 선택된 인덱스 집합 |
-| typeSelections | [Int: PinCategoryType] | 각 항목의 카테고리 선택 상태 |
+| typeSelections | [Int: ``PinCategoryType``] | 각 항목의 카테고리 선택 상태 |
 | isSaving | Bool | 저장 중 상태 |
 | errorMessage | String? | 에러 메시지 |
 | isSaveCompleted | Bool | 저장 완료 플래그 |
 | showDuplicateAlert | Bool | 중복 Alert 표시 여부 |
 | duplicateAddress | String? | 중복된 주소 (Alert용) |
-| pendingLocations | [Location] | 저장 대기 중인 Location 배열 |
+| pendingLocations | [``Location``] | 저장 대기 중인 Location 배열 |
 | currentCaseID | UUID? | 현재 케이스 ID |
 | canAddPin | Bool (computed) | 핀 추가 가능 여부 |
 
@@ -300,7 +299,7 @@ TaskGroup으로 모든 주소를 병렬 Geocode 검증
 
 ## 7. 파일 구조
 
-> 해당되는 기능의 파일만 작성
+> 해당되는 기능의 파일만 작성ScanLoadFeatureStateScanLoadFeatureStateScanListFeatureState
 ```
 Sources/
 ├── 📁 Presentation/

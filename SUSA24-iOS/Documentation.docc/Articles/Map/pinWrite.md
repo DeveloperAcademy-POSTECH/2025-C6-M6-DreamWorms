@@ -1,4 +1,5 @@
 # 핀 작성 기능 (Pin Write Feature)
+
 지도에서 위치를 선택하여 핀(거주지/범행지/기타)을 추가하고 관리하는 기능
 
 > 📅 **작성일**: 2026.01.27  
@@ -49,16 +50,16 @@
 
 | 인터랙션 | 동작 | 결과 |
 | :--- | :--- | :--- |
-| 지도 위치 탭 | ``PlaceInfoSheet`` 표시 | Kakao API로 주소 정보 조회 |
-| 핀 추가 버튼 탭 | ``PinWriteView``로 전환 | 핀 이름/색상/카테고리 입력 화면 |
+| 지도 위치 탭 | [PlaceInfoSheet] 표시 | Kakao API로 주소 정보 조회 |
+| 핀 추가 버튼 탭 | [PinWriteView]로 전환 | 핀 이름/색상/카테고리 입력 화면 |
 | 핀 이름 입력 | 텍스트 입력 | 1~20자, 이모지 불가 |
 | 색상 선택 | 7가지 색상 중 선택 | 선택된 색상 강조 표시 |
 | 카테고리 선택 | 거주지/범행지/기타 중 선택 | 선택된 카테고리 강조 |
 | 저장 버튼 탭 | CoreData에 Location 저장 | 지도에 핀 마커 추가 |
-| 기존 핀 탭 | ``PlaceInfoSheet`` 표시 | 핀 정보 및 형사 노트 표시 |
-| 핀 수정 버튼 탭 | ``PinWriteView``로 전환 (수정 모드) | 기존 데이터 로드 |
+| 기존 핀 탭 | [PlaceInfoSheet] 표시 | 핀 정보 및 형사 노트 표시 |
+| 핀 수정 버튼 탭 | [PinWriteView]로 전환 (수정 모드) | 기존 데이터 로드 |
 | 핀 삭제 버튼 탭 | 삭제 확인 Alert | 확인 시 CoreData에서 삭제 |
-| 형사 노트 버튼 탭 | ``NoteWriteView``로 전환 | 메모 입력/수정 화면 |
+| 형사 노트 버튼 탭 | [NoteWriteView]로 전환 | 메모 입력/수정 화면 |
 
 ---
 
@@ -79,29 +80,29 @@
 **1. 위치 선택 및 정보 조회**
 - 사용자가 지도에서 위치를 탭하면 `.mapTapped(latlng:)` 액션 발생
 - ``MapFeature``가 Kakao Geocode API로 주소 정보 조회
-- ``PlaceInfoSheet``에 주소 정보 표시, 기존 핀 여부 확인
+- [``PlaceInfoSheet``]에 주소 정보 표시, 기존 핀 여부 확인
 
 **2. 핀 추가 (Add Mode)**
 - `.addPinTapped` 액션 발생 시 `isPinWritePresented = true`
-- ``PinWriteView`` 표시, `existingLocation = nil`로 추가 모드 진입
+- [``PinWriteView``] 표시, `existingLocation = nil`로 추가 모드 진입
 - 사용자가 핀 이름/색상/카테고리 선택 후 `.saveTapped`
-- ``LocationRepository.createLocations()``로 CoreData에 저장
+- ``LocationRepository/createLocations``로 CoreData에 저장
 - `.saveCompleted(location)` → 상위 ``MapFeature``에 콜백
 
 **3. 핀 수정 (Edit Mode)**
 - `.editPinTapped` 액션 발생 시 `isEditMode = true`
-- ``PinWriteView`` 표시, `existingLocation`에서 기존 데이터 로드
+- [``PinWriteView``] 표시, `existingLocation`에서 기존 데이터 로드
 - `.onAppear`에서 `pinName`, `selectedColor`, `selectedCategory` 설정
-- 수정 후 `.saveTapped` → ``LocationRepository.updateLocation()``
+- 수정 후 `.saveTapped` → ``LocationRepository/updateLocation``
 
 **4. 핀 삭제**
 - `.confirmDeletePin` 액션 발생
-- ``LocationRepository.deleteLocation(id:)`` 호출
+- ``LocationRepository/deleteLocation`` 호출
 - `.deletePinCompleted` → 지도에서 마커 제거
 
 **5. 형사 노트**
-- `.noteButtonTapped` → ``NoteWriteView`` 표시
-- 노트 입력/수정 후 `.saveTapped` → ``LocationRepository.updateLocation()``
+- `.noteButtonTapped` → [``NoteWriteView``] 표시
+- 노트 입력/수정 후 `.saveTapped` → ``LocationRepository/updateLocation``
 - `.noteSaveCompleted(note)` → ``MapFeature`` 상태 업데이트
 
 ---
@@ -127,10 +128,10 @@
 
 - **LocationRepository** (`class`)
   - CoreData 기반 Location CRUD
-  - `createLocations(data:caseId:)`: 핀 생성
-  - `updateLocation(_:)`: 핀 수정
-  - `deleteLocation(id:)`: 핀 삭제
-  - `fetchLocations(caseId:)`: 케이스별 핀 조회
+  - ``LocationRepository/createLocations``: 핀 생성
+  - ``LocationRepository/updateLocation``: 핀 수정
+  - ``LocationRepository/deleteLocation``: 핀 삭제
+  - ``LocationRepository/fetchLocations``: 케이스별 핀 조회
 
 - **KakaoGeocodeAPI** (`service`)
   - 좌표 → 주소 변환 (Reverse Geocoding)
@@ -145,11 +146,11 @@
 | `caseId` | `UUID` | 현재 케이스 ID |
 | `placeInfo` | `PlaceInfo` | 장소 정보 (주소 등) |
 | `coordinate` | `MapCoordinate?` | 지도 좌표 |
-| `existingLocation` | `Location?` | 기존 Location (수정 모드) |
+| `existingLocation` | ``Location``? | 기존 Location (수정 모드) |
 | `isEditMode` | `Bool` (computed) | 수정 모드 여부 (`existingLocation != nil`) |
 | `pinName` | `String` | 핀 이름 입력값 |
-| `selectedColor` | `PinColorType` | 선택된 색상 (기본값: `.black`) |
-| `selectedCategory` | `PinCategoryType` | 선택된 카테고리 (기본값: `.home`) |
+| `selectedColor` | ``PinColorType`` | 선택된 색상 (기본값: `.black`) |
+| `selectedCategory` | ``PinCategoryType`` | 선택된 카테고리 (기본값: `.home`) |
 | `isPinNameFocused` | `Bool` | 핀 이름 입력 필드 포커스 여부 |
 | `isValidPinName` | `Bool` (computed) | 핀 이름 유효성 (1~20자, 이모지 불가) |
 
@@ -160,7 +161,7 @@
 | 변수명 | 타입 | 설명 |
 | :--- | :--- | :--- |
 | `existingNote` | `String?` | 기존 노트 내용 |
-| `existingLocation` | `Location` | 기존 Location 정보 |
+| `existingLocation` | ``Location`` | 기존 Location 정보 |
 | `noteText` | `String` | 노트 텍스트 입력값 |
 | `isTextEditorFocused` | `Bool` | 텍스트 에디터 포커스 여부 |
 | `showDeleteConfirmation` | `Bool` | 삭제 확인 Alert 표시 여부 |
