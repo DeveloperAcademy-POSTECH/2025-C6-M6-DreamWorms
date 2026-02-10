@@ -19,7 +19,7 @@ actor CameraControlService {
     
     // MARK: - Device Setup
     
-    /// 후면 카메라를 선택합니다. 가능한 경우 듀얼 와이드 카메라를 우선시합니다.
+    /// 후면 카메라를 선택 가능한 경우 듀얼 와이드 카메라를 우선시
     func selectBackCamera() {
         // Dual Wide 카메라를 먼저 시도
         if let dualWideCamera = AVCaptureDevice.default(
@@ -53,7 +53,7 @@ actor CameraControlService {
         }
     }
     
-    /// 프론트 카메라를 선택합니다.
+    /// 프론트 카메라를 선택
     /// 현재는 사용안함
     func selectFrontCamera() {
         device = AVCaptureDevice.default(
@@ -69,7 +69,7 @@ actor CameraControlService {
     
     // MARK: - Zoom Control
     
-    /// 지정된 줌 팩터를 가져와 줌을 설정합니다.
+    /// 지정된 줌 팩터를 가져와 줌을 설정
     /// - Parameter factor: 줌 팩터 (0.5 ~ 12.0)
     /// - Returns: 실제 설정된 줌 팩터
     /// 디폴트는 1.0
@@ -91,7 +91,7 @@ actor CameraControlService {
         }
     }
     
-    /// Pinch 제스처로 상대적 줌을 조절합니다.
+    /// Pinch 제스처로 상대적 줌을 조절
     /// - Parameter delta: 줌 변경 배수
     /// - Returns: 실제 설정된 줌 팩터
     func applyPinchZoom(delta: CGFloat) -> CGFloat {
@@ -101,7 +101,7 @@ actor CameraControlService {
     
     // MARK: - Torch Control
     
-    /// 토치(손전등)를 켭니다.
+    /// 토치(손전등) 켬
     /// - Returns: 성공 여부
     func turnOnTorch() -> Bool {
         guard let device, device.hasTorch else { return false }
@@ -118,7 +118,7 @@ actor CameraControlService {
         }
     }
     
-    /// 토치(손전등)를 끕니다.
+    /// 토치(손전등) 끔
     /// - Returns: 성공 여부
     func turnOffTorch() -> Bool {
         guard let device, device.hasTorch else { return false }
@@ -135,7 +135,7 @@ actor CameraControlService {
         }
     }
     
-    /// 토치를 토글합니다.
+    /// 토치를 토글
     /// - Returns: 토글 후의 토치 켜짐 여부 (isTorchOn)
     func toggleTorch() -> Bool {
         if isTorchOn {
@@ -147,13 +147,13 @@ actor CameraControlService {
             _ = turnOnTorch()
         }
         
-        // 최종 상태를 반환합니다.
+        // 최종 상태를 반환
         return isTorchOn
     }
     
     // MARK: - Focus Control
     
-    /// 연속 자동 포커스를 설정합니다.
+    /// 연속 자동 포커스를 설정
     private func setupFocusMode() throws {
         guard let device else { return }
         
@@ -174,7 +174,7 @@ actor CameraControlService {
         }
     }
     
-    /// 특정 포인트에 포커스를 맞춥니다.
+    /// 특정 포인트에 포커스를 맞춤.
     /// - Parameters:
     ///   - point: 뷰에서의 포인트 (0~1 정규화 좌표)
     func focusOnPoint(_ point: CGPoint) {
@@ -200,7 +200,7 @@ actor CameraControlService {
     
     // MARK: - Utility
     
-    /// 디바이스의 줌 가능 범위를 반환합니다.
+    /// 디바이스의 줌 가능 범위를 반환
     func getZoomRange() -> ClosedRange<CGFloat> {
         minimumZoom ... maximumZoom
     }

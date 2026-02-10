@@ -18,7 +18,7 @@ actor CameraCaptureSession {
     
     // MARK: - Session Lifecycle
     
-    /// 캡처 세션을 구성하고 시작합니다.
+    /// 캡처 세션을 구성하고 시작
     /// - Parameters:
     ///   - captureSession: 사용할 AVCaptureSession
     ///   - device: 사용할 AVCaptureDevice
@@ -70,7 +70,7 @@ actor CameraCaptureSession {
         newSession.startRunning()
     }
     
-    /// 캡처 세션을 중지하고 정리합니다.
+    /// 캡처 세션을 중지하고 정리
     func stopAndClean() {
         session?.stopRunning()
         session = nil
@@ -86,12 +86,12 @@ actor CameraCaptureSession {
         session?.startRunning()
     }
     
-    /// 세션이 실행 중인지 확인합니다.
+    /// 세션이 실행 중인지 확인
     func isRunning() -> Bool {
         session?.isRunning ?? false
     }
     
-    /// 사진 촬영 출력을 세션에 추가합니다.
+    /// 사진 촬영 출력을 세션에 추가
     /// - Parameter photoOutput: 추가할 AVCapturePhotoOutput
     /// - Throws: 추가 실패 시 에러
     func addPhotoOutput(_ photoOutput: AVCapturePhotoOutput) throws {

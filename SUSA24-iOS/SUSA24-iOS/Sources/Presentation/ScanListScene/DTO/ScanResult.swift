@@ -9,7 +9,7 @@ import Foundation
 
 /// 문서 분석 결과 모델
 ///
-/// Vision Framework로 추출한 주소와 Geocode API로 검증된 좌표 정보를 담습니다.
+/// Vision Framework로 추출한 주소와 Geocode API로 검증된 좌표 정보.
 struct ScanResult: Identifiable, Sendable {
     /// 고유 식별자
     let id: UUID

@@ -10,7 +10,7 @@ import CoreVideo
 import Foundation
 import Vision
 
-/// 프레임을 처리하고 문서 감지 + 렌즈 얼룩 감지 결과를 스트림으로 제공합니다 (매 프레임)
+/// 프레임을 처리하고 문서 감지 + 렌즈 얼룩 감지 결과를 스트림으로 제공 (매 프레임)
 actor DocumentDetectionProcessor {
     // 문서 감지
     private var documentContinuation: AsyncStream<DocumentDetectionResult>.Continuation?
@@ -92,7 +92,7 @@ actor DocumentDetectionProcessor {
         smudgeStream
     }
 
-    /// 문서를 감지합니다 (VNDetectDocumentSegmentationRequest)
+    /// 문서를 감지 (VNDetectDocumentSegmentationRequest)
     private func detectDocument(
         _ buffer: CVImageBuffer,
         timestamp: TimeInterval
@@ -164,7 +164,7 @@ actor DocumentDetectionProcessor {
         }
     }
 
-    /// 성능 메트릭을 업데이트하고 출력합니다
+    /// 성능 메트릭을 업데이트 및 출력
     private func updatePerformanceMetrics(processingTime: TimeInterval) {
         totalProcessingTime += processingTime
 
@@ -175,7 +175,7 @@ actor DocumentDetectionProcessor {
         }
     }
 
-    /// 스트림을 정리합니다
+    /// 스트림 정리
     func cleanup() {
         documentContinuation?.finish()
         smudgeContinuation?.finish()

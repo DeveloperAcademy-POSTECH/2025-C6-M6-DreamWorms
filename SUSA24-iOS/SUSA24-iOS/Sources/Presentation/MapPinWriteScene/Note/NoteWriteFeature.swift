@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Reducer
 
-/// 형사 노트 작성/수정 화면의 비즈니스 로직을 담당하는 Reducer입니다.
+/// 형사 노트 작성/수정 화면의 비즈니스 로직을 담당하는 Reducer
 struct NoteWriteFeature: DWReducer {
     private let repository: LocationRepositoryProtocol
     private let onSaveCompleted: (String?) -> Void
@@ -24,7 +24,7 @@ struct NoteWriteFeature: DWReducer {
     
     // MARK: - State
     
-    /// 형사 노트 작성/수정 화면의 상태를 나타냅니다.
+    /// 형사 노트 작성/수정 화면의 상태
     struct State: DWState {
         // MARK: 기본 정보
         
