@@ -14,7 +14,7 @@
 
 ### 기능 정의
 
-Vision Framework 의 ``RecognizeDocumentsRequest``를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
+Vision Framework 의 [RecognizeDocumentsRequest]를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
 ``VisionModel`` 에서 관리되는 State에 문서 이미지를 분석하고 주소를 추출하는 기능이 포함되어 있다.
 
 
@@ -56,7 +56,7 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 ### 사용자 관점 동작 조건
 
-1. 사용자가 **[카메라 스캔 버튼을 탭]**하면 [``ScanLoadView]``로 [이동]한다.
+1. 사용자가 **[카메라 스캔 버튼을 탭]**하면 [``ScanLoadView``]로 [이동]한다.
 2. [``ScanLoadView``]가 [``CameraSession``] 을 이용해 실시간으로 [분석]한다.
 3. 분석 중 로딩 애니메이션을 표시한다.
 4. 분석 완료 후 [``ScanListView``] 로 이동하여 추출된 주소 목록을 표시한다.
@@ -88,12 +88,12 @@ Vision Framework를 활용하여 문서 스캔 기능을 제공한다.
 
 1. Vision 분석 단계
 [``ScanLoadView``] 진입 시 .startScanning(photos) 액션 자동 발생
-``BatchAddressAnalyzer/analyzePhotos``가 각 사진을 순차적으로 분석
-``DocumentAnalyzer/analyzeDocument``가 ``RecognizeDocumentsRequest``로 테이블/리스트/텍스트 추출
+``BatchAddressAnalyzer/analyzePhotos(_:progressHandler:)``가 각 사진을 순차적으로 분석
+``DocumentAnalyzer/analyzeDocument(from:)``가 ``RecognizeDocumentsRequest``로 테이블/리스트/텍스트 추출
 추출 우선순위: 테이블 → 리스트 → 텍스트 (Fallback)
 
 2. 주소 추출 단계
-``AddressExtractor/extractAddressColumnFromTable``이 테이블에서 "주소" 컬럼 탐색
+``AddressExtractor/extractAddressColumnFromTable(_:)``이 테이블에서 "주소" 컬럼 탐색
 헤더 탐색 실패 시 테이블 행열 전치 후 재시도
 최종 실패 시 fallbackScan()으로 전체 셀 스캔
 ``KoreanAddressPattern``이 도로명/지번 주소 정규식 매칭

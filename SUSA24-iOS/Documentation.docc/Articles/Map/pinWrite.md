@@ -50,16 +50,16 @@
 
 | 인터랙션 | 동작 | 결과 |
 | :--- | :--- | :--- |
-| 지도 위치 탭 | [PlaceInfoSheet] 표시 | Kakao API로 주소 정보 조회 |
-| 핀 추가 버튼 탭 | [PinWriteView]로 전환 | 핀 이름/색상/카테고리 입력 화면 |
+| 지도 위치 탭 | [``PlaceInfoSheet``] 표시 | Kakao API로 주소 정보 조회 |
+| 핀 추가 버튼 탭 | [``PinWriteView``]로 전환 | 핀 이름/색상/카테고리 입력 화면 |
 | 핀 이름 입력 | 텍스트 입력 | 1~20자, 이모지 불가 |
 | 색상 선택 | 7가지 색상 중 선택 | 선택된 색상 강조 표시 |
 | 카테고리 선택 | 거주지/범행지/기타 중 선택 | 선택된 카테고리 강조 |
 | 저장 버튼 탭 | CoreData에 Location 저장 | 지도에 핀 마커 추가 |
-| 기존 핀 탭 | [PlaceInfoSheet] 표시 | 핀 정보 및 형사 노트 표시 |
-| 핀 수정 버튼 탭 | [PinWriteView]로 전환 (수정 모드) | 기존 데이터 로드 |
+| 기존 핀 탭 | [``PlaceInfoSheet``] 표시 | 핀 정보 및 형사 노트 표시 |
+| 핀 수정 버튼 탭 | [``PinWriteView``]로 전환 (수정 모드) | 기존 데이터 로드 |
 | 핀 삭제 버튼 탭 | 삭제 확인 Alert | 확인 시 CoreData에서 삭제 |
-| 형사 노트 버튼 탭 | [NoteWriteView]로 전환 | 메모 입력/수정 화면 |
+| 형사 노트 버튼 탭 | [``NoteWriteView``]로 전환 | 메모 입력/수정 화면 |
 
 ---
 
@@ -86,23 +86,23 @@
 - `.addPinTapped` 액션 발생 시 `isPinWritePresented = true`
 - [``PinWriteView``] 표시, `existingLocation = nil`로 추가 모드 진입
 - 사용자가 핀 이름/색상/카테고리 선택 후 `.saveTapped`
-- ``LocationRepository/createLocations``로 CoreData에 저장
+- ``LocationRepository/createLocations(data:caseId:)``로 CoreData에 저장
 - `.saveCompleted(location)` → 상위 ``MapFeature``에 콜백
 
 **3. 핀 수정 (Edit Mode)**
 - `.editPinTapped` 액션 발생 시 `isEditMode = true`
 - [``PinWriteView``] 표시, `existingLocation`에서 기존 데이터 로드
 - `.onAppear`에서 `pinName`, `selectedColor`, `selectedCategory` 설정
-- 수정 후 `.saveTapped` → ``LocationRepository/updateLocation``
+- 수정 후 `.saveTapped` → ``LocationRepository/updateLocation(_:)``
 
 **4. 핀 삭제**
 - `.confirmDeletePin` 액션 발생
-- ``LocationRepository/deleteLocation`` 호출
+- ``LocationRepository/deleteLocation(id:)`` 호출
 - `.deletePinCompleted` → 지도에서 마커 제거
 
 **5. 형사 노트**
 - `.noteButtonTapped` → [``NoteWriteView``] 표시
-- 노트 입력/수정 후 `.saveTapped` → ``LocationRepository/updateLocation``
+- 노트 입력/수정 후 `.saveTapped` → ``LocationRepository/updateLocation(_:)``
 - `.noteSaveCompleted(note)` → ``MapFeature`` 상태 업데이트
 
 ---
@@ -128,10 +128,10 @@
 
 - **LocationRepository** (`class`)
   - CoreData 기반 Location CRUD
-  - ``LocationRepository/createLocations``: 핀 생성
-  - ``LocationRepository/updateLocation``: 핀 수정
-  - ``LocationRepository/deleteLocation``: 핀 삭제
-  - ``LocationRepository/fetchLocations``: 케이스별 핀 조회
+- ``Repository/createLocations``: 핀 생성
+- ``Repository/updateLocation``: 핀 수정
+- ``Repository/deleteLocation``: 핀 삭제
+- ``Repository/fetchLocations``: 케이스별 핀 조회
 
 - **KakaoGeocodeAPI** (`service`)
   - 좌표 → 주소 변환 (Reverse Geocoding)

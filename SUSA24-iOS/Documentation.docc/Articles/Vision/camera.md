@@ -80,17 +80,17 @@ State는 문서 이미지를 분석하고 주소를 추출하는 기능이 포�
 
 1. 카메라 시작
 [``CameraView``]가 나타나면 .onAppear → .viewDidAppear 액션이 순차 발생
-``CameraModel/start``가 호출되어 권한 확인 → 디바이스 선택 → 세션 구성 → 프레임 스트림 설정
+``CameraModel/start()``가 호출되어 권한 확인 → 디바이스 선택 → 세션 구성 → 프레임 스트림 설정
 Vision 분석이 활성화되어 렌즈 얼룩 감지 스트림 시작
 
 2. 사진 촬영 (Photo Capture)
 .captureButtonTapped 액션 발생 시 isCapturing = true로 연속 탭 방지
-``PhotoCaptureService/capturePhoto``가 ``AVCapturePhotoOutput``을 통해 촬영
+``PhotoCaptureService/capturedPhotos``가 ``AVCapturePhotoOutput``을 통해 촬영
 촬영 완료 후 .syncPhotoState → .updatePhotoCount → .updateThumbnail → .updateAllPhotos 체인 실행
 
 3. 줌/포커스 제어 (Device Control)
-Pinch 제스처: delta = scale / lastZoomScale 계산 후 ``CameraControlService/applyPinchZoom`` 호출
-Tap 제스처: 정규화된 좌표 (0~1)로 변환 후 ``CameraControlService/focusOnPoint`` 호출
+Pinch 제스처: delta = scale / lastZoomScale 계산 후 ``CameraControlService/applyPinchZoom(delta:)`` 호출
+Tap 제스처: 정규화된 좌표 (0~1)로 변환 후 ``CameraControlService/focusOnPoint(_:)`` 호출
 
 4. Vision 연동 (Realtime Detection)
 ``DocumentDetectionProcessor``가 프레임 스트림을 구독하여 매 10프레임(3fps)마다 분석
