@@ -53,29 +53,29 @@ Tracking Feature는 ``TrackingSelectionScreen``에서 사용자가 지도 위 3�
 ### 4.2 흐름 설명
 
 1. **이벤트 감지 (Event Phase)**
-    * ``NMFMapView``에서 발생한 마커 터치 이벤트는 ``TrackingNaverMapView.Coordinator``의 ``MapTouchHandler``에서 1차적으로 감지됩니다.
-    * `Coordinator`는 터치 이벤트를 직접 처리하지 않고, 선택된 `Location.id`, 표시용 `name`, 현재 선택 여부(`isSelected`)를 포함하여 ``TrackingSelectionScreen``의 `onLocationTapped(_:_:_:)` 콜백으로 즉시 전달합니다.
-    * ``TrackingSelectionScreen은 이 이벤트를 UI Action으로 해석하여,
-      - 이미 선택된 핀인 경우 → `clearSlot(at:)`을 통해 선택 해제
-      - 선택되지 않은 핀인 경우 → `activeSlotIndex` 또는 첫 번째 빈 슬롯에 할당하는 순수 UI 상태 갱신만 수행합니다.
+    * NMFMapView에서 발생한 마커 터치 이벤트는 ``TrackingNaverMapView/Coordinator``의 ``MapTouchHandler``에서 1차적으로 감지됩니다.
+    * Coordinator는 터치 이벤트를 직접 처리하지 않고, 선택된 Location.id, 표시용 name, 현재 선택 여부(isSelected)를 포함하여 ``TrackingSelectionScreen``의 onLocationTapped(_:_:_:) 콜백으로 즉시 전달합니다.
+    * ``TrackingSelectionScreen``은 이 이벤트를 UI Action으로 해석하여,
+      - 이미 선택된 핀인 경우 → clearSlot(at:)을 통해 선택 해제
+      - 선택되지 않은 핀인 경우 → activeSlotIndex 또는 첫 번째 빈 슬롯에 할당하는 순수 UI 상태 갱신만 수행합니다.
     * 이 단계에서는 네트워크 요청이나 비즈니스 로직은 수행되지 않으며, 오직 View 단의 상태(slots, activeSlotIndex)만 변경됩니다.
 
 2. **비즈니스 로직 처리 (Business Logic Phase)**
-    * 사용자가 3개의 슬롯을 모두 채운 뒤 완료 버튼을 탭하면, ``TrackingView``는 현재 선택된 ``Location`` 목록을 계산하여 / `TrackingFeature.Action.requestCCTV` Action을 Store에 전달합니다.
+    * 사용자가 3개의 슬롯을 모두 채운 뒤 완료 버튼을 탭하면, ``TrackingView``는 현재 선택된 ``Location`` 목록을 계산하여 / ``TrackingFeature/Action/requestCCTV(_:)`` Action을 Store에 전달합니다.
     * ``TrackingFeature``는 Reducer 내부에서:
-      1. 선택된 Location 배열을 기반으로 `makeClosedPolygonCoordinates(from:)`를 호출해 닫힌 폴리곤 좌표를 생성하고
-      2. `CCTVAPIService.fetchCCTVByPolygon(_:)`을 통해 VWorld CCTV Polygon API를 비동기로 호출합니다.
-    * API 응답은 CCTVMarker 배열로 변환되어 `.cctvResponse(.success(markers))` 액션으로 다시 Reducer에 전달됩니다.
-    * 이 과정에서 로딩 상태(isCCTVLoading)와 결과 데이터(cctvMarkers)는 모두 State로 관리되며, View는 Reducer 외부에서 직접 API를 호출하지 않습니다.
+      1. 선택된 Location 배열을 기반으로 ``TrackingFeature/makeClosedPolygonCoordinates(from:)``를 호출해 닫힌 폴리곤 좌표를 생성하고
+      2. ``CCTVAPIService/fetchCCTVByPolygon(_:)``을 통해 VWorld CCTV Polygon API를 비동기로 호출합니다.
+    * API 응답은 CCTVMarker 배열로 변환되어 ``TrackingFeature/Action/cctvResponse(_:)`` 액션으로 다시 Reducer에 전달됩니다.
+    * 이 과정에서 로딩 상태(``TrackingFeature/State/isCCTVLoading``)와 결과 데이터(``TrackingFeature/State/cctvMarkers``)는 모두 State로 관리되며, View는 Reducer 외부에서 직접 API를 호출하지 않습니다.
 
 3. **렌더링 동기화 (Rendering Phase)** 
-    * TrackingFeature.State가 변경되면, 이를 구독 중인 ``TrackingView``가 변화를 감지합니다.
-    * `isResultMode`가 true로 전환되면, 렌더링 흐름에 따라 ``TrackingResultScreen``이 표시됩니다.
+    * ``TrackingFeature/State``가 변경되면, 이를 구독 중인 ``TrackingView``가 변화를 감지합니다.
+    * isResultMode가 true로 전환되면, 렌더링 흐름에 따라 ``TrackingResultScreen``이 표시됩니다.
     * ``TrackingResultScreen``은 변경된 State를 기반으로 ``TrackingNaverMapView``에 아래와 같은 데이터를 전달합니다:
       - locations
       - selectedLocationIDs
       - cctvMarkers
-    * SwiftUI 라이프사이클에 따라 `updateUIView`가 호출되면, `TrackingNaverMapView.Coordinator`는
+    * SwiftUI 라이프사이클에 따라 updateUIView가 호출되면, ``TrackingNaverMapView/Coordinator``는
       - 선택된 핀 마커 상태 갱신
       - 선택된 위치 간 Path(2개) 또는 Polygon(3개 이상) Overlay 렌더링
       - CCTV 마커 레이어 업데이트를 수행하여 현재 State와 지도 화면을 동기화합니다.
@@ -85,7 +85,7 @@ Tracking Feature는 ``TrackingSelectionScreen``에서 사용자가 지도 위 3�
 > 
 > Tracking Feature에서 새로운 지도 기반 기능을 확장해야 할 경우에도 다음 원칙을 유지하는 것을 권장합니다.
 > 1. 지도 이벤트는 View/Coordinator에서 Action으로 변환하고
-> 2. 비즈니스 판단(API 호출, 조건 분기)은 반드시 TrackingFeature에서 수행하며
+> 2. 비즈니스 판단(API 호출, 조건 분기)은 반드시 ``TrackingFeature``에서 수행하며
 > 3. 지도 렌더링은 State 변경의 결과로만 발생하도록 합니다.
 >
 > 이 패턴을 유지하면, Selection / Result / Expanded Map 등 화면이 늘어나더라도
@@ -103,9 +103,9 @@ Tracking Feature는 2종류의 상태로 화면을 제어합니다.
 
 | Variable Name | Description | Available Interactions |
 | :--- | :--- | :--- |
-| caseId | 현재 추적 대상 케이스 ID | • 화면 진입 시 로드 기준 |
-| locations | 지도에 표시할 위치 핀 목록(중복 제거 적용) | • 지도에서 핀 탭(선택/해제) |
-| cctvMarkers | VWorld 폴리곤 조회 결과 CCTV 마커 목록 | • 결과 화면 리스트/지도 렌더링 |
+| ``TrackingFeature/State/caseId`` | 현재 추적 대상 케이스 ID | • 화면 진입 시 로드 기준 |
+| ``TrackingFeature/State/locations`` | 지도에 표시할 위치 핀 목록(중복 제거 적용) | • 지도에서 핀 탭(선택/해제) |
+| ``TrackingFeature/State/cctvMarkers`` | VWorld 폴리곤 조회 결과 CCTV 마커 목록 | • 결과 화면 리스트/지도 렌더링 |
 
 2. View Local State: TrackingView / TrackingResultScreen의 @State (화면 모드/인터랙션 상태)
 
@@ -118,7 +118,7 @@ Tracking Feature는 2종류의 상태로 화면을 제어합니다.
 | isMapExpanded (Result) | 결과 화면에서 지도 확장 모드 | • 확장/축소 버튼 탭 |
 
 > Note:
-> - 초기 상태(Initial State): TrackingView 진입 직후 isResultMode == false, slots == [nil, nil, nil], activeSlotIndex == nil 입니다.
+> - 초기 상태(Initial State): ``TrackingView`` 진입 직후 isResultMode == false, slots == [nil, nil, nil], activeSlotIndex == nil 입니다.
 > - CCTV 요청 가능 조건: slots.allSatisfy({ $0 != nil }) == true (3개 선택 완료)일 때만 완료 버튼이 활성화됩니다.
 > - Store와 View 분리: 핀 선택 UI(슬롯)는 View Local State가 담당하고, 데이터 로딩/네트워크 결과는 Store State가 담당합니다.
 
@@ -128,32 +128,32 @@ Tracking Feature는 2종류의 상태로 화면을 제어합니다.
 
 ### 5.3 주요 전이 상세 (Transition Details)
 - **Selection 진입 → 위치 로딩**
-    - **Action**: TrackingFeature/Action/onAppear(UUID)
+    - **Action**: ``TrackingFeature/Action/onAppear(_:)``
     - **Effect**: state.caseId 설정, repository fetch → .locationsLoaded
 - **위치 로딩 완료 → 핀 선택 가능**
-    - **Action**: TrackingFeature/Action/locationsLoaded([Location])
+    - **Action**: ``TrackingFeature/Action/locationsLoaded(_:)``
     - **Effect**: state.locations = locations.deduplicatedByCoordinate()
 - **핀 선택/해제 (Selection 내부)**
-    - **Action**: TrackingNaverMapView.Coordinator → onLocationTapped(id:name:isSelected)
+    - **Action**: ``TrackingNaverMapView/Coordinator`` → onLocationTapped(id:name:isSelected)
     - **Effect**:
         - isSelected == true → TrackingSelectionScreen.clearSlot(at:)로 해제 + 당김 처리
         - isSelected == false → activeSlotIndex 또는 첫 빈 슬롯에 할당
 - **3개 선택 완료 → CCTV 요청**
-    - **Action**: TrackingView의 onDone → TrackingFeature/Action/requestCCTV([Location])
+    - **Action**: ``TrackingView``의 onDone → ``TrackingFeature/Action/requestCCTV(_:)``
     - **Effect**:
         - makeClosedPolygonCoordinates(from:)로 좌표 구성
-        - CCTVAPIService.fetchCCTVByPolygon 호출
+        - ``CCTVAPIService/fetchCCTVByPolygon(_:)`` 호출
 - **CCTV 응답 수신 → Result 전환**
-    - **Action**: TrackingFeature/Action/cctvResponse(Result<[CCTVMarker], VWorldError>)
+    - **Action**: ``TrackingFeature/Action/cctvResponse(_:)``
     - **Effect**:
         - 성공: state.cctvMarkers = markers
         - 실패: state.cctvMarkers = []
         - View: isResultMode = true (Result 화면 표시)
 - **Result ↔ ExpandedMap**
-    - **Action**: TrackingResultScreen의 expand/collapse 버튼 탭
+    - **Action**: ``TrackingResultScreen``의 expand/collapse 버튼 탭
     - **Effect**: isMapExpanded 토글 + matchedGeometryEffect로 확장 애니메이션
 - **Result → Selection 복귀**
-    - **Action**: TrackingResultScreen Back 버튼 → TrackingView.resetTrackingState()
+    - **Action**: ``TrackingResultScreen`` Back 버튼 → ``TrackingView/resetTrackingState()``
     - **Effect**: slots/slotLocationIds/activeSlotIndex 초기화 + isResultMode = false
 
 ---
@@ -189,13 +189,13 @@ Sources/
 
 ### 예외 상황 1: 위치 데이터 로딩 실패
 - **증상**: 지도에 위치 핀이 표시되지 않음
-- **원인**: LocationRepositoryProtocol.fetchLocations 실패
-- **대응**: TrackingFeature에서 .locationsLoaded([])로 폴백하여 빈 상태 유지
+- **원인**: ``LocationRepositoryProtocol/fetchLocations(caseId:)`` 실패
+- **대응**: ``TrackingFeature``에서 .locationsLoaded([])로 폴백하여 빈 상태 유지
 
 ### 예외 상황 2: CCTV 조회 실패
 - **증상**: 결과 화면에서 CCTV 목록이 비어있고 EmptyState가 노출됨
-- **원인**: CCTVAPIService.fetchCCTVByPolygon 실패 또는 응답 파싱 실패
-- **대응**: TrackingFeature에서 .cctvResponse(.failure(_)) 처리 시 state.cctvMarkers = []로 폴백, TrackingResultScreen에서 TimeLineEmptyState(message: .cctvEmpty) 노출
+- **원인**: ``CCTVAPIService/fetchCCTVByPolygon(_:)`` 실패 또는 응답 파싱 실패
+- **대응**: TrackingFeature에서 .cctvResponse(.failure(_)) 처리 시 state.cctvMarkers = []로 폴백, ``TrackingResultScreen``에서 ``TimeLineEmptyState`` 노출
 
 ---
 
