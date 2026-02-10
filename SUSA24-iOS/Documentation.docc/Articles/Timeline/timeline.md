@@ -39,7 +39,7 @@ Timeline Feature는 ``MainTabFeature``(SSOT)에서 전달받은 위치 데이터
 ### 사용자 관점 동작 조건
 
 1. 사용자가 사건을 선택하여 지도 탭에 진입하면 ``MainTabFeature``가 SSOT를 통해 위치 데이터를 로드하고, ``TimeLineFeature``에 `.updateData()` 액션으로 전달합니다.
-2. ``TimeLineFeature``는 ``LocationGroupedByDate``의 `groupByDate()` 메서드로 데이터를 날짜별 그룹화하고, TOP3 주소를 계산하여 색상을 매핑합니다.
+2. ``TimeLineFeature``는 ``LocationGroupedByDate``의 ``LocationGroupedByDate/groupByDate(_:)`` 메서드로 데이터를 날짜별 그룹화하고, TOP3 주소를 계산하여 색상을 매핑합니다.
 3. 사용자가 **위치 셀을 탭**하면 ``TimeLineFeature``가 ``MapDispatcher``에 `.moveToLocation(coordinate:)` 요청을 전송하고, 지도 카메라가 해당 좌표로 이동합니다.
 4. 사용자가 **지도에서 기지국 마커를 탭**하면, ``MapDispatcher``의 `.focusCellTimeline(cellKey:title:)` 요청을 통해 ``TimeLineFeature``가 **기지국 타임라인 모드**로 전환됩니다.
 5. 사용자가 **검색바에 키워드를 입력**하면, 250ms 디바운스 후 주소 기반 필터링 결과가 표시됩니다.
@@ -68,13 +68,13 @@ Timeline Feature는 ``MainTabFeature``(SSOT)에서 전달받은 위치 데이터
 
 1) **초기 데이터 로딩 (SSOT)**
     - ``MainTabView``가 `.onAppear`에서 ``MainTabFeature``의 `.onAppear` 액션을 전송합니다.
-    - ``MainTabFeature``는 ``CaseRepository``의 `fetchAllDataOfSpecificCase()`를 호출하여 사건 정보와 위치 데이터를 로드합니다.
-    - 동시에 `.startLocationObserver` 액션을 통해 ``LocationRepository``의 `watchLocations(caseId:)` AsyncStream을 구독합니다.
+    - ``MainTabFeature``는 ``CaseRepository``의 ``CaseRepository/fetchAllDataOfSpecificCase(for:)``를 호출하여 사건 정보와 위치 데이터를 로드합니다.
+    - 동시에 `.startLocationObserver` 액션을 통해 ``LocationRepository``의 ``LocationRepository/watchLocations(caseId:)`` AsyncStream을 구독합니다.
     - CoreData에 새 위치가 저장될 때마다 `.locationsUpdated([Location])` 액션이 자동 발생합니다.
 
 2) **타임라인 동기화**
     - ``MainTabView``의 `.onChange(of: store.state.locations)`에서 ``TimeLineFeature``에 `.updateData(caseInfo:locations:)` 액션을 전송합니다.
-    - ``TimeLineFeature``의 Reducer가 ``LocationGroupedByDate``의 `groupByDate()` 정적 메서드를 호출합니다.
+    - ``TimeLineFeature``의 Reducer가 ``LocationGroupedByDate``의 ``LocationGroupedByDate/groupByDate(_:)`` 정적 메서드를 호출합니다.
     - `groupByDate()`는 내부적으로:
         1. `locationType == 2` (기지국)인 위치만 필터링
         2. 전체 위치에서 **TOP 3 주소**를 방문 빈도 기준으로 계산
@@ -87,14 +87,14 @@ Timeline Feature는 ``MainTabFeature``(SSOT)에서 전달받은 위치 데이터
     - ``TimeLineDetail`` 컴포넌트의 `onTap` 클로저가 ``TimeLineFeature``에 `.locationTapped(location)` 액션을 전송합니다.
     - ``TimeLineFeature``의 Reducer가 ``MapDispatcher``에 `.moveToLocation(coordinate:)` 요청을 전송합니다.
     - 동시에 `.resetDetentToMid` NotificationCenter 알림을 발송하여 바텀시트를 Mid 높이로 조절합니다.
-    - ``MapView``가 `onChange(of: dispatcher.request)`에서 요청을 감지하고, 카메라를 해당 좌표로 이동시킨 뒤 `dispatcher.consume()`을 호출합니다.
+    - ``MapView``가 `onChange(of: dispatcher.request)`에서 요청을 감지하고, 카메라를 해당 좌표로 이동시킨 뒤 ``MapDispatcher/consume()``을 호출합니다.
 
 4) **검색 (Debounce Pattern)**
     - ``TimeLineSearchBar``에 키워드가 입력되면 `.searchTextChanged(text)` 액션이 발생합니다.
-    - Reducer는 새로운 `UUID` taskID를 생성하고 `state.searchDebounceTaskID`에 저장합니다.
+    - Reducer는 새로운 `UUID` taskID를 생성하고 ``TimeLineFeature/State/searchDebounceTaskID``에 저장합니다.
     - 250ms `Task.sleep` 후 `.performSearch(text, taskID)` 액션이 발생합니다.
-    - Reducer는 `state.searchDebounceTaskID == taskID`를 검증하여 **만료된 검색을 무시**합니다.
-    - 유효한 검색이면 `groupedLocations` 내에서 주소 substring 필터링을 수행합니다.
+    - Reducer는 ``TimeLineFeature/State/searchDebounceTaskID`` == taskID를 검증하여 **만료된 검색을 무시**합니다.
+    - 유효한 검색이면 ``TimeLineFeature/State/groupedLocations`` 내에서 주소 substring 필터링을 수행합니다.
 
 5) **기지국 타임라인 모드**
     - 지도에서 기지국 마커를 탭하면 ``MapDispatcher``에 `.focusCellTimeline(cellKey:title:)` 요청이 전송됩니다.
@@ -103,8 +103,8 @@ Timeline Feature는 ``MainTabFeature``(SSOT)에서 전달받은 위치 데이터
         - Idle Pin이 있으면 제거
         - ``TimeLineFeature``에 `.applyCellFilter(cellKey:title:)` 액션 전송
         - 바텀시트를 Mid 높이로 조절
-        - `dispatcher.consume()` 호출
-    - ``TimeLineFeature``는 `cellKey` (좌표 키 형식: "latitude_longitude") 기반으로 위치를 필터링하고 `state.isCellTimelineMode = true`로 전환합니다.
+        - ``MapDispatcher/consume()`` 호출
+    - ``TimeLineFeature``는 `cellKey` (좌표 키 형식: "latitude_longitude") 기반으로 위치를 필터링하고 ``TimeLineFeature/State/isCellTimelineMode``를 `true`로 전환합니다.
     - 사용자가 바텀시트를 Short으로 내리면 `.clearCellFilter` 액션이 발생하여 전체 타임라인으로 복귀합니다.
 
 > Tip:
@@ -147,12 +147,12 @@ Timeline Feature는 2종류의 상태로 화면을 제어합니다.
 
 | Property | 설명 |
 | :--- | :--- |
-| `caseName` | `caseInfo?.name ?? ""` — 사건명 |
-| `suspectName` | `caseInfo?.suspect ?? ""` — 용의자명 |
-| `isEmpty` | `groupedLocations.isEmpty` — 데이터 유무 |
-| `totalLocationCount` | 고유 주소 개수 |
-| `isSearchResultEmpty` | `isSearchActive && searchedGroupedLocations.isEmpty` |
-| `displayGroupedLocations` | 검색 활성화 시 `searchedGroupedLocations`, 아니면 `groupedLocations` |
+| ``TimeLineFeature/State/caseName`` | `caseInfo?.name ?? ""` — 사건명 |
+| ``TimeLineFeature/State/suspectName`` | `caseInfo?.suspect ?? ""` — 용의자명 |
+| ``TimeLineFeature/State/isEmpty`` | `groupedLocations.isEmpty` — 데이터 유무 |
+| ``TimeLineFeature/State/totalLocationCount`` | 고유 주소 개수 |
+| ``TimeLineFeature/State/isSearchResultEmpty`` | `isSearchActive && searchedGroupedLocations.isEmpty` |
+| ``TimeLineFeature/State/displayGroupedLocations`` | 검색 활성화 시 ``TimeLineFeature/State/searchedGroupedLocations``, 아니면 ``TimeLineFeature/State/groupedLocations`` |
 
 ### 5.2 상태 다이어그램 (Visual Diagram)
 
@@ -236,9 +236,9 @@ Sources/
 
 ## 9. 기능 한계 및 주의사항
 
-- **기지국 데이터만 타임라인에 표시**: `groupByDate()` 내부에서 `locationType == 2` (기지국)인 위치만 필터링합니다. 사용자가 수동으로 추가한 핀(locationType != 2)은 타임라인에 표시되지 않습니다.
+- **기지국 데이터만 타임라인에 표시**: ``LocationGroupedByDate/groupByDate(_:)`` 내부에서 `locationType == 2` (기지국)인 위치만 필터링합니다. 사용자가 수동으로 추가한 핀(locationType != 2)은 타임라인에 표시되지 않습니다.
 
-- **연속 체류 시간 계산의 근사치**: ``ConsecutiveLocationGroup``의 `startTime`은 실제 최초 수신 시각에서 **5분을 뺀 값**으로 설정됩니다. 이는 기지국 문자 수신 간격(보통 5분)을 감안한 근사치이며, 실제 도착 시각과 차이가 있을 수 있습니다.
+- **연속 체류 시간 계산의 근사치**: ``ConsecutiveLocationGroup``의 ``ConsecutiveLocationGroup/startTime``은 실제 최초 수신 시각에서 **5분을 뺀 값**으로 설정됩니다. 이는 기지국 문자 수신 간격(보통 5분)을 감안한 근사치이며, 실제 도착 시각과 차이가 있을 수 있습니다.
 
 - **TOP3 색상 매핑의 전역성**: TOP3 주소는 **전체 날짜**의 방문 빈도를 기준으로 계산됩니다. 특정 날짜에서는 TOP3가 아닌 주소가 색상 표시될 수 있어, 날짜별 상대 랭킹과 혼동될 수 있습니다.
 
@@ -260,7 +260,7 @@ Sources/
 ### 기술 부채
 
 - **locationType 하드코딩**: `locationType == 2`를 직접 비교하는 대신 ``LocationType`` enum을 활용하여 타입 안전성을 확보해야 합니다.
-- **groupByDate() 복잡도**: 현재 `groupByDate()`는 ~50줄의 단일 함수로, TOP3 계산 + 그룹화 + 연속 그룹 생성을 모두 수행합니다. 각 단계를 독립적인 메서드로 분리하면 테스트 용이성이 향상됩니다.
+- **groupByDate() 복잡도**: 현재 ``LocationGroupedByDate/groupByDate(_:)``는 ~50줄의 단일 함수로, TOP3 계산 + 그룹화 + 연속 그룹 생성을 모두 수행합니다. 각 단계를 독립적인 메서드로 분리하면 테스트 용이성이 향상됩니다.
 - **바텀시트 Detent 하드코딩**: Short(73px), Mid(40%), Large(전체) 값이 ``MainTabView``에 직접 정의되어 있습니다. 디바이스별 최적화를 위해 설정 파일이나 enum으로 추출을 고려할 수 있습니다.
 
 ---
