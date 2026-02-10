@@ -1,0 +1,348 @@
+# App Intent 기반 위치 데이터 자동 수집 (App Intent Feature)
+통신사 기지국 문자를 iOS 단축어로 수신하여, 주소 추출 → 좌표 변환 → CoreData 저장 → 타임라인/지도 실시간 반영까지의 **End-to-End 위치 데이터 자동화 파이프라인**입니다.
+
+> 📅 **작성일**: 2026.02.10  
+> 👤 **작성자**: 유경모  
+> 🏷️ **버전**: v1.0  
+
+## 1. 기능 개요
+
+### 기능명
+
+- **App Intent 기반 메시지 위치 데이터 자동 추출 및 사건 타임라인/지도 반영**
+
+### 기능 정의
+
+본 기능은 통신사로부터 수신되는 기지국 위치 문자를 **iOS 단축어 자동화**를 통해 ``ReceiveMessageIntent``가 수신하고,
+``MessageParser``로 텍스트 내 주소를 추출한 뒤 ``NaverGeocodeAPIService``를 통해 위경도 좌표로 변환하여
+``LocationRepository``에 저장하는 자동화 파이프라인입니다.
+
+저장된 위치 데이터는 ``MainTabFeature``의 **SSOT(Single Source of Truth) Observer 패턴**을 통해 실시간으로 감지되며,
+``TimeLineFeature``와 ``MapFeature``에 자동 전파되어 타임라인 바텀시트와 지도에 즉시 반영됩니다.
+
+### 도입 목적
+
+- **수동 입력 제거**: 수사 과정에서 반복되는 "문자 확인 → 타 지도앱 수동 입력 → 위치 확인 → 팀 공유" 단계를 자동화하여 입력 오타, 누락, 시간 지연을 최소화합니다.
+- **사건별 데이터 축적**: 위치 정보를 사건 단위로 자동 분류/저장하여 타임라인 기반 추적 효율을 향상시킵니다.
+- **실시간 가시화**: 수집 즉시 지도 핀 + 타임라인 셀로 표준화된 형태로 제공하여 한 눈에 파악 가능하게 합니다.
+
+---
+
+## 2. 기능 적용 범위
+
+### 사용 위치
+
+본 기능은 **앱 외부(iOS 단축어)** 에서 트리거되어 **앱 내부(CoreData → UI)** 까지 관통하는 End-to-End 파이프라인입니다.
+
+1. **iOS 단축어 앱**: 자동화 규칙 설정 후, 문자 수신 시 ``ReceiveMessageIntent`` 자동 실행
+2. **MainTabScene**: SSOT Observer가 CoreData 변경을 감지하여 하위 Feature에 전파
+3. **TimeLineScene**: 새 위치 Cell이 타임라인 바텀시트에 자동 추가
+4. **MapScene**: 새 위치 핀이 지도에 자동 표시
+
+### 사용자 관점 동작 조건
+
+1. **사전 조건**
+    - 사용자가 iOS 단축어 앱에서 자동화 규칙을 설정해야 합니다.
+    - 자동화 조건: '메시지 수신 시' 메시지 포함 내용 `[발신기지국]`으로 설정합니다.
+    - 자동화 동작: '수사24' 앱의 '기지국 위치정보 저장하기'(``ReceiveMessageIntent``)를 실행으로 설정합니다.
+    - 사건에 피의자를 추적할 기지국 전화번호가 정확히 등록되어 있어야 합니다.
+
+2. **트리거 조건**
+    - 통신사로부터 기지국 위치 문자가 수신됩니다.
+    - 문자 내용에 `[발신기지국]` 키워드가 포함되어야 합니다.
+    - "확인불가", "전원꺼짐" 등 무효 키워드가 있으면 ``MessageParser``가 `nil`을 반환하여 저장하지 않습니다.
+
+3. **처리 조건**
+    - 기지국 발신 전화번호가 등록된 사건의 피의자 번호와 일치해야 합니다.
+    - Naver Geocoding API 호출이 가능해야 합니다. (네트워크 연결 필수)
+    - CoreData 저장 공간이 확보되어 있어야 합니다.
+
+4. **결과 조건**
+    - 저장 완료 시: 시스템 알림 "위치가 저장되었습니다: (주소)" 표시
+    - 앱 진입 시: 타임라인 바텀시트에 새 위치 Cell이 자동 업데이트
+    - 지도에 새 핀이 자동 표시 (새로고침 불필요)
+
+---
+
+## 3. 화면 흐름도 (Screen Flow)
+
+> SMS 수신부터 앱 내 데이터 반영까지의 전체 흐름
+
+![App Intent 화면 흐름도](appintent-screen-flow.svg)
+
+---
+
+## 4. 기능 전체 흐름
+
+### 4.1 시퀀스 다이어그램
+
+![App Intent 시퀀스 다이어그램](appintent-sequence-diagram.svg)
+
+### 4.2 데이터 변환 흐름 (Data Transformation Pipeline)
+
+SMS 원본 텍스트가 최종 UI 컴포넌트로 변환되기까지 **7단계 변환**을 거칩니다.
+
+![App Intent 데이터 변환 다이어그램](appintent-data-transform-diagram.svg)
+
+### 4.3 흐름 설명
+
+1) **SMS 수신 → App Intent 진입**
+    - 통신사 기지국 문자가 수신되면 iOS 단축어가 `[발신기지국]` 패턴을 감지하여 ``ReceiveMessageIntent``의 ``ReceiveMessageIntent/perform()`` 메서드를 호출합니다.
+    - Intent는 문자 발신 번호를 **정규화**(하이픈 제거, `+82` → `0` 변환)합니다.
+
+2) **사건 매칭**
+    - ``CaseRepository``의 ``CaseRepository/findCaseTest(byCasePhoneNumber:)``를 호출하여, 정규화된 번호로 등록된 사건을 조회합니다.
+    - 매칭되는 사건이 없으면 "해당 전화번호의 사건을 찾을 수 없습니다" 다이얼로그를 반환하고 종료합니다.
+
+3) **주소 추출**
+    - ``MessageParser``의 ``MessageParser/extractAddress(from:)`` 메서드가 SMS 본문에서 `[발신기지국]` 마커 이후의 한글 주소를 추출합니다.
+    - ``MessageParser/containsInvalidKeywords(from:)`` 체크를 통해 "확인불가", "전원 상태 N" 등 무효 문자를 필터링합니다.
+    - 추출된 주소 뒤에 다음 줄의 건물 번호(숫자)를 연결합니다. (예: "부산강서구지사동 1299")
+
+4) **좌표 변환 (Geocoding)**
+    - ``NaverGeocodeAPIService``의 ``NaverGeocodeAPIService/geocode(address:)`` 메서드로 추출된 주소를 위경도 좌표로 변환합니다.
+    - Naver Maps API 호출 시 10초 타임아웃이 적용됩니다.
+
+5) **CoreData 저장**
+    - ``LocationRepository``의 ``LocationRepository/createLocationFromMessage(caseID:address:latitude:longitude:)`` 메서드로 LocationEntity를 생성합니다.
+    - 내부적으로 `makeBoundingBox()`를 호출하여 500m 반경의 바운딩 박스를 자동 계산합니다.
+    - `locationType: 2` (기지국 타입)으로 저장되며, `receivedAt`에 현재 시각이 기록됩니다.
+
+6) **실시간 동기화 (SSOT Pattern)**
+    - CoreData 저장 시 `NSManagedObjectContextObjectsDidChange` 알림이 발생합니다.
+    - ``MainTabFeature``의 ``LocationRepository/watchLocations(caseId:)`` AsyncStream이 이를 감지하여 ``MainTabFeature/State/locations``를 갱신합니다.
+    - ``MainTabView``의 `.onChange(of: store.state.locations)`가 트리거되어:
+        - ``TimeLineFeature``에 `.updateData(caseInfo:locations:)` 액션 전송
+        - ``MapFeature``에 locations 전파
+
+> Tip:
+> 이 SSOT 패턴의 핵심은 **데이터 소유권의 단일화**입니다.
+> 위치 데이터는 오직 ``MainTabFeature``만 소유(fetch/observe)하고,
+> ``TimeLineFeature``와 ``MapFeature``는 전달받은 데이터를 소비(consume)하기만 합니다.
+> 이를 통해 데이터 불일치(Race Condition)를 구조적으로 방지합니다.
+
+---
+
+## 5. 상태 다이어그램 (State Diagram)
+
+### 5.1 상태 변수 정의 (State Variables)
+
+App Intent Feature는 자체 State가 아닌, ``MainTabFeature``를 SSOT로 활용합니다.
+
+**MainTabFeature.State** (위치 데이터 SSOT)
+
+| Variable Name | Description |
+| :--- | :--- |
+| ``MainTabFeature/State/selectedCurrentCaseId`` | 현재 선택된 사건 ID |
+| ``MainTabFeature/State/caseInfo`` | 로드된 사건 상세 정보 |
+| ``MainTabFeature/State/locations`` | 현재 사건의 위치 데이터 배열 (SSOT) |
+| ``MainTabFeature/State/selectedTab`` | 현재 선택된 탭 (.map / .tracking / .dashboard) |
+
+**ReceiveMessageIntent 내부 처리 상태** (State 객체 없음 - 절차적 처리)
+
+| 단계 | 설명 | 실패 시 |
+| :--- | :--- | :--- |
+| 전화번호 정규화 | `+82` → `0`, 하이픈/공백 제거 | N/A (항상 성공) |
+| 사건 조회 | ``CaseRepository/findCaseTest(byCasePhoneNumber:)`` | "해당 전화번호의 사건을 찾을 수 없습니다" 반환 |
+| 주소 추출 | ``MessageParser/extractAddress(from:)`` | "주소를 추출할 수 없습니다" 반환 |
+| 좌표 변환 | ``NaverGeocodeAPIService/geocode(address:)`` | "위치 변환 실패" 반환 |
+| CoreData 저장 | ``LocationRepository/createLocationFromMessage(caseID:address:latitude:longitude:)`` | throws 전파 |
+
+### 5.2 상태 다이어그램 (Visual Diagram)
+
+![App Intent 상태 다이어그램](appintent-state-diagram.svg)
+
+### 5.3 주요 전이 상세 (Transition Details)
+
+- **SMS 수신 → Intent 실행**: iOS 단축어 자동화 트리거 → `perform()` 호출
+- **전화번호 정규화 → 사건 조회**: 정규화 완료 후 즉시 ``CaseRepository/findCaseTest(byCasePhoneNumber:)`` 호출
+- **주소 추출 → 좌표 변환**: ``MessageParser`` 결과가 nil이 아닌 경우에만 진행
+- **CoreData 저장 → SSOT 갱신**: `NSManagedObjectContextObjectsDidChange` → ``LocationRepository/watchLocations(caseId:)`` AsyncStream 감지
+- **SSOT 갱신 → 하위 Feature 동기화**: ``MainTabView``의 `.onChange(of: locations)` → `.updateData()` 전송
+
+---
+
+## 6. 의존성 다이어그램 (Dependency Diagram)
+
+![App Intent 의존성 다이어그램](appintent-dependency-diagram.svg)
+
+---
+
+## 7. 파일 구조
+
+```
+Sources/
+├── 📁 Data/
+│    ├── 🗂️ Repository/
+│    │    ├── CaseRepository.swift             // findCaseTest(byCasePhoneNumber:) - 전화번호로 사건 조회
+│    │    └── LocationRepository.swift         // createLocationFromMessage() - 문자 기반 위치 생성
+│    │                                         // watchLocations() - CoreData 실시간 변경 감지 AsyncStream
+│    ├── Persistence.swift                     // NSPersistentContainer 관리
+│    └── SUSA24_iOS.xcdatamodeld               // LocationEntity, CaseEntity, SuspectEntity
+├── 📁 Presentation/
+│    └── 🗂️ MainTabScene/
+│         ├── MainTabFeature.swift             // SSOT: startLocationObserver, locationsUpdated
+│         └── MainTabView.swift                // .onChange(of: locations) → 하위 Feature 동기화
+└── 📁 Util/
+     ├── 🗂️ AppIntent/
+     │    ├── ReceiveMessageIntent.swift        // App Intent 진입점 - perform() 비동기 처리
+     │    └── MessageParser.swift               // SMS 텍스트 파싱 - extractAddress(), containsInvalidKeywords()
+     └── 🗂️ Network/
+          └── 🗂️ Service/
+               └── NaverGeocodeAPIService.swift // 주소 → 좌표 변환 (Naver Maps Geocoding API)
+```
+
+---
+
+## 8. 예외 상황 및 대응 기준
+
+### 예외 상황 1: 문자 파싱 실패 — 주소 추출 불가
+
+- **증상**: App Intent 실행 후 알림이 오지 않음, 타임라인에 새 위치 미표시
+- **원인**: 문자 형식에 `[발신기지국]` 텍스트 미포함, "확인불가"/"전원꺼짐" 등 무효 키워드 포함, 한글 주소 부재
+- **대응**: ``MessageParser``의 ``MessageParser/containsInvalidKeywords(from:)`` 메서드에서 무효 문자를 필터링하고, 파싱 실패 시 `nil`을 반환하여 Intent가 조기 종료됩니다.
+
+```swift
+// MessageParser.swift
+guard !containsInvalidKeywords(from: text) else {
+    return nil  // 무효 문자 → 저장하지 않음
+}
+```
+
+### 예외 상황 2: 지오코딩 API 실패
+
+- **증상**: 주소는 추출되었으나 좌표가 변환되지 않아 저장 실패
+- **원인**: Naver API 할당량 초과, 네트워크 오류, 존재하지 않는 주소 (신규 개발 지역 등)
+- **대응**: ``NaverGeocodeAPIService``에서 `throws` 처리하고, ``ReceiveMessageIntent``에서 `do-catch`로 에러 시 사용자에게 알림 다이얼로그를 반환합니다.
+
+```swift
+// ReceiveMessageIntent.swift
+do {
+    let geocodeResult = try await NaverGeocodeAPIService.shared.geocode(address: address)
+} catch {
+    return .result(dialog: "위치 변환 실패: \(error.localizedDescription)")
+}
+```
+
+### 예외 상황 3: 전화번호로 사건 조회 실패
+
+- **증상**: 문자는 수신되나 "해당 사건 없음" 알림 표시
+- **원인**: 사건에 등록된 전화번호와 문자 발신번호 불일치, 전화번호 정규화 미스매치
+- **대응**: 전화번호 정규화 로직(하이픈/공백/+82 제거) 적용. 사건 등록 시 전화번호 포맷 통일을 권장합니다.
+
+```swift
+// ReceiveMessageIntent.swift - 전화번호 정규화
+let normalized = senderPhoneNumber
+    .replacingOccurrences(of: "-", with: "")
+    .replacingOccurrences(of: " ", with: "")
+    .replacingOccurrences(of: "+82", with: "0")
+```
+
+### 예외 상황 4: CoreData Observer 중복 구독
+
+- **증상**: 같은 위치가 타임라인에 여러 번 표시, 불필요한 리렌더링
+- **원인**: 탭 전환 시 `watchLocations()`가 중복 호출
+- **대응**: SSOT 패턴 적용으로 ``MainTabFeature``에서만 Observer를 단일 관리합니다. `stopLocationObserver` 액션으로 명시적 해제 로직 구현이 필요합니다.
+
+---
+
+## 9. 기능 한계 및 주의사항
+
+- **Observer 취소(Cancel) 미구현**: 현재 `.stopLocationObserver` 액션은 정의되어 있으나 실제 AsyncStream 취소 로직이 없습니다. 앱이 백그라운드로 전환되거나 화면을 나가도 Observer가 계속 실행될 수 있습니다.
+
+```swift
+// 현재 구현 — 실제 cancel 로직 없음
+case .stopLocationObserver:
+    return .none
+```
+
+- **광범위한 CoreData 변경 감지**: `NSManagedObjectContextObjectsDidChange`는 모든 엔티티 변경을 감지합니다. Location과 무관한 Case/Suspect 변경에도 불필요한 fetch가 발생할 수 있습니다.
+
+- **오프라인 저장 불가**: 지오코딩이 네트워크 필수이므로 오프라인 상태에서 수신된 문자는 처리되지 않습니다.
+
+- **문자 형식 의존성**: 통신사별 문자 포맷이 다를 경우 ``MessageParser``의 ``MessageParser/extractAddress(from:)``가 주소 추출에 실패할 수 있습니다. 현재는 `[발신기지국]` 텍스트에 의존합니다.
+
+- **사건당 여러 피의자 구분 불가**: 한 사건에 여러 명의 피의자가 존재할 수 있으나, 현재는 한 사건에 한 용의자로 저장합니다. KT 등 통신사는 기지국 위치 발신 번호를 하나만 발행하므로, 동일 사건 내 여러 피의자를 구분할 수 없습니다.
+
+> Warning:
+> 같은 통신사를 사용하는 복수 피의자의 기지국 번호가 동일할 수 있어, 피의자별 위치 구분이 불가능합니다.
+> 예: A 사건의 '김', '유', '박' 피의자가 모두 KT 사용 시 → 기지국 발신 번호가 동일하여 위치 데이터가 혼재됩니다.
+
+---
+
+## 10. 향후 개선 사항
+
+### 기능 고도화
+
+- **오프라인 큐잉**: 네트워크 미연결 시 문자를 로컬 큐에 저장 후 연결 복구 시 일괄 처리
+- **다중 통신사 파서**: KT, SKT, LGU+ 등 통신사별 문자 포맷 대응을 위한 Parser Strategy 패턴 도입
+- **이상 패턴 감지**: 급격한 위치 변화 또는 장시간 동일 위치 체류 시 수사관에게 알림
+- **실시간 푸시 알림**: 새 위치 저장 시 앱 내 Toast가 아닌 시스템 Push Notification 발송
+
+### 기술 부채
+
+- **Observer 취소 로직 구현**: `observerTask?.cancel()`을 통한 명시적 AsyncStream 종료 처리 필요
+
+```swift
+// 개선 방향
+case .stopLocationObserver:
+    observerTask?.cancel()
+    return .none
+```
+
+- **변경 필터링 구체화**: `NSManagedObjectContextObjectsDidChange` 대신 LocationEntity 변경만 감지하도록 타입 체크 로직 추가 필요
+
+```swift
+// 개선 방향: notification.userInfo에서 타입 체크
+guard let inserted = notification.userInfo?[NSInsertedObjectsKey] as? Set<NSManagedObject>,
+      inserted.contains(where: { $0 is LocationEntity }) else { return }
+```
+
+- **Diff 기반 업데이트**: `updateData` 시 전체 교체가 아닌 변경분만 반영하여 렌더링 최적화
+- **테스트 코드 보강**: ``MessageParser``, ``LocationRepository``의 ``LocationRepository/watchLocations(caseId:)`` 단위 테스트 추가
+
+---
+
+## 11. 담당 및 참고 정보
+
+| 항목 | 내용 |
+| --- | --- |
+| 담당자 | 유경모 (iOS Developer) |
+| 관련 PR | [SSOT 기반 토대 구축](https://github.com/DeveloperAcademy-POSTECH/2025-C6-M6-DreamWorms/pull/50) |
+| 관련 PR | [실시간 Observer 추가](https://github.com/DeveloperAcademy-POSTECH/2025-C6-M6-DreamWorms/pull/122) |
+| 핵심 파일 | ReceiveMessageIntent.swift, MessageParser.swift, MainTabFeature.swift, LocationRepository.swift |
+
+---
+
+## Topics
+
+### Core Components
+
+App Intent 자동 수집 파이프라인의 핵심 컴포넌트입니다.
+
+- ``ReceiveMessageIntent``
+- ``MessageParser``
+- ``MainTabFeature``
+
+### Data Layer
+
+위치 데이터의 저장과 실시간 관측을 담당합니다.
+
+- ``LocationRepository``
+- ``CaseRepository``
+- ``NaverGeocodeAPIService``
+
+### SSOT Pattern
+
+단일 진실 공급원 패턴으로 데이터 일관성을 보장합니다.
+
+- ``MainTabView``
+- ``MapDispatcher``
+
+### Domain Models
+
+파이프라인에서 사용되는 데이터 모델입니다.
+
+- ``Location``
+- ``Case``
+- ``LocationGroupedByDate``
