@@ -115,7 +115,7 @@
 ### 4.3 외부 명령 흐름 (Dispatcher Flow)
 검색(``SearchFeature``)이나 타임라인(``TimelineFeature``) 등 외부 모듈에서 지도를 제어할 때는 **직접 참조 대신 ``MapDispatcher``를 통한 간접 제어** 방식을 사용합니다.
 
-![맵 시퀀스 전체](map-dispatcher-sequence-diagram)
+![맵 시퀀스 전체](map-dispatcher-sequence-diagram.svg)
 
 
 ### 흐름 설명
