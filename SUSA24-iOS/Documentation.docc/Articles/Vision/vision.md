@@ -14,7 +14,7 @@
 
 ### 기능 정의
 
-Vision Framework 의 [RecognizeDocumentsRequest]를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
+Vision Framework 의 RecognizeDocumentsRequest를 주로 활용하여 문서 이미지에서 테이블, 리스트, 텍스트를 분석한다.
 ``VisionModel`` 에서 관리되는 State에 문서 이미지를 분석하고 주소를 추출하는 기능이 포함되어 있다.
 
 

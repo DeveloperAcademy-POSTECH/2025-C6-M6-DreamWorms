@@ -128,14 +128,14 @@
 
 - **LocationRepository** (`class`)
   - CoreData 기반 Location CRUD
-- ``Repository/createLocations``: 핀 생성
-- ``Repository/updateLocation``: 핀 수정
-- ``Repository/deleteLocation``: 핀 삭제
-- ``Repository/fetchLocations``: 케이스별 핀 조회
+- ``LocationRepository/createLocations(data:caseId:)``: 핀 생성
+- ``LocationRepository/updateLocation(_:)``: 핀 수정
+- ``LocationRepository/deleteLocation(id:)``: 핀 삭제
+- ``LocationRepository/fetchLocations(caseId:)``: 케이스별 핀 조회
 
 - **KakaoGeocodeAPI** (`service`)
   - 좌표 → 주소 변환 (Reverse Geocoding)
-  - `PlaceInfo` 반환 (지번주소, 도로명주소, 전화번호)
+  - ```PlaceInfo`` 반환 (지번주소, 도로명주소, 전화번호)
 
 ---
 
@@ -144,9 +144,9 @@
 | 변수명 | 타입 | 설명 |
 | :--- | :--- | :--- |
 | `caseId` | `UUID` | 현재 케이스 ID |
-| `placeInfo` | `PlaceInfo` | 장소 정보 (주소 등) |
-| `coordinate` | `MapCoordinate?` | 지도 좌표 |
-| `existingLocation` | ``Location``? | 기존 Location (수정 모드) |
+| `placeInfo` | PlaceInfo | 장소 정보 (주소 등) |
+| `coordinate` | ``MapCoordinate`` | 지도 좌표 |
+| `existingLocation` | ``Location`` | 기존 Location (수정 모드) |
 | `isEditMode` | `Bool` (computed) | 수정 모드 여부 (`existingLocation != nil`) |
 | `pinName` | `String` | 핀 이름 입력값 |
 | `selectedColor` | ``PinColorType`` | 선택된 색상 (기본값: `.black`) |
