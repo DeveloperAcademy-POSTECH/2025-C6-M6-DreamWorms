@@ -1,5 +1,5 @@
 //
-//  InfrastructureLayerManager.swift
+//  InfrastructureMarkerManager.swift
 //  SUSA24-iOS
 //
 //  Created by Moo on 11/12/25.

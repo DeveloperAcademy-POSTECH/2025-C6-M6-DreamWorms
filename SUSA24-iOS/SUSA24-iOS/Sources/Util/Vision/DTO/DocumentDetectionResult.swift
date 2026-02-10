@@ -28,7 +28,7 @@ struct DocumentDetectionResult: Sendable {
         confidence >= 0.5
     }
     
-    /// 화면 크기에 맞춰 좌표를 변환합니다
+    /// 화면 크기에 맞춰 좌표를 변환
     /// - Parameter screenSize: 화면 크기
     /// - Returns: 화면 좌표로 변환된 정규화 좌표들
     func toScreenCoordinates(screenSize: CGSize) -> [CGPoint] {

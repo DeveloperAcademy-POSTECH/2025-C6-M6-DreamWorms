@@ -10,9 +10,9 @@ import Vision
 
 /// Vision Framework 기반 문서 분석 유틸리티
 /// - 테이블, 리스트, 텍스트를 모두 분석하는 가장 핵심적인 Analyzer
-/// - 모든 VisionService 및 BatchAddressAnalyzer가 이 결과를 기반으로 동작한다.
+/// - 모든 VisionService 및 BatchAddressAnalyzer가 이 결과를 기반으로 동작
 struct DocumentAnalyzer: Sendable {
-    /// 이미지 데이터에서 문서(테이블 + 리스트 + 텍스트)를 분석한다.
+    /// 이미지 데이터에서 문서(테이블 + 리스트 + 텍스트)를 분석
     /// - Parameter imageData: 분석할 JPEG/PNG 데이터
     /// - Returns: DocumentAnalysisResult
     static func analyzeDocument(from imageData: Data) async throws -> DocumentAnalysisResult {

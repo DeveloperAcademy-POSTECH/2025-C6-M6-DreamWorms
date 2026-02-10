@@ -13,20 +13,20 @@ extension CVImageBuffer: @unchecked @retroactive Sendable {}
 
 extension CameraFrameProvider: AVCaptureVideoDataOutputSampleBufferDelegate {}
 
-/// 카메라 프레임을 스트림으로 제공하고 관리합니다.
-/// preview에 보여주고 추후 비전 처리될 프레임을 관리합니다.
+/// 카메라 프레임을 스트림으로 제공하고 관리.
+/// preview에 보여주고 추후 비전 처리될 프레임을 관리.
 final class CameraFrameProvider: NSObject {
     private(set) var frameStream: AsyncStream<CVImageBuffer>?
     private var frameContinuation: AsyncStream<CVImageBuffer>.Continuation?
     
-    /// 프레임 스트림을 설정합니다.
+    /// 프레임 스트림을 설정
     func setupFrameStreams() {
         frameStream = AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             self.frameContinuation = continuation
         }
     }
     
-    /// 프레임 스트림을 정리합니다.
+    /// 프레임 스트림을 정리
     func cleanupFrameStreams() {
         frameContinuation?.finish()
     }

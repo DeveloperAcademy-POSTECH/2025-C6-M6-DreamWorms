@@ -8,7 +8,7 @@
 @preconcurrency import AVFoundation
 import SwiftUI
 
-/// 카메라의 모든 기능을 통합 관리합니다.
+/// 카메라의 모든 기능을 통합 관리
 @MainActor
 @Observable
 final class CameraModel: NSObject {
@@ -61,7 +61,7 @@ final class CameraModel: NSObject {
 // MARK: - Camera Lifecycle + Control
 
 extension CameraModel {
-    /// 카메라를 시작합니다.
+    /// 카메라를 시작
     func start() async {
         guard cameraStatus == .notInitialized else { return }
         
@@ -107,7 +107,7 @@ extension CameraModel {
         }
     }
     
-    /// 카메라를 일시정지합니다.
+    /// 카메라를 일시정지
     func pauseCamera() {
         isCameraPaused = true
         Task { await captureSession.pause() }
@@ -118,7 +118,7 @@ extension CameraModel {
         Task { await captureSession.resume() }
     }
     
-    /// 카메라를 중지합니다.
+    /// 카메라를 중지
     func stop() async {
         await captureSession.stopAndClean()
         frameProvider.cleanupFrameStreams()
@@ -131,31 +131,31 @@ extension CameraModel {
 // MARK: - Photo Capture
 
 extension CameraModel {
-    /// 사진을 촬영합니다.
+    /// 사진을 촬영
     func capturePhoto() async throws -> CapturedPhoto {
         let photo = try await photoCaptureService.capturePhoto()
         updatePhotoState()
         return photo
     }
     
-    /// 모든 촬영된 사진을 반환합니다.
+    /// 모든 촬영된 사진을 반환
     func getAllPhotos() -> [CapturedPhoto] {
         photoCaptureService.getAllPhotos()
     }
     
-    /// 특정 인덱스의 사진을 삭제합니다.
+    /// 특정 인덱스의 사진을 삭제
     func deletePhoto(at index: Int) {
         photoCaptureService.deletePhoto(at: index)
         updatePhotoState()
     }
     
-    /// 모든 사진을 삭제합니다.
+    /// 모든 사진을 삭제
     func clearAllPhotos() {
         photoCaptureService.clearAllPhotos()
         updatePhotoState()
     }
     
-    /// 마지막 사진의 섬네일을 반환합니다.
+    /// 마지막 사진의 섬네일을 반환
     func getLastThumbnail() -> UIImage? {
         photoCaptureService.getLastThumbnail()
     }
@@ -164,29 +164,29 @@ extension CameraModel {
 // MARK: - Device Zoom, Torch Control, Focus
 
 extension CameraModel {
-    /// 줌을 설정합니다. (0.5 ~ 12.0배)
+    /// 줌을 설정 (0.5 ~ 12.0배)
     func setZoom(to factor: CGFloat) async {
         guard !isCameraPaused else { return }
         zoomFactor = await controlService.setZoom(to: factor)
     }
     
-    /// Pinch 제스처로 줌을 조절합니다.
+    /// Pinch 제스처로 줌을 조절
     func applyPinchZoom(delta: CGFloat) async {
         guard !isCameraPaused else { return }
         zoomFactor = await controlService.applyPinchZoom(delta: delta)
     }
     
-    /// 기본 줌 설정 (1.0배)을 적용합니다.
+    /// 기본 줌 설정 (1.0배)을 적용
     func resetZoom() async {
         await setZoom(to: 1.0)
     }
     
-    /// 줌 가능 범위를 반환합니다.
+    /// 줌 가능 범위를 반환
     func getZoomRange() async -> ClosedRange<CGFloat> {
         await controlService.getZoomRange()
     }
     
-    /// 토치를 토글합니다.
+    /// 토치를 토글
     func toggleTorch() async {
         isTorchOn = await controlService.toggleTorch()
     }
@@ -217,7 +217,7 @@ extension CameraModel {
 // MARK: - Frame Stream
 
 extension CameraModel {
-    /// 프레임 스트림을 반환합니다.
+    /// 프레임 스트림을 반환
     func getFrameStream() -> AsyncStream<CVImageBuffer>? {
         frameProvider.frameStream
     }
