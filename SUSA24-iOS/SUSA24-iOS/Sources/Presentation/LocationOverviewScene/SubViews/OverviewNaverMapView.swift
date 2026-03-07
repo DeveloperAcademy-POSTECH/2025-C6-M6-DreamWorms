@@ -82,6 +82,12 @@ struct OverviewNaverMapView: UIViewRepresentable {
             self.parent = parent
         }
         
+        /// iOS 26 이후 `UIScreen.main` 대신, 실제 렌더링 컨텍스트(window/scene/trait) 기준 scale을 사용합니다.
+        private func displayScale(for mapView: NMFMapView) -> CGFloat {
+            mapView.window?.windowScene?.screen.scale
+                ?? mapView.traitCollection.displayScale
+        }
+        
         // MARK: - Camera
         
         func configureInitialCamera(on mapView: NMFMapView) {
@@ -117,6 +123,8 @@ struct OverviewNaverMapView: UIViewRepresentable {
             at latlng: NMGLatLng,
             on mapView: NMFMapView
         ) {
+            let scale = displayScale(for: mapView)
+
             if let marker = centerMarker {
                 marker.position = latlng
             } else {
@@ -127,7 +135,7 @@ struct OverviewNaverMapView: UIViewRepresentable {
                 centerMarker = marker
                 
                 Task { @MainActor in
-                    let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true))
+                    let icon = await MarkerImageCache.shared.image(for: .cell(isVisited: true), scale: scale)
                     marker.iconImage = NMFOverlayImage(image: icon)
                 }
             }
@@ -225,6 +233,7 @@ struct OverviewNaverMapView: UIViewRepresentable {
                 locationMarkers[id]?.mapView = nil
                 locationMarkers.removeValue(forKey: id)
             }
+            let scale = displayScale(for: mapView)
             
             // 새/변경된 마커 적용
             Task { @MainActor in
@@ -246,7 +255,7 @@ struct OverviewNaverMapView: UIViewRepresentable {
                         marker.height = CGFloat(NMF_MARKER_SIZE_AUTO)
                         marker.anchor = CGPoint(x: 0.5, y: 1.0)
                         
-                        let icon = await MarkerImageCache.shared.image(for: model.markerType)
+                        let icon = await MarkerImageCache.shared.image(for: model.markerType, scale: scale)
                         marker.iconImage = NMFOverlayImage(image: icon)
                         marker.mapView = mapView
                         

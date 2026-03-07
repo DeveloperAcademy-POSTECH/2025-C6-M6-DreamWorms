@@ -24,39 +24,61 @@ actor MarkerImageCache {
     
     /// MarkerType에 해당하는 UIImage를 반환합니다.
     /// - 캐시에 있으면 즉시 반환, 없으면 생성 후 캐싱
-    /// - Parameter type: 마커 타입
+    ///
+    /// - Parameters:
+    ///   - type: 마커 타입
+    ///   - scale: 마커가 표시될 화면의 디스플레이 스케일
+    ///            (예: `windowScene.screen.scale` 또는 `traitCollection.displayScale`)
     /// - Returns: 변환된 UIImage
-    func image(for type: MarkerType) async -> UIImage {
+    func image(
+        for type: MarkerType,
+        scale: CGFloat
+    ) async -> UIImage {
         let key = type.cacheKey
         if let cachedImage = cache[key] { return cachedImage }
         
         // 캐시에 없으면 생성
-        let newImage = await generateImage(for: type)
+        let newImage = await generateImage(for: type, scale: scale)
         cache[key] = newImage
         return newImage
     }
 
     /// 사용자 위치용 마커 이미지 반환 (home / work / custom, 색 커스텀)
+    ///
     /// - Parameters:
-    ///   - type: MarkerType.home / .work / .custom
+    ///   - type: `MarkerType.home` / `.work` / `.custom`
     ///   - color: 핀 색상
-    func userLocationImage(for type: MarkerType, color: PinColorType) async -> UIImage {
+    ///   - scale: 마커가 표시될 화면의 디스플레이 스케일
+    ///            (예: `windowScene.screen.scale` 또는 `traitCollection.displayScale`)
+    /// - Returns: 지정된 스케일로 렌더링된 UIImage
+    func userLocationImage(
+        for type: MarkerType,
+        color: PinColorType,
+        scale: CGFloat
+    ) async -> UIImage {
         let key = "\(type.cacheKey)_\(color.rawValue)"
         if let cachedImage = cache[key] { return cachedImage }
 
-        let newImage = await generateUserLocationImage(for: type, color: color)
+        let newImage = await generateUserLocationImage(for: type, color: color, scale: scale)
         cache[key] = newImage
         return newImage
     }
     
     /// 선택된 위치용 큰 핀 이미지 반환
     /// - 캐시에 있으면 즉시 반환, 없으면 생성 후 캐싱
-    /// - Parameter style: 큰 핀 스타일 (home/work/custom/cell + 색 정보)
-    func selectedPinImage(for style: SelectedPinStyle) async -> UIImage {
+    /// - Parameters:
+    ///   - style: 큰 핀 스타일 (home/work/custom/cell + 색 정보)
+    ///   - scale: 마커가 표시될 화면의 디스플레이 스케일
+    ///            (예: `windowScene.screen.scale` 또는 `traitCollection.displayScale`)
+    /// - Returns: 지정된 스케일로 렌더링된 UIImage
+    func selectedPinImage(
+        for style: SelectedPinStyle,
+        scale: CGFloat
+    ) async -> UIImage {
         let key = await style.cacheKey
         if let cachedImage = cache[key] { return cachedImage }
         
-        let newImage = await generateSelectedPinImage(for: style)
+        let newImage = await generateSelectedPinImage(for: style, scale: scale)
         cache[key] = newImage
         return newImage
     }
@@ -71,13 +93,19 @@ actor MarkerImageCache {
     // MARK: - Private Methods
     
     /// SwiftUI Marker를 UIImage로 변환합니다.
-    /// - Parameter type: 마커 타입
+    /// - Parameters:
+    ///   - type: 변환할 마커 타입
+    ///   - scale: 마커가 표시될 화면의 디스플레이 스케일
+    ///            (예: windowScene.screen.scale 또는 traitCollection.displayScale)
     /// - Returns: 변환된 UIImage
-    private func generateImage(for type: MarkerType) async -> UIImage {
+    private func generateImage(
+        for type: MarkerType,
+        scale: CGFloat
+    ) async -> UIImage {
         await MainActor.run {
             let marker = MarkerImage(type: type)
             let renderer = ImageRenderer(content: marker)
-            renderer.scale = UIScreen.main.scale
+            renderer.scale = scale
             guard let uiImage = renderer.uiImage else {
                 return createPlaceholderImage(size: CGSize(width: 40, height: 40))
             }
@@ -86,10 +114,17 @@ actor MarkerImageCache {
     }
 
     /// 사용자 위치용 마커 이미지를 생성합니다.
+    ///
     /// - Parameters:
-    ///   - type: MarkerType.home / .work / .custom
+    ///   - type: `MarkerType.home` / `.work` / `.custom`
     ///   - color: 핀 색상
-    private func generateUserLocationImage(for type: MarkerType, color: PinColorType) async -> UIImage {
+    ///   - scale: 마커가 표시될 화면의 디스플레이 스케일
+    /// - Returns: 지정된 스케일로 렌더링된 UIImage
+    private func generateUserLocationImage(
+        for type: MarkerType,
+        color: PinColorType,
+        scale: CGFloat
+    ) async -> UIImage {
         await MainActor.run {
             let marker: MarkerImage = switch type {
             case .home:
@@ -104,7 +139,7 @@ actor MarkerImageCache {
             }
 
             let renderer = ImageRenderer(content: marker)
-            renderer.scale = UIScreen.main.scale
+            renderer.scale = scale
             guard let uiImage = renderer.uiImage else {
                 return createPlaceholderImage(size: CGSize(width: 40, height: 40))
             }
@@ -113,12 +148,19 @@ actor MarkerImageCache {
     }
     
     /// 선택된 위치용 큰 핀 이미지를 생성합니다.
-    /// - Parameter style: 큰 핀 스타일
-    private func generateSelectedPinImage(for style: SelectedPinStyle) async -> UIImage {
+    ///
+    /// - Parameters:
+    ///   - style: 큰 핀 스타일
+    ///   - scale: 마커가 표시될 화면의 디스플레이 스케일
+    /// - Returns: 지정된 스케일로 렌더링된 UIImage
+    private func generateSelectedPinImage(
+        for style: SelectedPinStyle,
+        scale: CGFloat
+    ) async -> UIImage {
         await MainActor.run {
             let marker = SelectedPinImage(style: style)
             let renderer = ImageRenderer(content: marker)
-            renderer.scale = UIScreen.main.scale
+            renderer.scale = scale
             guard let uiImage = renderer.uiImage else {
                 return createPlaceholderImage(size: CGSize(width: 32, height: 42))
             }
@@ -142,7 +184,12 @@ actor MarkerImageCache {
 
 extension MarkerImageCache {
     /// 자주 사용되는 마커 타입을 미리 로드합니다.
-    func preloadCommonMarkers() async {
+    ///
+    /// - Important:
+    ///   preload도 실제 표시될 화면의 scale을 기준으로 렌더링해야 품질(픽셀 밀도)이 맞습니다.
+    ///
+    /// - Parameter scale: 마커가 표시될 화면의 디스플레이 스케일
+    func preloadCommonMarkers(scale: CGFloat) async {
         let commonTypes: [MarkerType] = [
             .home,
             .work,
@@ -155,7 +202,7 @@ extension MarkerImageCache {
         await withTaskGroup(of: Void.self) { group in
             for type in commonTypes {
                 group.addTask {
-                    _ = await self.image(for: type)
+                    _ = await self.image(for: type, scale: scale)
                 }
             }
         }

@@ -94,6 +94,13 @@ extension TrackingNaverMapView {
             self.parent = parent
         }
         
+        /// 현재 mapView가 속한 컨텍스트 기준 displayScale을 반환합니다.
+        /// - iOS 26 이후 `UIScreen.main` 대신 windowScene/trait 기반 값을 사용합니다.
+        private func displayScale(for mapView: NMFMapView) -> CGFloat {
+            mapView.window?.windowScene?.screen.scale
+                ?? mapView.traitCollection.displayScale
+        }
+        
         // MARK: - Public
         
         /// Location 배열을 기반으로 마커를 업데이트합니다.
@@ -226,6 +233,7 @@ extension TrackingNaverMapView {
             on mapView: NMFMapView
         ) -> NMFMarker {
             let marker = NMFMarker()
+            let scale = displayScale(for: mapView)
             marker.position = NMGLatLng(
                 lat: location.pointLatitude,
                 lng: location.pointLongitude
@@ -233,7 +241,7 @@ extension TrackingNaverMapView {
             
             // 아이콘 설정
             Task { @MainActor in
-                marker.iconImage = await iconImage(for: location, isSelected: isSelected)
+                marker.iconImage = await iconImage(for: location, isSelected: isSelected, scale: scale)
             }
             
             marker.width = CGFloat(NMF_MARKER_SIZE_AUTO)
@@ -273,10 +281,11 @@ extension TrackingNaverMapView {
             )
             
             if marker.mapView == nil { marker.mapView = mapView }
+            let scale = displayScale(for: mapView)
             
             // 선택 상태에 따라 아이콘 교체
             Task { @MainActor in
-                marker.iconImage = await iconImage(for: location, isSelected: isSelected)
+                marker.iconImage = await iconImage(for: location, isSelected: isSelected, scale: scale)
             }
         }
         
@@ -285,7 +294,8 @@ extension TrackingNaverMapView {
         @MainActor
         private func iconImage(
             for location: Location,
-            isSelected: Bool
+            isSelected: Bool,
+            scale: CGFloat
         ) async -> NMFOverlayImage {
             let pinColor = PinColorType(location.colorType)
             let locationType = LocationType(location.locationType)
@@ -307,9 +317,9 @@ extension TrackingNaverMapView {
             }
             
             let image: UIImage = if markerType.isUserLocation {
-                await MarkerImageCache.shared.userLocationImage(for: markerType, color: pinColor)
+                await MarkerImageCache.shared.userLocationImage(for: markerType, color: pinColor, scale: scale)
             } else {
-                await MarkerImageCache.shared.image(for: markerType)
+                await MarkerImageCache.shared.image(for: markerType, scale: scale)
             }
             
             return NMFOverlayImage(image: image)
