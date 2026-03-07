@@ -11,7 +11,7 @@ import Vision
 // MARK: - CameraScene 에서만 사용하는 CapturedPhoto Extensions
 
 extension CapturedPhoto {
-    /// 사진 데이터를 UIImage로 변환합니다.
+    /// 사진 데이터를 UIImage로 변환
     var uiImage: UIImage? {
         UIImage(data: data)
     }
@@ -56,7 +56,7 @@ extension CapturedPhoto {
         return isUnreadable
     }
     
-    /// 텍스트 인식을 수행합니다
+    /// 텍스트 인식을 수행
     /// - Parameter cgImage: 분석할 CGImage
     /// - Returns: 텍스트 인식 결과
     private func recognizeText(from cgImage: CGImage) -> TextRecognitionResult {

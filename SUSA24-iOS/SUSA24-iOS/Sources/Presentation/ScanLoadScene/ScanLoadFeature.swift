@@ -146,7 +146,7 @@ struct ScanLoadFeature: DWReducer {
     
     // MARK: - Private Methods
     
-    /// 주소 목록을 Geocode API로 검증하여 좌표를 가져옵니다.
+    /// 주소 목록을 Geocode API로 검증하여 좌표 필터.
     /// - Parameter addresses: 중복 제거된 주소 목록 [주소: 중복횟수]
     /// - Returns: 검증된 ScanResult 배열과 실패 개수
     private func validateAddressesWithGeocode(addresses: [String: Int]) async -> Action {

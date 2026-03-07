@@ -106,7 +106,7 @@ struct TrackingFeature: DWReducer {
             switch result {
             case let .success(markers):
                 state.cctvMarkers = markers
-            case let .failure(error):
+            case .failure:
                 state.cctvMarkers = []
             }
             
