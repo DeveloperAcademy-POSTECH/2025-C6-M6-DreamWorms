@@ -13,7 +13,7 @@ enum AddressExtractor {
     typealias Table = DocumentObservation.Container.Table
     typealias Cell = DocumentObservation.Container.Table.Cell
 
-    /// 테이블에서 "주소" 컬럼/행을 찾아 주소 텍스트를 추출한다.
+    /// 테이블에서 "주소" 컬럼/행을 찾아 주소 텍스트를 추출
     /// - 전치(Transpose)까지 지원
     static func extractAddressColumnFromTable(_ table: Table) async -> [String] {
         let grid = makeGrid(from: table) // [[Cell]]
@@ -34,7 +34,7 @@ enum AddressExtractor {
         return fallbackScan(table: table)
     }
 
-    /// 일반 텍스트에서 한국 주소를 추출한다.
+    /// 일반 텍스트에서 한국 주소를 추출
     static func extractAddressesFromText(_ text: String) async -> [String] {
         KoreanAddressPattern
             .extractAddresses(from: text)
@@ -42,12 +42,12 @@ enum AddressExtractor {
             .filter { !$0.isEmpty }
     }
 
-    /// 주소 배열을 정규화 + 중복 제거한 뒤 정렬한다.
+    /// 주소 배열을 정규화 + 중복 제거한 뒤 정렬
     static func normalizeAddresses(_ addresses: [String]) -> [String] {
         Array(Set(addresses)).sorted()
     }
 
-    /// Vision Table을 2차원 Cell 배열로 변환한다.
+    /// Vision Table을 2차원 Cell 배열로 변환
     private static func makeGrid(from table: Table) -> [[Cell]] {
         var grid: [[Cell]] = []
         for row in table.rows {
@@ -56,7 +56,7 @@ enum AddressExtractor {
         return grid
     }
 
-    /// 2차원 Cell 배열을 전치(행<->열)한다.
+    /// 2차원 Cell 배열을 전치(행<->열)
     private static func transpose(grid: [[Cell]]) -> [[Cell]] {
         guard let firstRow = grid.first, !firstRow.isEmpty else { return grid }
 
@@ -81,7 +81,7 @@ enum AddressExtractor {
         return transposed
     }
 
-    /// 2차원 Cell 배열에서 "주소" 헤더를 찾아, 해당 컬럼/행의 값을 추출한다.
+    /// 2차원 Cell 배열에서 "주소" 헤더를 찾아, 해당 컬럼/행의 값을 추출
     ///
     /// 시도 순서:
     /// 1. 첫 행을 헤더로 보고 "주소" 컬럼 찾기 → 그 아래 값들 추출 (가로 헤더)
@@ -151,9 +151,7 @@ enum AddressExtractor {
 
     // MARK: - FALLBACK 스캔
 
-    // ---------------------------------------------------------------------
-
-    /// 헤더를 찾지 못했을 때, 테이블 전체 셀을 훑어서 한국 주소를 직접 추출한다.
+    /// 헤더를 찾지 못했을 때, 테이블 전체 셀을 훑어서 한국 주소를 직접 추출
     private static func fallbackScan(table: Table) -> [String] {
         var extracted: [String] = []
 
@@ -172,7 +170,7 @@ enum AddressExtractor {
 
     // ---------------------------------------------------------------------
 
-    /// 추출된 raw 문자열 배열을 하나의 텍스트로 합쳐서, 다시 정규식 기반 주소 추출을 수행한다.
+    /// 추출된 raw 문자열 배열을 하나의 텍스트로 합쳐서, 다시 정규식 기반 주소 추출 수행
     private static func normalizeAndExtract(_ raw: [String]) async -> [String] {
         await extractAddressesFromText(raw.joined(separator: " "))
     }

@@ -12,7 +12,7 @@ import UIKit
 
 extension PhotoCaptureService: AVCapturePhotoCaptureDelegate {}
 
-/// 사진 촬영 및 관리를 담당합니다.
+/// 사진 촬영 및 관리를 담당
 @Observable
 final class PhotoCaptureService: NSObject {
     private let photoOutput = AVCapturePhotoOutput()
@@ -29,12 +29,12 @@ final class PhotoCaptureService: NSObject {
     private let maxPhotosLimit = 10
     private var continuations: [CheckedContinuation<CapturedPhoto, Error>] = []
     
-    /// 사진 촬영 출력 객체를 반환합니다.
+    /// 사진 촬영 출력 객체를 반환
     var output: AVCapturePhotoOutput {
         photoOutput
     }
     
-    /// 사진을 촬영합니다.
+    /// 사진을 촬영
     /// - Returns: 촬영된 사진 데이터
     /// - Throws: 촬영 실패 시 에러
     func capturePhoto() async throws -> CapturedPhoto {
@@ -49,24 +49,24 @@ final class PhotoCaptureService: NSObject {
         }
     }
     
-    /// 마지막으로 촬영된 사진의 섬네일을 반환합니다.
+    /// 마지막으로 촬영된 사진의 섬네일을 반환
     func getLastThumbnail() -> UIImage? {
         lastThumbnail
     }
     
-    /// 촬영된 모든 사진을 반환합니다.
+    /// 촬영된 모든 사진을 반환
     func getAllPhotos() -> [CapturedPhoto] {
         capturedPhotos
     }
     
-    /// 특정 인덱스의 사진을 삭제합니다.
+    /// 특정 인덱스의 사진을 삭제
     func deletePhoto(at index: Int) {
         guard index >= 0, index < capturedPhotos.count else { return }
         capturedPhotos.remove(at: index)
         updateCapturability()
     }
     
-    /// 모든 사진을 삭제합니다.
+    /// 모든 사진을 삭제
     func clearAllPhotos() {
         capturedPhotos.removeAll()
         lastThumbnail = nil

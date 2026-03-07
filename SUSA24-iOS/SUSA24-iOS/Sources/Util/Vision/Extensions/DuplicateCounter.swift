@@ -9,7 +9,7 @@ import Foundation
 
 /// 주소 중복을 카운팅하는 헬퍼
 enum DuplicateCounter {
-    /// 주소 배열에서 중복을 제거하고 개수를 센다.
+    /// 주소 배열에서 중복을 제거하고 개수 카운트
     /// - Parameter addresses: 주소 배열
     /// - Returns: [주소: 개수] 딕셔너리
     static func countDuplicates(_ addresses: [String]) -> [String: Int] {
@@ -25,7 +25,7 @@ enum DuplicateCounter {
         return countDict
     }
     
-    /// 주소 개수 딕셔너리를 개수 기준으로 정렬합니다. (내림차순)
+    /// 주소 개수 딕셔너리를 개수 기준으로 정렬 (내림차순)
     /// - Parameter addressCount: [주소: 개수] 딕셔너리
     /// - Returns: 정렬된 배열 [(주소, 개수)]
     static func sortByCount(_ addressCount: [String: Int]) -> [(address: String, count: Int)] {
@@ -34,7 +34,7 @@ enum DuplicateCounter {
             .map { (address: $0.key, count: $0.value) }
     }
     
-    /// 최소 개수 이상의 주소들만 필터링합니다.
+    /// 최소 개수 이상의 주소들만 필터링
     /// - Parameters:
     ///   - addressCount: [주소: 개수] 딕셔너리
     ///   - minimumCount: 최소 개수 (기본값: 1)
@@ -43,7 +43,7 @@ enum DuplicateCounter {
         addressCount.filter { $0.value >= minimumCount }
     }
     
-    /// 전체 주소 배열 중 Top N 주소를 반환합니다.
+    /// 전체 주소 배열 중 Top N 주소를 반환
     /// - Parameters:
     ///   - addressCount: [주소: 개수] 딕셔너리
     ///   - topN: 반환할 상위 개수 (기본값: 10)
@@ -52,7 +52,7 @@ enum DuplicateCounter {
         Array(sortByCount(addressCount).prefix(topN))
     }
     
-    /// 여러 주소 배열을 합쳐서 개수를 센다.
+    /// 여러 주소 배열을 합쳐서 개수 카운트
     /// - Parameter addressArrays: 주소 배열들
     /// - Returns: [주소: 개수] 딕셔너리
     static func mergeCounts(_ addressArrays: [[String]]) -> [String: Int] {
@@ -60,7 +60,7 @@ enum DuplicateCounter {
         return countDuplicates(flatAddresses)
     }
     
-    /// 두 주소 딕셔너리를 병합합니다.
+    /// 두 주소 딕셔너리를 병합
     /// - Parameters:
     ///   - first: 첫 번째 딕셔너리
     ///   - second: 두 번째 딕셔너리

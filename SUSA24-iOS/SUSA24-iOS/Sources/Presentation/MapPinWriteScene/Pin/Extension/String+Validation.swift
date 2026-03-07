@@ -6,7 +6,7 @@
 //
 
 extension String {
-    /// 이모지가 포함되어 있는지 확인합니다.
+    /// 이모지가 포함되어 있는지 확인
     var containsEmoji: Bool {
         for scalar in unicodeScalars {
             // 실제 이모지 프레젠테이션 체크
@@ -32,7 +32,7 @@ extension String {
         return false
     }
     
-    /// 이모지를 제거한 문자열을 반환합니다.
+    /// 이모지를 제거한 문자열을 반환
     var removingEmojis: String {
         unicodeScalars
             .filter { scalar in

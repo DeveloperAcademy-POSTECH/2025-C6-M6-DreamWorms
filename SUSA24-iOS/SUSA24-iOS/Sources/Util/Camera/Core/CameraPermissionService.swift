@@ -11,7 +11,7 @@ import AVFoundation
 actor CameraPermissionService {
     private(set) var isCameraAuthorized: Bool = false
     
-    /// 카메라 권한을 확인하고 요청합니다.
+    /// 카메라 권한을 확인하고 요청
     func requestCameraAuthorization() async -> Bool {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         
