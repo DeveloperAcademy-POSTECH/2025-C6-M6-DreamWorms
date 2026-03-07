@@ -74,6 +74,7 @@ protocol LocationRepositoryProtocol: Sendable {
 
 // MARK: - Repository Implementation
 
+@MainActor
 struct LocationRepository: LocationRepositoryProtocol {
     private let context: NSManagedObjectContext
     
@@ -87,37 +88,35 @@ struct LocationRepository: LocationRepositoryProtocol {
     /// - Returns: Location 배열 (Case가 없거나 Location이 없으면 빈 배열 반환)
     /// - Throws: CoreData 조회 에러
     func fetchLocations(caseId: UUID) async throws -> [Location] {
-        try await context.perform {
-            let caseRequest = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-            caseRequest.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
+        let caseRequest = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+        caseRequest.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
             
-            guard let caseEntity = try context.fetch(caseRequest).first else { return [] }
-            guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity> else { return [] }
+        guard let caseEntity = try context.fetch(caseRequest).first else { return [] }
+        guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity> else { return [] }
             
-            var locations: [LocationEntity] = []
-            for suspect in suspectsSet {
-                if let locationsSet = suspect.locations as? Set<LocationEntity> {
-                    locations.append(contentsOf: locationsSet)
-                }
+        var locations: [LocationEntity] = []
+        for suspect in suspectsSet {
+            if let locationsSet = suspect.locations as? Set<LocationEntity> {
+                locations.append(contentsOf: locationsSet)
             }
-            return locations.compactMap { locationEntity -> Location? in
-                guard let locationId = locationEntity.id else { return nil }
-                return Location(
-                    id: locationId,
-                    address: locationEntity.address ?? "",
-                    title: locationEntity.title,
-                    note: locationEntity.note,
-                    pointLatitude: locationEntity.pointLatitude,
-                    pointLongitude: locationEntity.pointLongitude,
-                    boxMinLatitude: locationEntity.boxMinLatitude == 0.0 ? nil : locationEntity.boxMinLatitude,
-                    boxMinLongitude: locationEntity.boxMinLongitude == 0.0 ? nil : locationEntity.boxMinLongitude,
-                    boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
-                    boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
-                    locationType: locationEntity.locationType,
-                    colorType: locationEntity.colorType,
-                    receivedAt: locationEntity.receivedAt
-                )
-            }
+        }
+        return locations.compactMap { locationEntity -> Location? in
+            guard let locationId = locationEntity.id else { return nil }
+            return Location(
+                id: locationId,
+                address: locationEntity.address ?? "",
+                title: locationEntity.title,
+                note: locationEntity.note,
+                pointLatitude: locationEntity.pointLatitude,
+                pointLongitude: locationEntity.pointLongitude,
+                boxMinLatitude: locationEntity.boxMinLatitude == 0.0 ? nil : locationEntity.boxMinLatitude,
+                boxMinLongitude: locationEntity.boxMinLongitude == 0.0 ? nil : locationEntity.boxMinLongitude,
+                boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
+                boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
+                locationType: locationEntity.locationType,
+                colorType: locationEntity.colorType,
+                receivedAt: locationEntity.receivedAt
+            )
         }
     }
     
@@ -128,40 +127,38 @@ struct LocationRepository: LocationRepositoryProtocol {
     /// - Returns: Location 배열
     /// - Throws: CoreData 조회 에러
     func fetchNoCellLocations(caseId: UUID, locationType: [Int]) async throws -> [Location] {
-        try await context.perform {
-            let caseRequest = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-            caseRequest.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
+        let caseRequest = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+        caseRequest.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
             
-            guard let caseEntity = try context.fetch(caseRequest).first else { return [] }
-            guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity> else { return [] }
+        guard let caseEntity = try context.fetch(caseRequest).first else { return [] }
+        guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity> else { return [] }
             
-            var locations: [LocationEntity] = []
-            for suspect in suspectsSet {
-                if let locationsSet = suspect.locations as? Set<LocationEntity> {
-                    locations.append(contentsOf: locationsSet.filter { location in
-                        locationType.contains(Int(location.locationType))
-                    })
-                }
+        var locations: [LocationEntity] = []
+        for suspect in suspectsSet {
+            if let locationsSet = suspect.locations as? Set<LocationEntity> {
+                locations.append(contentsOf: locationsSet.filter { location in
+                    locationType.contains(Int(location.locationType))
+                })
             }
+        }
             
-            return locations.compactMap { locationEntity -> Location? in
-                guard let id = locationEntity.id else { return nil }
-                return Location(
-                    id: id,
-                    address: locationEntity.address ?? "",
-                    title: locationEntity.title,
-                    note: locationEntity.note,
-                    pointLatitude: locationEntity.pointLatitude,
-                    pointLongitude: locationEntity.pointLongitude,
-                    boxMinLatitude: locationEntity.boxMinLatitude == 0.0 ? nil : locationEntity.boxMinLatitude,
-                    boxMinLongitude: locationEntity.boxMinLongitude == 0.0 ? nil : locationEntity.boxMinLongitude,
-                    boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
-                    boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
-                    locationType: locationEntity.locationType,
-                    colorType: locationEntity.colorType,
-                    receivedAt: locationEntity.receivedAt
-                )
-            }
+        return locations.compactMap { locationEntity -> Location? in
+            guard let id = locationEntity.id else { return nil }
+            return Location(
+                id: id,
+                address: locationEntity.address ?? "",
+                title: locationEntity.title,
+                note: locationEntity.note,
+                pointLatitude: locationEntity.pointLatitude,
+                pointLongitude: locationEntity.pointLongitude,
+                boxMinLatitude: locationEntity.boxMinLatitude == 0.0 ? nil : locationEntity.boxMinLatitude,
+                boxMinLongitude: locationEntity.boxMinLongitude == 0.0 ? nil : locationEntity.boxMinLongitude,
+                boxMaxLatitude: locationEntity.boxMaxLatitude == 0.0 ? nil : locationEntity.boxMaxLatitude,
+                boxMaxLongitude: locationEntity.boxMaxLongitude == 0.0 ? nil : locationEntity.boxMaxLongitude,
+                locationType: locationEntity.locationType,
+                colorType: locationEntity.colorType,
+                receivedAt: locationEntity.receivedAt
+            )
         }
     }
     
@@ -199,68 +196,56 @@ struct LocationRepository: LocationRepositoryProtocol {
     func createLocations(data: [Location], caseId: UUID) async throws {
         guard !data.isEmpty else { return }
         
-        try await context.perform {
-            let caseRequest = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
-            caseRequest.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
+        let caseRequest = NSFetchRequest<CaseEntity>(entityName: "CaseEntity")
+        caseRequest.predicate = NSPredicate(format: "id == %@", caseId as CVarArg)
             
-            guard let caseEntity = try context.fetch(caseRequest).first else {
-                throw NSError(domain: "LocationRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "Case not found"])
-            }
-            
-            guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity>,
-                  let suspect = suspectsSet.first
-            else {
-                throw NSError(domain: "LocationRepository", code: 2, userInfo: [NSLocalizedDescriptionKey: "Suspect not found"])
-            }
-            
-            for location in data {
-                let locationEntity = LocationEntity(context: context)
-                locationEntity.id = location.id
-                locationEntity.address = location.address
-                locationEntity.title = location.title
-                locationEntity.note = location.note
-                locationEntity.pointLatitude = location.pointLatitude
-                locationEntity.pointLongitude = location.pointLongitude
-
-                if let minLat = location.boxMinLatitude,
-                   let minLon = location.boxMinLongitude,
-                   let maxLat = location.boxMaxLatitude,
-                   let maxLon = location.boxMaxLongitude
-                {
-                    locationEntity.boxMinLatitude = minLat
-                    locationEntity.boxMinLongitude = minLon
-                    locationEntity.boxMaxLatitude = maxLat
-                    locationEntity.boxMaxLongitude = maxLon
-                } else {
-                    let box = makeBoundingBox(
-                        centerLatitude: location.pointLatitude,
-                        centerLongitude: location.pointLongitude
-                    )
-                    locationEntity.boxMinLatitude = box.minLat
-                    locationEntity.boxMinLongitude = box.minLon
-                    locationEntity.boxMaxLatitude = box.maxLat
-                    locationEntity.boxMaxLongitude = box.maxLon
-                }
-                
-                locationEntity.locationType = location.locationType
-                locationEntity.colorType = location.colorType
-                locationEntity.receivedAt = location.receivedAt
-                locationEntity.suspect = suspect
-            }
-            
-            try context.save()
+        guard let caseEntity = try context.fetch(caseRequest).first else {
+            throw NSError(domain: "LocationRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "Case not found"])
         }
+            
+        guard let suspectsSet = caseEntity.suspects as? Set<SuspectEntity>,
+              let suspect = suspectsSet.first
+        else {
+            throw NSError(domain: "LocationRepository", code: 2, userInfo: [NSLocalizedDescriptionKey: "Suspect not found"])
+        }
+            
+        for location in data {
+            let locationEntity = LocationEntity(context: context)
+            locationEntity.id = location.id
+            locationEntity.address = location.address
+            locationEntity.title = location.title
+            locationEntity.note = location.note
+            locationEntity.pointLatitude = location.pointLatitude
+            locationEntity.pointLongitude = location.pointLongitude
+
+            if let minLat = location.boxMinLatitude,
+               let minLon = location.boxMinLongitude,
+               let maxLat = location.boxMaxLatitude,
+               let maxLon = location.boxMaxLongitude
+            {
+                locationEntity.boxMinLatitude = minLat
+                locationEntity.boxMinLongitude = minLon
+                locationEntity.boxMaxLatitude = maxLat
+                locationEntity.boxMaxLongitude = maxLon
+            } else {
+                let box = makeBoundingBox(
+                    centerLatitude: location.pointLatitude,
+                    centerLongitude: location.pointLongitude
+                )
+                locationEntity.boxMinLatitude = box.minLat
+                locationEntity.boxMinLongitude = box.minLon
+                locationEntity.boxMaxLatitude = box.maxLat
+                locationEntity.boxMaxLongitude = box.maxLon
+            }
+                
+            locationEntity.locationType = location.locationType
+            locationEntity.colorType = location.colorType
+            locationEntity.receivedAt = location.receivedAt
+            locationEntity.suspect = suspect
+        }
+            
+        try context.save()
     }
-    
-    /// 테스트용 목데이터를 저장합니다. 기존 데이터가 있으면 저장하지 않습니다.
-    /// - Parameter caseId: 저장할 Case의 UUID
-    /// - Throws: JSONLoaderError, CoreData 저장 에러
-    /// 기존 목 데이터 가져오는 방식 주석 처리
-//    func loadMockDataIfNeeded(caseId: UUID) async throws {
-//        let existingLocations = try await fetchLocations(caseId: caseId)
-//        guard existingLocations.isEmpty else { return }
-//        try await LocationMockLoader.loadAndSaveToCoreData(caseId: caseId, context: context)
-//    }
     
     /// AppIntent에서 사용: 메시지로부터 Location 생성
     func createLocationFromMessage(
@@ -317,19 +302,17 @@ struct LocationRepository: LocationRepositoryProtocol {
     
     /// Case 간 전화번호 중복을 확인합니다.
     func validateSuspectPhone(caseID: UUID, phoneNumber: String) async throws -> Bool {
-        try await context.perform {
-            guard !phoneNumber.isEmpty else { return true }
+        guard !phoneNumber.isEmpty else { return true }
             
-            let request = NSFetchRequest<SuspectEntity>(entityName: "SuspectEntity")
-            request.predicate = NSPredicate(format: "phoneNumber == %@", phoneNumber)
-            let suspects = try context.fetch(request)
+        let request = NSFetchRequest<SuspectEntity>(entityName: "SuspectEntity")
+        request.predicate = NSPredicate(format: "phoneNumber == %@", phoneNumber)
+        let suspects = try context.fetch(request)
             
-            guard !suspects.isEmpty else { return true }
+        guard !suspects.isEmpty else { return true }
             
-            return suspects.allSatisfy { suspect in
-                guard let relateCase = suspect.relateCase else { return true }
-                return relateCase.id == caseID
-            }
+        return suspects.allSatisfy { suspect in
+            guard let relateCase = suspect.relateCase else { return true }
+            return relateCase.id == caseID
         }
     }
     
@@ -343,34 +326,32 @@ struct LocationRepository: LocationRepositoryProtocol {
     
     /// Location을 업데이트합니다.
     func updateLocation(_ location: Location) async throws {
-        try await context.perform { [context] in
-            let request = NSFetchRequest<LocationEntity>(entityName: "LocationEntity")
-            request.predicate = NSPredicate(format: "id == %@", location.id as CVarArg)
-            
-            guard let locationEntity = try context.fetch(request).first else {
-                throw NSError(
-                    domain: "LocationRepository",
-                    code: 3,
-                    userInfo: [NSLocalizedDescriptionKey: "Location not found"]
-                )
-            }
-            
-            // 업데이트
-            locationEntity.address = location.address
-            locationEntity.title = location.title
-            locationEntity.note = location.note
-            locationEntity.pointLatitude = location.pointLatitude
-            locationEntity.pointLongitude = location.pointLongitude
-            locationEntity.boxMinLatitude = location.boxMinLatitude ?? 0.0
-            locationEntity.boxMinLongitude = location.boxMinLongitude ?? 0.0
-            locationEntity.boxMaxLatitude = location.boxMaxLatitude ?? 0.0
-            locationEntity.boxMaxLongitude = location.boxMaxLongitude ?? 0.0
-            locationEntity.locationType = location.locationType
-            locationEntity.colorType = location.colorType
-            locationEntity.receivedAt = location.receivedAt
-            
-            try context.save()
+        let request = NSFetchRequest<LocationEntity>(entityName: "LocationEntity")
+        request.predicate = NSPredicate(format: "id == %@", location.id as CVarArg)
+           
+        guard let locationEntity = try context.fetch(request).first else {
+            throw NSError(
+                domain: "LocationRepository",
+                code: 3,
+                userInfo: [NSLocalizedDescriptionKey: "Location not found"]
+            )
         }
+           
+        // 업데이트
+        locationEntity.address = location.address
+        locationEntity.title = location.title
+        locationEntity.note = location.note
+        locationEntity.pointLatitude = location.pointLatitude
+        locationEntity.pointLongitude = location.pointLongitude
+        locationEntity.boxMinLatitude = location.boxMinLatitude ?? 0.0
+        locationEntity.boxMinLongitude = location.boxMinLongitude ?? 0.0
+        locationEntity.boxMaxLatitude = location.boxMaxLatitude ?? 0.0
+        locationEntity.boxMaxLongitude = location.boxMaxLongitude ?? 0.0
+        locationEntity.locationType = location.locationType
+        locationEntity.colorType = location.colorType
+        locationEntity.receivedAt = location.receivedAt
+           
+        try context.save()
     }
 }
 
@@ -416,9 +397,6 @@ struct MockLocationRepository: LocationRepositoryProtocol {
     }
 
     func validateSuspectPhone(caseID _: UUID, phoneNumber _: String) async throws -> Bool { true }
-    
-    // MARK: - Pin 관련 처리 메소드
-
     func checkLocationExists(address _: String, caseId _: UUID) async throws -> Location? { nil }
     func updateLocation(_: Location) async throws {}
 }

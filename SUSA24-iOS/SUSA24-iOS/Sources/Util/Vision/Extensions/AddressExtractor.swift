@@ -90,7 +90,7 @@ enum AddressExtractor {
         guard !grid.isEmpty, !grid[0].isEmpty else { return nil }
 
         let rowCount = grid.count
-        let colCount = grid[0].count
+        _ = grid[0].count
 
         // 1) 가로 헤더: 첫 번째 행에서 "주소" 셀 찾기
         let headerRow = grid[0]
