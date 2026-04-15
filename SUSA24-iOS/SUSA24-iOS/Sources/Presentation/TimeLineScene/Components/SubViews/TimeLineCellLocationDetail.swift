@@ -63,21 +63,6 @@ struct TimeLineCellLocationDetail: View {
     }
 }
 
-// MARK: - Progressive Disclosure
-
-extension TimeLineCellLocationDetail {
-    /// 시간 포맷을 설정합니다.
-    ///
-    /// - Parameter format: DateFormatter 형식 문자열
-    ///     - "hh:mm a" : 01:44 PM ( 12시간 형식 )
-    ///     - "HH:mm" : 13:44 (24시간 형식)
-    @discardableResult
-    func setupTimeFormat(_ format: String) -> Self {
-        var v = self
-        v.timeFormat = format
-        return v
-    }
-}
 
 //// MARK: - Preview
 //
