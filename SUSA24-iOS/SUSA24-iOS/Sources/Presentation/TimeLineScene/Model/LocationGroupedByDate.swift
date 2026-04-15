@@ -19,11 +19,7 @@ struct LocationGroupedByDate: Identifiable, Equatable, Sendable {
     
     /// 섹션 헤더 텍스트 ( 예: "10월 30일 (목) " )
     var headerText: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "M월 d일 (E)"
-        formatter.timeZone = TimeZone.current
-        return formatter.string(from: date)
+        date.monthDayWeekday
     }
 
     /// 스크롤 ID로 사용할 String ID (예: "2025-01-06")

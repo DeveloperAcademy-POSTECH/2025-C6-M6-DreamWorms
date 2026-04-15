@@ -30,16 +30,13 @@ struct TimeLineCellLocationDetail: View {
     let startTime: Date
     let endTime: Date?
 
-    var timeFormat: String = "HH:mm a" // 24시간 형식 ( 13:44 )
-
     /// 시간 범위 텍스트
 
     private var timeRangeText: String {
-        let start = startTime.formatted(timeFormat)
+        let start = startTime.hourMinute
 
         if let endTime {
-            let end = endTime.formatted(timeFormat)
-            // Localizable 포맷 사용
+            let end = endTime.hourMinute
             return String(localized: .timeRangeFormat(
                 start: start,
                 end: end
