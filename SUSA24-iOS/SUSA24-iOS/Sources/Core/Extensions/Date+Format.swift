@@ -5,34 +5,46 @@
 //  Created by Demian Yoo on 11/5/25.
 //
 
-import SwiftUI
+import Foundation
 
 // MARK: - Date Extension
 
 extension Date {
-    /// Date를 지정된 포맷의 문자열로 변환합니다.
-    ///
-    /// - Parameter format: 날짜 포맷 문자열
-    /// - Returns: 포맷팅된 문자열
-    func formatted(_ format: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        formatter.locale = Locale(
-            identifier: String(
-                localized: .usVer
-            )
-        )
-        return formatter.string(from: self)
+    /// 재사용되는 DateFormatter (static 캐싱으로 매번 생성 방지)
+    private static let chipFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "M.d"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+
+    private static let headerFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "M월 d일 (E)"
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .current
+        return f
+    }()
+
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm a"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+
+    /// 월.일 포맷 (예: "11.8")
+    var monthDay: String {
+        Self.chipFormatter.string(from: self)
     }
-    
-    /// Date를 월과 일만 "M.d" 형식으로 Date() 타입으로 빼옵니다.
-    ///
-    /// - Parameter dataText: 날짜 포맷 문자열
-    /// - Returns: 포맷팅된 Date() 타입.
-    func formattedDateType(_ dataText: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = dataText
-        let dateString = formatter.string(from: self)
-        return formatter.date(from: dateString)
+
+    /// 시:분 포맷 (예: "13:44 PM")
+    var hourMinute: String {
+        Self.timeFormatter.string(from: self)
+    }
+
+    /// 월 일 (요일) 포맷 (예: "11월 11일 (화)")
+    var monthDayWeekday: String {
+        Self.headerFormatter.string(from: self)
     }
 }

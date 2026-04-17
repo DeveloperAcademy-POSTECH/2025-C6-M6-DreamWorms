@@ -19,7 +19,7 @@ struct TimeLineDateChip: View {
     
     var body: some View {
         DWTappedPin(
-            text: date.formatted("M.d"), // Date Extension 활용
+            text: date.monthDay,
             action: { onTap(date) }
         )
         .colors(

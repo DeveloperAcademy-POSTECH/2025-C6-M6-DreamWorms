@@ -34,7 +34,7 @@ struct TimeLineScrollContentView: View {
                             
                             // Location List
                             Section {
-                                VStack(spacing: 0) {
+                                LazyVStack(spacing: 0) {
                                     ForEach(Array(group.consecutiveGroups.enumerated()), id: \.element.id) { index, consecutiveGroup in
                                         TimeLineDetail(
                                             state: consecutiveGroup.state,

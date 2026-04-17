@@ -166,7 +166,7 @@ private nonisolated struct CellLogDTO: Decodable, Sendable {
 enum LocationMockLoader {
     static func loadCellLogSampleWithGeocode() async throws -> [Location] {
         let dtos: [CellLogDTO] = try await JSONLoader.loadAsync(
-            "celllog_cleaned.json",
+            "celllog_cleaned_5k.json",
             as: [CellLogDTO].self
         )
         
